@@ -1,0 +1,59 @@
+import axios from 'axios';
+
+// Define your API base URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/admin'; 
+
+// Helper function to call your backend API using Axios
+const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PATCH', endpoint: string, data: any = {}) => {
+  const token = localStorage.getItem('token'); 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await axios({
+      method,
+      url: `${API_BASE_URL}${endpoint}`,
+      data,
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error('API Error:', error.response.data.error || 'Unknown error from API');
+        throw new Error(error.response.data.error || 'Server Error');
+      } else if (error.request) {
+        console.error('No response received from API:', error.request);
+        throw new Error('No response from the server');
+      }
+    } else {
+      console.error('Unknown error:', error);
+      throw new Error('An unknown error occurred');
+    }
+  }
+};
+
+// API for admin login
+export const adminLoginApi = async (email: string, password: string) => {
+  console.log('Attempting admin login:', email);
+  return apiRequest('POST', '/login', { email, password });
+};
+
+// API for fetching admin dashboard data
+export const fetchAdminDashboardDataApi = async () => {
+  return apiRequest('GET', '/dashboard');
+};
+
+// API for fetching recruiters
+export const fetchRecruitersApi = async () => {
+  return apiRequest('GET', '/recruiters');
+};
+
+// API for approving a recruiter
+export const approveRecruiterApi = async (recruiterId: string) => {
+  return apiRequest('PATCH', `/recruiters/${recruiterId}/approve`);
+};

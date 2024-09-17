@@ -1,0 +1,4 @@
+4jobs_backend/.env
+4jobs_frontend/.env
+4jobs_backend/node_modules
+4jobs_frontend/node_modules

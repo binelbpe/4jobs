@@ -1,0 +1,37 @@
+.recruiter-list {
+  padding: 20px;
+}
+
+.recruiter-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recruiter-list table, th, td {
+  border: 1px solid #ddd;
+}
+
+.recruiter-list th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+.recruiter-list th {
+  background-color: #f4f4f4;
+}
+
+.error-message {
+  color: red;
+}
+
+.recruiter-list button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.recruiter-list button:hover {
+  background-color: #218838;
+}

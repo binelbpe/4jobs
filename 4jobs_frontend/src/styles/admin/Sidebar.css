@@ -1,0 +1,51 @@
+/* Sidebar container */
+.sidebar {
+  width: 250px;
+  background-color: #343a40; /* Dark background color for sidebar */
+  color: #ffffff; /* White text color */
+  padding: 20px;
+  height: 100vh; /* Full viewport height */
+  position: fixed; /* Fixed positioning */
+  top: 0;
+  left: 0;
+  overflow-y: auto; /* Scroll if content overflows */
+}
+
+/* Sidebar heading */
+.sidebar h2 {
+  margin: 0;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ffffff; /* Divider line */
+}
+
+/* Sidebar list */
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Sidebar list item */
+.sidebar ul li {
+  margin: 10px 0;
+}
+
+/* Sidebar links */
+.sidebar ul li a {
+  color: #ffffff; /* White text color for links */
+  text-decoration: none;
+  font-size: 16px;
+  display: block; /* Block level for padding */
+  padding: 10px;
+  border-radius: 4px;
+}
+
+/* Sidebar links on hover */
+.sidebar ul li a:hover {
+  background-color: #495057; /* Slightly lighter background on hover */
+}
+
+/* Sidebar links for active page */
+.sidebar ul li a.active {
+  background-color: #007bff; /* Blue background for active page */
+  color: #ffffff; /* Ensure text is readable on active background */
+}

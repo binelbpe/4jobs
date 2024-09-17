@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.adminRouter = void 0;
+const express_1 = require("express");
+const AdminController_1 = require("../controllers/AdminController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const adminMiddleware_1 = require("../middlewares/adminMiddleware");
+const adminRouter = (0, express_1.Router)();
+exports.adminRouter = adminRouter;
+adminRouter.post('/login', AdminController_1.AdminController.login);
+adminRouter.get('/dashboard', authMiddleware_1.authenticate, authMiddleware_1.authorizeAdmin, adminMiddleware_1.adminMiddleware, AdminController_1.AdminController.dashboard);
+adminRouter.get('/recruiters', AdminController_1.AdminController.fetchRecruiters);
+adminRouter.patch('/recruiters/:id/approve', AdminController_1.AdminController.approveRecruiter);
