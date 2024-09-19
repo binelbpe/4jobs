@@ -9,4 +9,5 @@ export interface IRecruiter {
   isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;
+  governmentId?: string; // Add this line
 }

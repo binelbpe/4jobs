@@ -1,7 +1,9 @@
-import { IUserRepository } from '../../../../core/interfaces/repositories/IUserRepository';
-import { User } from '../../../../core/entities/User';
+import { IUserRepository } from '../../../../domain/interfaces/repositories/IUserRepository';
+import { User } from '../../../../domain/entities/User';
 import { UserModel } from '../models/UserModel';
+import { injectable } from 'inversify';
 
+@injectable()
 export class MongoUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
     const user = await UserModel.findById(id).lean();
@@ -32,9 +34,6 @@ export class MongoUserRepository implements IUserRepository {
       name: doc.name,
       role: doc.role,
       isAdmin: doc.isAdmin,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-      
     };
   }
 }

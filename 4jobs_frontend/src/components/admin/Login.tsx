@@ -8,7 +8,7 @@ import '../../styles/admin/Login.css';
 const AdminLogin: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isAuthenticated, error, loading } = useSelector((state: RootState) => state.admin);
+  const { isAuthenticatedAdmin, error, loading } = useSelector((state: RootState) => state.admin);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +32,11 @@ const AdminLogin: React.FC = () => {
     setFormErrors(errors);
     return !errors.email && !errors.password; 
   };
-
+  useEffect(() => {
+    if (isAuthenticatedAdmin) {
+        navigate('/admin/dashboard');
+    }
+  }, [isAuthenticatedAdmin, navigate]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
@@ -42,12 +46,6 @@ const AdminLogin: React.FC = () => {
       dispatch(loginAdmin({ email, password }));
     }
   };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/admin/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
 
   return (
     <div className="login-container">

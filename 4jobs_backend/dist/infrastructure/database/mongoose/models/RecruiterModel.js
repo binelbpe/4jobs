@@ -32,6 +32,8 @@ const RecruiterSchema = new mongoose_1.Schema({
     role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'recruiter' },
     isApproved: { type: Boolean, default: false },
     name: { type: String },
+    governmentId: { type: String, required: true },
+    governmentIdUrl: { type: String, },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

@@ -4,9 +4,7 @@ const API_BASE_URL = 'http://localhost:5000/recruiter';
 
 const apiRequest = async (method: 'POST' | 'GET' | 'DELETE', endpoint: string, data: any = {}) => {
   const token = localStorage.getItem('token');
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers: Record<string, string> = {};
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -36,8 +34,10 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE', endpoint: string, d
 };
 
 
-export const registerRecruiterApi = async (recruiterData: any) => {
-  console.log('Attempting recruiter registration:', recruiterData);
+
+export const registerRecruiterApi = async (recruiterData: FormData) => {
+  console.log('Attempting recruiter registration with file:', recruiterData);
+  console.log(recruiterData)
   return apiRequest('POST', '/register', recruiterData);
 };
 

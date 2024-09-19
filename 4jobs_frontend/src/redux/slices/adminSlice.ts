@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { adminLoginApi, fetchRecruitersApi, approveRecruiterApi } from '../../api/adminApi';
 
 interface AdminState {
-  isAuthenticated: boolean;
+  isAuthenticatedAdmin: boolean;
   loading: boolean;
   error: string | null;
   dashboardData: any;
@@ -11,7 +11,7 @@ interface AdminState {
 }
 
 const initialState: AdminState = {
-  isAuthenticated: false,
+  isAuthenticatedAdmin: false,
   loading: false,
   error: null,
   dashboardData: null,
@@ -25,7 +25,7 @@ export const loginAdmin = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await adminLoginApi(email, password);
-      localStorage.setItem('adminToken', response.token); // Store token
+      localStorage.setItem('adminToken', response.token);
       return response;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Login failed');
@@ -33,10 +33,13 @@ export const loginAdmin = createAsyncThunk(
   }
 );
 
+
+
 export const logoutAdmin = createAsyncThunk('admin/logout', async () => {
   localStorage.removeItem('adminToken');
   return;
 });
+
 
 export const fetchRecruiters = createAsyncThunk(
   'admin/fetchRecruiters',
@@ -45,10 +48,11 @@ export const fetchRecruiters = createAsyncThunk(
       const response = await fetchRecruitersApi();
       return response;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch recruiters');
+      return rejectWithValue(err.message || 'Failed to fetch recruiters');
     }
   }
 );
+
 
 export const approveRecruiter = createAsyncThunk(
   'admin/approveRecruiter',
@@ -77,17 +81,17 @@ const adminSlice = createSlice({
       })
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
+        state.isAuthenticatedAdmin = true;
         state.token = action.payload.token; // Store token
         state.error = null;
       })
       .addCase(loginAdmin.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        state.isAuthenticated = false;
+        state.isAuthenticatedAdmin = false;
         state.error = action.payload || 'Login failed';
       })
       .addCase(logoutAdmin.fulfilled, (state) => {
-        state.isAuthenticated = false;
+        state.isAuthenticatedAdmin = false;
         state.token = null;
         state.dashboardData = null;
       })

@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
-import { IEmailService } from '../../core/interfaces/services/IEmailService';
+import { injectable } from 'inversify';  // Import @injectable
+import { IEmailService } from '../../domain/interfaces/services/IEmailService';
 
+@injectable()  // Add @injectable annotation
 export class NodemailerEmailService implements IEmailService {
   private transporter: nodemailer.Transporter;
 
@@ -10,8 +12,8 @@ export class NodemailerEmailService implements IEmailService {
       port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: false,  
       auth: {
-        user: process.env.SMTP_USER||'binelbijupe@gmail.com',
-        pass: process.env.SMTP_PASS||"slgg epir pxjq fojv",
+        user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
+        pass: process.env.SMTP_PASS || 'slgg epir pxjq fojv',
       },
       logger: true,  
       debug: true,    
@@ -21,7 +23,7 @@ export class NodemailerEmailService implements IEmailService {
   async sendWelcomeEmail(to: string, name: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM||'binelbijupe@gmail.com',
+        from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
         to,
         subject: 'Welcome to 4JOBS',
         text: `Hello ${name},\n\nWelcome to 4JOBS! We're excited to have you on board.`,

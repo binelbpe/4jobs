@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "target": "es6",                          // ES6 or higher
+    "module": "commonjs",                     // CommonJS for Node.js
+    "outDir": "./dist",                       // Output directory for compiled files
+    "strict": true,                          // Enable all strict type-checking options
+    "esModuleInterop": true,                 // Enable ES module interoperability
+    "skipLibCheck": true,                    // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent casing in file names
+    "emitDecoratorMetadata": true,           // Emit metadata for decorators
+    "experimentalDecorators": true           // Enable experimental decorators
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": ["src/**/*", "src/types.ts"],                    // Include all files in src
+  "exclude": ["node_modules", "**/*.spec.ts"] // Exclude node_modules and spec files
 }

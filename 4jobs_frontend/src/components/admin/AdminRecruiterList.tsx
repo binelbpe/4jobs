@@ -1,37 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecruiters, approveRecruiter } from '../../redux/slices/adminSlice';
 import { RootState, AppDispatch } from '../../redux/store';
-import '../../styles/admin/RecruiterList.css'; // Ensure this CSS file exists
+import { Navigate } from 'react-router-dom';
+import '../../styles/admin/RecruiterList.css';
 
 const AdminRecruiterList: React.FC = () => {
-  const [recruiters, setRecruiters] = useState<any[]>([]);
   const dispatch = useDispatch<AppDispatch>();
-  const adminState = useSelector((state: RootState) => state.admin);
-  const { recruiters: fetchedRecruiter, error, loading } = adminState;
+  const { recruiters: fetchedRecruiters, error, loading, isAuthenticatedAdmin, token } = useSelector((state: RootState) => state.admin);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await dispatch(fetchRecruiters()).unwrap();
-        setRecruiters(result); // Set recruiters state from the fetched data
-      } catch (err) {
-        console.error('Failed to fetch recruiters', err);
-      }
-    };
-    fetchData();
-  }, [dispatch]);
+    if (isAuthenticatedAdmin && token) {
+      dispatch(fetchRecruiters());
+    }
+  }, [dispatch, isAuthenticatedAdmin, token]);
 
   const handleApprove = async (recruiterId: string) => {
     try {
       await dispatch(approveRecruiter(recruiterId)).unwrap();
-      // Optionally, refetch recruiters or update the local state
-      const result = await dispatch(fetchRecruiters()).unwrap();
-      setRecruiters(result);
+      dispatch(fetchRecruiters());
     } catch (err) {
       console.error('Failed to approve recruiter', err);
     }
   };
+
+  const handleDownloadGovernmentId = (url: string, recruiterName: string) => {
+    const anchor = document.createElement('a');
+    const fullurl=`http://localhost:5000/${url}`
+    anchor.href =fullurl 
+    anchor.setAttribute('download', `${recruiterName}-government-id`);
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  };
+
+  if (!isAuthenticatedAdmin) {
+    return <Navigate to="/admin/login" />;
+  }
 
   return (
     <div className="recruiter-list">
@@ -46,10 +51,11 @@ const AdminRecruiterList: React.FC = () => {
             <th>Phone</th>
             <th>Status</th>
             <th>Actions</th>
+            <th>Government ID</th> {/* New column for Government ID */}
           </tr>
         </thead>
         <tbody>
-          {recruiters.map(recruiter => (
+          {fetchedRecruiters.map(recruiter => (
             <tr key={recruiter._id}>
               <td>{recruiter.name}</td>
               <td>{recruiter.email}</td>
@@ -58,6 +64,17 @@ const AdminRecruiterList: React.FC = () => {
               <td>
                 {!recruiter.isApproved && (
                   <button onClick={() => handleApprove(recruiter._id)}>Approve</button>
+                )}
+              </td>
+              <td>
+                {recruiter.governmentId ? (
+                  <button 
+                    onClick={() => handleDownloadGovernmentId(recruiter.governmentId, recruiter.name)}
+                  >
+                    Download ID
+                  </button>
+                ) : (
+                  <span>No ID uploaded</span>
                 )}
               </td>
             </tr>

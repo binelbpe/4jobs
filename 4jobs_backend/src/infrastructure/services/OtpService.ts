@@ -18,7 +18,6 @@ export class OtpService {
 
   async sendOtp(email: string, otp: string): Promise<void> {
     try {
-    
       await this.emailService.sendWelcomeEmail(email, `Your OTP: ${otp}`);
       console.log(`Sending OTP ${otp} to email ${email}`);
     } catch (error) {

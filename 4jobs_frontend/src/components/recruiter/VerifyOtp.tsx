@@ -15,7 +15,7 @@ const VerifyOtp = () => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
 
-  const { error, isAuthenticated } = useSelector((state: RootState) => state.recruiter);
+  const { error, isAuthenticatedRecruiter } = useSelector((state: RootState) => state.recruiter);
   const email = location.state?.email || '';
 
 
@@ -56,10 +56,10 @@ const VerifyOtp = () => {
   }, [isTimerActive, timer]);
   
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticatedRecruiter) {
       navigate('/recruiter/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticatedRecruiter, navigate]);
 
   return (
     <div className="verify-otp-container">

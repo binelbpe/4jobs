@@ -8,9 +8,9 @@ interface RecruiterPrivateRouteProps {
 }
 
 const RecruiterPrivateRoute: React.FC<RecruiterPrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated} = useSelector((state: RootState) => state.recruiter);
+  const { isAuthenticatedRecruiter} = useSelector((state: RootState) => state.recruiter);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticatedRecruiter) {
     return <Navigate to="/recruiter/login" replace />;
   }
 

@@ -4,7 +4,7 @@ import { registerRecruiterApi, loginRecruiterApi, verifyOtpApi ,sendOtpApi } fro
 
 interface RecruiterState {
   recruiter: any | null;
-  isAuthenticated: boolean;
+  isAuthenticatedRecruiter: boolean;
   isApproved: boolean;
   loading: boolean;
   error: string | null;
@@ -14,7 +14,7 @@ interface RecruiterState {
 const token = localStorage.getItem('recruiterToken');
 const initialState: RecruiterState = {
   recruiter: null,
-  isAuthenticated: !!token,
+  isAuthenticatedRecruiter: !!token,
   isApproved: false,
   loading: false,
   error: null,
@@ -92,7 +92,7 @@ const recruiterSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.recruiter = null;
-      state.isAuthenticated = false;
+      state.isAuthenticatedRecruiter = false;
       state.isApproved = false;
       state.otpStep = false;
       localStorage.removeItem('recruiterToken');
@@ -125,7 +125,7 @@ const recruiterSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
+        state.isAuthenticatedRecruiter = true;
         state.recruiter = action.payload.recruiter;
         state.isApproved = action.payload.isApproved;
         localStorage.setItem('recruiterToken', action.payload.token);
@@ -140,7 +140,7 @@ const recruiterSlice = createSlice({
       })
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
+        state.isAuthenticatedRecruiter = true;
         state.isApproved = action.payload.isApproved;
         localStorage.setItem('recruiterToken', action.payload.token);
       })

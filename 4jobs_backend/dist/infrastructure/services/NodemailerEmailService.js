@@ -1,4 +1,13 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14,7 +23,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodemailerEmailService = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-class NodemailerEmailService {
+const inversify_1 = require("inversify"); // Import @injectable
+let NodemailerEmailService = class NodemailerEmailService {
     constructor() {
         this.transporter = nodemailer_1.default.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -22,7 +32,7 @@ class NodemailerEmailService {
             secure: false,
             auth: {
                 user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
-                pass: process.env.SMTP_PASS || "slgg epir pxjq fojv",
+                pass: process.env.SMTP_PASS || 'slgg epir pxjq fojv',
             },
             logger: true,
             debug: true,
@@ -62,5 +72,10 @@ class NodemailerEmailService {
             }
         });
     }
-}
+};
 exports.NodemailerEmailService = NodemailerEmailService;
+exports.NodemailerEmailService = NodemailerEmailService = __decorate([
+    (0, inversify_1.injectable)() // Add @injectable annotation
+    ,
+    __metadata("design:paramtypes", [])
+], NodemailerEmailService);

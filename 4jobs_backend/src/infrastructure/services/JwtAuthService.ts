@@ -1,12 +1,18 @@
+// src/infrastructure/services/JwtAuthService.ts
+import { injectable,inject  } from 'inversify'; // Add this import
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
-import { IAuthService } from '../../core/interfaces/services/IAuthService';
-import { User } from '../../core/entities/User';
+import { IAuthService } from '../../domain/interfaces/services/IAuthService';
+import { User } from '../../domain/entities/User';
+import TYPES  from '../../types';
 
+@injectable()
 export class JwtAuthService implements IAuthService {
   private readonly JWT_SECRET: Secret;
 
-  constructor(jwtSecret: Secret) {
+  constructor(
+    @inject(TYPES.JwtSecret) jwtSecret: Secret
+  ) {
     this.JWT_SECRET = jwtSecret;
   }
 

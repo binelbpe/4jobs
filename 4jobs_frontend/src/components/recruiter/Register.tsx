@@ -12,26 +12,33 @@ const Register: React.FC = () => {
     phone: '',
     email: '',
     password: '',
+    governmentId: null as File | null,
   });
-  const [formErrors, setFormErrors] = useState({ email: '', phone: '', password: '' });
+  const [formErrors, setFormErrors] = useState({ email: '', phone: '', password: '', governmentId: '' });
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { error, loading, isAuthenticated } = useSelector((state: RootState) => state.recruiter);
+  const { error, loading, isAuthenticatedRecruiter } = useSelector((state: RootState) => state.recruiter);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticatedRecruiter) {
         navigate('/recruiter/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticatedRecruiter, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({ ...formData, governmentId: e.target.files[0] });
+    }
+  };
+
   const validateForm = () => {
-    const errors = { email: '', phone: '', password: '' };
+    const errors = { email: '', phone: '', password: '', governmentId: '' };
 
     if (!/^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/.test(formData.email)) {
       errors.email = 'Please enter a valid email address.';
@@ -48,21 +55,37 @@ const Register: React.FC = () => {
         'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.';
     }
 
+    if (!formData.governmentId) {
+      errors.governmentId = 'Please upload a government ID.';
+    }
+
     setFormErrors(errors);
-    return !errors.email && !errors.phone && !errors.password;
+    return !errors.email && !errors.phone && !errors.password && !errors.governmentId;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (validateForm()) {
       if (error) {
-        dispatch(clearError()); 
+        dispatch(clearError());
       }
+  
+      const formDataWithFile = new FormData();
+      formDataWithFile.append('name', formData.name);
+      formDataWithFile.append('companyName', formData.companyName);
+      formDataWithFile.append('phone', formData.phone);
+      formDataWithFile.append('email', formData.email);
+      formDataWithFile.append('password', formData.password);
+      if (formData.governmentId) {
+        formDataWithFile.append('governmentId', formData.governmentId);
+      }
+  
       try {
-        await dispatch(register(formData));
+        await dispatch(register(formDataWithFile)).unwrap();
         navigate('/recruiter/verify-otp', { state: { email: formData.email } });
       } catch (err) {
+        // Handle the error and display it
         console.error('Error registering:', err);
       }
     }
@@ -114,6 +137,14 @@ const Register: React.FC = () => {
           required
         />
         {formErrors.password && <p className="error-message">{formErrors.password}</p>}
+
+        <input
+          name="governmentId"
+          type="file"
+          onChange={handleFileChange}
+          required
+        />
+        {formErrors.governmentId && <p className="error-message">{formErrors.governmentId}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}

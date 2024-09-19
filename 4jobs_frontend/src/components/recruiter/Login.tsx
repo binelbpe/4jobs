@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   
-  const { loading, error, isAuthenticated, isApproved } = useSelector((state: RootState) => state.recruiter);
+  const { loading, error, isAuthenticatedRecruiter, isApproved } = useSelector((state: RootState) => state.recruiter);
 
   const validateForm = () => {
     const errors = { email: '', password: '' };
@@ -45,14 +45,14 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticatedRecruiter) {
       if (isApproved) {
         navigate('/recruiter/dashboard');
       } else {
-        navigate('/recruiter');
+        navigate('/recruiter/dashboard');
       }
     }
-  }, [isAuthenticated, isApproved, navigate]);
+  }, [isAuthenticatedRecruiter, isApproved, navigate]);
 
   return (
     <div className="login-container">

@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { User } from '../core/entities/User';
+import { User } from '../domain/entities/User';
 
 export interface AuthenticatedRequest extends Request {
   user?: User;

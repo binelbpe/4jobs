@@ -1,4 +1,10 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11,7 +17,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MongoUserRepository = void 0;
 const UserModel_1 = require("../models/UserModel");
-class MongoUserRepository {
+const inversify_1 = require("inversify");
+let MongoUserRepository = class MongoUserRepository {
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield UserModel_1.UserModel.findById(id).lean();
@@ -45,9 +52,10 @@ class MongoUserRepository {
             name: doc.name,
             role: doc.role,
             isAdmin: doc.isAdmin,
-            createdAt: doc.createdAt,
-            updatedAt: doc.updatedAt,
         };
     }
-}
+};
 exports.MongoUserRepository = MongoUserRepository;
+exports.MongoUserRepository = MongoUserRepository = __decorate([
+    (0, inversify_1.injectable)()
+], MongoUserRepository);
