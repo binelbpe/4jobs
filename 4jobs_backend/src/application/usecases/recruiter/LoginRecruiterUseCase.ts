@@ -11,21 +11,32 @@ export class LoginRecruiterUseCase {
   ) {}
 
   async execute(email: string, password: string) {
+    // Find recruiter by email
     const recruiter = await this.recruiterRepository.findRecruiterByEmail(email);
-
-    if (!recruiter || recruiter.password !== password) {
+  
+    if (!recruiter) {
       throw new Error('Invalid credentials');
     }
-
+  
+    // Compare plain text password with hashed password
+    const isPasswordValid = await this.authService.comparePasswords(password, recruiter.password);
+  
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+  
     const token = this.authService.generateToken({
       id: recruiter.id,         
       email: recruiter.email,
       password: recruiter.password,
       role: 'recruiter', 
       name: recruiter.name,
-      isAdmin: false
+      isAdmin: false,
+      experiences: [], // Provide default value
+      projects: [],    // Provide default value
+      certificates: [], // Provide default value
+      skills: [], 
     });
-
     return {
       isApproved: recruiter.isApproved,
       token,
@@ -41,4 +52,5 @@ export class LoginRecruiterUseCase {
       },
     };
   }
+  
 }

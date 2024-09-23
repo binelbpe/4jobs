@@ -3,20 +3,23 @@ import { Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store, { persistor } from './redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
+
 import Login from './components/user/Login';
 import Signup from './components/user/Signup';
 import Dashboard from './components/user/Dashboard';
 import PrivateRoute from './components/user/PrivateRoute';
-import AdminLogin from './components/admin/Login';
-import AdminDashboard from './components/admin/Dashboard';
+import AdminLogin from './components/admin/AdminLogin';
+import AdminDashboard from './components/admin/AdminDashboard';
 import AdminPrivateRoute from './components/admin/AdminPrivateRoute';
-import RecruiterLogin from './components/recruiter/Login';
-import RecruiterSignup from './components/recruiter/Register';
-import RecruiterDashboard from './components/recruiter/Dashboard';
+import RecruiterLogin from './components/recruiter/RecruiterLogin';
+import RecruiterSignup from './components/recruiter/RecruiterRegister';
+import RecruiterDashboard from './components/recruiter/RecruiterHome';
 import RecruiterPrivateRoute from './components/recruiter/RecruiterPrivateRoute';
-import VerifyOtp from './components/recruiter/VerifyOtp';
+import VerifyOtp from './components/recruiter/RecruiterVerifyOtp';
 import AdminRecruiterList from './components/admin/AdminRecruiterList';
-import LoadingSpinner from './components/LoadingSpinner'; 
+import LoadingSpinner from './components/LoadingSpinner';
+import UserProfile from './components/user/UserProfile';
+import UpdateProfile from './components/user/UpdateProfile';
 
 const App: React.FC = () => {
   return (
@@ -28,6 +31,8 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/profile/:userId" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+          <Route path="/profile/update/:userId" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />

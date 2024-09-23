@@ -27,6 +27,11 @@ app.use(cors({
   allowedHeaders: 'Content-Type,Authorization',
 }));
 
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  next();
+});
+
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Routes setup

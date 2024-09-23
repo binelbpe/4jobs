@@ -28,7 +28,7 @@ export const loginAdmin = createAsyncThunk(
       localStorage.setItem('adminToken', response.token);
       return response;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Login failed');
+      return rejectWithValue(err.message || 'Login failed');
     }
   }
 );
@@ -65,6 +65,7 @@ export const approveRecruiter = createAsyncThunk(
     }
   }
 );
+
 
 const adminSlice = createSlice({
   name: 'admin',

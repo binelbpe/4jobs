@@ -14,7 +14,11 @@ const TYPES = {
   JwtAuthService: Symbol.for('JwtAuthService'),
   AdminController: Symbol.for('AdminController'),
   RecruiterController: Symbol.for('RecruiterController'),
-  AuthController: Symbol.for('AuthController')
+  AuthController: Symbol.for('AuthController'),
+    IUserProfileRepository: Symbol.for('IUserProfileRepository'),
+  GetUserProfileUseCase: Symbol.for('GetUserProfileUseCase'),
+  UpdateUserProfileUseCase: Symbol.for('UpdateUserProfileUseCase'),
+  ProfileController: Symbol.for('ProfileController'),
 };
 
 export default TYPES;

@@ -4,20 +4,17 @@ import { RootState } from '../../redux/store';
 import { useNavigate } from 'react-router-dom';
 import SignupForm from './SignupForm';
 import OtpVerification from './OtpVerification';
-import '../../styles/user/SignupForm.css'
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isOtpStep, setIsOtpStep] = useState(false);
 
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth); // Added role
+  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated) {
-   
-        navigate('/dashboard');
-      
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
@@ -27,15 +24,25 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="signup-container">
-      <h2>Signup</h2>
-      {isOtpStep ? (
-        <OtpVerification email={email} />
-      ) : (
-        <SignupForm onSignupSuccess={handleSignupSuccess} />
-      )}
-      {loading && <p>Loading...</p>}
-      {error && <p className="error-message">{error}</p>}
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-4xl overflow-hidden rounded-lg bg-white shadow-xl">
+        <div className="flex flex-col md:flex-row">
+          <div className="bg-purple-600 p-12 md:w-2/5">
+            <div className="text-8xl font-bold text-white opacity-50">4</div>
+            <div className="mt-4 text-4xl font-semibold text-white">JOBS</div>
+          </div>
+          <div className="p-12 md:w-3/5">
+            <h2 className="mb-8 text-3xl font-semibold text-purple-600">Sign Up</h2>
+            {isOtpStep ? (
+              <OtpVerification email={email} />
+            ) : (
+              <SignupForm onSignupSuccess={handleSignupSuccess} />
+            )}
+            {loading && <p className="mt-4 text-sm text-gray-600">Loading...</p>}
+            {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

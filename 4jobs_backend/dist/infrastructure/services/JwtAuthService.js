@@ -36,16 +36,21 @@ let JwtAuthService = class JwtAuthService {
     }
     hashPassword(password) {
         return __awaiter(this, void 0, void 0, function* () {
-            return bcrypt_1.default.hash(password, 10);
+            const saltRounds = 10; // You can adjust the salt rounds based on your preference
+            return yield bcrypt_1.default.hash(password, saltRounds);
         });
     }
     comparePasswords(plainPassword, hashedPassword) {
         return __awaiter(this, void 0, void 0, function* () {
-            return bcrypt_1.default.compare(plainPassword, hashedPassword);
+            return yield bcrypt_1.default.compare(plainPassword, hashedPassword);
         });
     }
     generateToken(user) {
-        return jsonwebtoken_1.default.sign({ id: user.id, email: user.email, role: user.role }, this.JWT_SECRET, { expiresIn: '1d' });
+        return jsonwebtoken_1.default.sign({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+        }, this.JWT_SECRET, { expiresIn: '1d' });
     }
     verifyToken(token) {
         return jsonwebtoken_1.default.verify(token, this.JWT_SECRET);

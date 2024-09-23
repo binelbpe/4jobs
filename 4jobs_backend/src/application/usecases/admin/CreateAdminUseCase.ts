@@ -19,11 +19,16 @@ export class CreateAdminUseCase {
     const hashedPassword = await this.authService.hashPassword(password);
     const admin = await this.userRepository.create({
       email,
-      password: hashedPassword,
+      password,
       name,
-      role: 'admin',
+      role: "admin",
       isAdmin: true,
+      experiences: [], // Provide default value
+      projects: [],    // Provide default value
+      certificates: [], // Provide default value
+      skills: [],      // Provide default value
     });
+    
     const adminUser: Admin = {
       ...admin,
       adminLevel,

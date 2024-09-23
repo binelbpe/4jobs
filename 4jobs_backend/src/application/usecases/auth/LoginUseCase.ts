@@ -23,6 +23,7 @@ export class LoginUseCase {
       }
 
       const token = this.authService.generateToken(user);
+      console.log('user',user)
       return { user, token };
     } else {
       const user = await this.userRepository.findByEmail(email);

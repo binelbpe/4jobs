@@ -20,7 +20,10 @@ const LoginRecruiterUseCase_1 = require("../application/usecases/recruiter/Login
 const LoginUseCase_1 = require("../application/usecases/auth/LoginUseCase");
 const AdminController_1 = require("../presentation/controllers/AdminController");
 const RecruiterController_1 = require("../presentation/controllers/RecruiterController");
-const AuthController_1 = require("../presentation/controllers/AuthController");
+const AuthController_1 = require("../presentation/controllers/user/AuthController");
+const GetUserProfileUseCase_1 = require("../application/usecases/auth/GetUserProfileUseCase");
+const UpdateUserProfileUseCase_1 = require("../application/usecases/auth/UpdateUserProfileUseCase");
+const ProfileController_1 = require("../presentation/controllers/user/ProfileController");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -40,4 +43,7 @@ container.bind(types_1.default.JwtAuthService).to(JwtAuthService_1.JwtAuthServic
 container.bind(types_1.default.AdminController).to(AdminController_1.AdminController);
 container.bind(types_1.default.RecruiterController).to(RecruiterController_1.RecruiterController);
 container.bind(types_1.default.AuthController).to(AuthController_1.AuthController);
+container.bind(types_1.default.GetUserProfileUseCase).to(GetUserProfileUseCase_1.GetUserProfileUseCase);
+container.bind(types_1.default.UpdateUserProfileUseCase).to(UpdateUserProfileUseCase_1.UpdateUserProfileUseCase);
+container.bind(types_1.default.ProfileController).to(ProfileController_1.ProfileController);
 console.log(container);

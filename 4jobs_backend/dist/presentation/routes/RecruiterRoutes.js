@@ -16,7 +16,7 @@ const recruiterController = container_1.container.get(types_1.default.RecruiterC
 const upload = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, 'uploads/');
+            cb(null, 'uploads/recruiter/');
         },
         filename: (req, file, cb) => {
             cb(null, `${Date.now()}${path_1.default.extname(file.originalname)}`);

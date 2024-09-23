@@ -1,10 +1,15 @@
 import { IUserRepository } from '../../../../domain/interfaces/repositories/IUserRepository';
 import { User } from '../../../../domain/entities/User';
-import { UserModel } from '../models/UserModel';
 import { injectable } from 'inversify';
+import { UserModel } from '../../mongoose/models/UserModel';
 
 @injectable()
 export class MongoUserRepository implements IUserRepository {
+  async findByUserId(userId: string): Promise<User | null> {
+    const user = await UserModel.findById(userId).lean();
+    return user ? this.mapToUser(user) : null;
+  }
+
   async findById(id: string): Promise<User | null> {
     const user = await UserModel.findById(id).lean();
     return user ? this.mapToUser(user) : null;
@@ -34,6 +39,16 @@ export class MongoUserRepository implements IUserRepository {
       name: doc.name,
       role: doc.role,
       isAdmin: doc.isAdmin,
+      bio: doc.bio,
+      about: doc.about,
+      experiences: doc.experiences || [],
+      projects: doc.projects || [],
+      certificates: doc.certificates || [],
+      skills: doc.skills || [],
+      profileImage: doc.profileImage,
+      dateOfBirth: doc.dateOfBirth,
+      gender: doc.gender,
+      resume: doc.resume,
     };
   }
 }

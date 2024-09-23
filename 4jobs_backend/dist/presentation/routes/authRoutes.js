@@ -6,11 +6,73 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRouter = void 0;
 const express_1 = require("express");
 const container_1 = require("../../infrastructure/container");
+const multer_1 = __importDefault(require("multer"));
 const types_1 = __importDefault(require("../../types"));
-exports.authRouter = (0, express_1.Router)();
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+// Create necessary upload directories
+const createUploadDirs = () => {
+    const dirs = [
+        'uploads/user/profile',
+        'uploads/user/resume',
+        'uploads/user/certificates',
+    ];
+    dirs.forEach((dir) => {
+        if (!fs_1.default.existsSync(dir)) {
+            fs_1.default.mkdirSync(dir, { recursive: true });
+        }
+    });
+};
+createUploadDirs();
+const profileController = container_1.container.get(types_1.default.ProfileController);
 const authController = container_1.container.get(types_1.default.AuthController);
+// Configure multer for file uploads
+const storage = multer_1.default.diskStorage({
+    destination: (req, file, cb) => {
+        let dir = 'uploads/';
+        if (file.fieldname === 'profileImage') {
+            dir += 'user/profile';
+        }
+        else if (file.fieldname === 'resume') {
+            dir += 'user/resume';
+        }
+        else if (file.fieldname === 'certificateImage') {
+            dir += 'user/certificates';
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path_1.default.extname(file.originalname));
+    },
+});
+const upload = (0, multer_1.default)({ storage });
+// Initialize the router
+exports.authRouter = (0, express_1.Router)();
+const mid = (req, res, next) => {
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+    next();
+};
+// Auth routes
 exports.authRouter.post('/login', authController.login.bind(authController));
 exports.authRouter.post('/signup', authController.signupUser.bind(authController));
 exports.authRouter.post('/send-otp', authController.sendOtp.bind(authController));
 exports.authRouter.post('/verify-otp', authController.verifyOtp.bind(authController));
 exports.authRouter.post('/auth/google/callback', authController.googleAuth.bind(authController));
+// Profile routes
+exports.authRouter.get('/profile/:userId', profileController.getUserProfile.bind(profileController));
+// Update profile route
+exports.authRouter.put('/edit-profile/:userId', upload.fields([
+    { name: 'profileImage', maxCount: 1 },
+    { name: 'resume', maxCount: 1 },
+]), profileController.updateUserProfile.bind(profileController));
+// Update projects route
+exports.authRouter.put('/edit-projects/:userId', profileController.updateUserProjects.bind(profileController));
+// Update certificates route
+exports.authRouter.put('/edit-certificates/:userId', mid, upload.fields([{ name: 'certificateImage', maxCount: 1 }]), profileController.updateUserCertificates.bind(profileController));
+// Update experiences route
+exports.authRouter.put('/edit-experiences/:userId', profileController.updateUserExperiences.bind(profileController));
+// Update resume route
+exports.authRouter.put('/edit-resume/:userId', upload.single('resume'), profileController.updateUserResume.bind(profileController));
+exports.default = exports.authRouter;

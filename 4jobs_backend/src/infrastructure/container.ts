@@ -16,7 +16,10 @@ import { LoginUseCase } from '../application/usecases/auth/LoginUseCase';
 import { IRecruiterRepository } from '../domain/interfaces/repositories/IRecruiterRepository';
 import { AdminController } from '../presentation/controllers/AdminController'; 
 import { RecruiterController } from '../presentation/controllers/RecruiterController';
-import { AuthController } from '../presentation/controllers/AuthController';
+import { AuthController } from '../presentation/controllers/user/AuthController';
+import { GetUserProfileUseCase } from '../application/usecases/auth/GetUserProfileUseCase';
+import { UpdateUserProfileUseCase } from '../application/usecases/auth/UpdateUserProfileUseCase';
+import { ProfileController } from '../presentation/controllers/user/ProfileController';
 
 const container = new Container();
 
@@ -37,6 +40,11 @@ container.bind<JwtAuthService>(TYPES.JwtAuthService).to(JwtAuthService).inSingle
 container.bind(TYPES.AdminController).to(AdminController);
 container.bind<RecruiterController>(TYPES.RecruiterController).to(RecruiterController)
 container.bind<AuthController>(TYPES.AuthController).to(AuthController);
+container.bind<GetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase);
+container.bind<UpdateUserProfileUseCase>(TYPES.UpdateUserProfileUseCase).to(UpdateUserProfileUseCase);
+container.bind<ProfileController>(TYPES.ProfileController).to(ProfileController);
 
 console.log(container);
 export { container };
+
+

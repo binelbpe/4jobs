@@ -17,19 +17,22 @@ export class RegisterRecruiterUseCase {
     companyName: string,
     phone: string,
     name: string,
-    governmentId: string // New parameter
+    governmentId: string
   ): Promise<{ recruiter: IRecruiter; token: string; isApproved: boolean }> {
+    
+    // Hash the password before saving
+    const hashedPassword = await this.authService.hashPassword(password);
+  
     const recruiter = await this.recruiterRepository.create({
       email,
-      password,
+      password: hashedPassword, // Save the hashed password
       companyName,
       phone,
       name,
       role: 'recruiter',
       isApproved: false,
-      governmentId, // Save the government ID
+      governmentId,
     });
-
     const token = this.authService.generateToken({
       id: recruiter.id,
       email: recruiter.email,
@@ -37,6 +40,10 @@ export class RegisterRecruiterUseCase {
       role: recruiter.role,
       name: recruiter.name,
       isAdmin: false,
+      experiences: [], // Provide default value
+      projects: [],    // Provide default value
+      certificates: [], // Provide default value
+      skills: [], 
     });
 
     return { recruiter, token, isApproved: recruiter.isApproved };

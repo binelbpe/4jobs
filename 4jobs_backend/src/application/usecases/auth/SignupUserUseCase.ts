@@ -24,13 +24,19 @@ export class SignupUserUseCase {
         throw new Error('User already exists');
       }
 
+      // Ensure password is hashed before saving the user
       const hashedPassword = await this.authService.hashPassword(password);
+
       const user = await this.userRepository.create({
         email,
-        password: hashedPassword,
+        password: hashedPassword, // Save hashed password
         name,
-        role: 'user',
+        role: "user",
         isAdmin: false,
+        experiences: [], 
+        projects: [],    
+        certificates: [], 
+        skills: [],      
       });
 
       const token = this.authService.generateToken(user);
@@ -43,13 +49,18 @@ export class SignupUserUseCase {
 
       user = await this.userRepository.create({
         email,
-        password: "",  
+        password: "",  // No password required for Google Auth
         name,
         role: 'user',
         isAdmin: false,
+        experiences: [], 
+        projects: [],    
+        certificates: [], 
+        skills: [], 
       });
 
       const token = this.authService.generateToken(user);
+      console.log('g user',user)
       return { user, token };
     }
   }

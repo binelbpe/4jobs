@@ -16,9 +16,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MongoUserRepository = void 0;
-const UserModel_1 = require("../models/UserModel");
 const inversify_1 = require("inversify");
+const UserModel_1 = require("../../mongoose/models/UserModel");
 let MongoUserRepository = class MongoUserRepository {
+    findByUserId(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield UserModel_1.UserModel.findById(userId).lean();
+            return user ? this.mapToUser(user) : null;
+        });
+    }
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield UserModel_1.UserModel.findById(id).lean();
@@ -52,6 +58,16 @@ let MongoUserRepository = class MongoUserRepository {
             name: doc.name,
             role: doc.role,
             isAdmin: doc.isAdmin,
+            bio: doc.bio,
+            about: doc.about,
+            experiences: doc.experiences || [],
+            projects: doc.projects || [],
+            certificates: doc.certificates || [],
+            skills: doc.skills || [],
+            profileImage: doc.profileImage,
+            dateOfBirth: doc.dateOfBirth,
+            gender: doc.gender,
+            resume: doc.resume,
         };
     }
 };

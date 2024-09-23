@@ -44,6 +44,7 @@ let LoginUseCase = class LoginUseCase {
                     throw new Error('Invalid password');
                 }
                 const token = this.authService.generateToken(user);
+                console.log('user', user);
                 return { user, token };
             }
             else {

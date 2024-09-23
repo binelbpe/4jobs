@@ -14,7 +14,7 @@ export class LoginAdminUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || !user.isAdmin) {
-      throw new Error('Unauthorized');
+      throw new Error('Unauthorized,You are not an admin');
     }
 
     const isPasswordValid = await this.authService.comparePasswords(password, user.password);

@@ -34,10 +34,14 @@ let CreateAdminUseCase = class CreateAdminUseCase {
             const hashedPassword = yield this.authService.hashPassword(password);
             const admin = yield this.userRepository.create({
                 email,
-                password: hashedPassword,
+                password,
                 name,
-                role: 'admin',
+                role: "admin",
                 isAdmin: true,
+                experiences: [], // Provide default value
+                projects: [], // Provide default value
+                certificates: [], // Provide default value
+                skills: [], // Provide default value
             });
             const adminUser = Object.assign(Object.assign({}, admin), { adminLevel });
             yield this.userRepository.update(admin.id, adminUser);

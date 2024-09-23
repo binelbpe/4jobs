@@ -62,64 +62,76 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSignup}>
+    <form onSubmit={handleSignup} className="space-y-6">
       <div>
-        <label>Name</label>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
         <input
+          id="name"
           type="text"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
             validateField('name', e.target.value);
           }}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
           required
         />
-        {errors.name && <span className="error-message">{errors.name}</span>}
+        {errors.name && <span className="mt-1 text-xs text-red-500">{errors.name}</span>}
       </div>
       <div>
-        <label>Email</label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
         <input
+          id="email"
           type="email"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
             validateField('email', e.target.value);
           }}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
           required
         />
-        {errors.email && <span className="error-message">{errors.email}</span>}
+        {errors.email && <span className="mt-1 text-xs text-red-500">{errors.email}</span>}
       </div>
       <div>
-        <label>Password</label>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
             validateField('password', e.target.value);
           }}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
           required
         />
-        {errors.password && <span className="error-message">{errors.password}</span>}
+        {errors.password && <span className="mt-1 text-xs text-red-500">{errors.password}</span>}
       </div>
       <div>
-        <label>Confirm Password</label>
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
         <input
+          id="confirmPassword"
           type="password"
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
             validateField('confirmPassword', e.target.value);
           }}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
           required
         />
-        {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+        {errors.confirmPassword && <span className="mt-1 text-xs text-red-500">{errors.confirmPassword}</span>}
       </div>
 
-      {signupError && <div className="signup-error-message">{signupError}</div>}
+      {signupError && <div className="text-sm text-red-500">{signupError}</div>}
       
-      <button type="submit" disabled={Object.values(errors).some((error) => error !== '') || password !== confirmPassword || loading}>
-        {loading ? 'Signing Up...' : 'Signup'}
+      <button
+        type="submit"
+        disabled={Object.values(errors).some((error) => error !== '') || password !== confirmPassword || loading}
+        className="w-full rounded-md bg-purple-600 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-purple-700 focus:outline-none disabled:opacity-50"
+      >
+        {loading ? 'Signing Up...' : 'Sign Up'}
       </button>
     </form>
   );

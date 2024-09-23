@@ -24,15 +24,48 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
-// src/infrastructure/database/mongoose/models/UserModel.ts
 const mongoose_1 = __importStar(require("mongoose"));
 const UserSchema = new mongoose_1.Schema({
-    email: { type: String, required: true },
+    email: { type: String, unique: true, required: true },
     password: { type: String },
     name: { type: String, required: true },
-    role: { type: String, enum: ['user', 'recruiter', 'admin'], required: true },
-    isAdmin: { type: Boolean, required: true },
+    role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'user' },
+    isAdmin: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    bio: { type: String },
+    about: { type: String },
+    experiences: [{
+            id: { type: String, required: true },
+            title: { type: String, required: true },
+            company: { type: String, required: true },
+            startDate: { type: String, required: true },
+            endDate: { type: String },
+            currentlyWorking: { type: Boolean, default: false },
+            description: { type: String },
+        }],
+    projects: [{
+            id: { type: String, required: true },
+            name: { type: String, required: true },
+            description: { type: String, required: true },
+            link: { type: String },
+            imageUrl: { type: String },
+        }],
+    certificates: [{
+            id: { type: String, required: true },
+            name: { type: String, required: true },
+            issuingOrganization: { type: String, required: true },
+            dateOfIssue: { type: Date, required: true },
+            imageUrl: { type: String },
+        }],
+    skills: [{ type: String }],
+    profileImage: { type: String },
+    dateOfBirth: { type: Date },
+    gender: { type: String, enum: ['male', 'female', 'other'] },
+    resume: { type: String },
+});
+UserSchema.pre('save', function (next) {
+    this.updatedAt = new Date();
+    next();
 });
 exports.UserModel = mongoose_1.default.model('User', UserSchema);

@@ -33,18 +33,19 @@ let RegisterRecruiterUseCase = class RegisterRecruiterUseCase {
         this.recruiterRepository = recruiterRepository;
         this.authService = authService;
     }
-    execute(email, password, companyName, phone, name, governmentId // New parameter
-    ) {
+    execute(email, password, companyName, phone, name, governmentId) {
         return __awaiter(this, void 0, void 0, function* () {
+            // Hash the password before saving
+            const hashedPassword = yield this.authService.hashPassword(password);
             const recruiter = yield this.recruiterRepository.create({
                 email,
-                password,
+                password: hashedPassword, // Save the hashed password
                 companyName,
                 phone,
                 name,
                 role: 'recruiter',
                 isApproved: false,
-                governmentId, // Save the government ID
+                governmentId,
             });
             const token = this.authService.generateToken({
                 id: recruiter.id,
@@ -53,6 +54,10 @@ let RegisterRecruiterUseCase = class RegisterRecruiterUseCase {
                 role: recruiter.role,
                 name: recruiter.name,
                 isAdmin: false,
+                experiences: [], // Provide default value
+                projects: [], // Provide default value
+                certificates: [], // Provide default value
+                skills: [],
             });
             return { recruiter, token, isApproved: recruiter.isApproved };
         });

@@ -27,6 +27,10 @@ app.use((0, cors_1.default)({
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: 'Content-Type,Authorization',
 }));
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    next();
+});
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
 // Routes setup
 app.use('/', authRoutes_1.authRouter); // Changed to '/auth' to match naming conventions

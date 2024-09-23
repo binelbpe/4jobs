@@ -35,8 +35,14 @@ let LoginRecruiterUseCase = class LoginRecruiterUseCase {
     }
     execute(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
+            // Find recruiter by email
             const recruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
-            if (!recruiter || recruiter.password !== password) {
+            if (!recruiter) {
+                throw new Error('Invalid credentials');
+            }
+            // Compare plain text password with hashed password
+            const isPasswordValid = yield this.authService.comparePasswords(password, recruiter.password);
+            if (!isPasswordValid) {
                 throw new Error('Invalid credentials');
             }
             const token = this.authService.generateToken({
@@ -45,7 +51,11 @@ let LoginRecruiterUseCase = class LoginRecruiterUseCase {
                 password: recruiter.password,
                 role: 'recruiter',
                 name: recruiter.name,
-                isAdmin: false
+                isAdmin: false,
+                experiences: [], // Provide default value
+                projects: [], // Provide default value
+                certificates: [], // Provide default value
+                skills: [],
             });
             return {
                 isApproved: recruiter.isApproved,

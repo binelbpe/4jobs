@@ -17,20 +17,26 @@ export class JwtAuthService implements IAuthService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+    const saltRounds = 10; // You can adjust the salt rounds based on your preference
+    return await bcrypt.hash(password, saltRounds);
   }
 
   async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
+    return await bcrypt.compare(plainPassword, hashedPassword);
   }
 
-  generateToken(user: User): string {
-    return jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      this.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-  }
+generateToken(user: User): string {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,  
+    },
+    this.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+}
+
 
   verifyToken(token: string): any {
     return jwt.verify(token, this.JWT_SECRET);
