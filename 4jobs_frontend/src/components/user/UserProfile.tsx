@@ -66,7 +66,7 @@ const UserProfile: React.FC = () => {
               <ProfileDetail title="Skills" content={user?.skills?.join(", ") || "No skills listed."} />
             </div>
 
-            {/* Redesigned Certificates Section */}
+            {/* Certificates Section */}
             <div className="mb-6">
               <h3 className="text-xl font-semibold mb-2">Certificates</h3>
               {user?.certificates?.length ? (
@@ -94,6 +94,34 @@ const UserProfile: React.FC = () => {
                 </a>
               ) : (
                 <p>No resume uploaded.</p>
+              )}
+            </div>
+
+            {/* Projects Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-2">Projects</h3>
+              {user?.projects?.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {user.projects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              ) : (
+                <p>No projects listed.</p>
+              )}
+            </div>
+
+            {/* Experience Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-2">Experience</h3>
+              {user?.experiences?.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {user.experiences.map((exp) => (
+                    <ExperienceCard key={exp.id} experience={exp} />
+                  ))}
+                </div>
+              ) : (
+                <p>No experience listed.</p>
               )}
             </div>
           </div>
@@ -125,6 +153,27 @@ const CertificateCard: React.FC<{ certificate: any }> = ({ certificate }) => (
         className="w-full h-48 object-cover"
       />
     )}
+  </div>
+);
+
+const ProjectCard: React.FC<{ project: any }> = ({ project }) => (
+  <div className="border rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105">
+    <div className="p-4 bg-gray-100">
+      <h4 className="font-semibold text-md">{project.title}</h4>
+      <p className="text-sm text-gray-600">{project.description}</p>
+      <p className="text-xs text-gray-500">Date: {new Date(project.date).toLocaleDateString()}</p>
+    </div>
+  </div>
+);
+
+const ExperienceCard: React.FC<{ experience: any }> = ({ experience }) => (
+  <div className="border rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105">
+    <div className="p-4 bg-gray-100">
+      <h4 className="font-semibold text-md">{experience.position}</h4>
+      <p className="text-sm text-gray-600">Company: {experience.company}</p>
+      <p className="text-xs text-gray-500">Duration: {experience.startDate} - {experience.endDate}</p>
+      <p className="text-sm text-gray-600">{experience.description}</p>
+    </div>
   </div>
 );
 

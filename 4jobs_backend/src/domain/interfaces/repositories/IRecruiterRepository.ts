@@ -10,6 +10,9 @@ export interface IRecruiterRepository {
     role: string;
     isApproved: boolean;
     governmentId?: string; 
+    location?: string;
+    employeeId?: string; // New field
+    employeeIdImage?: string; // New field
   }): Promise<IRecruiter>;
 
   findRecruiterByEmail(email: string): Promise<IRecruiter | null>;
@@ -17,4 +20,6 @@ export interface IRecruiterRepository {
   save(recruiter: IRecruiter): Promise<IRecruiter>;
   findRecruiters(): Promise<IRecruiter[]>;
   findById(id: string): Promise<IRecruiter | null>;
+  findRecruiterById(id: string): Promise<IRecruiter | null>;
+  updateRecruiter(id: string, updates: Partial<IRecruiter>): Promise<IRecruiter | null>;
 }

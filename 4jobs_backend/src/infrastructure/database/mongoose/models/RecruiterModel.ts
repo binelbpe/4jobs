@@ -3,14 +3,17 @@ import { Recruiter as RecruiterInterface } from '../../../../domain/entities/Rec
 
 const RecruiterSchema: Schema = new Schema({
   companyName: { type: String, required: true },
+  location:{type:String},
   phone: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'recruiter' },
   isApproved: { type: Boolean, default: false },
-  name: { type: String }, 
+  name: { type: String },
   governmentId: { type: String, required: true },
-  governmentIdUrl: { type: String,  },
+  governmentIdUrl: { type: String },
+  employeeId: { type: String },  // New field
+  employeeIdImage: { type: String },  // New field
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

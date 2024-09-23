@@ -20,6 +20,9 @@ import AdminRecruiterList from './components/admin/AdminRecruiterList';
 import LoadingSpinner from './components/LoadingSpinner';
 import UserProfile from './components/user/UserProfile';
 import UpdateProfile from './components/user/UpdateProfile';
+import AdminProfile from './components/admin/AdminProfile';
+import RecruiterProfile from './components/recruiter/RecruiterProfile';
+import RecruiterProfileUpdate from './components/recruiter/RecruiterProfileUpdate';
 
 const App: React.FC = () => {
   return (
@@ -39,6 +42,7 @@ const App: React.FC = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard/*" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />
           <Route path="/admin/recruiters" element={<AdminPrivateRoute><AdminRecruiterList /></AdminPrivateRoute>} />
+          <Route path="/admin/profile" element={<AdminPrivateRoute><AdminProfile /></AdminPrivateRoute>} />
 
           {/* Recruiter Routes */}
           <Route path="/recruiter" element={<RecruiterLogin />} />
@@ -46,6 +50,8 @@ const App: React.FC = () => {
           <Route path="/recruiter/signup" element={<RecruiterSignup />} />
           <Route path="/recruiter/verify-otp" element={<VerifyOtp />} />
           <Route path="/recruiter/dashboard/*" element={<RecruiterPrivateRoute><RecruiterDashboard /></RecruiterPrivateRoute>} />
+          <Route path="/recruiter/profile" element={<RecruiterPrivateRoute><RecruiterProfile /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/update-profile" element={<RecruiterPrivateRoute><RecruiterProfileUpdate /></RecruiterPrivateRoute>} />
         </Routes>
       </PersistGate>
     </Provider>

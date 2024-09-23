@@ -8,13 +8,22 @@ import 'react-toastify/dist/ReactToastify.css';
 const Resume: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
-
   const [resume, setResume] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      setResume(files[0]);
+      const selectedFile = files[0];
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(selectedFile.type)) {
+        toast.error("Only PDF, DOC, and DOCX files are allowed.");
+        return;
+      }
+      if (selectedFile.size > 5 * 1024 * 1024) { // 5 MB
+        toast.error("File size must be less than 5 MB.");
+        return;
+      }
+      setResume(selectedFile);
     }
   };
 

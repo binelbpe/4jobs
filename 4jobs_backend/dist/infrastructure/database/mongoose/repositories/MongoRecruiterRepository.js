@@ -57,6 +57,21 @@ let MongoRecruiterRepository = class MongoRecruiterRepository {
             return recruiters;
         });
     }
+    updateRecruiter(id, updates) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (updates.location === undefined) {
+                throw new Error("Location is required for updating the profile");
+            }
+            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(id, updates, { new: true }).exec();
+            return updatedRecruiter;
+        });
+    }
+    findRecruiterById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const recruiter = yield RecruiterModel_1.default.findById(id).exec();
+            return recruiter;
+        });
+    }
 };
 exports.MongoRecruiterRepository = MongoRecruiterRepository;
 exports.MongoRecruiterRepository = MongoRecruiterRepository = __decorate([

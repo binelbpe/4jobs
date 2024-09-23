@@ -9,17 +9,17 @@ const Sidebar: React.FC = () => {
     <div className="w-1/4 p-4 bg-white shadow-lg mt-4 hidden md:block">
       <div className="flex flex-col items-center">
         {user?.profileImage ? (
-          <img  src={
-            user?.profileImage
-              ? `http://localhost:5000${user.profileImage}`
-              : "/default-profile.png"
-          } alt="Profile" className="h-20 w-20 rounded-full" />
+          <img
+            src={`http://localhost:5000${user.profileImage}`}
+            alt="Profile"
+            className="h-20 w-20 rounded-full"
+          />
         ) : (
           <div className="bg-gray-200 rounded-full h-20 w-20"></div>
         )}
         <h2 className="mt-4 text-lg font-semibold">{user?.name || 'Guest'}</h2>
         <p className="text-gray-500 text-sm text-center mt-2">
-          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+          {user?.bio || 'No bio available.'}
         </p>
       </div>
       <div className="mt-6">

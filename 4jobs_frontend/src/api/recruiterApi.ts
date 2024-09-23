@@ -2,7 +2,8 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/recruiter';
 
-const apiRequest = async (method: 'POST' | 'GET' | 'DELETE', endpoint: string, data: any = {}) => {
+// Function to handle API requests
+const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: string, data: any = {}) => {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {};
 
@@ -33,11 +34,9 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE', endpoint: string, d
   }
 };
 
-
-
+// API functions
 export const registerRecruiterApi = async (recruiterData: FormData) => {
   console.log('Attempting recruiter registration with file:', recruiterData);
-  console.log(recruiterData)
   return apiRequest('POST', '/register', recruiterData);
 };
 
@@ -45,7 +44,6 @@ export const loginRecruiterApi = async (loginData: any) => {
   console.log('Attempting recruiter login with:', loginData);
   return apiRequest('POST', '/login', loginData);
 };
-
 
 export const verifyOtpApi = async (otpData: any) => {
   console.log('Attempting OTP verification:', otpData);
@@ -57,3 +55,12 @@ export const sendOtpApi = async (email: string) => {
   return apiRequest('POST', '/send-otp', { email });
 };
 
+export const fetchRecruiterProfileApi = async (recruiterId: string) => {
+  console.log(`Fetching profile for recruiter ID: ${recruiterId}`);
+  return apiRequest('GET', `/profile/${recruiterId}`);
+};
+
+export const updateRecruiterProfileApi = async (recruiterId: string, profileData: any) => {
+  console.log(`Updating profile for recruiter ID: ${recruiterId}`);
+  return apiRequest('PUT', `/update-profile/${recruiterId}`, profileData);
+};

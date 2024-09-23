@@ -9,14 +9,16 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
     email: string;
     password: string;
     companyName: string;
+    location: string;
     phone: string;
     name: string;
     role: string;
     isApproved: boolean;
     governmentId: string;
+    employeeId: string; 
+    employeeIdImage?: string; 
     createdAt?: Date;
     updatedAt?: Date;
-    
   }): Promise<IRecruiter> {
     const recruiter = new Recruiter(recruiterData);
     return recruiter.save() as Promise<IRecruiter>;
@@ -45,4 +47,19 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
     const recruiters = await Recruiter.find().exec();
     return recruiters as IRecruiter[];
   }
+
+  async updateRecruiter(id: string, updates: Partial<IRecruiter>): Promise<IRecruiter | null> {
+    if (updates.location === undefined) {
+      throw new Error("Location is required for updating the profile");
+    }
+    
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(id, updates, { new: true }).exec();
+    return updatedRecruiter as IRecruiter | null;
+  }
+  
+  async findRecruiterById(id: string): Promise<IRecruiter | null> {
+    const recruiter = await Recruiter.findById(id).exec();
+    return recruiter as IRecruiter | null;
+  }
+  
 }

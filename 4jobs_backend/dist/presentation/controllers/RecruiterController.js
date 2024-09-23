@@ -38,17 +38,16 @@ let RecruiterController = class RecruiterController {
         this.otpService = otpService;
         this.recruiterRepository = recruiterRepository;
     }
+    // Register Recruiter
     registerRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b;
             try {
                 const { email, password, companyName, phone, name } = req.body;
-                const governmentId = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path; // File path of the uploaded government ID
-                console.log("kerunnund");
-                console.log(req.body);
-                console.log(req.file);
+                const governmentId = ((_a = req.files) === null || _a === void 0 ? void 0 : _a['governmentId']) ? req.files['governmentId'][0].path : undefined;
+                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b['employeeIdImage']) ? req.files['employeeIdImage'][0].path : undefined;
                 if (!email || !password || !companyName || !phone || !name || !governmentId) {
-                    return res.status(400).json({ error: 'All fields are required' });
+                    return res.status(400).json({ error: 'All fields are required, including government ID' });
                 }
                 const existingRecruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
                 if (existingRecruiter) {
@@ -66,6 +65,7 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
+    // Verify OTP
     verifyOtp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -76,7 +76,7 @@ let RecruiterController = class RecruiterController {
                     if (!recruiterData) {
                         return res.status(400).json({ error: 'Recruiter data not found. Please register again.' });
                     }
-                    const result = yield this.registerUseCase.execute(recruiterData.email, recruiterData.password, recruiterData.companyName, recruiterData.phone, recruiterData.name, recruiterData.governmentId || "");
+                    const result = yield this.registerUseCase.execute(recruiterData.email, recruiterData.password, recruiterData.companyName, recruiterData.phone, recruiterData.name, recruiterData.governmentId || '');
                     delete tempRecruiterStore[email];
                     res.status(201).json(result);
                 }
@@ -90,6 +90,7 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
+    // Login Recruiter
     loginRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,6 +107,7 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
+    // Send OTP
     sendOtp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -121,6 +123,51 @@ let RecruiterController = class RecruiterController {
             catch (error) {
                 console.error('Error sending OTP:', error);
                 res.status(500).json({ error: 'Failed to send OTP' });
+            }
+        });
+    }
+    // Get Recruiter Profile
+    getProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const recruiter = yield this.recruiterRepository.findRecruiterById(id);
+                if (!recruiter) {
+                    return res.status(404).json({ error: 'Recruiter not found' });
+                }
+                res.status(200).json(recruiter);
+            }
+            catch (error) {
+                console.error('Error fetching recruiter profile:', error);
+                res.status(500).json({ error: 'Failed to fetch profile' });
+            }
+        });
+    }
+    // Update Recruiter Profile
+    updateProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            try {
+                const { id } = req.params;
+                const updates = req.body;
+                const governmentIdImage = ((_a = req.files) === null || _a === void 0 ? void 0 : _a['governmentId']) ? req.files['governmentId'][0].path : undefined;
+                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b['employeeIdImage']) ? req.files['employeeIdImage'][0].path : undefined;
+                if (governmentIdImage) {
+                    updates.governmentId = governmentIdImage;
+                }
+                if (employeeIdImage) {
+                    updates.employeeIdImage = employeeIdImage;
+                }
+                const updatedRecruiter = yield this.recruiterRepository.updateRecruiter(id, updates);
+                console.log("updaterec", updatedRecruiter);
+                if (!updatedRecruiter) {
+                    return res.status(404).json({ error: 'Recruiter not found' });
+                }
+                res.status(200).json(updatedRecruiter);
+            }
+            catch (error) {
+                console.error('Error updating recruiter profile:', error);
+                res.status(500).json({ error: 'Failed to update profile' });
             }
         });
     }

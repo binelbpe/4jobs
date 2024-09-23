@@ -9,10 +9,8 @@ export interface IRecruiter {
   isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;
-  governmentId?: string; 
+  governmentId?: string;
+  employeeId?: string; 
+  location?: string;
+  employeeIdImage?: string; 
 }
-
-
-
-
-

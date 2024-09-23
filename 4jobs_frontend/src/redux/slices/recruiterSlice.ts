@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../../redux/store';
-import { registerRecruiterApi, loginRecruiterApi, verifyOtpApi ,sendOtpApi } from '../../api/recruiterApi';
+import { 
+  registerRecruiterApi, 
+  loginRecruiterApi, 
+  verifyOtpApi, 
+  sendOtpApi,
+  fetchRecruiterProfileApi,
+  updateRecruiterProfileApi // Ensure you import this function
+} from '../../api/recruiterApi';
 
 interface RecruiterState {
   recruiter: any | null;
@@ -9,6 +16,7 @@ interface RecruiterState {
   loading: boolean;
   error: string | null;
   otpStep: boolean;
+  profile: any | null; 
 }
 
 const token = localStorage.getItem('recruiterToken');
@@ -19,7 +27,21 @@ const initialState: RecruiterState = {
   loading: false,
   error: null,
   otpStep: false,
+  profile: null,
 };
+
+// Create a new thunk for fetching recruiter profile
+export const fetchProfile = createAsyncThunk(
+  'recruiter/fetchProfile',
+  async (recruiterId: string, thunkAPI) => {
+    try {
+      return await fetchRecruiterProfileApi(recruiterId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
 
 export const register = createAsyncThunk(
   'recruiter/register',
@@ -28,11 +50,8 @@ export const register = createAsyncThunk(
       const response = await registerRecruiterApi(recruiterData);
       return response;
     } catch (error) {
-      if (error instanceof Error) {
-        return thunkAPI.rejectWithValue(error.message);
-      } else {
-        return thunkAPI.rejectWithValue('An unknown error occurred');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
@@ -44,11 +63,8 @@ export const login = createAsyncThunk(
       const response = await loginRecruiterApi(loginData);
       return response;
     } catch (error) {
-      if (error instanceof Error) {
-        return thunkAPI.rejectWithValue(error.message);
-      } else {
-        return thunkAPI.rejectWithValue('An unknown error occurred');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
@@ -60,11 +76,8 @@ export const verifyOtp = createAsyncThunk(
       const response = await verifyOtpApi(otpData);
       return response;
     } catch (error) {
-      if (error instanceof Error) {
-        return thunkAPI.rejectWithValue(error.message);
-      } else {
-        return thunkAPI.rejectWithValue('An unknown error occurred');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
@@ -76,15 +89,23 @@ export const sendOtp = createAsyncThunk(
       const response = await sendOtpApi(email);
       return response;
     } catch (error) {
-      if (error instanceof Error) {
-        return thunkAPI.rejectWithValue(error.message);
-      } else {
-        return thunkAPI.rejectWithValue('An unknown error occurred');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
 
+export const updateProfile = createAsyncThunk(
+  'recruiter/updateProfile',
+  async ({ recruiterId, profileData }: { recruiterId: string; profileData: FormData }, thunkAPI) => {
+    try {
+      return await updateRecruiterProfileApi(recruiterId, profileData);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
 
 const recruiterSlice = createSlice({
   name: 'recruiter',
@@ -95,6 +116,7 @@ const recruiterSlice = createSlice({
       state.isAuthenticatedRecruiter = false;
       state.isApproved = false;
       state.otpStep = false;
+      state.profile = null; 
       localStorage.removeItem('recruiterToken');
     },
     setOtpStep: (state, action) => {
@@ -157,6 +179,30 @@ const recruiterSlice = createSlice({
         console.log('OTP sent successfully');
       })
       .addCase(sendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+      .addCase(fetchProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

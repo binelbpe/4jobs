@@ -14,7 +14,6 @@ const Certificates: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // Handle possible null user and ensure certificates is always an array
   const initialCertificates: CertificateWithFile[] =
     user && Array.isArray(user.certificates)
       ? user.certificates.map((cert) => ({ ...cert, file: null }))
@@ -55,9 +54,30 @@ const Certificates: React.FC = () => {
     ]);
   };
 
+  const validateCertificates = (): boolean => {
+    for (const cert of certificates) {
+      if (!cert.name || !cert.issuingOrganization || !cert.dateOfIssue) {
+        toast.error("All fields are required.");
+        return false;
+      }
+      if (cert.name.length > 100) {
+        toast.error("Certificate name must be less than 100 characters.");
+        return false;
+      }
+      if (cert.issuingOrganization.length > 100) {
+        toast.error("Issuing organization must be less than 100 characters.");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateCertificates()) return; // Validate before proceeding
+
     if (user) {
+      console.log("Submitting certificates for user:", user);
       const certificatesWithFiles = certificates.map((cert) => ({
         file: cert.file,
         details: {
@@ -82,6 +102,7 @@ const Certificates: React.FC = () => {
         toast.error("Failed to update certificates.");
       }
     } else {
+      console.error("User not available:", user);
       toast.error("User not available.");
     }
   };
@@ -126,7 +147,6 @@ const Certificates: React.FC = () => {
             <input
               type="file"
               name="certificates"
-              multiple
               onChange={(e) =>
                 handleFileChange(
                   index,

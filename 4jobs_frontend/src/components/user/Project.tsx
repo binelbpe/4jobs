@@ -23,8 +23,33 @@ const Projects: React.FC = () => {
     setProjects([...projects, { id: Date.now().toString(), name: '', description: '', link: '', imageUrl: '' }]);
   };
 
+  const validateProjects = (): boolean => {
+    for (const project of projects) {
+      if (!project.name) {
+        toast.error("Project name is required.");
+        return false;
+      }
+      if (!project.description) {
+        toast.error("Project description is required.");
+        return false;
+      }
+      // Optional fields validation
+      if (project.link && !/^https?:\/\/.+/.test(project.link)) {
+        toast.error("Project link must be a valid URL if provided.");
+        return false;
+      }
+      if (project.imageUrl && !/^https?:\/\/.+/.test(project.imageUrl)) {
+        toast.error("Image URL must be a valid URL if provided.");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateProjects()) return; // Validate before proceeding
+
     if (user) {
       try {
         await dispatch(updateUserProjects({ userId: user.id, projects }));
@@ -60,14 +85,14 @@ const Projects: React.FC = () => {
           <input
             type="url"
             value={project.link}
-            placeholder="Project Link"
+            placeholder="Project Link (optional)"
             onChange={(e) => handleChange(index, 'link', e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="url"
             value={project.imageUrl}
-            placeholder="Image URL"
+            placeholder="Image URL (optional)"
             onChange={(e) => handleChange(index, 'imageUrl', e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

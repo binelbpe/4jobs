@@ -43,14 +43,49 @@ const Profile: React.FC = () => {
     }
   };
 
+  const validateForm = (): boolean => {
+    if (!formData.name) {
+      toast.error("Name is required.");
+      return false;
+    }
+    if (!formData.email) {
+      toast.error("Email is required.");
+      return false;
+    }
+    if (!formData.bio) {
+      toast.error("Bio is required.");
+      return false;
+    }
+    if (!formData.about) {
+      toast.error("About section is required.");
+      return false;
+    }
+    if (!formData.dateOfBirth) {
+      toast.error("Date of Birth is required.");
+      return false;
+    }
+    if (!formData.gender) {
+      toast.error("Gender is required.");
+      return false;
+    }
+    if (formData.skills.length > 200) {
+      toast.error("Skills must be less than 200 characters.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return; // Validate before proceeding
+
     const dataToSubmit = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null) {
         dataToSubmit.append(key, value);
       }
     });
+
     if (user) {
       try {
         await dispatch(updateUserProfile({ userId: user.id, formData: dataToSubmit }));

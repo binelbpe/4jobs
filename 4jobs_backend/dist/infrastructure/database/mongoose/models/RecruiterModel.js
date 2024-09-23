@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const RecruiterSchema = new mongoose_1.Schema({
     companyName: { type: String, required: true },
+    location: { type: String },
     phone: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -33,7 +34,9 @@ const RecruiterSchema = new mongoose_1.Schema({
     isApproved: { type: Boolean, default: false },
     name: { type: String },
     governmentId: { type: String, required: true },
-    governmentIdUrl: { type: String, },
+    governmentIdUrl: { type: String },
+    employeeId: { type: String }, // New field
+    employeeIdImage: { type: String }, // New field
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

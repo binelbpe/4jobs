@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -31,9 +30,30 @@ const upload = multer({
   },
 });
 
-recruiterRouter.post('/register', upload.single('governmentId'), recruiterController.registerRecruiter.bind(recruiterController));
+// Route for registering recruiters with file uploads (governmentId and employeeIdImage)
+recruiterRouter.post(
+  '/register', 
+  upload.fields([{ name: 'governmentId' }]), 
+  recruiterController.registerRecruiter.bind(recruiterController)
+);
+
+// Route for verifying OTP
 recruiterRouter.post('/verify-otp', recruiterController.verifyOtp.bind(recruiterController));
+
+// Route for logging in
 recruiterRouter.post('/login', recruiterController.loginRecruiter.bind(recruiterController));
+
+// Route for sending OTP
 recruiterRouter.post('/send-otp', recruiterController.sendOtp.bind(recruiterController));
+
+// Route for updating recruiter profiles with optional file uploads
+recruiterRouter.put(
+  '/update-profile/:id', 
+  upload.fields([{ name: 'governmentId' }, { name: 'employeeIdImage' }]), 
+  recruiterController.updateProfile.bind(recruiterController)
+);
+
+// Route for fetching recruiter profile
+recruiterRouter.get('/profile/:id', recruiterController.getProfile.bind(recruiterController));
 
 export { recruiterRouter };

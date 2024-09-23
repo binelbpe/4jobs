@@ -31,8 +31,42 @@ const Experiences: React.FC = () => {
     }]);
   };
 
+  const validateExperiences = (): boolean => {
+    for (const exp of experiences) {
+      if (!exp.title || !exp.company || !exp.startDate || !exp.description) {
+        toast.error("All fields except 'End Date' are required.");
+        return false;
+      }
+      if (exp.title.length > 100) {
+        toast.error("Job title must be less than 100 characters.");
+        return false;
+      }
+      if (exp.company.length > 100) {
+        toast.error("Company name must be less than 100 characters.");
+        return false;
+      }
+      if (exp.startDate.length > 50) {
+        toast.error("Start date must be less than 50 characters.");
+        return false;
+      }
+      // Check if endDate is defined before checking its length
+      if (exp.endDate && exp.endDate.length > 50) {
+        toast.error("End date must be less than 50 characters.");
+        return false;
+      }
+      if (exp.description.length > 500) {
+        toast.error("Job description must be less than 500 characters.");
+        return false;
+      }
+    }
+    return true;
+  };
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateExperiences()) return; // Validate before proceeding
+
     if (user) {
       try {
         await dispatch(updateUserExperiences({ userId: user.id, experiences }));
