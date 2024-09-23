@@ -31,6 +31,11 @@ const Profile: React.FC = () => {
     profileImage: null,
   });
 
+  const nameRegex = /^[a-zA-Z\s]{3,20}$/;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/;
+  const bioAboutRegex = /^.{1,500}$/; // Limit bio and about sections to 500 characters.
+  const skillsRegex = /^[a-zA-Z\s,]{0,200}$/;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -44,20 +49,20 @@ const Profile: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!formData.name) {
-      toast.error("Name is required.");
+    if (!nameRegex.test(formData.name)) {
+      toast.error("Name must contain only letters and spaces (3-20 characters).");
       return false;
     }
-    if (!formData.email) {
-      toast.error("Email is required.");
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Invalid email address.");
       return false;
     }
-    if (!formData.bio) {
-      toast.error("Bio is required.");
+    if (!bioAboutRegex.test(formData.bio)) {
+      toast.error("Bio must be less than 500 characters.");
       return false;
     }
-    if (!formData.about) {
-      toast.error("About section is required.");
+    if (!bioAboutRegex.test(formData.about)) {
+      toast.error("About section must be less than 500 characters.");
       return false;
     }
     if (!formData.dateOfBirth) {
@@ -68,8 +73,8 @@ const Profile: React.FC = () => {
       toast.error("Gender is required.");
       return false;
     }
-    if (formData.skills.length > 200) {
-      toast.error("Skills must be less than 200 characters.");
+    if (!skillsRegex.test(formData.skills)) {
+      toast.error("Skills must be comma-separated and less than 200 characters.");
       return false;
     }
     return true;

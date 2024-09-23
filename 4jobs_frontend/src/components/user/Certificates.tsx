@@ -22,6 +22,10 @@ const Certificates: React.FC = () => {
   const [certificates, setCertificates] =
     useState<CertificateWithFile[]>(initialCertificates);
 
+  // Regex Patterns
+  const nameRegex = /^[a-zA-Z0-9\s]{1,20}$/;
+  const organizationRegex = /^[a-zA-Z0-9\s]{1,20}$/;
+
   const handleChange = (
     index: number,
     field: keyof Omit<Certificate, "id" | "file">,
@@ -60,12 +64,18 @@ const Certificates: React.FC = () => {
         toast.error("All fields are required.");
         return false;
       }
-      if (cert.name.length > 100) {
-        toast.error("Certificate name must be less than 100 characters.");
+
+      if (!nameRegex.test(cert.name)) {
+        toast.error(
+          "Certificate name can only contain letters, numbers, and spaces, and must be less than 20 characters."
+        );
         return false;
       }
-      if (cert.issuingOrganization.length > 100) {
-        toast.error("Issuing organization must be less than 100 characters.");
+
+      if (!organizationRegex.test(cert.issuingOrganization)) {
+        toast.error(
+          "Issuing organization can only contain letters, numbers, and spaces, and must be less than 20 characters."
+        );
         return false;
       }
     }
@@ -77,7 +87,6 @@ const Certificates: React.FC = () => {
     if (!validateCertificates()) return; // Validate before proceeding
 
     if (user) {
-      console.log("Submitting certificates for user:", user);
       const certificatesWithFiles = certificates.map((cert) => ({
         file: cert.file,
         details: {

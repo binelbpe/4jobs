@@ -9,11 +9,15 @@ import 'react-toastify/dist/ReactToastify.css';
 const Projects: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   const [projects, setProjects] = useState<Project[]>(user?.projects || []);
 
+  // Regex patterns
+  const nameRegex = /^[a-zA-Z0-9\s]{1,20}$/; // Max 50 characters, alphanumeric with spaces
+  const urlRegex = /^https?:\/\/[^\s$.?#].[^\s]*$/; // Valid URL format (HTTP/HTTPS)
+
   const handleChange = (index: number, field: keyof Project, value: string) => {
-    const updatedProjects = projects.map((project, i) => 
+    const updatedProjects = projects.map((project, i) =>
       i === index ? { ...project, [field]: value } : project
     );
     setProjects(updatedProjects);
@@ -29,17 +33,16 @@ const Projects: React.FC = () => {
         toast.error("Project name is required.");
         return false;
       }
+      if (!nameRegex.test(project.name)) {
+        toast.error("Project name must be alphanumeric and less than 20 characters.");
+        return false;
+      }
       if (!project.description) {
         toast.error("Project description is required.");
         return false;
       }
-      // Optional fields validation
-      if (project.link && !/^https?:\/\/.+/.test(project.link)) {
-        toast.error("Project link must be a valid URL if provided.");
-        return false;
-      }
-      if (project.imageUrl && !/^https?:\/\/.+/.test(project.imageUrl)) {
-        toast.error("Image URL must be a valid URL if provided.");
+      if (project.link && !urlRegex.test(project.link)) {
+        toast.error("Project link must be a valid URL (http or https) if provided.");
         return false;
       }
     }

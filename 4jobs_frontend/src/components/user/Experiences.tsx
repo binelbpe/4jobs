@@ -12,6 +12,11 @@ const Experiences: React.FC = () => {
 
   const [experiences, setExperiences] = useState<Experience[]>(user?.experiences || []);
 
+  // Regex Patterns
+  const titleRegex = /^[a-zA-Z0-9\s]{1,30}$/; // Max 30 characters, alphanumeric and spaces
+  const companyRegex = /^[a-zA-Z0-9\s]{1,20}$/; // Max 20 characters, alphanumeric and spaces
+  const dateRegex = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$/; // Month Year format like "Jan 2020"
+
   const handleChange = (index: number, field: keyof Experience, value: string | boolean) => {
     const updatedExperiences = experiences.map((exp, i) => 
       i === index ? { ...exp, [field]: value } : exp
@@ -37,23 +42,32 @@ const Experiences: React.FC = () => {
         toast.error("All fields except 'End Date' are required.");
         return false;
       }
-      if (exp.title.length > 100) {
-        toast.error("Job title must be less than 100 characters.");
+
+      // Title Validation
+      if (!titleRegex.test(exp.title)) {
+        toast.error("Job title can only contain letters, numbers, and spaces, and must be less than 30 characters.");
         return false;
       }
-      if (exp.company.length > 100) {
-        toast.error("Company name must be less than 100 characters.");
+
+      // Company Validation
+      if (!companyRegex.test(exp.company)) {
+        toast.error("Company name can only contain letters, numbers, and spaces, and must be less than 20 characters.");
         return false;
       }
-      if (exp.startDate.length > 50) {
-        toast.error("Start date must be less than 50 characters.");
+
+      // Start Date Validation
+      if (!dateRegex.test(exp.startDate)) {
+        toast.error("Start date must be in the format 'MMM YYYY' (e.g., Jan 2020).");
         return false;
       }
-      // Check if endDate is defined before checking its length
-      if (exp.endDate && exp.endDate.length > 50) {
-        toast.error("End date must be less than 50 characters.");
+
+      // End Date Validation (optional)
+      if (exp.endDate && !dateRegex.test(exp.endDate) && exp.endDate !== "Present") {
+        toast.error("End date must be in the format 'MMM YYYY' or 'Present' (e.g., Dec 2022 or Present).");
         return false;
       }
+
+      // Description Validation
       if (exp.description.length > 500) {
         toast.error("Job description must be less than 500 characters.");
         return false;
@@ -61,7 +75,6 @@ const Experiences: React.FC = () => {
     }
     return true;
   };
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
