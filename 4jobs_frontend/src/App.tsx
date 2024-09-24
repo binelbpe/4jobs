@@ -1,9 +1,11 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import store, { persistor } from './redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
+import store, { persistor } from './redux/store';
 
+
+// Import components
 import Login from './components/user/Login';
 import Signup from './components/user/Signup';
 import Dashboard from './components/user/Dashboard';
@@ -23,7 +25,9 @@ import UpdateProfile from './components/user/UpdateProfile';
 import AdminProfile from './components/admin/AdminProfile';
 import RecruiterProfile from './components/recruiter/RecruiterProfile';
 import RecruiterProfileUpdate from './components/recruiter/RecruiterProfileUpdate';
-
+import JobPostWrapper from './components/recruiter/jobPost/JobPostWrapper';
+import CreateJobPost from './components/recruiter/jobPost/CreateJobPost';
+import EditJobPost from './components/recruiter/jobPost/EditJobPost';
 const App: React.FC = () => {
   return (
     <Provider store={store}>
@@ -51,7 +55,31 @@ const App: React.FC = () => {
           <Route path="/recruiter/verify-otp" element={<VerifyOtp />} />
           <Route path="/recruiter/dashboard/*" element={<RecruiterPrivateRoute><RecruiterDashboard /></RecruiterPrivateRoute>} />
           <Route path="/recruiter/profile" element={<RecruiterPrivateRoute><RecruiterProfile /></RecruiterPrivateRoute>} />
-        <Route path="/recruiter/update-profile" element={<RecruiterPrivateRoute><RecruiterProfileUpdate /></RecruiterPrivateRoute>} />
+          <Route path="/recruiter/update-profile" element={<RecruiterPrivateRoute><RecruiterProfileUpdate /></RecruiterPrivateRoute>} />
+          <Route 
+            path="/recruiter/jobs" 
+            element={
+              <RecruiterPrivateRoute>
+                <JobPostWrapper />
+              </RecruiterPrivateRoute>
+            } 
+          />
+          <Route 
+            path="/recruiter/jobs/create" 
+            element={
+              <RecruiterPrivateRoute>
+                <CreateJobPost />
+              </RecruiterPrivateRoute>
+            } 
+          />
+           <Route 
+            path="/recruiter/jobs/edit/:id" 
+            element={
+              <RecruiterPrivateRoute>
+                <EditJobPost />
+              </RecruiterPrivateRoute>
+            } 
+          />
         </Routes>
       </PersistGate>
     </Provider>

@@ -15,11 +15,15 @@ import { LoginRecruiterUseCase } from '../application/usecases/recruiter/LoginRe
 import { LoginUseCase } from '../application/usecases/auth/LoginUseCase';
 import { IRecruiterRepository } from '../domain/interfaces/repositories/IRecruiterRepository';
 import { AdminController } from '../presentation/controllers/AdminController'; 
-import { RecruiterController } from '../presentation/controllers/RecruiterController';
+import { RecruiterController } from '../presentation/controllers/recruiter/RecruiterController';
 import { AuthController } from '../presentation/controllers/user/AuthController';
 import { GetUserProfileUseCase } from '../application/usecases/auth/GetUserProfileUseCase';
 import { UpdateUserProfileUseCase } from '../application/usecases/auth/UpdateUserProfileUseCase';
 import { ProfileController } from '../presentation/controllers/user/ProfileController';
+import { IJobPostRepository } from '../domain/interfaces/repositories/IJobPostRepository';
+import { MongoJobPostRepository } from '../infrastructure/database/mongoose/repositories/MongoJobPostRepository';
+import { JobPostUseCase } from '../application/usecases/recruiter/JobPostUseCase';
+import { JobPostController } from '../presentation/controllers/recruiter/JobPostController';
 
 const container = new Container();
 
@@ -43,6 +47,10 @@ container.bind<AuthController>(TYPES.AuthController).to(AuthController);
 container.bind<GetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase);
 container.bind<UpdateUserProfileUseCase>(TYPES.UpdateUserProfileUseCase).to(UpdateUserProfileUseCase);
 container.bind<ProfileController>(TYPES.ProfileController).to(ProfileController);
+container.bind<IJobPostRepository>(TYPES.JobPostRepository).to(MongoJobPostRepository);
+container.bind<JobPostUseCase>(TYPES.JobPostUseCase).to(JobPostUseCase);
+container.bind<JobPostController>(TYPES.JobPostController).to(JobPostController);
+
 
 console.log(container);
 export { container };

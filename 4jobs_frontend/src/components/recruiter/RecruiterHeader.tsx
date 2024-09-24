@@ -18,6 +18,9 @@ const RecruiterHeader = () => {
     setDropdownOpen(false); 
   };
 
+  const handleAddJobs = () => {
+    navigate('/recruiter/jobs');
+  };
   return (
     <header className="flex justify-between items-center p-4 lg:p-6 bg-white shadow-md w-full">
       {/* Logo */}
@@ -40,8 +43,14 @@ const RecruiterHeader = () => {
       </div>
 
       {/* Right-side Icons */}
+      
       <div className="flex items-center space-x-4 lg:space-x-6">
-        <button className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300">ADD JOBS</button>
+        <button 
+          onClick={handleAddJobs}
+          className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300"
+        >
+          ADD JOBS
+        </button>
 
         {/* Message Icon */}
         <button className="text-black text-xl hover:text-gray-600 transition duration-300">✉️</button>

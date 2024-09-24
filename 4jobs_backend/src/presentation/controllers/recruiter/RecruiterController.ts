@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import TYPES from '../../types';
-import { RegisterRecruiterUseCase } from '../../application/usecases/recruiter/registerRecruiter';
-import { LoginRecruiterUseCase } from '../../application/usecases/recruiter/LoginRecruiterUseCase';
-import { IRecruiterRepository } from '../../domain/interfaces/repositories/IRecruiterRepository';
-import { OtpService } from '../../infrastructure/services/OtpService';
-import { IRecruiter } from '../../types/recruiter';
+import TYPES from '../../../types';
+import { RegisterRecruiterUseCase } from '../../../application/usecases/recruiter/registerRecruiter';
+import { LoginRecruiterUseCase } from '../../../application/usecases/recruiter/LoginRecruiterUseCase';
+import { IRecruiterRepository } from '../../../domain/interfaces/repositories/IRecruiterRepository';
+import { OtpService } from '../../../infrastructure/services/OtpService';
+import { IRecruiter } from '../../../types/recruiter';
 
 const tempRecruiterStore: { [email: string]: { email: string, password: string, companyName: string, phone: string, name: string, governmentId?: string } } = {};
 

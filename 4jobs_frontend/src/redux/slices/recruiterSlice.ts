@@ -61,6 +61,7 @@ export const login = createAsyncThunk(
   async (loginData: any, thunkAPI) => {
     try {
       const response = await loginRecruiterApi(loginData);
+      console.log("rec respo log",response)
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';

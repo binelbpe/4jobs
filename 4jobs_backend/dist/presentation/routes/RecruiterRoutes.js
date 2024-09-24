@@ -12,6 +12,7 @@ const types_1 = __importDefault(require("../../types"));
 const recruiterRouter = (0, express_1.Router)();
 exports.recruiterRouter = recruiterRouter;
 const recruiterController = container_1.container.get(types_1.default.RecruiterController);
+const jobPostController = container_1.container.get(types_1.default.JobPostController);
 // Configure multer for file uploads
 const upload = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({
@@ -46,3 +47,8 @@ recruiterRouter.post('/send-otp', recruiterController.sendOtp.bind(recruiterCont
 recruiterRouter.put('/update-profile/:id', upload.fields([{ name: 'governmentId' }, { name: 'employeeIdImage' }]), recruiterController.updateProfile.bind(recruiterController));
 // Route for fetching recruiter profile
 recruiterRouter.get('/profile/:id', recruiterController.getProfile.bind(recruiterController));
+recruiterRouter.post('/create-jobpost/:id', jobPostController.createJobPost.bind(jobPostController));
+recruiterRouter.get('/job-posts/:id', jobPostController.getJobPostById.bind(jobPostController));
+recruiterRouter.get('/recruiters/:recruiterId/job-posts', jobPostController.getJobPostsByRecruiterId.bind(jobPostController));
+recruiterRouter.put('/update-jobpost/:id', jobPostController.updateJobPost.bind(jobPostController));
+recruiterRouter.delete('/jobpost-delete/:id', jobPostController.deleteJobPost.bind(jobPostController));

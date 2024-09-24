@@ -21,5 +21,8 @@ const TYPES = {
     GetUserProfileUseCase: Symbol.for('GetUserProfileUseCase'),
     UpdateUserProfileUseCase: Symbol.for('UpdateUserProfileUseCase'),
     ProfileController: Symbol.for('ProfileController'),
+    JobPostRepository: Symbol.for("JobPostRepository"),
+    JobPostUseCase: Symbol.for("JobPostUseCase"),
+    JobPostController: Symbol.for("JobPostController"),
 };
 exports.default = TYPES;
