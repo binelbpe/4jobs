@@ -48,16 +48,16 @@ let AuthController = class AuthController {
             try {
                 const { email } = req.body;
                 if (!email) {
-                    return res.status(400).json({ error: 'Email is required' });
+                    return res.status(400).json({ error: "Email is required" });
                 }
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendOtp(email, otp);
-                res.status(200).json({ message: 'OTP sent to email.' });
+                res.status(200).json({ message: "OTP sent to email." });
             }
             catch (error) {
-                console.error('Error sending OTP:', error);
-                res.status(500).json({ error: 'Failed to send OTP' });
+                console.error("Error sending OTP:", error);
+                res.status(500).json({ error: "Failed to send OTP" });
             }
         });
     }
@@ -66,20 +66,26 @@ let AuthController = class AuthController {
             try {
                 const { email, password, name } = req.body;
                 if (!email || !password || !name) {
-                    return res.status(400).json({ error: 'Email, password, and name are required' });
+                    return res
+                        .status(400)
+                        .json({ error: "Email, password, and name are required" });
                 }
                 const existingUser = yield this.userRepository.findByEmail(email);
                 if (existingUser) {
-                    return res.status(400).json({ error: 'User already exists' });
+                    return res.status(400).json({ error: "User already exists" });
                 }
                 tempUserStore[email] = { email, password, name };
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendOtp(email, otp);
-                res.status(200).json({ message: 'OTP sent to email. Please verify OTP to complete signup.' });
+                res
+                    .status(200)
+                    .json({
+                    message: "OTP sent to email. Please verify OTP to complete signup.",
+                });
             }
             catch (error) {
-                console.error('Error during user signup:', error);
+                console.error("Error during user signup:", error);
                 res.status(400).json({ error: error.message });
             }
         });
@@ -92,19 +98,21 @@ let AuthController = class AuthController {
                 if (isValid) {
                     const userData = tempUserStore[email];
                     if (!userData) {
-                        return res.status(400).json({ error: 'User data not found. Please sign up again.' });
+                        return res
+                            .status(400)
+                            .json({ error: "User data not found. Please sign up again." });
                     }
                     const result = yield this.signupUseCase.execute(userData.email, userData.password, userData.name);
                     delete tempUserStore[email];
                     res.status(201).json(result);
                 }
                 else {
-                    res.status(400).json({ error: 'Invalid OTP' });
+                    res.status(400).json({ error: "Invalid OTP" });
                 }
             }
             catch (error) {
-                console.error('Error verifying OTP:', error);
-                res.status(500).json({ error: 'Failed to verify OTP' });
+                console.error("Error verifying OTP:", error);
+                res.status(500).json({ error: "Failed to verify OTP" });
             }
         });
     }
@@ -113,13 +121,16 @@ let AuthController = class AuthController {
             try {
                 const { email, password } = req.body;
                 if (!email || !password) {
-                    return res.status(400).json({ error: 'Email and password are required' });
+                    return res
+                        .status(400)
+                        .json({ error: "Email and password are required" });
                 }
                 const result = yield this.loginUseCase.execute(email, password);
+                console.log("result", result);
                 res.status(200).json(result);
             }
             catch (error) {
-                console.error('Error during login:', error);
+                console.error("Error during login:", error);
                 res.status(400).json({ error: error.message });
             }
         });
@@ -129,32 +140,37 @@ let AuthController = class AuthController {
             try {
                 const tokenId = req.body.googleToken;
                 if (!tokenId) {
-                    return res.status(400).json({ error: 'ID Token is required' });
+                    return res.status(400).json({ error: "ID Token is required" });
                 }
                 const payload = yield this.googleAuthService.verifyToken(tokenId);
                 const email = payload === null || payload === void 0 ? void 0 : payload.email;
-                const name = (payload === null || payload === void 0 ? void 0 : payload.name) || 'Google User';
+                const name = (payload === null || payload === void 0 ? void 0 : payload.name) || "Google User";
                 if (!email) {
-                    return res.status(400).json({ error: 'Google authentication failed. No email found in token.' });
+                    return res
+                        .status(400)
+                        .json({
+                        error: "Google authentication failed. No email found in token.",
+                    });
                 }
                 let user = yield this.userRepository.findByEmail(email);
                 if (user) {
-                    const result = yield this.loginUseCase.execute(email, '', true);
+                    const result = yield this.loginUseCase.execute(email, "", true);
                     const token = this.jwtAuthService.generateToken(user);
-                    console.log('result', result);
+                    console.log("result", result);
                     return res.status(200).json(result);
                 }
                 else {
                     user = yield this.userRepository.create({
                         email,
-                        password: '',
+                        password: "",
                         name,
-                        role: 'user',
+                        role: "user",
                         isAdmin: false,
-                        experiences: [], // Provide default value
-                        projects: [], // Provide default value
-                        certificates: [], // Provide default value
+                        experiences: [],
+                        projects: [],
+                        certificates: [],
                         skills: [],
+                        appliedJobs: [],
                     });
                     const token = this.jwtAuthService.generateToken(user);
                     console.log("g user", user);
@@ -162,8 +178,10 @@ let AuthController = class AuthController {
                 }
             }
             catch (error) {
-                console.error('Error during Google authentication:', error);
-                return res.status(500).json({ error: 'Failed to authenticate with Google' });
+                console.error("Error during Google authentication:", error);
+                return res
+                    .status(500)
+                    .json({ error: "Failed to authenticate with Google" });
             }
         });
     }

@@ -29,7 +29,7 @@ let CreateAdminUseCase = class CreateAdminUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const existingUser = yield this.userRepository.findByEmail(email);
             if (existingUser) {
-                throw new Error('User already exists');
+                throw new Error("User already exists");
             }
             const hashedPassword = yield this.authService.hashPassword(password);
             const admin = yield this.userRepository.create({

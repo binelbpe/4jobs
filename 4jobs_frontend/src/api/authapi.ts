@@ -1,5 +1,15 @@
 import axios from 'axios';
 import { LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../types/auth';
+import { BasicJobPost } from '../types/jobPostTypes';
+import { CreatePostData, LikePostData, CommentPostData, Post } from '../types/postTypes';
+
+export interface FetchJobPostsParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: string;
+  filter?: any;
+}
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -14,7 +24,6 @@ const apiRequest = async (
     'Content-Type': 'application/json',
   };
 
-  // Attach token if present
   if (token) {
     defaultHeaders.Authorization = `Bearer ${token}`;
   }
@@ -32,25 +41,18 @@ const apiRequest = async (
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        // Handle API errors based on status codes
-        if (error.response.status === 401) {
-          console.error('Unauthorized - Token might be expired');
-          localStorage.removeItem('token'); // Remove invalid token
-          window.location.href = '/login';  // Redirect to login
-        } else {
-          console.error('API Error:', error.response.data.error);
-          throw new Error(error.response.data.error);
-        }
+        console.error('API Error:', error.response.data);
+        throw new Error(error.response.data.error || 'Server Error');
       } else if (error.request) {
-        console.error('No response received from API:', error.request);
+        console.error('No response received:', error.request);
         throw new Error('No response from the server');
       }
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('An unknown error occurred');
     }
+    console.error('Unexpected error:', error);
+    throw new Error('An unknown error occurred');
   }
 };
+
 
 export const sendOtpApi = async (email: string) => {
   return apiRequest('POST', '/send-otp', { email });
@@ -120,4 +122,77 @@ export const updateUserResumeApi = async (userId: string, resume: File) => {
   return apiRequest('PUT', `/edit-resume/${userId}`, formData, {
     'Content-Type': 'multipart/form-data',
   });
+};
+
+export const fetchJobPostsuser = async (params: FetchJobPostsParams = {}): Promise<{ jobPosts: BasicJobPost[], currentPage: number, totalPages: number, totalCount: number }> => {
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    filter = {}
+  } = params;
+
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+    sortBy,
+    sortOrder,
+    filter: JSON.stringify(filter)
+  });
+
+  return apiRequest('GET', `/jobs?${queryParams.toString()}`);
+};
+
+
+export const applyForJob = async (userId: string, jobId: string): Promise<void> => {
+  return apiRequest('POST', `/jobs/${jobId}/apply`, { userId });
+};
+
+
+export const fetchJobPostApi = async (jobId: string): Promise<BasicJobPost> => {
+  return apiRequest('GET', `/jobs/${jobId}`);
+};
+
+
+
+/* ------------------ Post APIs ------------------ */
+
+// Fetch all posts
+export const fetchPostsAPI = async (): Promise<Post[]> => {
+  return apiRequest('GET', '/posts');
+};
+
+// Fetch posts by user ID
+export const fetchPostsByUserIdAPI = async (userId: string): Promise<Post[]> => {
+  return apiRequest('GET', `/posts/user/${userId}`);
+};
+
+// Create a new post
+export const createPostAPI = async (postData: CreatePostData): Promise<Post> => {
+  const formData = new FormData();
+  if (postData.content) formData.append('content', postData.content);
+  if (postData.video) formData.append('video', postData.video);
+  if (postData.image) formData.append('image', postData.image);
+
+  return apiRequest('POST', '/posts', formData, {
+    'Content-Type': 'multipart/form-data',
+  });
+};
+
+// Like a post
+export const likePostAPI = async (likeData: LikePostData): Promise<Post> => {
+  return apiRequest('POST', `/posts/${likeData.postId}/like`, { userId: likeData.userId });
+};
+
+// Comment on a post
+export const commentOnPostAPI = async (commentData: CommentPostData): Promise<Post> => {
+  return apiRequest('POST', `/posts/${commentData.postId}/comment`, {
+    userId: commentData.userId,
+    content: commentData.content,
+  });
+};
+
+export const deletePostAPI = async (postId: string): Promise<void> => {
+  return apiRequest('DELETE', `/posts/${postId}`);
 };

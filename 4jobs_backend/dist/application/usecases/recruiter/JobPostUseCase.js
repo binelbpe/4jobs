@@ -28,8 +28,14 @@ exports.JobPostUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 let JobPostUseCase = class JobPostUseCase {
-    constructor(jobPostRepository) {
+    constructor(jobPostRepository, userRepository) {
         this.jobPostRepository = jobPostRepository;
+        this.userRepository = userRepository;
+    }
+    getApplicantsByJobId(jobId, page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.jobPostRepository.findApplicantsByJobId(jobId, page, limit);
+        });
     }
     createJobPost(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -39,6 +45,11 @@ let JobPostUseCase = class JobPostUseCase {
     getJobPostById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.jobPostRepository.findById(id);
+        });
+    }
+    getApplicantsById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.userRepository.findById(id);
         });
     }
     getJobPostsByRecruiterId(recruiterId) {
@@ -61,5 +72,6 @@ exports.JobPostUseCase = JobPostUseCase;
 exports.JobPostUseCase = JobPostUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.JobPostRepository)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
+    __metadata("design:paramtypes", [Object, Object])
 ], JobPostUseCase);

@@ -4,8 +4,10 @@ import multer from 'multer';
 import TYPES from '../../types';
 import { AuthController } from '../controllers/user/AuthController';
 import { ProfileController } from '../controllers/user/ProfileController';
+import { JobPostControllerUser } from '../controllers/user/JobPostControllerUser';
 import path from 'path';
 import fs from 'fs';
+import {authenticate} from '../middlewares/authMiddleware'
 
 // Create necessary upload directories
 const createUploadDirs = () => {
@@ -25,6 +27,7 @@ createUploadDirs();
 
 const profileController = container.get<ProfileController>(TYPES.ProfileController);
 const authController = container.get<AuthController>(TYPES.AuthController);
+const jobPostControllerUser = container.get<JobPostControllerUser>(TYPES.JobPostControllerUser);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -66,7 +69,7 @@ authRouter.post('/verify-otp', authController.verifyOtp.bind(authController));
 authRouter.post('/auth/google/callback', authController.googleAuth.bind(authController));
 
 // Profile routes
-authRouter.get('/profile/:userId', profileController.getUserProfile.bind(profileController));
+authRouter.get('/profile/:userId',authenticate, profileController.getUserProfile.bind(profileController));
 
 // Update profile route
 authRouter.put(
@@ -74,19 +77,19 @@ authRouter.put(
   upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'resume', maxCount: 1 },
-  ]),
+  ]),authenticate,
   profileController.updateUserProfile.bind(profileController)
 );
 
 // Update projects route
 authRouter.put(
-  '/edit-projects/:userId',
+  '/edit-projects/:userId',authenticate,
   profileController.updateUserProjects.bind(profileController)
 );
 
 // Update certificates route
 authRouter.put(
-  '/edit-certificates/:userId',
+  '/edit-certificates/:userId',authenticate,
   mid,
   upload.fields([{ name: 'certificateImage', maxCount: 1 }]),
   profileController.updateUserCertificates.bind(profileController)
@@ -94,15 +97,29 @@ authRouter.put(
 
 // Update experiences route
 authRouter.put(
-  '/edit-experiences/:userId',
+  '/edit-experiences/:userId',authenticate,
   profileController.updateUserExperiences.bind(profileController)
 );
 
 // Update resume route
 authRouter.put(
-  '/edit-resume/:userId',
+  '/edit-resume/:userId',authenticate,
   upload.single('resume'),
   profileController.updateUserResume.bind(profileController)
 );
+
+
+authRouter.get('/jobs',authenticate, jobPostControllerUser.getJobPosts.bind(jobPostControllerUser));
+authRouter.get('/jobs/:id',authenticate, jobPostControllerUser.getJobPostById.bind(jobPostControllerUser));
+authRouter.post('/jobs/:jobId/apply',authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
+
+
+router.get('/', controller.getAllPosts);
+router.post('/', controller.createPost);
+router.post('/:id/like', controller.likePost);
+router.post('/:id/comment', controller.commentOnPost);
+router.post('/:id/share', controller.sharePost);
+
+
 
 export default authRouter;

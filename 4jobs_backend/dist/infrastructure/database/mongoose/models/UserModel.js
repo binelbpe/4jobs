@@ -29,6 +29,7 @@ const UserSchema = new mongoose_1.Schema({
     email: { type: String, unique: true, required: true },
     password: { type: String },
     name: { type: String, required: true },
+    phone: { type: Number },
     role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'user' },
     isAdmin: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
@@ -63,6 +64,8 @@ const UserSchema = new mongoose_1.Schema({
     dateOfBirth: { type: Date },
     gender: { type: String, enum: ['male', 'female', 'other'] },
     resume: { type: String },
+    appliedJobs: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'JobPost' }],
+    isBlocked: { type: Boolean, default: false },
 });
 UserSchema.pre('save', function (next) {
     this.updatedAt = new Date();

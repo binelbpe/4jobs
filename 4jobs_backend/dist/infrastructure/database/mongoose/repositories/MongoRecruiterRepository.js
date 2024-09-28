@@ -62,7 +62,9 @@ let MongoRecruiterRepository = class MongoRecruiterRepository {
             if (updates.location === undefined) {
                 throw new Error("Location is required for updating the profile");
             }
-            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(id, updates, { new: true }).exec();
+            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(id, updates, {
+                new: true,
+            }).exec();
             return updatedRecruiter;
         });
     }

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { AuthState, LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../../types/auth';
+import { AuthState,LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../../types/auth';
+import axios from 'axios';
 import { 
   loginUserApi, 
   signupUserApi, 
@@ -10,8 +11,16 @@ import {
   updateUserProjectsApi,
   updateUserCertificatesApi,
   updateUserExperiencesApi,
-  updateUserResumeApi
+  updateUserResumeApi,
+  fetchJobPostsuser,
+  FetchJobPostsParams,
+  applyForJob,
+  fetchJobPostApi
 } from '../../api/authapi';
+
+
+
+
 
 const initialState: AuthState = {
   user: null,
@@ -19,6 +28,16 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   otpStep: false,
+  jobPosts: {
+    posts: [],
+    loading: false,
+    error: null,
+    totalPages: 0,
+    totalCount: 0,
+    currentPage: 1,
+    updatedAt: new Date().toISOString()
+  },
+  selectedPost: null,
 };
 
 export const fetchUserProfile = createAsyncThunk(
@@ -32,7 +51,7 @@ export const fetchUserProfile = createAsyncThunk(
       const response = await fetchUserProfileApi(userId, token);
       return response;
     } catch (error) {
-      return thunkAPI.rejectWithValue('Failed to fetch user profile');
+      return thunkAPI.rejectWithValue(error instanceof Error ? error.message :'Failed to fetch user profile');
     }
   }
 );
@@ -40,6 +59,7 @@ export const fetchUserProfile = createAsyncThunk(
 export const login = createAsyncThunk('auth/login', async (credentials: LoginCredentials, thunkAPI) => {
   try {
     const userData = await loginUserApi(credentials);
+    console.log("userdarta",userData)
     return userData;
   } catch (error) {
     return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -90,7 +110,7 @@ export const updateUserProjects = createAsyncThunk(
   async ({ userId, projects }: { userId: string; projects: any[] }, thunkAPI) => {
     try {
       const updatedProjects = await updateUserProjectsApi(userId, projects);
-      return updatedProjects;
+      return updatedProjects;  // Assuming this returns the updated project list
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
@@ -117,6 +137,7 @@ export const updateUserExperiences = createAsyncThunk(
   async ({ userId, experiences }: { userId: string; experiences: any[] }, thunkAPI) => {
     try {
       const updatedExperiences = await updateUserExperiencesApi(userId, experiences);
+      console.log("exp",updatedExperiences)
       return updatedExperiences;
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -135,6 +156,60 @@ export const updateUserResume = createAsyncThunk(
     }
   }
 );
+
+export const fetchJobPostsAsync = createAsyncThunk(
+  'auth/fetchJobPosts',
+  async (params: FetchJobPostsParams = {}, { rejectWithValue }) => {
+    try {
+      console.log("params",params)
+      const response = await fetchJobPostsuser(params);
+      console.log("apply",response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job posts');
+    }
+  }
+);
+
+export const applyForJobAsync = createAsyncThunk(
+  'auth/applyForJob',
+  async ({ userId, jobId }: { userId: string; jobId: string }, { dispatch, rejectWithValue }) => {
+    try {
+     await applyForJob(userId, jobId);
+      
+      // Fetch updated job posts after applying
+      await dispatch(fetchJobPostsAsync({}));
+      
+      return jobId;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the error message from the backend
+        return rejectWithValue(error.response.data.error || 'Failed to apply for job');
+      }
+      return rejectWithValue('Failed to apply for job');
+    }
+  }
+);
+
+export const fetchJobPost = createAsyncThunk(
+  'auth/fetchJobPost',
+  async (jobId: string, { rejectWithValue }) => {
+    try {
+      const response = await fetchJobPostApi(jobId);
+      console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job post');
+    }
+  }
+);
+
+
+
+export const updateUserAppliedJobs = (jobId: string) => ({
+  type: 'auth/updateAppliedJobs',
+  payload: jobId,
+});
 
 const authSlice = createSlice({
   name: 'auth',
@@ -165,11 +240,14 @@ const authSlice = createSlice({
           token: action.payload.token,
           role: action.payload.user.role,
           profileImage: action.payload.user.profileImage,
+          appliedJobs: action.payload.user.appliedJobs,
+          bio:action.payload.user.bio,
         };
         localStorage.setItem('token', action.payload.token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
+        console.log(action.payload)
         state.error = action.payload as string;
       })
       .addCase(googleLogin.pending, (state) => {
@@ -186,6 +264,7 @@ const authSlice = createSlice({
           token: action.payload.token,
           role: action.payload.user.role,
           profileImage: action.payload.user.profileImage,
+          appliedJobs: action.payload.user.appliedJobs,
         };
         localStorage.setItem('token', action.payload.token);
       })
@@ -215,6 +294,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         localStorage.setItem('token', action.payload.token);
+        state.user = {
+          id: action.payload.user.id,
+          email: action.payload.user.email,
+          name: action.payload.user.name,
+          token: action.payload.token,
+          role: action.payload.user.role,
+          profileImage: action.payload.user.profileImage,
+          appliedJobs: action.payload.user.appliedJobs,
+        };
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
@@ -244,7 +332,6 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(updateUserProjects.fulfilled, (state, action) => {
-        state.loading = false;
         if (state.user) {
           state.user.projects = action.payload;
         }
@@ -266,7 +353,7 @@ const authSlice = createSlice({
       .addCase(updateUserExperiences.fulfilled, (state, action) => {
         state.loading = false;
         if (state.user) {
-          state.user.experiences = action.payload;
+          state.user = action.payload;
         }
       })
       .addCase(updateUserExperiences.rejected, (state, action) => {
@@ -282,9 +369,50 @@ const authSlice = createSlice({
       .addCase(updateUserResume.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(fetchJobPostsAsync.pending, (state) => {
+        state.jobPosts.loading = true;
+        state.jobPosts.error = null;
+      })
+      .addCase(fetchJobPostsAsync.fulfilled, (state, action) => {
+        state.jobPosts.loading = false;
+        state.jobPosts.posts = action.payload.jobPosts;
+        state.jobPosts.currentPage = action.payload.currentPage;
+        state.jobPosts.totalPages = action.payload.totalPages;
+        state.jobPosts.totalCount = action.payload.totalCount;
+      })
+      .addCase(fetchJobPostsAsync.rejected, (state, action) => {
+        state.jobPosts.loading = false;
+        state.jobPosts.error = action.payload as string;
+      })
+      .addCase(applyForJobAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(applyForJobAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        if (state.user) {
+          state.user.appliedJobs = [...(state.user.appliedJobs || []), action.payload];
+        }
+      })
+      .addCase(applyForJobAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchJobPost.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchJobPost.fulfilled, (state, action) => {
+        state.loading = false;
+        // You might want to store the fetched job post somewhere in the state
+      })
+      .addCase(fetchJobPost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { logout, setOtpStep } = authSlice.actions;
+export const { logout, setOtpStep  } = authSlice.actions;
 export default authSlice.reducer;

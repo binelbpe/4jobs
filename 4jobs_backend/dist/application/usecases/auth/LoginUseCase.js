@@ -37,20 +37,24 @@ let LoginUseCase = class LoginUseCase {
             if (!isGoogleAuth) {
                 const user = yield this.userRepository.findByEmail(email);
                 if (!user) {
-                    throw new Error('User not found');
+                    throw new Error("User not found");
+                }
+                console.log("user login", user);
+                if (user.isBlocked) {
+                    throw new Error("User is blocked");
                 }
                 const isPasswordValid = yield this.authService.comparePasswords(password, user.password);
                 if (!isPasswordValid) {
-                    throw new Error('Invalid password');
+                    throw new Error("Invalid password");
                 }
                 const token = this.authService.generateToken(user);
-                console.log('user', user);
+                console.log("user", user);
                 return { user, token };
             }
             else {
                 const user = yield this.userRepository.findByEmail(email);
                 if (!user) {
-                    throw new Error('User not found');
+                    throw new Error("User not found");
                 }
                 const token = this.authService.generateToken(user);
                 return { user, token };

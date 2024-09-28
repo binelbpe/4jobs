@@ -62,5 +62,8 @@ recruiterRouter.get('/job-posts/:id', jobPostController.getJobPostById.bind(jobP
 recruiterRouter.get('/recruiters/:recruiterId/job-posts', jobPostController.getJobPostsByRecruiterId.bind(jobPostController));
 recruiterRouter.put('/update-jobpost/:id', jobPostController.updateJobPost.bind(jobPostController));
 recruiterRouter.delete('/jobpost-delete/:id', jobPostController.deleteJobPost.bind(jobPostController));
+recruiterRouter.get('/job-applicants/:jobId', jobPostController.getApplicantsByJobId.bind(jobPostController));
+recruiterRouter.get('/applicants/:applicantId', jobPostController.getApplicantsById.bind(jobPostController));
+
 
 export { recruiterRouter };

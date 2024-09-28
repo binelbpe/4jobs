@@ -27,14 +27,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecruiterController = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const registerRecruiter_1 = require("../../../application/usecases/recruiter/registerRecruiter");
+const RegisterRecruiterUsecase_1 = require("../../../application/usecases/recruiter/RegisterRecruiterUsecase");
 const LoginRecruiterUseCase_1 = require("../../../application/usecases/recruiter/LoginRecruiterUseCase");
+const UpdateRecruiterUseCase_1 = require("../../../application/usecases/recruiter/UpdateRecruiterUseCase"); // Added
+const GetRecruiterProfileUseCase_1 = require("../../../application/usecases/recruiter/GetRecruiterProfileUseCase"); // Added
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const tempRecruiterStore = {};
 let RecruiterController = class RecruiterController {
-    constructor(registerUseCase, loginUseCase, otpService, recruiterRepository) {
+    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
+        this.updateRecruiterUseCase = updateRecruiterUseCase;
+        this.getRecruiterProfileUseCase = getRecruiterProfileUseCase;
         this.otpService = otpService;
         this.recruiterRepository = recruiterRepository;
     }
@@ -44,23 +48,43 @@ let RecruiterController = class RecruiterController {
             var _a, _b;
             try {
                 const { email, password, companyName, phone, name } = req.body;
-                const governmentId = ((_a = req.files) === null || _a === void 0 ? void 0 : _a['governmentId']) ? req.files['governmentId'][0].path : undefined;
-                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b['employeeIdImage']) ? req.files['employeeIdImage'][0].path : undefined;
-                if (!email || !password || !companyName || !phone || !name || !governmentId) {
-                    return res.status(400).json({ error: 'All fields are required, including government ID' });
+                const governmentId = ((_a = req.files) === null || _a === void 0 ? void 0 : _a["governmentId"])
+                    ? req.files["governmentId"][0].path
+                    : undefined;
+                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b["employeeIdImage"])
+                    ? req.files["employeeIdImage"][0].path
+                    : undefined;
+                if (!email ||
+                    !password ||
+                    !companyName ||
+                    !phone ||
+                    !name ||
+                    !governmentId) {
+                    return res
+                        .status(400)
+                        .json({ error: "All fields are required, including government ID" });
                 }
                 const existingRecruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
                 if (existingRecruiter) {
-                    return res.status(400).json({ error: 'Recruiter already exists' });
+                    return res.status(400).json({ error: "Recruiter already exists" });
                 }
-                tempRecruiterStore[email] = { email, password, companyName, phone, name, governmentId };
+                tempRecruiterStore[email] = {
+                    email,
+                    password,
+                    companyName,
+                    phone,
+                    name,
+                    governmentId,
+                };
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendOtp(email, otp);
-                res.status(200).json({ message: 'OTP sent to email. Please verify OTP to complete registration.' });
+                res.status(200).json({
+                    message: "OTP sent to email. Please verify OTP to complete registration.",
+                });
             }
             catch (error) {
-                console.error('Error during recruiter registration:', error);
+                console.error("Error during recruiter registration:", error);
                 res.status(400).json({ error: error.message });
             }
         });
@@ -74,19 +98,21 @@ let RecruiterController = class RecruiterController {
                 if (isValid) {
                     const recruiterData = tempRecruiterStore[email];
                     if (!recruiterData) {
-                        return res.status(400).json({ error: 'Recruiter data not found. Please register again.' });
+                        return res.status(400).json({
+                            error: "Recruiter data not found. Please register again.",
+                        });
                     }
-                    const result = yield this.registerUseCase.execute(recruiterData.email, recruiterData.password, recruiterData.companyName, recruiterData.phone, recruiterData.name, recruiterData.governmentId || '');
+                    const result = yield this.registerUseCase.execute(recruiterData.email, recruiterData.password, recruiterData.companyName, recruiterData.phone, recruiterData.name, recruiterData.governmentId || "");
                     delete tempRecruiterStore[email];
                     res.status(201).json(result);
                 }
                 else {
-                    res.status(400).json({ error: 'Invalid OTP' });
+                    res.status(400).json({ error: "Invalid OTP" });
                 }
             }
             catch (error) {
-                console.error('Error verifying OTP:', error);
-                res.status(500).json({ error: 'Failed to verify OTP' });
+                console.error("Error verifying OTP:", error);
+                res.status(500).json({ error: "Failed to verify OTP" });
             }
         });
     }
@@ -96,13 +122,15 @@ let RecruiterController = class RecruiterController {
             try {
                 const { email, password } = req.body;
                 if (!email || !password) {
-                    return res.status(400).json({ error: 'Email and password are required' });
+                    return res
+                        .status(400)
+                        .json({ error: "Email and password are required" });
                 }
                 const result = yield this.loginUseCase.execute(email, password);
                 res.status(200).json(result);
             }
             catch (error) {
-                console.error('Error during recruiter login:', error);
+                console.error("Error during recruiter login:", error);
                 res.status(400).json({ error: error.message });
             }
         });
@@ -113,16 +141,16 @@ let RecruiterController = class RecruiterController {
             try {
                 const { email } = req.body;
                 if (!email) {
-                    return res.status(400).json({ error: 'Email is required' });
+                    return res.status(400).json({ error: "Email is required" });
                 }
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendOtp(email, otp);
-                res.status(200).json({ message: 'OTP sent to email.' });
+                res.status(200).json({ message: "OTP sent to email." });
             }
             catch (error) {
-                console.error('Error sending OTP:', error);
-                res.status(500).json({ error: 'Failed to send OTP' });
+                console.error("Error sending OTP:", error);
+                res.status(500).json({ error: "Failed to send OTP" });
             }
         });
     }
@@ -131,15 +159,15 @@ let RecruiterController = class RecruiterController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                const recruiter = yield this.recruiterRepository.findRecruiterById(id);
+                const recruiter = yield this.getRecruiterProfileUseCase.execute(id); // Updated
                 if (!recruiter) {
-                    return res.status(404).json({ error: 'Recruiter not found' });
+                    return res.status(404).json({ error: "Recruiter not found" });
                 }
                 res.status(200).json(recruiter);
             }
             catch (error) {
-                console.error('Error fetching recruiter profile:', error);
-                res.status(500).json({ error: 'Failed to fetch profile' });
+                console.error("Error fetching recruiter profile:", error);
+                res.status(500).json({ error: "Failed to fetch profile" });
             }
         });
     }
@@ -150,24 +178,29 @@ let RecruiterController = class RecruiterController {
             try {
                 const { id } = req.params;
                 const updates = req.body;
-                const governmentIdImage = ((_a = req.files) === null || _a === void 0 ? void 0 : _a['governmentId']) ? req.files['governmentId'][0].path : undefined;
-                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b['employeeIdImage']) ? req.files['employeeIdImage'][0].path : undefined;
+                const governmentIdImage = ((_a = req.files) === null || _a === void 0 ? void 0 : _a["governmentId"])
+                    ? req.files["governmentId"][0].path
+                    : undefined;
+                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b["employeeIdImage"])
+                    ? req.files["employeeIdImage"][0].path
+                    : undefined;
                 if (governmentIdImage) {
                     updates.governmentId = governmentIdImage;
                 }
                 if (employeeIdImage) {
                     updates.employeeIdImage = employeeIdImage;
                 }
-                const updatedRecruiter = yield this.recruiterRepository.updateRecruiter(id, updates);
+                const updatedRecruiter = yield this.updateRecruiterUseCase.execute(// Updated
+                id, updates);
                 console.log("updaterec", updatedRecruiter);
                 if (!updatedRecruiter) {
-                    return res.status(404).json({ error: 'Recruiter not found' });
+                    return res.status(404).json({ error: "Recruiter not found" });
                 }
                 res.status(200).json(updatedRecruiter);
             }
             catch (error) {
-                console.error('Error updating recruiter profile:', error);
-                res.status(500).json({ error: 'Failed to update profile' });
+                console.error("Error updating recruiter profile:", error);
+                res.status(500).json({ error: "Failed to update profile" });
             }
         });
     }
@@ -177,9 +210,13 @@ exports.RecruiterController = RecruiterController = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.RegisterRecruiterUseCase)),
     __param(1, (0, inversify_1.inject)(types_1.default.LoginRecruiterUseCase)),
-    __param(2, (0, inversify_1.inject)(types_1.default.OtpService)),
-    __param(3, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
-    __metadata("design:paramtypes", [registerRecruiter_1.RegisterRecruiterUseCase,
+    __param(2, (0, inversify_1.inject)(types_1.default.UpdateRecruiterUseCase)),
+    __param(3, (0, inversify_1.inject)(types_1.default.GetRecruiterProfileUseCase)),
+    __param(4, (0, inversify_1.inject)(types_1.default.OtpService)),
+    __param(5, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
+    __metadata("design:paramtypes", [RegisterRecruiterUsecase_1.RegisterRecruiterUseCase,
         LoginRecruiterUseCase_1.LoginRecruiterUseCase,
+        UpdateRecruiterUseCase_1.UpdateRecruiterUseCase,
+        GetRecruiterProfileUseCase_1.GetRecruiterProfileUseCase,
         OtpService_1.OtpService, Object])
 ], RecruiterController);

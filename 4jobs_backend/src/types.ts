@@ -1,5 +1,10 @@
 const TYPES = {
-  IUserRepository: Symbol.for('IUserRepository'),
+  IUserRepository: Symbol.for("IUserRepository"),
+  IJobPostUserRepository: Symbol.for("IJobPostUserRepository"),
+  GetJobPostsUseCase: Symbol.for("GetJobPostsUseCase"),
+  GetJobPostByIdUseCase: Symbol.for("GetJobPostByIdUseCase"),
+  ApplyForJobUseCase: Symbol.for("ApplyForJobUseCase"),
+  IAdminRepository: Symbol.for('IAdminRepository'),
   IRecruiterRepository: Symbol.for('IRecruiterRepository'),
   IAuthService: Symbol.for('IAuthService'),
   JwtSecret: Symbol.for('JwtSecret'),
@@ -7,6 +12,12 @@ const TYPES = {
   NodemailerEmailService: Symbol.for('NodemailerEmailService'),
   GoogleAuthService: Symbol.for('GoogleAuthService'),
   LoginAdminUseCase: Symbol.for('LoginAdminUseCase'),
+  FetchAllUsersUseCase: Symbol.for("FetchAllUsersUseCase"),
+  BlockUserUseCase: Symbol.for("BlockUserUseCase"),
+  UnblockUserUseCase: Symbol.for("UnblockUserUseCase"),
+  FetchRecruitersUseCase: Symbol.for("FetchRecruitersUseCase"),
+  ApproveRecruiterUseCase: Symbol.for("ApproveRecruiterUseCase"),
+  AdminDashboardUseCase: Symbol.for("AdminDashboardUseCase"),
   SignupUserUseCase: Symbol.for('SignupUserUseCase'),
   RegisterRecruiterUseCase: Symbol.for('RegisterRecruiterUseCase'),
   LoginRecruiterUseCase: Symbol.for('LoginRecruiterUseCase'),
@@ -15,13 +26,16 @@ const TYPES = {
   AdminController: Symbol.for('AdminController'),
   RecruiterController: Symbol.for('RecruiterController'),
   AuthController: Symbol.for('AuthController'),
-    IUserProfileRepository: Symbol.for('IUserProfileRepository'),
+  IUserProfileRepository: Symbol.for('IUserProfileRepository'),
   GetUserProfileUseCase: Symbol.for('GetUserProfileUseCase'),
   UpdateUserProfileUseCase: Symbol.for('UpdateUserProfileUseCase'),
   ProfileController: Symbol.for('ProfileController'),
   JobPostRepository: Symbol.for("JobPostRepository"),
   JobPostUseCase: Symbol.for("JobPostUseCase"),
   JobPostController: Symbol.for("JobPostController"),
+  JobPostControllerUser: Symbol.for("JobPostControllerUser"),
+  UpdateRecruiterUseCase: Symbol.for('UpdateRecruiterUseCase'), // Added
+  GetRecruiterProfileUseCase: Symbol.for('GetRecruiterProfileUseCase'), // Added
 };
 
 export default TYPES;

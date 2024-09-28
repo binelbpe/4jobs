@@ -26,6 +26,10 @@ export interface BasicJobPost {
   tags?: string[];
   postedDate?: string;
   lastUpdatedDate?: string;
+  applicants?: string[];
+  isApplied?: boolean;
+  createdAt: string; 
+  updatedAt: string;
 }
 
 export interface BasicJobPostFormData extends Omit<BasicJobPost, '_id'> {}

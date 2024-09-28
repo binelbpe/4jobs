@@ -37,11 +37,11 @@ let VerifyOtpUseCase = class VerifyOtpUseCase {
                     return recruiter;
                 }
                 else {
-                    throw new Error('Recruiter not found');
+                    throw new Error("Recruiter not found");
                 }
             }
             else {
-                throw new Error('Invalid OTP');
+                throw new Error("Invalid OTP");
             }
         });
     }

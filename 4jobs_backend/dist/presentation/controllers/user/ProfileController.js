@@ -42,6 +42,9 @@ let ProfileController = class ProfileController {
                 if (!profile) {
                     return res.status(404).json({ message: 'Profile not found' });
                 }
+                if (profile.isBlocked) {
+                    throw new Error('User is blocked');
+                }
                 res.status(200).json(profile);
             }
             catch (error) {

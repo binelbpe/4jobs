@@ -1,5 +1,13 @@
+// src/redux/slices/adminSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { adminLoginApi, fetchRecruitersApi, approveRecruiterApi } from '../../api/adminApi';
+import { adminLoginApi, fetchRecruitersApi, approveRecruiterApi, fetchUsersApi, blockUserApi, unblockUserApi } from '../../api/adminApi';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  isBlocked: boolean;
+}
 
 interface AdminState {
   isAuthenticatedAdmin: boolean;
@@ -7,6 +15,7 @@ interface AdminState {
   error: string | null;
   dashboardData: any;
   recruiters: any[];
+  users: User[];
   token: string | null; // Add token to state
 }
 
@@ -16,7 +25,8 @@ const initialState: AdminState = {
   error: null,
   dashboardData: null,
   recruiters: [],
-  token: localStorage.getItem('adminToken'), // Retrieve token from localStorage
+  users: [], // User state
+  token: localStorage.getItem('adminToken'), // Retrie
 };
 
 // Thunks
@@ -33,13 +43,10 @@ export const loginAdmin = createAsyncThunk(
   }
 );
 
-
-
 export const logoutAdmin = createAsyncThunk('admin/logout', async () => {
   localStorage.removeItem('adminToken');
   return;
 });
-
 
 export const fetchRecruiters = createAsyncThunk(
   'admin/fetchRecruiters',
@@ -53,7 +60,6 @@ export const fetchRecruiters = createAsyncThunk(
   }
 );
 
-
 export const approveRecruiter = createAsyncThunk(
   'admin/approveRecruiter',
   async (recruiterId: string, { rejectWithValue }) => {
@@ -61,11 +67,52 @@ export const approveRecruiter = createAsyncThunk(
       const response = await approveRecruiterApi(recruiterId);
       return response;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to approve recruiter');
+      return rejectWithValue(err.message || 'Failed to approve recruiter');
     }
   }
 );
 
+// New User Thunks
+export const fetchUsers = createAsyncThunk('admin/fetchUsers', async (_, { rejectWithValue }) => {
+  try {
+    const response = await fetchUsersApi();
+    console.log("fetchusers",response)
+    return response;
+  } catch (err: any) {
+    return rejectWithValue(err.message || 'Failed to fetch users');
+  }
+});
+
+export const blockUser = createAsyncThunk('admin/blockUser', async (userId: string, { rejectWithValue }) => {
+  try {
+   const response= await blockUserApi(userId);
+   console.log(response)
+    return response.id;
+  } catch (err: any) {
+    return rejectWithValue(err.message || 'Failed to block user');
+  }
+});
+
+export const unblockUser = createAsyncThunk('admin/unblockUser', async (userId: string, { rejectWithValue }) => {
+  try {
+    await unblockUserApi(userId);
+    return userId;
+  } catch (err: any) {
+    return rejectWithValue(err.message || 'Failed to unblock user');
+  }
+});
+
+
+export const initializeAdminState = createAsyncThunk(
+  'admin/initializeState',
+  async (_, { dispatch }) => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      // You might want to verify the token here
+      dispatch(loginAdmin.fulfilled({ token }, '', { email: '', password: '' }));
+    }
+  }
+);
 
 const adminSlice = createSlice({
   name: 'admin',
@@ -107,6 +154,32 @@ const adminSlice = createSlice({
       .addCase(fetchRecruiters.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch recruiters';
+      })
+      // User-related cases
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
+        state.loading = false;
+        state.users = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchUsers.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch users';
+      })
+      .addCase(blockUser.fulfilled, (state, action: PayloadAction<string>) => {
+        const user = state.users.find((user) => user.id === action.payload);
+        if (user) {
+          console.log(" in block",user)
+          user.isBlocked = true;
+        }
+      })
+      .addCase(unblockUser.fulfilled, (state, action: PayloadAction<string>) => {
+        const user = state.users.find((user) => user.id === action.payload);
+        if (user) {
+          user.isBlocked = false;
+        }
       })
       .addCase(approveRecruiter.pending, (state) => {
         state.loading = true;

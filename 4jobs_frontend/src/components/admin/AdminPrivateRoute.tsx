@@ -8,7 +8,8 @@ interface PrivateRouteProps {
 }
 
 const AdminPrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticatedAdmin, token } = useSelector((state: RootState) => state.admin);
+  const { isAuthenticatedAdmin } = useSelector((state: RootState) => state.admin);
+  const token = localStorage.getItem('adminToken');
 
   if (isAuthenticatedAdmin || token) {
     return <>{children}</>;

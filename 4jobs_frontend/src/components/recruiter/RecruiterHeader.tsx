@@ -1,99 +1,146 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../redux/slices/recruiterSlice'; 
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../redux/slices/recruiterSlice';
+import { fetchJobPosts } from '../../redux/slices/jobPostSlice';
 import { useNavigate } from 'react-router-dom';
+import { RootState } from '../../redux/store';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBriefcase,
+  faComments,
+  faBell,
+  faUser,
+  faSearch,
+  faBars,
+} from "@fortawesome/free-solid-svg-icons";
 
 const RecruiterHeader = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const recruiterId = useSelector((state: RootState) => state.recruiter?.recruiter.id);
 
   const handleLogout = () => {
-    dispatch(logout()); 
-    navigate('/recruiter/login'); 
+    dispatch(logout());
+    navigate('/recruiter/login');
   };
 
   const handleViewProfile = () => {
     navigate('/recruiter/profile');
-    setDropdownOpen(false); 
+    setMenuOpen(false);
   };
 
   const handleAddJobs = () => {
+    if (recruiterId) {
+      dispatch(fetchJobPosts(recruiterId) as any);
+    }
     navigate('/recruiter/jobs');
   };
+
+  const handleLogoClick = () => {
+    navigate('/recruiter/dashboard');
+  };
+
   return (
-    <header className="flex justify-between items-center p-4 lg:p-6 bg-white shadow-md w-full">
-      {/* Logo */}
-      <div className="flex items-center space-x-2">
-        <img 
-          src="../../logo.png" // Ensure to replace this with your actual logo path
-          alt="Logo"
-          className="h-8 lg:h-12"
-        />
-        <span className="text-purple-700 font-semibold text-lg lg:text-2xl">4 Jobs</span>
-      </div>
-
-      {/* Center Search Bar */}
-      <div className="hidden md:flex flex-1 mx-4">
-        <input
-          type="text"
-          className="w-full max-w-md border border-gray-300 rounded-lg p-2 focus:outline-none"
-          placeholder="Search"
-        />
-      </div>
-
-      {/* Right-side Icons */}
-      
-      <div className="flex items-center space-x-4 lg:space-x-6">
-        <button 
-          onClick={handleAddJobs}
-          className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300"
-        >
-          ADD JOBS
+    <header className="bg-white shadow-md p-4 flex justify-between items-center">
+      {/* Logo Section */}
+      <div className="flex items-center">
+        <button onClick={handleLogoClick}>
+          <img src="../../../logo.png" alt="Logo" className="h-20 w-20" />
         </button>
+        <span className="text-purple-700 font-semibold text-lg ml-2">4 Jobs Recruiter</span>
+      </div>
 
-        {/* Message Icon */}
-        <button className="text-black text-xl hover:text-gray-600 transition duration-300">✉️</button>
-
-        {/* Notification Icon */}
-        <button className="text-black text-xl hover:text-gray-600 transition duration-300">🔔</button>
-
-        {/* User Profile Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="text-purple-600 text-2xl hover:text-purple-700 transition duration-300">
-            👤
-          </button>
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-              <button 
-                onClick={handleViewProfile} 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-300">
-                View Profile
-              </button>
-              <button
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-300">
-                Settings and Privacy
-              </button>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-300">
-                Logout
-              </button>
-            </div>
-          )}
+      {/* Search Bar Section */}
+      <div className="flex-grow mx-10">
+        <div className="relative w-full max-w-lg mx-auto">
+          <input
+            type="text"
+            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Search"
+          />
+          <FontAwesomeIcon
+            icon={faSearch}
+            className="absolute right-3 top-3 text-gray-500"
+          />
         </div>
       </div>
 
-      {/* Responsive Mobile Search */}
-      <div className="flex md:hidden mt-4 w-full">
-        <input
-          type="text"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none"
-          placeholder="Search"
-        />
-      </div>
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden text-gray-600 focus:outline-none"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+      </button>
+
+      {/* Navigation Items for larger screens */}
+      <nav className="hidden md:flex space-x-6 items-center">
+        <button 
+          onClick={handleAddJobs}
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+        >
+          <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
+          <span>ADD JOBS</span>
+        </button>
+        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+          <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
+          <span>Messages</span>
+        </button>
+        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+          <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
+          <span>Notifications</span>
+        </button>
+        <button
+          className="text-purple-600 hover:text-gray-600"
+          onClick={handleViewProfile}
+        >
+          <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
+          <span className="text-xs">Profile</span>
+        </button>
+        <button
+          className="text-purple-600 hover:text-gray-600"
+          onClick={handleLogout}
+        >
+          <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
+          <span className="text-xs">Logout</span>
+        </button>
+      </nav>
+
+      {/* Dropdown Menu for Small Screens */}
+      {menuOpen && (
+        <div className="absolute top-16 right-0 w-48 bg-white shadow-lg rounded-md p-4 md:hidden">
+          <button
+            className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+            onClick={handleAddJobs}
+          >
+            <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
+            <span>ADD JOBS</span>
+          </button>
+          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+            <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
+            <span>Messages</span>
+          </button>
+          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+            <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
+            <span>Notifications</span>
+          </button>
+          <button
+            className="text-purple-600 hover:text-gray-600 mb-2"
+            onClick={handleViewProfile}
+          >
+            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
+            <span>Profile</span>
+          </button>
+          <button
+            className="flex items-center text-purple-600 hover:text-gray-600"
+            onClick={handleLogout}
+          >
+            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
+            <span>Logout</span>
+          </button>
+        </div>
+      )}
     </header>
   );
 };

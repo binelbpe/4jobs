@@ -11,6 +11,9 @@ console.log(token)
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+  if(!token){
+    console.log("no token")
+  }
 
   try {
     const response = await axios({
@@ -54,4 +57,16 @@ export const fetchRecruitersApi = async () => {
 // API for approving a recruiter
 export const approveRecruiterApi = async (recruiterId: string) => {
   return apiRequest('PATCH', `/recruiters/${recruiterId}/approve`);
+};
+
+export const fetchUsersApi = async () => {
+  return apiRequest('GET',`/users`)
+};
+
+export const blockUserApi = async (userId: string) => {
+return apiRequest('PATCH',`/users/${userId}/block`)
+};
+
+export const unblockUserApi = async (userId: string) => {
+  return apiRequest('PATCH',`/users/${userId}/unblock`)
 };

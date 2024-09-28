@@ -38,23 +38,22 @@ let LoginRecruiterUseCase = class LoginRecruiterUseCase {
             // Find recruiter by email
             const recruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
             if (!recruiter) {
-                throw new Error('Invalid credentials');
+                throw new Error("Invalid credentials");
             }
-            // Compare plain text password with hashed password
             const isPasswordValid = yield this.authService.comparePasswords(password, recruiter.password);
             if (!isPasswordValid) {
-                throw new Error('Invalid credentials');
+                throw new Error("Invalid credentials");
             }
             const token = this.authService.generateToken({
                 id: recruiter.id,
                 email: recruiter.email,
                 password: recruiter.password,
-                role: 'recruiter',
+                role: "recruiter",
                 name: recruiter.name,
                 isAdmin: false,
-                experiences: [], // Provide default value
-                projects: [], // Provide default value
-                certificates: [], // Provide default value
+                experiences: [],
+                projects: [],
+                certificates: [],
                 skills: [],
             });
             return {

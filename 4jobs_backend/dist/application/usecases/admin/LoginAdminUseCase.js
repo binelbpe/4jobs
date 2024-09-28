@@ -36,11 +36,11 @@ let LoginAdminUseCase = class LoginAdminUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.userRepository.findByEmail(email);
             if (!user || !user.isAdmin) {
-                throw new Error('Unauthorized,You are not an admin');
+                throw new Error("Unauthorized,You are not an admin");
             }
             const isPasswordValid = yield this.authService.comparePasswords(password, user.password);
             if (!isPasswordValid) {
-                throw new Error('Invalid credentials');
+                throw new Error("Invalid credentials");
             }
             const token = this.authService.generateToken(user);
             return { user, token };

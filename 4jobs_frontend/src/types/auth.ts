@@ -1,10 +1,23 @@
+
+import {BasicJobPost} from '../types/jobPostTypes'
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
   otpStep: boolean;
+  selectedPost: BasicJobPost | null,
+  jobPosts: {
+    posts: BasicJobPost[];
+    loading: boolean;
+    error: string | null;
+    totalPages: number;
+    totalCount: number;
+    currentPage: number;
+    updatedAt:string;
 }
+}
+
 
 export interface LoginCredentials {
   email: string;
@@ -27,6 +40,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  phone?: number;
+  token?: string;
   role?: 'user' | 'admin'; // Consider using enums for roles
   profileImage?: string;
   bio?: string;
@@ -35,10 +50,11 @@ export interface User {
   gender?: 'male' | 'female' | 'other'; // Consider using enums for gender
   skills?: string[]; // Retaining as array for flexibility
   experiences?: Experience[];
+  appliedJobs?: string[];
   projects?: Project[];
   certificates?: Certificate[];
   resume?: string;
-  token: string;
+  isBlocked?:boolean;
 }
 
 export interface UpdateProfileFormData {
@@ -52,6 +68,7 @@ export interface UpdateProfileFormData {
   profileImage: File | null;
   resume: File | null;
   experiences?: Experience[];
+  appliedJobs?: string[];
   projects?: Project[];
   certificates: {
     file: File | null; // Optional file property
@@ -85,4 +102,30 @@ export interface Certificate {
   description?: string; // Optional description of the certificate
   imageUrl?: string; // Optional URL for the certificate image
   file?: File | null; // File property for uploads
+}
+
+export interface UserDetails extends User {
+  bio?: string;
+  about?: string;
+  experiences: Experience[];
+  projects: Project[];
+  certificates: Certificate[];
+  skills: string[];
+  dateOfBirth?: string;
+  gender?: 'male' | 'female' | 'other';
+  resume?: string;
+}
+
+export interface FetchUsersResponse {
+  applicants: User[];
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface FetchUserDetailsResponse {
+  user: UserDetails;
+}
+
+export interface ApiError {
+  message: string;
 }

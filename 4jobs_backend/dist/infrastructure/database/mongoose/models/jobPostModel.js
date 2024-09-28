@@ -42,5 +42,6 @@ const JobPostSchema = new mongoose_1.Schema({
     qualifications: [{ type: String }],
     status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
     recruiterId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Recruiter', required: true },
+    applicants: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('JobPost', JobPostSchema);

@@ -1,13 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../../redux/store';
-import { 
-  registerRecruiterApi, 
-  loginRecruiterApi, 
-  verifyOtpApi, 
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../../redux/store";
+import { REHYDRATE } from 'redux-persist';
+import {
+  registerRecruiterApi,
+  loginRecruiterApi,
+  verifyOtpApi,
   sendOtpApi,
   fetchRecruiterProfileApi,
-  updateRecruiterProfileApi // Ensure you import this function
-} from '../../api/recruiterApi';
+  updateRecruiterProfileApi,
+} from "../../api/recruiterApi";
 
 interface RecruiterState {
   recruiter: any | null;
@@ -16,13 +17,12 @@ interface RecruiterState {
   loading: boolean;
   error: string | null;
   otpStep: boolean;
-  profile: any | null; 
+  profile: any | null;
 }
 
-const token = localStorage.getItem('recruiterToken');
 const initialState: RecruiterState = {
   recruiter: null,
-  isAuthenticatedRecruiter: !!token,
+  isAuthenticatedRecruiter: false,
   isApproved: false,
   loading: false,
   error: null,
@@ -30,97 +30,83 @@ const initialState: RecruiterState = {
   profile: null,
 };
 
-// Create a new thunk for fetching recruiter profile
-export const fetchProfile = createAsyncThunk(
-  'recruiter/fetchProfile',
-  async (recruiterId: string, thunkAPI) => {
-    try {
-      return await fetchRecruiterProfileApi(recruiterId);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
-    }
-  }
-);
-
+// Async thunks
 export const register = createAsyncThunk(
-  'recruiter/register',
-  async (recruiterData: any, thunkAPI) => {
+  "recruiter/register",
+  async (recruiterData: any, { rejectWithValue }) => {
     try {
-      const response = await registerRecruiterApi(recruiterData);
-      return response;
+      return await registerRecruiterApi(recruiterData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );
 
 export const login = createAsyncThunk(
-  'recruiter/login',
-  async (loginData: any, thunkAPI) => {
+  "recruiter/login",
+  async (loginData: any, { rejectWithValue }) => {
     try {
-      const response = await loginRecruiterApi(loginData);
-      console.log("rec respo log",response)
-      return response;
+      return await loginRecruiterApi(loginData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );
 
 export const verifyOtp = createAsyncThunk(
-  'recruiter/verifyOtp',
-  async (otpData: any, thunkAPI) => {
+  "recruiter/verifyOtp",
+  async (otpData: any, { rejectWithValue }) => {
     try {
-      const response = await verifyOtpApi(otpData);
-      return response;
+      return await verifyOtpApi(otpData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );
 
 export const sendOtp = createAsyncThunk(
-  'recruiter/sendOtp',
-  async (email: string, thunkAPI) => {
+  "recruiter/sendOtp",
+  async (email: string, { rejectWithValue }) => {
     try {
-      const response = await sendOtpApi(email);
-      return response;
+      return await sendOtpApi(email);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
+    }
+  }
+);
+
+export const fetchProfile = createAsyncThunk(
+  "recruiter/fetchProfile",
+  async (recruiterId: string, { rejectWithValue }) => {
+    try {
+      return await fetchRecruiterProfileApi(recruiterId);
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );
 
 export const updateProfile = createAsyncThunk(
-  'recruiter/updateProfile',
-  async ({ recruiterId, profileData }: { recruiterId: string; profileData: FormData }, thunkAPI) => {
+  "recruiter/updateProfile",
+  async ({ recruiterId, profileData }: { recruiterId: string; profileData: FormData }, { rejectWithValue }) => {
     try {
       return await updateRecruiterProfileApi(recruiterId, profileData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      return thunkAPI.rejectWithValue(errorMessage);
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );
 
 const recruiterSlice = createSlice({
-  name: 'recruiter',
+  name: "recruiter",
   initialState,
   reducers: {
     logout: (state) => {
-      state.recruiter = null;
-      state.isAuthenticatedRecruiter = false;
-      state.isApproved = false;
-      state.otpStep = false;
-      state.profile = null; 
-      localStorage.removeItem('recruiterToken');
+      Object.assign(state, initialState);
+      localStorage.removeItem("recruiterToken");
+      localStorage.removeItem('recruiterState');
     },
-    setOtpStep: (state, action) => {
+    setOtpStep: (state, action: PayloadAction<boolean>) => {
       state.otpStep = action.payload;
     },
     clearError: (state) => {
@@ -129,19 +115,31 @@ const recruiterSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(REHYDRATE, (state, action: any) => {
+        if (action.payload && action.key === 'recruiter') {
+          return {
+            ...state,
+            ...action.payload,
+            isAuthenticatedRecruiter: !!localStorage.getItem("recruiterToken"),
+          };
+        }
+        return state;
+      })
+      // Register
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.otpStep = true;
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
         state.recruiter = action.payload;
+        state.otpStep = true;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -151,12 +149,12 @@ const recruiterSlice = createSlice({
         state.isAuthenticatedRecruiter = true;
         state.recruiter = action.payload.recruiter;
         state.isApproved = action.payload.isApproved;
-        localStorage.setItem('recruiterToken', action.payload.token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Verify OTP
       .addCase(verifyOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -165,24 +163,25 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.isAuthenticatedRecruiter = true;
         state.isApproved = action.payload.isApproved;
-        localStorage.setItem('recruiterToken', action.payload.token);
+        localStorage.setItem("recruiterToken", action.payload.token);
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Send OTP
       .addCase(sendOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(sendOtp.fulfilled, (state) => {
         state.loading = false;
-        console.log('OTP sent successfully');
       })
       .addCase(sendOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Fetch Profile
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -195,6 +194,7 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Update Profile
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
         state.error = null;

@@ -9,6 +9,7 @@ export class JobPostController {
     @inject(TYPES.JobPostUseCase) private jobPostUseCase: JobPostUseCase
   ) {}
 
+
  async createJobPost(req: Request, res: Response): Promise<void> {
     try {
       const recruiterId = req.params.id; // Get recruiterId from route params
@@ -68,6 +69,32 @@ export class JobPostController {
       }
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete job post' });
+    }
+  }
+async getApplicantsByJobId(req: Request, res: Response): Promise<void> {
+    try {
+      const { jobId } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+console.log("jobuid page limit",jobId,page,limit)
+      const result = await this.jobPostUseCase.getApplicantsByJobId(jobId, page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error('Error in getApplicantsByJobId:', error);
+      res.status(500).json({ error: 'Failed to fetch applicants' });
+    }
+  }
+
+
+  async getApplicantsById(req: Request, res: Response): Promise<void> {
+    try {
+      const { applicantId } = req.params;
+
+      const result = await this.jobPostUseCase.getApplicantsById(applicantId);
+      res.json({user:result});
+    } catch (error) {
+      console.error('Error in getApplicantsById:', error);
+      res.status(500).json({ error: 'Failed to fetch applicant' });
     }
   }
 }

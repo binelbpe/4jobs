@@ -1,48 +1,90 @@
-import { Request, Response } from 'express';
-import { injectable, inject } from 'inversify';
-import TYPES from '../../../types';
-import { RegisterRecruiterUseCase } from '../../../application/usecases/recruiter/registerRecruiter';
-import { LoginRecruiterUseCase } from '../../../application/usecases/recruiter/LoginRecruiterUseCase';
-import { IRecruiterRepository } from '../../../domain/interfaces/repositories/IRecruiterRepository';
-import { OtpService } from '../../../infrastructure/services/OtpService';
-import { IRecruiter } from '../../../types/recruiter';
+import { Request, Response } from "express";
+import { injectable, inject } from "inversify";
+import TYPES from "../../../types";
+import { RegisterRecruiterUseCase } from "../../../application/usecases/recruiter/RegisterRecruiterUsecase";
+import { LoginRecruiterUseCase } from "../../../application/usecases/recruiter/LoginRecruiterUseCase";
+import { UpdateRecruiterUseCase } from "../../../application/usecases/recruiter/UpdateRecruiterUseCase"; // Added
+import { GetRecruiterProfileUseCase } from "../../../application/usecases/recruiter/GetRecruiterProfileUseCase"; // Added
+import { IRecruiterRepository } from "../../../domain/interfaces/repositories/recruiter/IRecruiterRepository";
+import { OtpService } from "../../../infrastructure/services/OtpService";
+import { IRecruiter } from "../../../domain/entities/Recruiter";
 
-const tempRecruiterStore: { [email: string]: { email: string, password: string, companyName: string, phone: string, name: string, governmentId?: string } } = {};
+const tempRecruiterStore: {
+  [email: string]: {
+    email: string;
+    password: string;
+    companyName: string;
+    phone: string;
+    name: string;
+    governmentId?: string;
+  };
+} = {};
 
 @injectable()
 export class RecruiterController {
   constructor(
-    @inject(TYPES.RegisterRecruiterUseCase) private registerUseCase: RegisterRecruiterUseCase,
-    @inject(TYPES.LoginRecruiterUseCase) private loginUseCase: LoginRecruiterUseCase,
+    @inject(TYPES.RegisterRecruiterUseCase)
+    private registerUseCase: RegisterRecruiterUseCase,
+    @inject(TYPES.LoginRecruiterUseCase)
+    private loginUseCase: LoginRecruiterUseCase,
+    @inject(TYPES.UpdateRecruiterUseCase) // Injected
+    private updateRecruiterUseCase: UpdateRecruiterUseCase, // Added
+    @inject(TYPES.GetRecruiterProfileUseCase) // Injected
+    private getRecruiterProfileUseCase: GetRecruiterProfileUseCase, // Added
     @inject(TYPES.OtpService) private otpService: OtpService,
-    @inject(TYPES.IRecruiterRepository) private recruiterRepository: IRecruiterRepository
+    @inject(TYPES.IRecruiterRepository)
+    private recruiterRepository: IRecruiterRepository
   ) {}
 
   // Register Recruiter
   async registerRecruiter(req: Request, res: Response) {
     try {
       const { email, password, companyName, phone, name } = req.body;
-      const governmentId = req.files?.['governmentId'] ? req.files['governmentId'][0].path : undefined;
-      const employeeIdImage = req.files?.['employeeIdImage'] ? req.files['employeeIdImage'][0].path : undefined;
+      const governmentId = req.files?.["governmentId"]
+        ? req.files["governmentId"][0].path
+        : undefined;
+      const employeeIdImage = req.files?.["employeeIdImage"]
+        ? req.files["employeeIdImage"][0].path
+        : undefined;
 
-      if (!email || !password || !companyName || !phone || !name || !governmentId) {
-        return res.status(400).json({ error: 'All fields are required, including government ID' });
+      if (
+        !email ||
+        !password ||
+        !companyName ||
+        !phone ||
+        !name ||
+        !governmentId
+      ) {
+        return res
+          .status(400)
+          .json({ error: "All fields are required, including government ID" });
       }
 
-      const existingRecruiter = await this.recruiterRepository.findRecruiterByEmail(email);
+      const existingRecruiter =
+        await this.recruiterRepository.findRecruiterByEmail(email);
       if (existingRecruiter) {
-        return res.status(400).json({ error: 'Recruiter already exists' });
+        return res.status(400).json({ error: "Recruiter already exists" });
       }
 
-      tempRecruiterStore[email] = { email, password, companyName, phone, name, governmentId };
+      tempRecruiterStore[email] = {
+        email,
+        password,
+        companyName,
+        phone,
+        name,
+        governmentId,
+      };
 
       const otp = this.otpService.generateOtp();
       this.otpService.storeOtp(email, otp);
       await this.otpService.sendOtp(email, otp);
 
-      res.status(200).json({ message: 'OTP sent to email. Please verify OTP to complete registration.' });
+      res.status(200).json({
+        message:
+          "OTP sent to email. Please verify OTP to complete registration.",
+      });
     } catch (error) {
-      console.error('Error during recruiter registration:', error);
+      console.error("Error during recruiter registration:", error);
       res.status(400).json({ error: (error as Error).message });
     }
   }
@@ -56,7 +98,9 @@ export class RecruiterController {
       if (isValid) {
         const recruiterData = tempRecruiterStore[email];
         if (!recruiterData) {
-          return res.status(400).json({ error: 'Recruiter data not found. Please register again.' });
+          return res.status(400).json({
+            error: "Recruiter data not found. Please register again.",
+          });
         }
 
         const result = await this.registerUseCase.execute(
@@ -65,18 +109,18 @@ export class RecruiterController {
           recruiterData.companyName,
           recruiterData.phone,
           recruiterData.name,
-          recruiterData.governmentId || '',
+          recruiterData.governmentId || ""
         );
 
         delete tempRecruiterStore[email];
 
         res.status(201).json(result);
       } else {
-        res.status(400).json({ error: 'Invalid OTP' });
+        res.status(400).json({ error: "Invalid OTP" });
       }
     } catch (error) {
-      console.error('Error verifying OTP:', error);
-      res.status(500).json({ error: 'Failed to verify OTP' });
+      console.error("Error verifying OTP:", error);
+      res.status(500).json({ error: "Failed to verify OTP" });
     }
   }
 
@@ -86,13 +130,15 @@ export class RecruiterController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
+        return res
+          .status(400)
+          .json({ error: "Email and password are required" });
       }
 
       const result = await this.loginUseCase.execute(email, password);
       res.status(200).json(result);
     } catch (error) {
-      console.error('Error during recruiter login:', error);
+      console.error("Error during recruiter login:", error);
       res.status(400).json({ error: (error as Error).message });
     }
   }
@@ -103,17 +149,17 @@ export class RecruiterController {
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
+        return res.status(400).json({ error: "Email is required" });
       }
 
       const otp = this.otpService.generateOtp();
       this.otpService.storeOtp(email, otp);
       await this.otpService.sendOtp(email, otp);
 
-      res.status(200).json({ message: 'OTP sent to email.' });
+      res.status(200).json({ message: "OTP sent to email." });
     } catch (error) {
-      console.error('Error sending OTP:', error);
-      res.status(500).json({ error: 'Failed to send OTP' });
+      console.error("Error sending OTP:", error);
+      res.status(500).json({ error: "Failed to send OTP" });
     }
   }
 
@@ -121,16 +167,16 @@ export class RecruiterController {
   async getProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const recruiter = await this.recruiterRepository.findRecruiterById(id);
-    
+      const recruiter = await this.getRecruiterProfileUseCase.execute(id); // Updated
+
       if (!recruiter) {
-        return res.status(404).json({ error: 'Recruiter not found' });
+        return res.status(404).json({ error: "Recruiter not found" });
       }
 
       res.status(200).json(recruiter);
     } catch (error) {
-      console.error('Error fetching recruiter profile:', error);
-      res.status(500).json({ error: 'Failed to fetch profile' });
+      console.error("Error fetching recruiter profile:", error);
+      res.status(500).json({ error: "Failed to fetch profile" });
     }
   }
 
@@ -140,8 +186,12 @@ export class RecruiterController {
       const { id } = req.params;
       const updates: Partial<IRecruiter> = req.body;
 
-      const governmentIdImage = req.files?.['governmentId'] ? req.files['governmentId'][0].path : undefined;
-      const employeeIdImage = req.files?.['employeeIdImage'] ? req.files['employeeIdImage'][0].path : undefined;
+      const governmentIdImage = req.files?.["governmentId"]
+        ? req.files["governmentId"][0].path
+        : undefined;
+      const employeeIdImage = req.files?.["employeeIdImage"]
+        ? req.files["employeeIdImage"][0].path
+        : undefined;
 
       if (governmentIdImage) {
         updates.governmentId = governmentIdImage;
@@ -150,16 +200,19 @@ export class RecruiterController {
         updates.employeeIdImage = employeeIdImage;
       }
 
-      const updatedRecruiter = await this.recruiterRepository.updateRecruiter(id, updates);
-console.log("updaterec",updatedRecruiter)
+      const updatedRecruiter = await this.updateRecruiterUseCase.execute( // Updated
+        id,
+        updates
+      );
+      console.log("updaterec", updatedRecruiter);
       if (!updatedRecruiter) {
-        return res.status(404).json({ error: 'Recruiter not found' });
+        return res.status(404).json({ error: "Recruiter not found" });
       }
 
       res.status(200).json(updatedRecruiter);
     } catch (error) {
-      console.error('Error updating recruiter profile:', error);
-      res.status(500).json({ error: 'Failed to update profile' });
+      console.error("Error updating recruiter profile:", error);
+      res.status(500).json({ error: "Failed to update profile" });
     }
   }
 }

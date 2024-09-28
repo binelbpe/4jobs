@@ -25,79 +25,130 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
-const LoginAdminUseCase_1 = require("../../application/usecases/admin/LoginAdminUseCase");
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../types"));
+// Import Use Cases
+const LoginAdminUseCase_1 = require("../../application/usecases/admin/LoginAdminUseCase");
+const FetchAllUsersUseCase_1 = require("../../application/usecases/admin/FetchAllUsersUseCase");
+const BlockUserUseCase_1 = require("../../application/usecases/admin/BlockUserUseCase");
+const UnblockUserUseCase_1 = require("../../application/usecases/admin/UnblockUserUseCase");
+const FetchRecruitersUseCase_1 = require("../../application/usecases/admin/FetchRecruitersUseCase");
+const ApproveRecruiterUseCase_1 = require("../../application/usecases/admin/ApproveRecruiterUseCase");
+const AdminDashboardUseCase_1 = require("../../application/usecases/admin/AdminDashboardUseCase");
 let AdminController = class AdminController {
-    constructor(recruiterRepository, loginAdminUseCase) {
-        this.recruiterRepository = recruiterRepository;
+    constructor(loginAdminUseCase, fetchAllUsersUseCase, blockUserUseCase, unblockUserUseCase, fetchRecruitersUseCase, approveRecruiterUseCase, adminDashboardUseCase) {
         this.loginAdminUseCase = loginAdminUseCase;
+        this.fetchAllUsersUseCase = fetchAllUsersUseCase;
+        this.blockUserUseCase = blockUserUseCase;
+        this.unblockUserUseCase = unblockUserUseCase;
+        this.fetchRecruitersUseCase = fetchRecruitersUseCase;
+        this.approveRecruiterUseCase = approveRecruiterUseCase;
+        this.adminDashboardUseCase = adminDashboardUseCase;
     }
-    // Login admin
+    // Admin login
     login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password } = req.body;
                 if (!email || !password) {
-                    return res.status(400).json({ error: 'Email and password are required' });
+                    return res.status(400).json({ error: "Email and password are required" });
                 }
                 const result = yield this.loginAdminUseCase.execute(email, password);
-                console.log(result.token);
                 res.status(200).json(result);
             }
             catch (error) {
-                console.error('Error during admin login:', error);
+                console.error("Error during admin login:", error);
                 res.status(400).json({ error: error.message });
             }
         });
     }
-    // Fetch recruiters
+    // Fetch all users
+    fetchUsers(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const users = yield this.fetchAllUsersUseCase.execute();
+                res.status(200).json(users);
+            }
+            catch (error) {
+                console.error("Error fetching users:", error);
+                res.status(500).json({ error: "Failed to fetch users" });
+            }
+        });
+    }
+    // Block user
+    blockUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                const user = yield this.blockUserUseCase.execute(userId);
+                if (!user) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+                res.status(200).json(user);
+            }
+            catch (error) {
+                console.error("Error blocking user:", error);
+                res.status(500).json({ error: "Failed to block user" });
+            }
+        });
+    }
+    // Unblock user
+    unblockUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                const user = yield this.unblockUserUseCase.execute(userId);
+                if (!user) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+                res.status(200).json(user);
+            }
+            catch (error) {
+                console.error("Error unblocking user:", error);
+                res.status(500).json({ error: "Failed to unblock user" });
+            }
+        });
+    }
+    // Fetch all recruiters
     fetchRecruiters(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const recruiters = yield this.recruiterRepository.findRecruiters();
-                console.log("ivide und tto");
+                const recruiters = yield this.fetchRecruitersUseCase.execute();
                 res.status(200).json(recruiters);
             }
             catch (error) {
-                console.error('Error fetching recruiters:', error);
-                res.status(500).json({ error: 'Failed to fetch recruiters' });
+                console.error("Error fetching recruiters:", error);
+                res.status(500).json({ error: "Failed to fetch recruiters" });
             }
         });
     }
     // Approve recruiter
     approveRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { id } = req.params;
             try {
-                const recruiter = yield this.recruiterRepository.findById(id);
+                const { id } = req.params;
+                const recruiter = yield this.approveRecruiterUseCase.execute(id);
                 if (!recruiter) {
-                    return res.status(404).json({ error: 'Recruiter not found' });
+                    return res.status(404).json({ error: "Recruiter not found" });
                 }
-                recruiter.isApproved = true;
-                const updatedRecruiter = yield this.recruiterRepository.save(recruiter);
-                res.status(200).json(updatedRecruiter);
+                res.status(200).json(recruiter);
             }
             catch (error) {
-                console.error('Error approving recruiter:', error);
-                res.status(500).json({ error: 'Failed to approve recruiter' });
+                console.error("Error approving recruiter:", error);
+                res.status(500).json({ error: "Failed to approve recruiter" });
             }
         });
     }
-    // New method: Admin dashboard
+    // Admin dashboard
     dashboard(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Logic for dashboard can include fetching statistics or admin-specific data
-                const data = {
-                    message: 'Welcome to the Admin Dashboard',
-                    // Add any other data you need to display on the admin dashboard
-                };
+                const data = yield this.adminDashboardUseCase.execute();
                 res.status(200).json(data);
             }
             catch (error) {
-                console.error('Error displaying dashboard:', error);
-                res.status(500).json({ error: 'Failed to load admin dashboard' });
+                console.error("Error loading admin dashboard:", error);
+                res.status(500).json({ error: "Failed to load admin dashboard" });
             }
         });
     }
@@ -105,7 +156,18 @@ let AdminController = class AdminController {
 exports.AdminController = AdminController;
 exports.AdminController = AdminController = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
-    __param(1, (0, inversify_1.inject)(types_1.default.LoginAdminUseCase)),
-    __metadata("design:paramtypes", [Object, LoginAdminUseCase_1.LoginAdminUseCase])
+    __param(0, (0, inversify_1.inject)(types_1.default.LoginAdminUseCase)),
+    __param(1, (0, inversify_1.inject)(types_1.default.FetchAllUsersUseCase)),
+    __param(2, (0, inversify_1.inject)(types_1.default.BlockUserUseCase)),
+    __param(3, (0, inversify_1.inject)(types_1.default.UnblockUserUseCase)),
+    __param(4, (0, inversify_1.inject)(types_1.default.FetchRecruitersUseCase)),
+    __param(5, (0, inversify_1.inject)(types_1.default.ApproveRecruiterUseCase)),
+    __param(6, (0, inversify_1.inject)(types_1.default.AdminDashboardUseCase)),
+    __metadata("design:paramtypes", [LoginAdminUseCase_1.LoginAdminUseCase,
+        FetchAllUsersUseCase_1.FetchAllUsersUseCase,
+        BlockUserUseCase_1.BlockUserUseCase,
+        UnblockUserUseCase_1.UnblockUserUseCase,
+        FetchRecruitersUseCase_1.FetchRecruitersUseCase,
+        ApproveRecruiterUseCase_1.ApproveRecruiterUseCase,
+        AdminDashboardUseCase_1.AdminDashboardUseCase])
 ], AdminController);

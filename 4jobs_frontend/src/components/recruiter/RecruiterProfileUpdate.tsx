@@ -6,12 +6,23 @@ import { useNavigate } from 'react-router-dom';
 import RecruiterHeader from '../recruiter/RecruiterHeader';
 import { toast } from 'react-toastify';
 
+// Define the form data interface
+interface FormData {
+  name: string;
+  email: string;
+  companyName: string;
+  phone: string;
+  location: string;
+  governmentId: File | null;
+  employeeIdImage: File | null;
+}
+
 const RecruiterProfileUpdate: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const { profile, recruiter } = useSelector(selectRecruiter);
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: profile?.name || '',
     email: profile?.email || '',
     companyName: profile?.companyName || '',
@@ -36,7 +47,6 @@ const RecruiterProfileUpdate: React.FC = () => {
   const phoneRegex = /^\d{10}$/;
   const nameRegex = /^[a-zA-Z\s]{3,20}$/;
   const locationRegex = /^[a-zA-Z\s,]{3,15}$/;
-  const fileExtensionRegex = /\.(jpg|jpeg|png|pdf)$/i;
 
   const validateForm = () => {
     let valid = true;
@@ -80,17 +90,29 @@ const RecruiterProfileUpdate: React.FC = () => {
       valid = false;
     }
 
-    // Validate government ID file (optional) if provided
-    if (formData.governmentId && !fileExtensionRegex.test(formData.governmentId)) {
-      newErrors.governmentId = 'Government ID must be a valid jpg, jpeg, png, or pdf file.';
-      valid = false;
+    if (formData.governmentId) {
+      const fileName = formData.governmentId.name; 
+      const validExtensions = /\.(jpg|jpeg|png|pdf|webp)$/i;
+
+      // Check if file type matches the allowed types
+      if (!validExtensions.test(fileName)) {
+        newErrors.governmentId = 'Government ID must be a valid jpg, jpeg, png, or pdf file.';
+        valid = false;
+      }
     }
 
     // Validate employee ID image (optional) if provided
-    if (formData.employeeIdImage && !fileExtensionRegex.test(formData.employeeIdImage)) {
-      newErrors.employeeIdImage = 'Employee ID Image must be a valid jpg, jpeg, png, or pdf file.';
-      valid = false;
+    if (formData.employeeIdImage) {
+      const fileName = formData.employeeIdImage.name; 
+      const validExtensions = /\.(jpg|jpeg|png|pdf|webp)$/i;
+
+      // Check if file type matches the allowed types
+      if (!validExtensions.test(fileName)) {
+        newErrors.employeeIdImage = 'Employee ID Image must be a valid jpg, jpeg, png, or pdf file.';
+        valid = false;
+      }
     }
+
 
     setErrors(newErrors);
     return valid;
@@ -144,7 +166,7 @@ const RecruiterProfileUpdate: React.FC = () => {
               value={formData.name}
               onChange={handleChange}
               className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2`}
-              required
+              disabled
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>
@@ -158,7 +180,7 @@ const RecruiterProfileUpdate: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2`}
-              required
+              disabled
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
@@ -205,18 +227,6 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
           </div>
 
-          {/* Government ID */}
-          <div>
-            <label className="block font-semibold">Government ID:</label>
-            <input
-              type="file"
-              name="governmentId"
-              onChange={handleChange}
-              className={`w-full p-2`}
-            />
-            {errors.governmentId && <p className="text-red-500 text-sm">{errors.governmentId}</p>}
-          </div>
-
           {/* Employee ID Image */}
           <div>
             <label className="block font-semibold">Employee ID Image:</label>
@@ -229,12 +239,12 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.employeeIdImage && <p className="text-red-500 text-sm">{errors.employeeIdImage}</p>}
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300"
-          >
-            Submit Changes
-          </button>
+          {/* Submit Button */}
+          <div>
+            <button type="submit" className="bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-600">
+              Update Profile
+            </button>
+          </div>
         </form>
       </div>
     </>

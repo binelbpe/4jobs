@@ -1,20 +1,28 @@
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faComments, faBell, faUser, faSearch, faBars } from '@fortawesome/free-solid-svg-icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom'; 
-import { logout } from '../../redux/slices/authSlice';
-import { RootState } from '../../redux/store';
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBriefcase,
+  faComments,
+  faBell,
+  faUser,
+  faSearch,
+  faBars,
+} from "@fortawesome/free-solid-svg-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../redux/slices/authSlice";
+import { RootState, AppDispatch } from "../../redux/store";
+import { fetchJobPostsAsync } from "../../redux/slices/authSlice";
 
 const UserHeader: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate("/login");
   };
 
   const goToProfile = () => {
@@ -23,14 +31,33 @@ const UserHeader: React.FC = () => {
     }
   };
 
+  const goToJobs = () => {
+    dispatch(
+      fetchJobPostsAsync({
+        page: 1,
+        limit: 10,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        filter: {},
+      })
+    );
+    navigate("/jobs");
+  };
+
+  const goHome = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <header className="bg-white shadow-md p-4 flex justify-between items-center">
       {/* Logo Section */}
       <div className="flex items-center">
-        <Link to="/">
+        <button onClick={goHome}>
           <img src="../../../logo.png" alt="Logo" className="h-20 w-20" />
-        </Link>
-        <span className="text-purple-700 font-semibold text-lg ml-2">4 Jobs</span>
+        </button>
+        <span className="text-purple-700 font-semibold text-lg ml-2">
+          4 Jobs
+        </span>
       </div>
 
       {/* Search Bar Section */}
@@ -41,18 +68,27 @@ const UserHeader: React.FC = () => {
             placeholder="Search..."
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
-          <FontAwesomeIcon icon={faSearch} className="absolute right-3 top-3 text-gray-500" />
+          <FontAwesomeIcon
+            icon={faSearch}
+            className="absolute right-3 top-3 text-gray-500"
+          />
         </div>
       </div>
 
       {/* Mobile Menu Button */}
-      <button className="md:hidden text-gray-600 focus:outline-none" onClick={() => setMenuOpen(!menuOpen)}>
+      <button
+        className="md:hidden text-gray-600 focus:outline-none"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
         <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
       </button>
 
       {/* Navigation Items for larger screens */}
       <nav className="hidden md:flex space-x-6 items-center">
-        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+        <button
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+          onClick={goToJobs}
+        >
           <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
           <span>Jobs</span>
         </button>
@@ -64,11 +100,17 @@ const UserHeader: React.FC = () => {
           <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
           <span>Notifications</span>
         </button>
-        <button className="text-purple-600 hover:text-gray-600" onClick={goToProfile}>
+        <button
+          className="text-purple-600 hover:text-gray-600"
+          onClick={goToProfile}
+        >
           <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
           <span className="text-xs">Profile</span>
         </button>
-        <button className="text-purple-600 hover:text-gray-600" onClick={handleLogout}>
+        <button
+          className="text-purple-600 hover:text-gray-600"
+          onClick={handleLogout}
+        >
           <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
           <span className="text-xs">Logout</span>
         </button>
@@ -77,7 +119,10 @@ const UserHeader: React.FC = () => {
       {/* Dropdown Menu for Small Screens */}
       {menuOpen && (
         <div className="absolute top-16 right-0 w-48 bg-white shadow-lg rounded-md p-4 md:hidden">
-          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+          <button
+            className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+            onClick={goToJobs}
+          >
             <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
             <span>Jobs</span>
           </button>
@@ -89,11 +134,14 @@ const UserHeader: React.FC = () => {
             <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
             <span>Notifications</span>
           </button>
-          <button className="text-gray-600 hover:text-purple-600 mb-2" onClick={goToProfile}>
+          <button
+            className="text-gray-600 hover:text-purple-600 mb-2"
+            onClick={goToProfile}
+          >
             <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
             <span>Profile</span>
           </button>
-          <button 
+          <button
             className="flex items-center text-purple-600 hover:text-gray-600"
             onClick={handleLogout}
           >

@@ -1,7 +1,7 @@
-import { IRecruiter } from '../../../../types/recruiter';
-import { IRecruiterRepository } from '../../../../domain/interfaces/repositories/IRecruiterRepository';
-import Recruiter from '../models/RecruiterModel';
-import { injectable } from 'inversify';
+import { IRecruiter } from "../../../../domain/entities/Recruiter";
+import { IRecruiterRepository } from "../../../../domain/interfaces/repositories/recruiter/IRecruiterRepository";
+import Recruiter from "../models/RecruiterModel";
+import { injectable } from "inversify";
 
 @injectable()
 export class MongoRecruiterRepository implements IRecruiterRepository {
@@ -15,8 +15,8 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
     role: string;
     isApproved: boolean;
     governmentId: string;
-    employeeId: string; 
-    employeeIdImage?: string; 
+    employeeId: string;
+    employeeIdImage?: string;
     createdAt?: Date;
     updatedAt?: Date;
   }): Promise<IRecruiter> {
@@ -39,7 +39,11 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
   }
 
   async save(recruiter: IRecruiter): Promise<IRecruiter> {
-    const updatedRecruiter = await Recruiter.findByIdAndUpdate(recruiter.id, recruiter, { new: true }).exec();
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(
+      recruiter.id,
+      recruiter,
+      { new: true }
+    ).exec();
     return updatedRecruiter as IRecruiter;
   }
 
@@ -48,18 +52,22 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
     return recruiters as IRecruiter[];
   }
 
-  async updateRecruiter(id: string, updates: Partial<IRecruiter>): Promise<IRecruiter | null> {
+  async updateRecruiter(
+    id: string,
+    updates: Partial<IRecruiter>
+  ): Promise<IRecruiter | null> {
     if (updates.location === undefined) {
       throw new Error("Location is required for updating the profile");
     }
-    
-    const updatedRecruiter = await Recruiter.findByIdAndUpdate(id, updates, { new: true }).exec();
+
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(id, updates, {
+      new: true,
+    }).exec();
     return updatedRecruiter as IRecruiter | null;
   }
-  
+
   async findRecruiterById(id: string): Promise<IRecruiter | null> {
     const recruiter = await Recruiter.findById(id).exec();
     return recruiter as IRecruiter | null;
   }
-  
 }

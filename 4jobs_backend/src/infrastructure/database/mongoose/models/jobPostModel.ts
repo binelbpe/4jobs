@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { JobPost } from '../../../../types/jobPostTypes';
+import { JobPost } from '../../../../domain/entities/jobPostTypes';
 
 const JobPostSchema: Schema = new Schema({
   title: { type: String, required: true },
@@ -19,6 +19,7 @@ const JobPostSchema: Schema = new Schema({
   qualifications: [{ type: String }],
   status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
   recruiterId: { type: Schema.Types.ObjectId, ref: 'Recruiter', required: true },
+  applicants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 export default mongoose.model<JobPost & Document>('JobPost', JobPostSchema);

@@ -6,23 +6,32 @@ interface JobPostState {
   posts: BasicJobPost[];
   loading: boolean;
   error: string | null;
+  totalPages: number;
+  totalCount: number;
+  currentPage: number;
+  selectedPost:BasicJobPost|null;
 }
 
 const initialState: JobPostState = {
   posts: [],
   loading: false,
   error: null,
+  totalPages: 0,
+  totalCount: 0,
+  currentPage: 1,
+  selectedPost: null, // Add this line to store the selected job post
 };
 
 export const fetchJobPosts = createAsyncThunk(
   'jobPosts/fetchJobPosts',
   async (recruiterId: string, { rejectWithValue }) => {
     try {
+      console.log("jobpostlist",recruiterId)
       const response = await jobPostApi.getJobPosts(recruiterId);
       console.log("jobpostlist",response)
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch job posts');
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job posts');
     }
   }
 );
@@ -34,7 +43,7 @@ export const createJobPost = createAsyncThunk(
       const response = await jobPostApi.createJobPost(params);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to create job post');
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to create job post');
     }
   }
 );
@@ -49,7 +58,7 @@ export const updateJobPost = createAsyncThunk(
       return response;
     } catch (error: any) {
       console.error('Error in updateJobPost thunk:', error);
-      return rejectWithValue(error.message || 'Failed to update job post');
+      return rejectWithValue(error instanceof Error ? error :'Failed to update job post');
     }
   }
 );
@@ -61,7 +70,7 @@ export const deleteJobPost = createAsyncThunk(
       await jobPostApi.deleteJobPost(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to delete job post');
+      return rejectWithValue(error instanceof Error ? error :'Failed to delete job post');
     }
   }
 );
@@ -119,5 +128,6 @@ const jobPostSlice = createSlice({
       });
   },
 });
+
 
 export default jobPostSlice.reducer;

@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserProjects } from '../../redux/slices/authSlice';
 import { RootState, AppDispatch } from '../../redux/store';
 import { Project } from '../../types/auth';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Plus, X } from 'lucide-react';
 
 const Projects: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const [projects, setProjects] = useState<Project[]>(user?.projects || []);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [errors, setErrors] = useState<{ [key: number]: { name?: string; link?: string; description?: string; imageUrl?: string } }>({});
 
-  // Regex patterns
-  const nameRegex = /^[a-zA-Z0-9\s]{1,20}$/; // Max 50 characters, alphanumeric with spaces
-  const urlRegex = /^https?:\/\/[^\s$.?#].[^\s]*$/; // Valid URL format (HTTP/HTTPS)
+  useEffect(() => {
+    if (user && Array.isArray(user.projects)) {
+      setProjects(user.projects);
+    }
+  }, [user]);
 
   const handleChange = (index: number, field: keyof Project, value: string) => {
     const updatedProjects = projects.map((project, i) =>
@@ -27,90 +30,137 @@ const Projects: React.FC = () => {
     setProjects([...projects, { id: Date.now().toString(), name: '', description: '', link: '', imageUrl: '' }]);
   };
 
-  const validateProjects = (): boolean => {
-    for (const project of projects) {
-      if (!project.name) {
-        toast.error("Project name is required.");
-        return false;
+  const removeProject = (index: number) => {
+    const updatedProjects = projects.filter((_, i) => i !== index);
+    setProjects(updatedProjects);
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[index];
+      return newErrors;
+    });
+  };
+
+  const validateProjects = () => {
+    const newErrors: { [key: number]: { name?: string; link?: string; description?: string; imageUrl?: string } } = {};
+    let isValid = true;
+
+    projects.forEach((project, index) => {
+      const projectErrors: { name?: string; link?: string; description?: string; imageUrl?: string } = {};
+      if (!project.name || project.name.length < 2 || project.name.length > 50) {
+        projectErrors.name = 'Name must be between 2 and 50 characters.';
+        isValid = false;
       }
-      if (!nameRegex.test(project.name)) {
-        toast.error("Project name must be alphanumeric and less than 20 characters.");
-        return false;
+      if (project.link && !/^https?:\/\/[^\s]+$/.test(project.link)) {
+        projectErrors.link = 'Invalid URL format.';
+        isValid = false;
       }
-      if (!project.description) {
-        toast.error("Project description is required.");
-        return false;
+      if (project.description && project.description.length > 500) {
+        projectErrors.description = 'Description must not exceed 500 characters.';
+        isValid = false;
       }
-      if (project.link && !urlRegex.test(project.link)) {
-        toast.error("Project link must be a valid URL (http or https) if provided.");
-        return false;
+      if (project.imageUrl && !/^https?:\/\/[^\s]+$/.test(project.imageUrl)) {
+        projectErrors.imageUrl = 'Invalid URL format.';
+        isValid = false;
       }
-    }
-    return true;
+      if (Object.keys(projectErrors).length) {
+        newErrors[index] = projectErrors;
+      }
+    });
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateProjects()) return; // Validate before proceeding
-
-    if (user) {
+    if (validateProjects() && user) {
       try {
         await dispatch(updateUserProjects({ userId: user.id, projects }));
         toast.success('Projects updated successfully!');
       } catch (error) {
         toast.error('Failed to update projects. Please try again later.');
-        console.error("Failed to update projects:", error);
       }
     } else {
-      toast.error('User is not available.');
-      console.error("User is not available.");
+      toast.error('Please fix the errors before submitting.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
-      <h2 className="text-2xl font-bold text-center mb-4">Projects</h2>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-2xl font-bold mb-4">Projects</h2>
       {projects.map((project, index) => (
-        <div key={project.id} className="space-y-2 p-4 border rounded shadow-sm">
-          <input
-            type="text"
-            value={project.name}
-            placeholder="Project Name"
-            onChange={(e) => handleChange(index, 'name', e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <textarea
-            value={project.description}
-            placeholder="Project Description"
-            onChange={(e) => handleChange(index, 'description', e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="url"
-            value={project.link}
-            placeholder="Project Link (optional)"
-            onChange={(e) => handleChange(index, 'link', e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="url"
-            value={project.imageUrl}
-            placeholder="Image URL (optional)"
-            onChange={(e) => handleChange(index, 'imageUrl', e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <div key={project.id} className="bg-white shadow rounded-lg p-6 relative">
+          <button
+            type="button"
+            onClick={() => removeProject(index)}
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor={`project-name-${index}`} className="block text-sm font-medium text-gray-700">Project Name</label>
+              <input
+                type="text"
+                id={`project-name-${index}`}
+                value={project.name}
+                onChange={(e) => handleChange(index, 'name', e.target.value)}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.name ? 'border-red-500' : ''}`}
+              />
+              {errors[index]?.name && <p className="text-red-500 text-sm">{errors[index].name}</p>}
+            </div>
+            <div>
+              <label htmlFor={`project-link-${index}`} className="block text-sm font-medium text-gray-700">Project Link</label>
+              <input
+                type="url"
+                id={`project-link-${index}`}
+                value={project.link}
+                onChange={(e) => handleChange(index, 'link', e.target.value)}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.link ? 'border-red-500' : ''}`}
+              />
+              {errors[index]?.link && <p className="text-red-500 text-sm">{errors[index].link}</p>}
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor={`project-description-${index}`} className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                id={`project-description-${index}`}
+                value={project.description}
+                onChange={(e) => handleChange(index, 'description', e.target.value)}
+                rows={3}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.description ? 'border-red-500' : ''}`}
+              />
+              {errors[index]?.description && <p className="text-red-500 text-sm">{errors[index].description}</p>}
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor={`project-image-${index}`} className="block text-sm font-medium text-gray-700">Image URL</label>
+              <input
+                type="url"
+                id={`project-image-${index}`}
+                value={project.imageUrl}
+                onChange={(e) => handleChange(index, 'imageUrl', e.target.value)}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.imageUrl ? 'border-red-500' : ''}`}
+              />
+              {errors[index]?.imageUrl && <p className="text-red-500 text-sm">{errors[index].imageUrl}</p>}
+            </div>
+          </div>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={addProject}
-        className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300"
-      >
-        Add Project
-      </button>
-      <button type="submit" className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition duration-300">
-        Update Projects
-      </button>
+      <div className="flex justify-between">
+        <button
+          type="button"
+          onClick={addProject}
+          className="flex items-center px-4 py-2 bg-purple-500 text-dark rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Add Project
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-purple-500 text-dark rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        >
+          Update Projects
+        </button>
+      </div>
     </form>
   );
 };

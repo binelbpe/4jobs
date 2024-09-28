@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BasicJobPostFormData } from '../../../types/jobPostTypes';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
+import { Briefcase, Building, Globe, MapPin, DollarSign, Users, Book, CheckSquare, Laptop } from 'lucide-react';
+import { validateJobPostForm } from './formValidation';
 
 interface JobPostFormProps {
   initialData?: BasicJobPostFormData;
@@ -23,8 +25,12 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
     qualifications: [],
     status: 'Open',
     recruiterId: recruiter.id,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   });
-  
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     if (isEditing && initialData) {
       setFormData({
@@ -58,116 +64,201 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit(formData);
+    const newErrors = validateJobPostForm(formData);
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      onSubmit(formData);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        name="title"
-        value={formData.title}
-        onChange={handleChange}
-        placeholder="Job Title"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Job Description"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="company.name"
-        value={formData.company.name}
-        onChange={handleChange}
-        placeholder="Company Name"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="company.website"
-        value={formData.company.website}
-        onChange={handleChange}
-        placeholder="Company Website"
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="company.logo"
-        value={formData.company.logo}
-        onChange={handleChange}
-        placeholder="Company Logo URL"
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="location"
-        value={formData.location}
-        onChange={handleChange}
-        placeholder="Location"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <div className="flex space-x-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="title" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <Briefcase className="mr-2 text-purple-600" size={20} />
+          Job Title
+        </label>
         <input
-          type="number"
-          name="salaryRange.min"
-          value={formData.salaryRange.min}
+          type="text"
+          name="title"
+          id="title"
+          value={formData.title}
           onChange={handleChange}
-          placeholder="Minimum Salary"
-          className="w-1/2 p-2 border rounded"
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
         />
-        <input
-          type="number"
-          name="salaryRange.max"
-          value={formData.salaryRange.max}
-          onChange={handleChange}
-          placeholder="Maximum Salary"
-          className="w-1/2 p-2 border rounded"
-        />
+        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
       </div>
-      <input
-        type="text"
-        name="wayOfWork"
-        value={formData.wayOfWork}
-        onChange={handleChange}
-        placeholder="Way of Work (e.g., Remote, On-site, Hybrid)"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        value={formData.skillsRequired.join(', ')}
-        onChange={(e) => handleArrayChange(e, 'skillsRequired')}
-        placeholder="Skills Required (comma separated)"
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="text"
-        value={formData.qualifications.join(', ')}
-        onChange={(e) => handleArrayChange(e, 'qualifications')}
-        placeholder="Qualifications (comma separated)"
-        className="w-full p-2 border rounded"
-      />
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
-      >
-        <option value="Open">Open</option>
-        <option value="Closed">Closed</option>
-      </select>
+
+      <div>
+        <label htmlFor="description" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <Book className="mr-2 text-purple-600" size={20} />
+          Job Description
+        </label>
+        <textarea
+          name="description"
+          id="description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          rows={4}
+        />
+        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="company.name" className=" mb-1 font-medium text-gray-700 flex items-center">
+            <Building className="mr-2 text-purple-600" size={20} />
+            Company Name
+          </label>
+          <input
+            type="text"
+            name="company.name"
+            id="company.name"
+            value={formData.company.name}
+            onChange={handleChange}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+          {errors.companyName && <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="company.website" className=" mb-1 font-medium text-gray-700 flex items-center">
+            <Globe className="mr-2 text-purple-600" size={20} />
+            Company Website
+          </label>
+          <input
+            type="text"
+            name="company.website"
+            id="company.website"
+            value={formData.company.website}
+            onChange={handleChange}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+          {errors.companyWebsite && <p className="text-red-500 text-sm mt-1">{errors.companyWebsite}</p>}
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="location" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <MapPin className="mr-2 text-purple-600" size={20} />
+          Location
+        </label>
+        <input
+          type="text"
+          name="location"
+          id="location"
+          value={formData.location}
+          onChange={handleChange}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+        />
+        {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="salaryRange.min" className=" mb-1 font-medium text-gray-700 flex items-center">
+            <DollarSign className="mr-2 text-purple-600" size={20} />
+            Minimum Salary
+          </label>
+          <input
+            type="number"
+            name="salaryRange.min"
+            id="salaryRange.min"
+            value={formData.salaryRange.min}
+            onChange={handleChange}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+        </div>
+        <div>
+          <label htmlFor="salaryRange.max" className=" mb-1 font-medium text-gray-700 flex items-center">
+            <DollarSign className="mr-2 text-purple-600" size={20} />
+            Maximum Salary
+          </label>
+          <input
+            type="number"
+            name="salaryRange.max"
+            id="salaryRange.max"
+            value={formData.salaryRange.max}
+            onChange={handleChange}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+        </div>
+      </div>
+      {errors.salaryRange && <p className="text-red-500 text-sm mt-1">{errors.salaryRange}</p>}
+
+      <div>
+        <label htmlFor="wayOfWork" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <Laptop className="mr-2 text-purple-600" size={20} />
+          Way of Work
+        </label>
+        <select
+          name="wayOfWork"
+          id="wayOfWork"
+          value={formData.wayOfWork}
+          onChange={handleChange}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+        >
+          <option value="">Select work type</option>
+          <option value="Remote">Remote</option>
+          <option value="On-site">On-site</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+        {errors.wayOfWork && <p className="text-red-500 text-sm mt-1">{errors.wayOfWork}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="skillsRequired" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <Users className="mr-2 text-purple-600" size={20} />
+          Skills Required (comma separated)
+        </label>
+        <input
+          type="text"
+          id="skillsRequired"
+          value={formData.skillsRequired.join(', ')}
+          onChange={(e) => handleArrayChange(e, 'skillsRequired')}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+        />
+        {errors.skillsRequired && <p className="text-red-500 text-sm mt-1">{errors.skillsRequired}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="qualifications" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <CheckSquare className="mr-2 text-purple-600" size={20} />
+          Qualifications (comma separated)
+        </label>
+        <input
+          type="text"
+          id="qualifications"
+          value={formData.qualifications.join(', ')}
+          onChange={(e) => handleArrayChange(e, 'qualifications')}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+        />
+        {errors.qualifications && <p className="text-red-500 text-sm mt-1">{errors.qualifications}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="status" className=" mb-1 font-medium text-gray-700 flex items-center">
+          <CheckSquare className="mr-2 text-purple-600" size={20} />
+          Status
+        </label>
+        <select
+          name="status"
+          id="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+        >
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+
       <button
         type="submit"
-        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="w-full p-3 bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-300 ease-in-out flex items-center justify-center"
       >
+        <Briefcase className="mr-2" size={20} />
         {isEditing ? 'Update Job Post' : 'Create Job Post'}
       </button>
     </form>

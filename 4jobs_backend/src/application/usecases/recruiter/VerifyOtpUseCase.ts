@@ -1,13 +1,16 @@
-import { IRecruiterRepository } from '../../../domain/interfaces/repositories/IRecruiterRepository';
-import { OtpService } from '../../../infrastructure/services/OtpService';
-import { injectable } from 'inversify';
+import { IRecruiterRepository } from "../../../domain/interfaces/repositories/recruiter/IRecruiterRepository";
+import { OtpService } from "../../../infrastructure/services/OtpService";
+import { injectable } from "inversify";
 
 @injectable()
 export class VerifyOtpUseCase {
   private recruiterRepository: IRecruiterRepository;
   private otpService: OtpService;
 
-  constructor(recruiterRepository: IRecruiterRepository, otpService: OtpService) {
+  constructor(
+    recruiterRepository: IRecruiterRepository,
+    otpService: OtpService
+  ) {
     this.recruiterRepository = recruiterRepository;
     this.otpService = otpService;
   }
@@ -21,10 +24,10 @@ export class VerifyOtpUseCase {
         await this.recruiterRepository.save(recruiter);
         return recruiter;
       } else {
-        throw new Error('Recruiter not found');
+        throw new Error("Recruiter not found");
       }
     } else {
-      throw new Error('Invalid OTP');
+      throw new Error("Invalid OTP");
     }
   }
 }

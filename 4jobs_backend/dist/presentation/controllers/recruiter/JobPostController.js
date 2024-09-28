@@ -107,6 +107,35 @@ let JobPostController = class JobPostController {
             }
         });
     }
+    getApplicantsByJobId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { jobId } = req.params;
+                const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 10;
+                console.log("jobuid page limit", jobId, page, limit);
+                const result = yield this.jobPostUseCase.getApplicantsByJobId(jobId, page, limit);
+                res.json(result);
+            }
+            catch (error) {
+                console.error('Error in getApplicantsByJobId:', error);
+                res.status(500).json({ error: 'Failed to fetch applicants' });
+            }
+        });
+    }
+    getApplicantsById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { applicantId } = req.params;
+                const result = yield this.jobPostUseCase.getApplicantsById(applicantId);
+                res.json({ user: result });
+            }
+            catch (error) {
+                console.error('Error in getApplicantsById:', error);
+                res.status(500).json({ error: 'Failed to fetch applicant' });
+            }
+        });
+    }
 };
 exports.JobPostController = JobPostController;
 exports.JobPostController = JobPostController = __decorate([

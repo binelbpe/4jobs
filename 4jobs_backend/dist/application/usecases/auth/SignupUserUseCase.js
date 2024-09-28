@@ -38,7 +38,7 @@ let SignupUserUseCase = class SignupUserUseCase {
             if (!isGoogleAuth) {
                 const existingUser = yield this.userRepository.findByEmail(email);
                 if (existingUser) {
-                    throw new Error('User already exists');
+                    throw new Error("User already exists");
                 }
                 // Ensure password is hashed before saving the user
                 const hashedPassword = yield this.authService.hashPassword(password);
@@ -65,7 +65,7 @@ let SignupUserUseCase = class SignupUserUseCase {
                     email,
                     password: "", // No password required for Google Auth
                     name,
-                    role: 'user',
+                    role: "user",
                     isAdmin: false,
                     experiences: [],
                     projects: [],
@@ -73,7 +73,7 @@ let SignupUserUseCase = class SignupUserUseCase {
                     skills: [],
                 });
                 const token = this.authService.generateToken(user);
-                console.log('g user', user);
+                console.log("g user", user);
                 return { user, token };
             }
         });

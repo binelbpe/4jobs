@@ -4,6 +4,7 @@ import { updateUserResume } from '../../redux/slices/authSlice';
 import { RootState, AppDispatch } from '../../redux/store';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Upload } from 'lucide-react';
 
 const Resume: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -35,29 +36,43 @@ const Resume: React.FC = () => {
         toast.success('Resume updated successfully!');
       } catch (error) {
         toast.error('Failed to update resume. Please try again later.');
-        console.error("Failed to update resume:", error);
       }
     } else {
-      toast.error('User is not available or no resume uploaded.');
-      console.error("User is not available or no resume uploaded.");
+      toast.error('Please select a resume file to upload.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md space-y-4">
-      <h2 className="text-2xl font-bold text-center mb-4">Upload Your Resume</h2>
-      <input
-        type="file"
-        onChange={handleFileChange}
-        accept=".pdf,.doc,.docx"
-        className="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        type="submit"
-        className="w-full py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
-      >
-        Update Resume
-      </button>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
+        <Upload className="w-12 h-12 text-gray-400 mb-4" />
+        <p className="text-sm text-gray-600 mb-2">click to select a file</p>
+        <input
+          type="file"
+          onChange={handleFileChange}
+          accept=".pdf,.doc,.docx"
+          className="hidden"
+          id="resume-upload"
+        />
+        <label
+          htmlFor="resume-upload"
+          className="px-4 py-2 bg-purple-400 text-dark rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+        >
+          Select File
+        </label>
+        {resume && (
+          <p className="mt-2 text-sm text-gray-600">Selected file: {resume.name}</p>
+        )}
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="px-4 py-2 bg-purple-500 text-dark rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          disabled={!resume}
+        >
+          Upload Resume
+        </button>
+      </div>
     </form>
   );
 };

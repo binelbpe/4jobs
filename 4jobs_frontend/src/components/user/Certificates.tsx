@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserCertificates } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { Certificate } from "../../types/auth";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+import { Plus, X, Edit2 } from 'lucide-react';
 
 interface CertificateWithFile extends Omit<Certificate, "file"> {
   file: File | null;
@@ -19,75 +19,62 @@ const Certificates: React.FC = () => {
       ? user.certificates.map((cert) => ({ ...cert, file: null }))
       : [];
 
-  const [certificates, setCertificates] =
-    useState<CertificateWithFile[]>(initialCertificates);
+  const [certificates, setCertificates] = useState<CertificateWithFile[]>(initialCertificates);
+  const [currentCertificate, setCurrentCertificate] = useState<CertificateWithFile>({
+    id: '',
+    name: '',
+    issuingOrganization: '',
+    dateOfIssue: '',
+    imageUrl: '',
+    file: null,
+  });
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  // Regex Patterns
-  const nameRegex = /^[a-zA-Z0-9\s]{1,20}$/;
-  const organizationRegex = /^[a-zA-Z0-9\s]{1,20}$/;
+  useEffect(() => {
+    addNewCertificate();
+  }, []);
 
-  const handleChange = (
-    index: number,
-    field: keyof Omit<Certificate, "id" | "file">,
-    value: string
-  ) => {
-    const updatedCertificates = certificates.map((cert, i) =>
-      i === index ? { ...cert, [field]: value } : cert
-    );
-    setCertificates(updatedCertificates);
+  const handleChange = (field: keyof Omit<Certificate, "id" | "file">, value: string) => {
+    setCurrentCertificate((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (index: number, file: File | null) => {
-    const updatedCertificates = certificates.map((cert, i) =>
-      i === index ? { ...cert, file } : cert
-    );
-    setCertificates(updatedCertificates);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    setCurrentCertificate((prev) => ({ ...prev, file }));
   };
 
-  const addCertificate = () => {
-    setCertificates([
-      ...certificates,
-      {
-        id: Date.now().toString(),
-        name: "",
-        issuingOrganization: "",
-        dateOfIssue: "",
-        imageUrl: "",
-        file: null,
-      },
-    ]);
-  };
-
-  const validateCertificates = (): boolean => {
-    for (const cert of certificates) {
-      if (!cert.name || !cert.issuingOrganization || !cert.dateOfIssue) {
-        toast.error("All fields are required.");
-        return false;
-      }
-
-      if (!nameRegex.test(cert.name)) {
-        toast.error(
-          "Certificate name can only contain letters, numbers, and spaces, and must be less than 20 characters."
-        );
-        return false;
-      }
-
-      if (!organizationRegex.test(cert.issuingOrganization)) {
-        toast.error(
-          "Issuing organization can only contain letters, numbers, and spaces, and must be less than 20 characters."
-        );
-        return false;
-      }
+  const validateCertificate = (): boolean => {
+    const { name, issuingOrganization, dateOfIssue } = currentCertificate;
+    if (!name || !issuingOrganization || !dateOfIssue) {
+      toast.error("All fields are required.");
+      return false;
     }
+
+    if (name.length > 50 || issuingOrganization.length > 50) {
+      toast.error("Certificate name and issuing organization must be less than 50 characters.");
+      return false;
+    }
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateCertificates()) return; // Validate before proceeding
+    if (!validateCertificate()) return;
 
     if (user) {
-      const certificatesWithFiles = certificates.map((cert) => ({
+      let updatedCertificates: CertificateWithFile[];
+
+      if (editingIndex !== null) {
+        updatedCertificates = certificates.map((cert, index) =>
+          index === editingIndex ? currentCertificate : cert
+        );
+        setEditingIndex(null);
+      } else {
+        updatedCertificates = [...certificates, currentCertificate];
+      }
+
+      const certificatesWithFiles = updatedCertificates.map((cert) => ({
         file: cert.file,
         details: {
           id: cert.id,
@@ -99,95 +86,125 @@ const Certificates: React.FC = () => {
       }));
 
       try {
-        await dispatch(
-          updateUserCertificates({
-            userId: user.id,
-            certificates: certificatesWithFiles,
-          })
-        );
+        await dispatch(updateUserCertificates({ userId: user.id, certificates: certificatesWithFiles }));
+        setCertificates(updatedCertificates);
+        addNewCertificate();
         toast.success("Certificates updated successfully!");
       } catch (error) {
-        console.error("Failed to update certificates:", error);
-        toast.error("Failed to update certificates.");
+        toast.error("Failed to update certificates. Please try again later.");
       }
-    } else {
-      console.error("User not available:", user);
-      toast.error("User not available.");
     }
   };
 
-  return (
-    <>
-      <ToastContainer />
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md space-y-6"
-      >
-        <h2 className="text-2xl font-bold text-center mb-4">Certificates</h2>
-        {certificates.map((certificate, index) => (
-          <div
-            key={certificate.id}
-            className="space-y-4 p-4 border rounded-md shadow-sm"
-          >
-            <input
-              type="text"
-              value={certificate.name}
-              placeholder="Certificate Name"
-              onChange={(e) => handleChange(index, "name", e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={certificate.issuingOrganization}
-              placeholder="Issuing Organization"
-              onChange={(e) =>
-                handleChange(index, "issuingOrganization", e.target.value)
-              }
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="date"
-              value={certificate.dateOfIssue}
-              onChange={(e) =>
-                handleChange(index, "dateOfIssue", e.target.value)
-              }
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="file"
-              name="certificates"
-              onChange={(e) =>
-                handleFileChange(
-                  index,
-                  e.target.files ? e.target.files[0] : null
-                )
-              }
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              accept="image/*,application/pdf"
-            />
+  const addNewCertificate = () => {
+    setCurrentCertificate({
+      id: Date.now().toString(),
+      name: "",
+      issuingOrganization: "",
+      dateOfIssue: "",
+      imageUrl: "",
+      file: null,
+    });
+    setEditingIndex(null);
+  };
 
-            {certificate.file && (
-              <p className="text-sm text-gray-500">
-                Selected file: {certificate.file.name}
-              </p>
-            )}
+  const editCertificate = (index: number) => {
+    setCurrentCertificate(certificates[index]);
+    setEditingIndex(index);
+  };
+
+  const removeCertificate = (index: number) => {
+    setCertificates(certificates.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div>
+      <h2 className="text-3xl font-bold mb-8 text-gray-800">Certificates</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {certificates.map((certificate, index) => (
+          <div key={certificate.id} className="bg-white shadow-md rounded-lg p-6 relative">
+            <button
+              type="button"
+              onClick={() => removeCertificate(index)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-semibold mb-2 text-gray-800">{certificate.name}</h3>
+            <p className="text-gray-600 mb-1">{certificate.issuingOrganization}</p>
+            <p className="text-sm text-gray-500 mb-4">{certificate.dateOfIssue}</p>
+            <button
+              type="button"
+              onClick={() => editCertificate(index)}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit
+            </button>
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addCertificate}
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
-        >
-          Add Certificate
-        </button>
-        <button
-          type="submit"
-          className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
-        >
-          Update Certificates
-        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-2xl font-semibold mb-6 text-gray-800">
+          {editingIndex !== null ? "Edit Certificate" : "Add New Certificate"}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Certificate Name</label>
+            <input
+              type="text"
+              id="name"
+              value={currentCertificate.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="issuingOrganization" className="block text-sm font-medium text-gray-700 mb-1">Issuing Organization</label>
+            <input
+              type="text"
+              id="issuingOrganization"
+              value={currentCertificate.issuingOrganization}
+              onChange={(e) => handleChange("issuingOrganization", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="dateOfIssue" className="block text-sm font-medium text-gray-700 mb-1">Date of Issue</label>
+            <input
+              type="date"
+              id="dateOfIssue"
+              value={currentCertificate.dateOfIssue}
+              onChange={(e) => handleChange("dateOfIssue", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="certificateFile" className="block text-sm font-medium text-gray-700 mb-1">Certificate File</label>
+            <input
+              type="file"
+              id="certificateFile"
+              onChange={handleFileChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+              accept="image/*,application/pdf"
+            />
+          </div>
+        </div>
+        <div className="mt-6">
+          <button
+            type="submit"
+            className="w-full md:w-auto px-6 py-3 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            {editingIndex !== null ? "Update Certificate" : "Add Certificate"}
+          </button>
+        </div>
       </form>
-    </>
+    </div>
   );
 };
 

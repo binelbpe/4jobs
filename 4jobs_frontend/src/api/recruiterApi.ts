@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {  CreateBasicJobPostParams, UpdateBasicJobPostParams } from '../types/jobPostTypes';
+import { FetchUsersResponse, FetchUserDetailsResponse } from '../types/auth';
 
 const API_BASE_URL = 'http://localhost:5000/recruiter';
 
@@ -105,4 +106,13 @@ export const deleteJobPost = async (id: string) => {
     throw new Error('Job post ID is required to delete the job post');
   }
   return apiRequest('DELETE', `/jobpost-delete/${id}`);
+};
+
+export const fetchJobApplicants = async (jobId: string, page: number = 1): Promise<FetchUsersResponse> => {
+  console.log("job",jobId,page)
+  return apiRequest('GET', `/job-applicants/${jobId}?page=${page}`);
+};
+
+export const fetchUserDetails = async (userId: string): Promise<FetchUserDetailsResponse> => {
+  return apiRequest('GET', `/applicants/${userId}`);
 };

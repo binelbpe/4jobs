@@ -1,10 +1,11 @@
 // src/interface/middlewares/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { JwtAuthService } from '../../infrastructure/services/JwtAuthService';
+import {UserModel} from '../../infrastructure/database/mongoose/models/UserModel'; // Adjust the path to your user model
 
 const authService = new JwtAuthService(process.env.JWT_SECRET || 'secret_1');
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -12,20 +13,54 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
   }
 
   try {
+    // Verify the token
     const decoded = authService.verifyToken(token);
     console.log('Token:', token);
-console.log('Decoded:', decoded);
+    console.log('Decoded:', decoded);
 
-    (req as any).user = decoded;
-    next();
+    // Fetch user from the database using the decoded token information (e.g., userId)
+    const user = await UserModel.findById(decoded.id).lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }else if (user.isBlocked) {
+      throw new Error('User is blocked');
+    }else{
+      (req as any).user = user;
+      next();
+    }
+
+    // Attach the user object to the request
+   
+  } catch (error) {
+    console.error('Error authenticating user:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+
+export const authenticateadmin = async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+
+    const decoded = authService.verifyToken(token);
+
+    const user = await UserModel.findById(decoded.id).lean();
+   if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }else if (user.role!="admin") {
+      return res.status(403).json({ error: 'User is blocked' });
+    }else{
+      (req as any).user = user;
+      next();
+    }
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
 
-export const authorizeAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if ((req as any).user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  next();
-};

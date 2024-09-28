@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MongoJobPostRepository = void 0;
 const inversify_1 = require("inversify");
 const jobPostModel_1 = __importDefault(require("../models/jobPostModel"));
+const UserModel_1 = require("../models/UserModel");
 let MongoJobPostRepository = class MongoJobPostRepository {
     create(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,7 +31,7 @@ let MongoJobPostRepository = class MongoJobPostRepository {
     }
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield jobPostModel_1.default.findById(id);
+            return yield jobPostModel_1.default.findById(id).lean();
         });
     }
     findByRecruiterId(recruiterId) {
@@ -48,6 +49,67 @@ let MongoJobPostRepository = class MongoJobPostRepository {
             const result = yield jobPostModel_1.default.findByIdAndDelete(id);
             return !!result;
         });
+    }
+    findAll(page, limit, sortBy, sortOrder, filter) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const skip = (page - 1) * limit;
+            const sort = {
+                [sortBy]: sortOrder === "asc" ? 1 : -1,
+            };
+            const totalCount = yield jobPostModel_1.default.countDocuments(filter);
+            const totalPages = Math.ceil(totalCount / limit);
+            const jobPosts = yield jobPostModel_1.default.find(filter)
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .lean();
+            return {
+                jobPosts: jobPosts,
+                totalPages,
+                totalCount,
+            };
+        });
+    }
+    findApplicantsByJobId(jobId, page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const skip = (page - 1) * limit;
+            const jobPost = yield jobPostModel_1.default.findById(jobId).lean();
+            if (!jobPost || !jobPost.applicants) {
+                throw new Error("Job post or applicants not found");
+            }
+            const totalCount = ((_a = jobPost.applicants) === null || _a === void 0 ? void 0 : _a.length) || 0;
+            const totalPages = Math.ceil(totalCount / limit);
+            const applicantIds = ((_b = jobPost.applicants) === null || _b === void 0 ? void 0 : _b.slice(skip, skip + limit)) || [];
+            const applicants = yield UserModel_1.UserModel.find({
+                _id: { $in: applicantIds },
+            }).lean();
+            return {
+                applicants: applicants.map(this.mapToUser),
+                totalPages,
+                totalCount,
+            };
+        });
+    }
+    mapToUser(doc) {
+        return {
+            id: doc._id.toString(),
+            email: doc.email,
+            name: doc.name,
+            bio: doc.bio,
+            about: doc.about,
+            experiences: doc.experiences || [],
+            projects: doc.projects || [],
+            certificates: doc.certificates || [],
+            skills: doc.skills || [],
+            profileImage: doc.profileImage,
+            dateOfBirth: doc.dateOfBirth,
+            gender: doc.gender,
+            resume: doc.resume,
+            password: doc.password || "", // Optional, based on your need
+            role: doc.role || "", // Optional, based on your need
+            isAdmin: doc.isAdmin || false, // Optional, based on your need
+        };
     }
 };
 exports.MongoJobPostRepository = MongoJobPostRepository;

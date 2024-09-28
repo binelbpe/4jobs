@@ -1,55 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IUserDocument,Experience,Project,Certificate } from '../../../../domain/entities/User';
 
-interface IUserDocument extends Document {
-  email: string;
-  password: string;
-  name: string;
-  role: 'user' | 'recruiter' | 'admin';
-  isAdmin: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  bio?: string;
-  about?: string;
-  experiences?: Experience[];
-  projects?: Project[];
-  certificates?: Certificate[];
-  skills?: string[];
-  profileImage?: string;
-  dateOfBirth?: Date;
-  gender?: 'male' | 'female' | 'other';
-  resume?: string;
-}
-
-interface Experience {
-  id: string;
-  title: string;
-  company: string;
-  startDate: string;
-  endDate?: string;
-  currentlyWorking: boolean;
-  description: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  link?: string;
-  imageUrl?: string;
-}
-
-interface Certificate {
-  id: string;
-  name: string;
-  issuingOrganization: string;
-  dateOfIssue: Date;
-  imageUrl?: string;
-}
 
 const UserSchema = new Schema<IUserDocument>({
   email: { type: String, unique: true, required: true },
   password: { type: String },
   name: { type: String, required: true },
+  phone:{type: Number},
   role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'user' },
   isAdmin: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
@@ -84,6 +41,8 @@ const UserSchema = new Schema<IUserDocument>({
   dateOfBirth: { type: Date },
   gender: { type: String, enum: ['male', 'female', 'other'] },
   resume: { type: String },
+  appliedJobs: [{ type: Schema.Types.ObjectId, ref: 'JobPost' }],
+  isBlocked:{type: Boolean, default: false },
 });
 
 UserSchema.pre('save', function (next) {
