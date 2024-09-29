@@ -24,16 +24,16 @@ const FetchRecruitersUseCase_1 = require("../application/usecases/admin/FetchRec
 const ApproveRecruiterUseCase_1 = require("../application/usecases/admin/ApproveRecruiterUseCase");
 const AdminDashboardUseCase_1 = require("../application/usecases/admin/AdminDashboardUseCase");
 // Import Auth and Recruiter Use Cases
-const SignupUserUseCase_1 = require("../application/usecases/auth/SignupUserUseCase");
-const LoginUseCase_1 = require("../application/usecases/auth/LoginUseCase");
-const GetUserProfileUseCase_1 = require("../application/usecases/auth/GetUserProfileUseCase");
-const UpdateUserProfileUseCase_1 = require("../application/usecases/auth/UpdateUserProfileUseCase");
+const SignupUserUseCase_1 = require("../application/usecases/user/SignupUserUseCase");
+const LoginUseCase_1 = require("../application/usecases/user/LoginUseCase");
+const GetUserProfileUseCase_1 = require("../application/usecases/user/GetUserProfileUseCase");
+const UpdateUserProfileUseCase_1 = require("../application/usecases/user/UpdateUserProfileUseCase");
 const RegisterRecruiterUsecase_1 = require("../application/usecases/recruiter/RegisterRecruiterUsecase");
 const LoginRecruiterUseCase_1 = require("../application/usecases/recruiter/LoginRecruiterUseCase");
 const JobPostUseCase_1 = require("../application/usecases/recruiter/JobPostUseCase");
-const GetJobPostsUseCase_1 = require("../application/usecases/auth/GetJobPostsUseCase");
-const GetJobPostByIdUseCase_1 = require("../application/usecases/auth/GetJobPostByIdUseCase");
-const ApplyForJobUseCase_1 = require("../application/usecases/auth/ApplyForJobUseCase");
+const GetJobPostsUseCase_1 = require("../application/usecases/user/GetJobPostsUseCase");
+const GetJobPostByIdUseCase_1 = require("../application/usecases/user/GetJobPostByIdUseCase");
+const ApplyForJobUseCase_1 = require("../application/usecases/user/ApplyForJobUseCase");
 const UpdateRecruiterUseCase_1 = require("../application/usecases/recruiter/UpdateRecruiterUseCase");
 const GetRecruiterProfileUseCase_1 = require("../application/usecases/recruiter/GetRecruiterProfileUseCase");
 // Import Controllers
@@ -44,6 +44,11 @@ const ProfileController_1 = require("../presentation/controllers/user/ProfileCon
 const JobPostController_1 = require("../presentation/controllers/recruiter/JobPostController");
 const JobPostControllerUser_1 = require("../presentation/controllers/user/JobPostControllerUser");
 const MongoJobPostRepository_1 = require("./database/mongoose/repositories/MongoJobPostRepository");
+const MongoPostRepository_1 = require("../infrastructure/database/mongoose/repositories/MongoPostRepository");
+const CreatePostUseCase_1 = require("../application/usecases/user/post/CreatePostUseCase");
+const PostController_1 = require("../presentation/controllers/user/PostController");
+const S3Service_1 = require("./services/S3Service");
+const GetAllPostsUseCase_1 = require("../application/usecases/user/post/GetAllPostsUseCase");
 // Initialize Inversify Container
 const container = new inversify_1.Container();
 exports.container = container;
@@ -108,4 +113,9 @@ container
 container
     .bind(types_1.default.JobPostControllerUser)
     .to(JobPostControllerUser_1.JobPostControllerUser);
+container.bind(types_1.default.IPostRepository).to(MongoPostRepository_1.MongoPostRepository);
+container.bind(PostController_1.PostController).toSelf();
+container.bind(types_1.default.CreatePostUseCase).to(CreatePostUseCase_1.CreatePostUseCase);
+container.bind(types_1.default.GetAllPostsUseCase).to(GetAllPostsUseCase_1.GetAllPostsUseCase);
+container.bind(types_1.default.S3Service).to(S3Service_1.S3Service);
 console.log(container);

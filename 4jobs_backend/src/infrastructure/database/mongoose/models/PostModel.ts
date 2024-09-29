@@ -1,14 +1,19 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { Post } from '../../../../domain/entities/Post';
+// src/infrastructure/models/PostModel.ts
 
-export interface PostDocument extends Post, Document {}
+import mongoose, { Schema, Document } from 'mongoose';
+import { IPost } from '../../../../domain/entities/Post';
 
 const PostSchema: Schema = new Schema({
-  author: { type: String, required: true },
-  content: { type: String, required: true },
-  likes: { type: Number, default: 0 },
-  comments: [{ type: String }],
-  shares: { type: Number, default: 0 },
+  userId: { type: String, required: true },
+  content: { type: String },
+  imageUrl: { type: String },
+  videoUrl: { type: String },
+  likes: [{ type: String }],
+  comments: [{
+    userId: { type: String, required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
 }, { timestamps: true });
 
-export default mongoose.model<PostDocument>('Post', PostSchema);
+export default mongoose.model<IPost & Document>('Post', PostSchema);

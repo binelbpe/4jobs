@@ -1,15 +1,17 @@
+// src/domain/usecases/CreatePostUseCase.ts
+
+import { injectable, inject } from 'inversify';
 import { IPostRepository } from '../../../../domain/interfaces/repositories/user/IPostRepository';
-import { Post } from '../../../../domain/entities/Post';
+import { CreatePostDTO, IPost } from '../../../../domain/entities/Post';
+import  TYPES  from '../../../../types';
 
+@injectable()
 export class CreatePostUseCase {
-  constructor(private postRepository: IPostRepository) {}
+  constructor(
+    @inject(TYPES.IPostRepository) private postRepository: IPostRepository
+  ) {}
 
-  async execute(post: Omit<Post, 'id' | 'likes' | 'comments' | 'shares' | 'createdAt' | 'updatedAt'>): Promise<Post> {
-    return this.postRepository.create({
-      ...post,
-      likes: 0,
-      comments: [],
-      shares: 0,
-    });
+  async execute(postData: CreatePostDTO): Promise<IPost> {
+    return this.postRepository.create(postData);
   }
 }

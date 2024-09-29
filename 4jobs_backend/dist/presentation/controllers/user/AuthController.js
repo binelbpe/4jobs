@@ -27,8 +27,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const SignupUserUseCase_1 = require("../../../application/usecases/auth/SignupUserUseCase");
-const LoginUseCase_1 = require("../../../application/usecases/auth/LoginUseCase");
+const SignupUserUseCase_1 = require("../../../application/usecases/user/SignupUserUseCase");
+const LoginUseCase_1 = require("../../../application/usecases/user/LoginUseCase");
 const JwtAuthService_1 = require("../../../infrastructure/services/JwtAuthService");
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const GoogleAuthService_1 = require("../../../infrastructure/services/GoogleAuthService");
@@ -78,9 +78,7 @@ let AuthController = class AuthController {
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendOtp(email, otp);
-                res
-                    .status(200)
-                    .json({
+                res.status(200).json({
                     message: "OTP sent to email. Please verify OTP to complete signup.",
                 });
             }
@@ -146,9 +144,7 @@ let AuthController = class AuthController {
                 const email = payload === null || payload === void 0 ? void 0 : payload.email;
                 const name = (payload === null || payload === void 0 ? void 0 : payload.name) || "Google User";
                 if (!email) {
-                    return res
-                        .status(400)
-                        .json({
+                    return res.status(400).json({
                         error: "Google authentication failed. No email found in token.",
                     });
                 }

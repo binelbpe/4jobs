@@ -22,7 +22,9 @@ const MainFeed: React.FC = () => {
   }
 
   if (status === 'failed') {
-    return <div>Error: {error}</div>;
+    return <div><div className="w-full md:w-3/4 p-4">
+    <CreatePost />
+  </div>Error: {error}</div>;
   }
 
   return (

@@ -27,9 +27,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobPostControllerUser = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const ApplyForJobUseCase_1 = require("../../../application/usecases/auth/ApplyForJobUseCase");
-const GetJobPostByIdUseCase_1 = require("../../../application/usecases/auth/GetJobPostByIdUseCase");
-const GetJobPostsUseCase_1 = require("../../../application/usecases/auth/GetJobPostsUseCase");
+const ApplyForJobUseCase_1 = require("../../../application/usecases/user/ApplyForJobUseCase");
+const GetJobPostByIdUseCase_1 = require("../../../application/usecases/user/GetJobPostByIdUseCase");
+const GetJobPostsUseCase_1 = require("../../../application/usecases/user/GetJobPostsUseCase");
 let JobPostControllerUser = class JobPostControllerUser {
     constructor(applyForJobUseCase, getJobPostByIdUseCase, getJobPostsUseCase) {
         this.applyForJobUseCase = applyForJobUseCase;
@@ -90,7 +90,9 @@ let JobPostControllerUser = class JobPostControllerUser {
             catch (error) {
                 console.error("Error applying for job:", error.message);
                 // If it's a known error (business logic error), return 400 (Bad Request)
-                if (error.message === "User not found" || error.message === "Job post not found" || error.message === "Already applied for this job") {
+                if (error.message === "User not found" ||
+                    error.message === "Job post not found" ||
+                    error.message === "Already applied for this job") {
                     return res.status(400).json({ error: error.message });
                 }
                 // Otherwise, return 500 (Internal Server Error)

@@ -38,5 +38,16 @@ const TYPES = {
     JobPostControllerUser: Symbol.for("JobPostControllerUser"),
     UpdateRecruiterUseCase: Symbol.for('UpdateRecruiterUseCase'), // Added
     GetRecruiterProfileUseCase: Symbol.for('GetRecruiterProfileUseCase'), // Added
+    PostRepository: Symbol.for('PostRepository'),
+    CreatePostUseCase: Symbol.for('CreatePostUseCase'),
+    GetAllPostsUseCase: Symbol.for('GetAllPostsUseCase'),
+    GetUserPostsUseCase: Symbol.for('GetUserPostsUseCase'),
+    DeletePostUseCase: Symbol.for('DeletePostUseCase'),
+    LikePostUseCase: Symbol.for('LikePostUseCase'),
+    UnlikePostUseCase: Symbol.for('UnlikePostUseCase'),
+    CommentOnPostUseCase: Symbol.for('CommentOnPostUseCase'),
+    DeleteCommentUseCase: Symbol.for('DeleteCommentUseCase'),
+    S3Service: Symbol.for('S3Service'),
+    IPostRepository: Symbol.for('IPostRepository'),
 };
 exports.default = TYPES;

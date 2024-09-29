@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createPost } from '../../../redux/slices/postSlice';
-import { AppDispatch } from '../../../redux/store';
+import { RootState, AppDispatch } from "../../../redux/store";
 
 const CreatePost: React.FC = () => {
   const [content, setContent] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.auth.user?.id);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Ensure user is defined
+    if (!user) {
+      console.error('User ID is missing.');
+      return;
+    }
+  
     if (content.trim() || image || video) {
       const postData = {
         content: content.trim() ? content : undefined,
         image: image || undefined,
         video: video || undefined,
       };
-      dispatch(createPost(postData));
+      
+      dispatch(createPost({ postData, userId: user }));
+      
       setContent('');
       setImage(null);
       setVideo(null);
     }
   };
+  
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

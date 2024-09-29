@@ -11,6 +11,8 @@ const types_1 = __importDefault(require("../../types"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const PostController_1 = require("../controllers/user/PostController");
+const fileUploadMiddleware_1 = require("../middlewares/fileUploadMiddleware");
 // Create necessary upload directories
 const createUploadDirs = () => {
     const dirs = [
@@ -28,6 +30,7 @@ createUploadDirs();
 const profileController = container_1.container.get(types_1.default.ProfileController);
 const authController = container_1.container.get(types_1.default.AuthController);
 const jobPostControllerUser = container_1.container.get(types_1.default.JobPostControllerUser);
+const postController = container_1.container.get(PostController_1.PostController);
 // Configure multer for file uploads
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
@@ -48,7 +51,7 @@ const storage = multer_1.default.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path_1.default.extname(file.originalname));
     },
 });
-const upload = (0, multer_1.default)({ storage });
+const uploads = (0, multer_1.default)({ storage });
 // Initialize the router
 exports.authRouter = (0, express_1.Router)();
 const mid = (req, res, next) => {
@@ -65,19 +68,24 @@ exports.authRouter.post('/auth/google/callback', authController.googleAuth.bind(
 // Profile routes
 exports.authRouter.get('/profile/:userId', authMiddleware_1.authenticate, profileController.getUserProfile.bind(profileController));
 // Update profile route
-exports.authRouter.put('/edit-profile/:userId', upload.fields([
+exports.authRouter.put('/edit-profile/:userId', uploads.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'resume', maxCount: 1 },
 ]), authMiddleware_1.authenticate, profileController.updateUserProfile.bind(profileController));
 // Update projects route
 exports.authRouter.put('/edit-projects/:userId', authMiddleware_1.authenticate, profileController.updateUserProjects.bind(profileController));
 // Update certificates route
-exports.authRouter.put('/edit-certificates/:userId', authMiddleware_1.authenticate, mid, upload.fields([{ name: 'certificateImage', maxCount: 1 }]), profileController.updateUserCertificates.bind(profileController));
+exports.authRouter.put('/edit-certificates/:userId', authMiddleware_1.authenticate, mid, uploads.fields([{ name: 'certificateImage', maxCount: 1 }]), profileController.updateUserCertificates.bind(profileController));
 // Update experiences route
 exports.authRouter.put('/edit-experiences/:userId', authMiddleware_1.authenticate, profileController.updateUserExperiences.bind(profileController));
 // Update resume route
-exports.authRouter.put('/edit-resume/:userId', authMiddleware_1.authenticate, upload.single('resume'), profileController.updateUserResume.bind(profileController));
+exports.authRouter.put('/edit-resume/:userId', authMiddleware_1.authenticate, uploads.single('resume'), profileController.updateUserResume.bind(profileController));
 exports.authRouter.get('/jobs', authMiddleware_1.authenticate, jobPostControllerUser.getJobPosts.bind(jobPostControllerUser));
 exports.authRouter.get('/jobs/:id', authMiddleware_1.authenticate, jobPostControllerUser.getJobPostById.bind(jobPostControllerUser));
 exports.authRouter.post('/jobs/:jobId/apply', authMiddleware_1.authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
+exports.authRouter.post('/posts/:userId', authMiddleware_1.authenticate, fileUploadMiddleware_1.upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+]), postController.createPost.bind(postController));
+exports.authRouter.get('/posts', authMiddleware_1.authenticate, postController.getPosts.bind(postController));
 exports.default = exports.authRouter;

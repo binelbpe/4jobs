@@ -1,14 +1,14 @@
-// src/domain/repositories/IPostRepository.ts
-
-import { Post } from '../../../../domain/entities/Post';
+import { IPost, CreatePostDTO } from '../../../entities/Post';
 
 export interface IPostRepository {
-  findAll(): Promise<Post[]>;
-  findById(id: string): Promise<Post | null>;
-  create(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt'>): Promise<Post>;
-  update(id: string, post: Partial<Post>): Promise<Post | null>;
-  delete(id: string): Promise<boolean>;
-  like(id: string): Promise<Post | null>;
-  addComment(id: string, comment: string): Promise<Post | null>;
-  share(id: string): Promise<Post | null>;
+  create(postData: CreatePostDTO): Promise<IPost>;
+  // findById(id: string): Promise<Post | null>;
+  findAll(): Promise<IPost[]>;
+  // findByUserId(userId: string): Promise<Post[]>;
+  // update(id: string, post: Partial<Post>): Promise<Post | null>;
+  // delete(id: string): Promise<boolean>;
+  // addLike(postId: string, userId: string): Promise<Post | null>;
+  // removeLike(postId: string, userId: string): Promise<Post | null>;
+  // addComment(postId: string, comment: { userId: string; content: string }): Promise<Post | null>;
+  // removeComment(postId: string, commentId: string): Promise<Post | null>;
 }

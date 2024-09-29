@@ -1,61 +1,49 @@
-// src/infrastructure/mongodb/repositories/MongoPostRepository.ts
+import { injectable, inject } from 'inversify';
+import { IPostRepository } from '../../../../domain/interfaces/repositories/user/IPostRepository';
+import { IPost, CreatePostDTO } from '../../../../domain/entities/Post';
+import PostModel from '../models/PostModel';
+import { S3Service } from '../../../services/S3Service';
+import TYPES from '../../../../types';
 
-import { IPostRepository } from '../../../domain/repositories/IPostRepository';
-import { Post } from '../../../domain/entities/Post';
-import PostModel, { PostDocument } from '../models/PostModel';
-
+@injectable()
 export class MongoPostRepository implements IPostRepository {
-  async findAll(): Promise<Post[]> {
-    const posts = await PostModel.find().sort({ createdAt: -1 });
-    return posts.map(this.toPost);
-  }
+  constructor(
+    @inject(TYPES.S3Service) private s3Service: S3Service
+  ) {}
 
-  async findById(id: string): Promise<Post | null> {
-    const post = await PostModel.findById(id);
-    return post ? this.toPost(post) : null;
-  }
+  async create(postData: CreatePostDTO): Promise<IPost> {
+    const { userId, content, image, video } = postData;
+    
+    let imageUrl, videoUrl;
 
-  async create(postData: Omit<Post, 'id' | 'createdAt' | 'updatedAt'>): Promise<Post> {
-    const post = new PostModel(postData);
+    if (image) {
+      imageUrl = await this.s3Service.uploadFile(image);
+    }
+
+    if (video) {
+      videoUrl = await this.s3Service.uploadFile(video);
+    }
+
+    const post = new PostModel({
+      userId,
+      content,
+      imageUrl,
+      videoUrl,
+      likes: [],
+      comments: []
+    });
+
     await post.save();
-    return this.toPost(post);
+
+    return post.toObject();
   }
 
-  async update(id: string, postData: Partial<Post>): Promise<Post | null> {
-    const post = await PostModel.findByIdAndUpdate(id, postData, { new: true });
-    return post ? this.toPost(post) : null;
+  async findAll(): Promise<IPost[]> {
+    const posts = await PostModel.find();
+    return posts.map(post => post.toObject());
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await PostModel.findByIdAndDelete(id);
-    return !!result;
-  }
-
-  async like(id: string): Promise<Post | null> {
-    const post = await PostModel.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
-    return post ? this.toPost(post) : null;
-  }
-
-  async addComment(id: string, comment: string): Promise<Post | null> {
-    const post = await PostModel.findByIdAndUpdate(id, { $push: { comments: comment } }, { new: true });
-    return post ? this.toPost(post) : null;
-  }
-
-  async share(id: string): Promise<Post | null> {
-    const post = await PostModel.findByIdAndUpdate(id, { $inc: { shares: 1 } }, { new: true });
-    return post ? this.toPost(post) : null;
-  }
-
-  private toPost(doc: PostDocument): Post {
-    return {
-      id: doc._id.toString(),
-      author: doc.author,
-      content: doc.content,
-      likes: doc.likes,
-      comments: doc.comments,
-      shares: doc.shares,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    };
-  }
+  // Implement other methods for future expansion
 }
+
+

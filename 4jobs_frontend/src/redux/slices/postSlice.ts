@@ -38,11 +38,13 @@ export const fetchPostsByUserId = createAsyncThunk(
 
 export const createPost = createAsyncThunk(
   'posts/createPost',
-  async (postData: CreatePostData) => {
-    const response = await createPostAPI(postData);
+  async ({ postData, userId }: { postData: CreatePostData; userId: string }) => {
+    console.log("post",postData)
+    const response = await createPostAPI(postData, userId);
     return response;
   }
 );
+
 
 export const likePost = createAsyncThunk(
   'posts/likePost',

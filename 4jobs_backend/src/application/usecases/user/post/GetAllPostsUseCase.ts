@@ -1,10 +1,15 @@
+import { injectable, inject } from 'inversify';
+import { IPost } from '../../../../domain/entities/Post';
 import { IPostRepository } from '../../../../domain/interfaces/repositories/user/IPostRepository';
-import { Post } from '../../../../domain/entities/Post';
+import TYPES from '../../../../types';
 
+@injectable()
 export class GetAllPostsUseCase {
-  constructor(private postRepository: IPostRepository) {}
+  constructor(
+    @inject(TYPES.IPostRepository) private postRepository: IPostRepository
+  ) {}
 
-  async execute(): Promise<Post[]> {
+  async execute(): Promise<IPost[]> {
     return this.postRepository.findAll();
   }
 }

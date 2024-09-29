@@ -49,6 +49,13 @@ import { IJobPostRepository } from "../domain/interfaces/repositories/recruiter/
 import { MongoJobPostRepository } from "./database/mongoose/repositories/MongoJobPostRepository";
 import { IAdminRepository } from "../domain/interfaces/repositories/admin/IAdminRepository";
 
+import { IPostRepository } from '../domain/interfaces/repositories/user/IPostRepository';
+import { MongoPostRepository } from '../infrastructure/database/mongoose/repositories/MongoPostRepository';
+import { CreatePostUseCase } from '../application/usecases/user/post/CreatePostUseCase';
+import { PostController } from '../presentation/controllers/user/PostController';
+import { S3Service } from './services/S3Service';
+import { GetAllPostsUseCase } from '../application/usecases/user/post/GetAllPostsUseCase';
+
 // Initialize Inversify Container
 const container = new Container();
 
@@ -120,6 +127,12 @@ container
 container
   .bind<JobPostControllerUser>(TYPES.JobPostControllerUser)
   .to(JobPostControllerUser);
+
+  container.bind<IPostRepository>(TYPES.IPostRepository).to(MongoPostRepository);
+  container.bind<PostController>(PostController).toSelf();
+container.bind<CreatePostUseCase>(TYPES.CreatePostUseCase).to(CreatePostUseCase);
+container.bind<GetAllPostsUseCase>(TYPES.GetAllPostsUseCase).to(GetAllPostsUseCase);
+container.bind<S3Service>(TYPES.S3Service).to(S3Service);
 
 console.log(container);
 export { container };

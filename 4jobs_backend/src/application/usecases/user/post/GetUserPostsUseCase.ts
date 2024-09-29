@@ -4,12 +4,12 @@
 // import  TYPES  from '../../../../types';
 
 // @injectable()
-// export class CommentOnPostUseCase {
+// export class GetUserPostsUseCase {
 //   constructor(
 //     @inject(TYPES.PostRepository) private postRepository: IPostRepository
 //   ) {}
 
-//   async execute(postId: string, userId: string, content: string): Promise<Post | null> {
-//     return this.postRepository.addComment(postId, { userId, content });
+//   async execute(userId: string): Promise<Post[]> {
+//     return this.postRepository.findByUserId(userId);
 //   }
 // }

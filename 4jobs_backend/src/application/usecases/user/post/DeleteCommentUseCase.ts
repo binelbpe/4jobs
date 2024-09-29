@@ -4,12 +4,12 @@
 // import  TYPES  from '../../../../types';
 
 // @injectable()
-// export class CommentOnPostUseCase {
+// export class DeleteCommentUseCase {
 //   constructor(
 //     @inject(TYPES.PostRepository) private postRepository: IPostRepository
 //   ) {}
 
-//   async execute(postId: string, userId: string, content: string): Promise<Post | null> {
-//     return this.postRepository.addComment(postId, { userId, content });
+//   async execute(postId: string, commentId: string): Promise<Post | null> {
+//     return this.postRepository.removeComment(postId, commentId);
 //   }
 // }

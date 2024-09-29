@@ -53,6 +53,41 @@ const apiRequest = async (
   }
 };
 
+const apiUploadRequest = async (
+  method: 'POST' | 'PUT',
+  endpoint: string,
+  formData: FormData,
+) => {
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await axios({
+      method,
+      url: `${API_BASE_URL}${endpoint}`,
+      data: formData,
+      headers: headers,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error('API Error:', error.response.data);
+        throw new Error(error.response.data.error || 'Server Error');
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw new Error('No response from the server');
+      }
+    }
+    console.error('Unexpected error:', error);
+    throw new Error('An unknown error occurred');
+  }
+};
+
 
 export const sendOtpApi = async (email: string) => {
   return apiRequest('POST', '/send-otp', { email });
@@ -169,15 +204,27 @@ export const fetchPostsByUserIdAPI = async (userId: string): Promise<Post[]> => 
 };
 
 // Create a new post
-export const createPostAPI = async (postData: CreatePostData): Promise<Post> => {
+export const createPostAPI = async (postData: CreatePostData, userId: string): Promise<Post> => {
   const formData = new FormData();
-  if (postData.content) formData.append('content', postData.content);
-  if (postData.video) formData.append('video', postData.video);
-  if (postData.image) formData.append('image', postData.image);
+  
+  if (postData.content) {
+    formData.append('content', postData.content);
+  }
+  
+  if (postData.image instanceof File) {
+    formData.append('image', postData.image, postData.image.name);
+  }
+  
+  if (postData.video instanceof File) {
+    formData.append('video', postData.video, postData.video.name);
+  }
 
-  return apiRequest('POST', '/posts', formData, {
-    'Content-Type': 'multipart/form-data',
-  });
+  // Log FormData entries
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}: ${value instanceof File ? value.name : value}`);
+  }
+
+  return apiUploadRequest('POST', `/posts/${userId}`, formData);
 };
 
 // Like a post

@@ -8,6 +8,9 @@ import { JobPostControllerUser } from '../controllers/user/JobPostControllerUser
 import path from 'path';
 import fs from 'fs';
 import {authenticate} from '../middlewares/authMiddleware'
+import  {PostController}  from '../controllers/user/PostController';
+import { upload } from '../middlewares/fileUploadMiddleware';
+
 
 // Create necessary upload directories
 const createUploadDirs = () => {
@@ -28,6 +31,7 @@ createUploadDirs();
 const profileController = container.get<ProfileController>(TYPES.ProfileController);
 const authController = container.get<AuthController>(TYPES.AuthController);
 const jobPostControllerUser = container.get<JobPostControllerUser>(TYPES.JobPostControllerUser);
+const postController = container.get<PostController>(PostController);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -48,7 +52,8 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const uploads = multer({ storage });
+
 
 // Initialize the router
 export const authRouter = Router();
@@ -74,7 +79,7 @@ authRouter.get('/profile/:userId',authenticate, profileController.getUserProfile
 // Update profile route
 authRouter.put(
   '/edit-profile/:userId',
-  upload.fields([
+  uploads.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'resume', maxCount: 1 },
   ]),authenticate,
@@ -91,7 +96,7 @@ authRouter.put(
 authRouter.put(
   '/edit-certificates/:userId',authenticate,
   mid,
-  upload.fields([{ name: 'certificateImage', maxCount: 1 }]),
+  uploads.fields([{ name: 'certificateImage', maxCount: 1 }]),
   profileController.updateUserCertificates.bind(profileController)
 );
 
@@ -104,7 +109,7 @@ authRouter.put(
 // Update resume route
 authRouter.put(
   '/edit-resume/:userId',authenticate,
-  upload.single('resume'),
+  uploads.single('resume'),
   profileController.updateUserResume.bind(profileController)
 );
 
@@ -114,12 +119,15 @@ authRouter.get('/jobs/:id',authenticate, jobPostControllerUser.getJobPostById.bi
 authRouter.post('/jobs/:jobId/apply',authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
 
 
-router.get('/', controller.getAllPosts);
-router.post('/', controller.createPost);
-router.post('/:id/like', controller.likePost);
-router.post('/:id/comment', controller.commentOnPost);
-router.post('/:id/share', controller.sharePost);
+authRouter.post('/posts/:userId',authenticate, upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'video', maxCount: 1 }
+]), postController.createPost.bind(postController));
+
+
+authRouter.get('/posts',authenticate, postController.getPosts.bind(postController));
 
 
 
 export default authRouter;
+
