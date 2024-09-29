@@ -38,11 +38,14 @@ export class MongoPostRepository implements IPostRepository {
     return post.toObject();
   }
 
-  async findAll(): Promise<IPost[]> {
-    const posts = await PostModel.find();
+  async findAll(page: number, limit: number): Promise<IPost[]> {
+    const skip = (page - 1) * limit;
+    const posts = await PostModel.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
     return posts.map(post => post.toObject());
   }
-
   // Implement other methods for future expansion
 }
 

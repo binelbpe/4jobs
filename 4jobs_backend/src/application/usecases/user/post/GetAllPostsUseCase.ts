@@ -9,7 +9,7 @@ export class GetAllPostsUseCase {
     @inject(TYPES.IPostRepository) private postRepository: IPostRepository
   ) {}
 
-  async execute(): Promise<IPost[]> {
-    return this.postRepository.findAll();
+  async execute(page: number, limit: number): Promise<IPost[]> {
+    return this.postRepository.findAll(page, limit);
   }
 }

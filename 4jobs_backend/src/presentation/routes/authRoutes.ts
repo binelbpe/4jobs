@@ -125,7 +125,7 @@ authRouter.post('/posts/:userId',authenticate, upload.fields([
 ]), postController.createPost.bind(postController));
 
 
-authRouter.get('/posts',authenticate, postController.getPosts.bind(postController));
+authRouter.get('/posts', authenticate, postController.getPosts.bind(postController));
 
 
 

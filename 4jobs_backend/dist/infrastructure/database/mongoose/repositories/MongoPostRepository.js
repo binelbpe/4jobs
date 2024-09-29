@@ -55,9 +55,13 @@ let MongoPostRepository = class MongoPostRepository {
             return post.toObject();
         });
     }
-    findAll() {
+    findAll(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            const posts = yield PostModel_1.default.find();
+            const skip = (page - 1) * limit;
+            const posts = yield PostModel_1.default.find()
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
             return posts.map(post => post.toObject());
         });
     }

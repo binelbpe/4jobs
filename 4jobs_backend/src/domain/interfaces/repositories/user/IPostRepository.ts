@@ -3,7 +3,7 @@ import { IPost, CreatePostDTO } from '../../../entities/Post';
 export interface IPostRepository {
   create(postData: CreatePostDTO): Promise<IPost>;
   // findById(id: string): Promise<Post | null>;
-  findAll(): Promise<IPost[]>;
+  findAll(page:number,limit:number): Promise<IPost[]>;
   // findByUserId(userId: string): Promise<Post[]>;
   // update(id: string, post: Partial<Post>): Promise<Post | null>;
   // delete(id: string): Promise<boolean>;

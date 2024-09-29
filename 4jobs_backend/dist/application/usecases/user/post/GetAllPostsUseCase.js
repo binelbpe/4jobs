@@ -31,9 +31,9 @@ let GetAllPostsUseCase = class GetAllPostsUseCase {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
-    execute() {
+    execute(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.postRepository.findAll();
+            return this.postRepository.findAll(page, limit);
         });
     }
 };

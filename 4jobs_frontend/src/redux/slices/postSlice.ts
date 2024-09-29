@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Post, CreatePostData, LikePostData, CommentPostData } from '../../types/postTypes';
 import {
   fetchPostsAPI,
@@ -14,6 +14,8 @@ interface PostsState {
   userPosts: Post[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
+  hasMore: boolean;
+  page: number;
 }
 
 const initialState: PostsState = {
@@ -21,12 +23,18 @@ const initialState: PostsState = {
   userPosts: [],
   status: 'idle',
   error: null,
+  hasMore: true,
+  page: 1,
 };
 
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-  const response = await fetchPostsAPI();
-  return response;
-});
+export const fetchPosts = createAsyncThunk(
+  'posts/fetchPosts',
+  async (_, { getState }) => {
+    const { posts } = getState() as { posts: PostsState };
+    const response = await fetchPostsAPI(posts.page);
+    return response;
+  }
+);
 
 export const fetchPostsByUserId = createAsyncThunk(
   'posts/fetchPostsByUserId',
@@ -39,12 +47,10 @@ export const fetchPostsByUserId = createAsyncThunk(
 export const createPost = createAsyncThunk(
   'posts/createPost',
   async ({ postData, userId }: { postData: CreatePostData; userId: string }) => {
-    console.log("post",postData)
     const response = await createPostAPI(postData, userId);
     return response;
   }
 );
-
 
 export const likePost = createAsyncThunk(
   'posts/likePost',
@@ -70,19 +76,28 @@ export const deletePost = createAsyncThunk(
   }
 );
 
-
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
-  reducers: {},
+  reducers: {
+    resetPosts: (state) => {
+      state.list = [];
+      state.page = 1;
+      state.hasMore = true;
+      state.status = 'idle';
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchPosts.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchPosts.fulfilled, (state, action) => {
+      .addCase(fetchPosts.fulfilled, (state, action: PayloadAction<Post[]>) => {
         state.status = 'succeeded';
-        state.list = action.payload;
+        state.list = state.page === 1 ? action.payload : [...state.list, ...action.payload];
+        state.hasMore = action.payload.length > 0;
+        state.page += 1;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed';
@@ -118,9 +133,11 @@ const postsSlice = createSlice({
         }
       })
       .addCase(deletePost.fulfilled, (state, action) => {
+        state.list = state.list.filter(post => post.id !== action.payload);
         state.userPosts = state.userPosts.filter(post => post.id !== action.payload);
       });
   },
 });
 
+export const { resetPosts } = postsSlice.actions;
 export default postsSlice.reducer;

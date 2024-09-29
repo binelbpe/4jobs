@@ -4,7 +4,7 @@ import { updateUserCertificates } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { Certificate } from "../../types/auth";
 import { toast } from "react-toastify";
-import { Plus, X, Edit2 } from 'lucide-react';
+import {  X, Edit2 } from 'lucide-react';
 
 interface CertificateWithFile extends Omit<Certificate, "file"> {
   file: File | null;

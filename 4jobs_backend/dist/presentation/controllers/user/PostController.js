@@ -59,7 +59,11 @@ let PostController = class PostController {
     getPosts(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const posts = yield this.getAllPostsUseCase.execute();
+                const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 10;
+                console.log("Fetching posts for page:", page);
+                const posts = yield this.getAllPostsUseCase.execute(page, limit);
+                console.log("postssssss==================:", posts);
                 res.status(200).json(posts);
             }
             catch (error) {

@@ -193,9 +193,8 @@ export const fetchJobPostApi = async (jobId: string): Promise<BasicJobPost> => {
 
 /* ------------------ Post APIs ------------------ */
 
-// Fetch all posts
-export const fetchPostsAPI = async (): Promise<Post[]> => {
-  return apiRequest('GET', '/posts');
+export const fetchPostsAPI = async (page: number, limit: number = 10): Promise<Post[]> => {
+  return apiRequest('GET', `/posts?page=${page}&limit=${limit}`);
 };
 
 // Fetch posts by user ID

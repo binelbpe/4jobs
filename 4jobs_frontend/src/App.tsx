@@ -56,7 +56,7 @@ const App: React.FC = () => {
       <Route path="/jobs" element={<PrivateRoute><JobList /></PrivateRoute>} />
       <Route path="/jobs/:jobId" element={<PrivateRoute><JobDetail /></PrivateRoute>} />
       <Route path="/posts/:userId" element={<PrivateRoute><PostList /></PrivateRoute>} />
-      <Route path="/posts/create" element={<CreatePost />}/>
+      <Route path="/posts/create" element={<PrivateRoute><CreatePost /></PrivateRoute>}/>
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />

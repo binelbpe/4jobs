@@ -35,8 +35,11 @@ export class PostController {
 
   async getPosts(req: Request, res: Response): Promise<void> {
     try {
-      console.log("fetching")
-      const posts = await this.getAllPostsUseCase.execute();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      console.log("Fetching posts for page:", page);
+      const posts = await this.getAllPostsUseCase.execute(page, limit);
+      console.log("postssssss==================:",posts)
       res.status(200).json(posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
