@@ -20,6 +20,8 @@ const JobPostSchema: Schema = new Schema({
   status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
   recruiterId: { type: Schema.Types.ObjectId, ref: 'Recruiter', required: true },
   applicants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  reportedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }], 
+  isBlock: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model<JobPost & Document>('JobPost', JobPostSchema);

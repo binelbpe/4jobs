@@ -6,7 +6,8 @@ import {
   createPostAPI,
   likePostAPI,
   commentOnPostAPI,
-  deletePostAPI 
+  deletePostAPI,
+  editPostAPI
 } from '../../api/authapi';
 
 interface PostsState {
@@ -38,8 +39,10 @@ export const fetchPosts = createAsyncThunk(
 
 export const fetchPostsByUserId = createAsyncThunk(
   'posts/fetchPostsByUserId',
-  async (userId: string) => {
-    const response = await fetchPostsByUserIdAPI(userId);
+  async ({ userId, page, limit }: { userId: string; page: number; limit: number }) => {
+    console.log("Fetching posts for user:", userId);
+    const response = await fetchPostsByUserIdAPI(userId, page, limit);
+    console.log("Fetched posts:", response);
     return response;
   }
 );
@@ -70,9 +73,25 @@ export const commentOnPost = createAsyncThunk(
 
 export const deletePost = createAsyncThunk(
   'posts/deletePost',
-  async (postId: string) => {
-    await deletePostAPI(postId);
-    return postId;
+  async (postId: string, { rejectWithValue }) => {
+    try {
+      console.log("Deleting post with ID:", postId);
+      await deletePostAPI(postId);
+      return postId;
+    } catch (error) {
+      console.error("Error in deletePost thunk:", error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const editPost = createAsyncThunk(
+  'posts/editPost',
+  async ({ postId,userId, postData }: { postId: string; userId:string; postData: Partial<CreatePostData> }) => {
+    console.log("edit post",userId,postId,postData)
+    const response = await editPostAPI(postId,userId, postData);
+    console.log("response",response)
+    return response;
   }
 );
 
@@ -104,7 +123,9 @@ const postsSlice = createSlice({
         state.error = action.error.message || null;
       })
       .addCase(fetchPostsByUserId.fulfilled, (state, action) => {
+        console.log("action payload",action.payload)
         state.userPosts = action.payload;
+        console.log("userPosts",state.userPosts)
       })
       .addCase(createPost.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
@@ -112,30 +133,52 @@ const postsSlice = createSlice({
       })
       .addCase(likePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.list.findIndex((post) => post.id === updatedPost.id);
+        const index = state.list.findIndex((post) => post._id === updatedPost._id);
         if (index !== -1) {
           state.list[index] = updatedPost;
         }
-        const userIndex = state.userPosts.findIndex((post) => post.id === updatedPost.id);
+        const userIndex = state.userPosts.findIndex((post) => post._id === updatedPost._id);
         if (userIndex !== -1) {
           state.userPosts[userIndex] = updatedPost;
         }
       })
       .addCase(commentOnPost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.list.findIndex((post) => post.id === updatedPost.id);
+        const index = state.list.findIndex((post) => post._id === updatedPost._id);
         if (index !== -1) {
           state.list[index] = updatedPost;
         }
-        const userIndex = state.userPosts.findIndex((post) => post.id === updatedPost.id);
+        const userIndex = state.userPosts.findIndex((post) => post._id === updatedPost._id);
         if (userIndex !== -1) {
           state.userPosts[userIndex] = updatedPost;
         }
       })
+      .addCase(deletePost.pending, (state) => {
+        console.log("Delete post pending");
+        state.status = 'loading';
+      })
       .addCase(deletePost.fulfilled, (state, action) => {
-        state.list = state.list.filter(post => post.id !== action.payload);
-        state.userPosts = state.userPosts.filter(post => post.id !== action.payload);
-      });
+        console.log("Delete post fulfilled", action.payload);
+        state.status = 'succeeded';
+        state.list = state.list.filter(post => post._id !== action.payload);
+        state.userPosts = state.userPosts.filter(post => post._id !== action.payload);
+      })
+      .addCase(deletePost.rejected, (state, action) => {
+        console.error("Delete post rejected", action.error);
+        state.status = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(editPost.fulfilled, (state, action) => {
+        const updatedPost = action.payload;
+        const index = state.list.findIndex((post) => post._id === updatedPost._id);
+        if (index !== -1) {
+          state.list[index] = updatedPost;
+        }
+        const userIndex = state.userPosts.findIndex((post) => post._id === updatedPost._id);
+        if (userIndex !== -1) {
+          state.userPosts[userIndex] = updatedPost;
+        }
+      })
   },
 });
 

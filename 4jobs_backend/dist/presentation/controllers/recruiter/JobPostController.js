@@ -50,11 +50,11 @@ let JobPostController = class JobPostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const jobPost = yield this.jobPostUseCase.getJobPostById(req.params.id);
-                if (jobPost) {
+                if (jobPost && !jobPost.isBlock) {
                     res.json(jobPost);
                 }
                 else {
-                    res.status(404).json({ error: 'Job post not found' });
+                    res.status(404).json({ error: 'Job post not found or blocked' });
                 }
             }
             catch (error) {

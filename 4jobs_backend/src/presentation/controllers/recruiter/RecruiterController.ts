@@ -3,10 +3,11 @@ import { injectable, inject } from "inversify";
 import TYPES from "../../../types";
 import { RegisterRecruiterUseCase } from "../../../application/usecases/recruiter/RegisterRecruiterUsecase";
 import { LoginRecruiterUseCase } from "../../../application/usecases/recruiter/LoginRecruiterUseCase";
-import { UpdateRecruiterUseCase } from "../../../application/usecases/recruiter/UpdateRecruiterUseCase"; // Added
-import { GetRecruiterProfileUseCase } from "../../../application/usecases/recruiter/GetRecruiterProfileUseCase"; // Added
+import { UpdateRecruiterUseCase } from "../../../application/usecases/recruiter/UpdateRecruiterUseCase";
+import { GetRecruiterProfileUseCase } from "../../../application/usecases/recruiter/GetRecruiterProfileUseCase";
 import { IRecruiterRepository } from "../../../domain/interfaces/repositories/recruiter/IRecruiterRepository";
 import { OtpService } from "../../../infrastructure/services/OtpService";
+import { S3Service } from "../../../infrastructure/services/S3Service";
 import { IRecruiter } from "../../../domain/entities/Recruiter";
 
 const tempRecruiterStore: {
@@ -27,44 +28,31 @@ export class RecruiterController {
     private registerUseCase: RegisterRecruiterUseCase,
     @inject(TYPES.LoginRecruiterUseCase)
     private loginUseCase: LoginRecruiterUseCase,
-    @inject(TYPES.UpdateRecruiterUseCase) // Injected
-    private updateRecruiterUseCase: UpdateRecruiterUseCase, // Added
-    @inject(TYPES.GetRecruiterProfileUseCase) // Injected
-    private getRecruiterProfileUseCase: GetRecruiterProfileUseCase, // Added
+    @inject(TYPES.UpdateRecruiterUseCase)
+    private updateRecruiterUseCase: UpdateRecruiterUseCase,
+    @inject(TYPES.GetRecruiterProfileUseCase)
+    private getRecruiterProfileUseCase: GetRecruiterProfileUseCase,
     @inject(TYPES.OtpService) private otpService: OtpService,
     @inject(TYPES.IRecruiterRepository)
-    private recruiterRepository: IRecruiterRepository
+    private recruiterRepository: IRecruiterRepository,
+    @inject(TYPES.S3Service) private s3Service: S3Service
   ) {}
 
-  // Register Recruiter
   async registerRecruiter(req: Request, res: Response) {
     try {
       const { email, password, companyName, phone, name } = req.body;
-      const governmentId = req.files?.["governmentId"]
-        ? req.files["governmentId"][0].path
-        : undefined;
-      const employeeIdImage = req.files?.["employeeIdImage"]
-        ? req.files["employeeIdImage"][0].path
-        : undefined;
-
-      if (
-        !email ||
-        !password ||
-        !companyName ||
-        !phone ||
-        !name ||
-        !governmentId
-      ) {
-        return res
-          .status(400)
-          .json({ error: "All fields are required, including government ID" });
+      const governmentIdFile = req.file;
+console.log("governmentId",req.file)
+      if (!email || !password || !companyName || !phone || !name || !governmentIdFile) {
+        return res.status(400).json({ error: "All fields are required, including government ID" });
       }
 
-      const existingRecruiter =
-        await this.recruiterRepository.findRecruiterByEmail(email);
+      const existingRecruiter = await this.recruiterRepository.findRecruiterByEmail(email);
       if (existingRecruiter) {
         return res.status(400).json({ error: "Recruiter already exists" });
       }
+
+      const governmentIdUrl = await this.s3Service.uploadFile(governmentIdFile);
 
       tempRecruiterStore[email] = {
         email,
@@ -72,7 +60,7 @@ export class RecruiterController {
         companyName,
         phone,
         name,
-        governmentId,
+        governmentId: governmentIdUrl,
       };
 
       const otp = this.otpService.generateOtp();
@@ -80,8 +68,7 @@ export class RecruiterController {
       await this.otpService.sendOtp(email, otp);
 
       res.status(200).json({
-        message:
-          "OTP sent to email. Please verify OTP to complete registration.",
+        message: "OTP sent to email. Please verify OTP to complete registration.",
       });
     } catch (error) {
       console.error("Error during recruiter registration:", error);
@@ -180,31 +167,25 @@ export class RecruiterController {
     }
   }
 
-  // Update Recruiter Profile
+
   async updateProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const updates: Partial<IRecruiter> = req.body;
 
-      const governmentIdImage = req.files?.["governmentId"]
-        ? req.files["governmentId"][0].path
-        : undefined;
-      const employeeIdImage = req.files?.["employeeIdImage"]
-        ? req.files["employeeIdImage"][0].path
-        : undefined;
+      const governmentIdFile = req.files?.["governmentId"]?.[0];
+      const employeeIdFile = req.files?.["employeeIdImage"]?.[0];
 
-      if (governmentIdImage) {
-        updates.governmentId = governmentIdImage;
+      if (governmentIdFile) {
+        const governmentIdUrl = await this.s3Service.uploadFile(governmentIdFile);
+        updates.governmentId = governmentIdUrl;
       }
-      if (employeeIdImage) {
-        updates.employeeIdImage = employeeIdImage;
+      if (employeeIdFile) {
+        const employeeIdUrl = await this.s3Service.uploadFile(employeeIdFile);
+        updates.employeeIdImage = employeeIdUrl;
       }
 
-      const updatedRecruiter = await this.updateRecruiterUseCase.execute( // Updated
-        id,
-        updates
-      );
-      console.log("updaterec", updatedRecruiter);
+      const updatedRecruiter = await this.updateRecruiterUseCase.execute(id, updates);
       if (!updatedRecruiter) {
         return res.status(404).json({ error: "Recruiter not found" });
       }

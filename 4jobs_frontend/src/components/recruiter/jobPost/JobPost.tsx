@@ -1,6 +1,6 @@
 import React from 'react';
 import { BasicJobPost } from '../../../types/jobPostTypes';
-import { Briefcase, MapPin, DollarSign, Users, Edit, Trash2, ToggleLeft, ToggleRight, Eye } from 'lucide-react';
+import { Briefcase, MapPin, IndianRupee, Users, Edit, Trash2, ToggleLeft, ToggleRight, Eye } from 'lucide-react';
 
 interface JobPostProps {
   jobPosts: BasicJobPost[];
@@ -27,7 +27,7 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
               <span>{post.location}</span>
             </div>
             <div className="flex items-center text-gray-700">
-              <DollarSign size={18} className="mr-2 text-purple-600" />
+              <IndianRupee size={18} className="mr-2 text-purple-600" />
               <span>₹{post.salaryRange.min.toLocaleString()} - ₹{post.salaryRange.max.toLocaleString()}</span>
             </div>
             <div className="flex items-center text-gray-700">

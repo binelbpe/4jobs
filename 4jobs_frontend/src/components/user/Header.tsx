@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBriefcase,
@@ -7,18 +7,63 @@ import {
   faUser,
   faSearch,
   faBars,
+  faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { fetchJobPostsAsync } from "../../redux/slices/authSlice";
+import {
+  fetchNotifications,
+  addNotification,
+  markAsRead,
+  markAllAsRead,
+} from "../../redux/slices/notificationSlice";
+import { socketService } from "../../services/socketService";
 
 const UserHeader: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
+  const notifications = useSelector(
+    (state: RootState) => state.notifications.items
+  );
+  const unreadCount = useSelector(
+    (state: RootState) => state.notifications.unreadCount
+  );
+
+  useEffect(() => {
+    if (user) {
+      console.log("Connecting socket for user:", user.id);
+      if (!socketService.isConnected()) {
+        socketService.connect(user.id);
+      }
+      dispatch(fetchNotifications(user.id));
+
+      const handleNewNotification = (notification: any) => {
+        console.log("New notification received:", notification);
+        dispatch(addNotification(notification));
+      };
+
+      socketService.on('newNotification', handleNewNotification);
+
+      // Add this debug logging
+      const checkConnectionStatus = setInterval(() => {
+        const status = socketService.getConnectionStatus();
+        console.log('Current socket connection status:', status);
+      }, 5000);
+
+      return () => {
+        console.log("Disconnecting socket");
+        socketService.disconnect();
+        clearInterval(checkConnectionStatus);
+        socketService.off('newNotification', handleNewNotification);
+      };
+    }
+  }, [user, dispatch]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -46,6 +91,17 @@ const UserHeader: React.FC = () => {
 
   const goHome = () => {
     navigate("/dashboard");
+  };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      dispatch(markAllAsRead());
+      notifications.forEach((notification) => {
+        socketService.markNotificationAsRead(notification._id);
+        dispatch(markAsRead(notification._id));
+      });
+    }
   };
 
   return (
@@ -96,60 +152,57 @@ const UserHeader: React.FC = () => {
           <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
           <span>Messages</span>
         </button>
-        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+        <div className="relative">
+        <button
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+          onClick={toggleNotifications}
+        >
           <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
           <span>Notifications</span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+              {unreadCount}
+            </span>
+          )}
         </button>
+        {showNotifications && (
+          <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+            <div className="p-2 border-b border-gray-200 font-bold">
+              Notifications
+            </div>
+            {notifications.length === 0 ? (
+              <div className="p-2">No new notifications</div>
+            ) : (
+              notifications.map((notification) => (
+                <div
+                  key={notification._id}
+                  className="p-2 border-b border-gray-100 hover:bg-gray-50"
+                >
+                  <p className="text-sm">{notification.message}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(notification.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
         <button
-          className="text-purple-600 hover:text-gray-600"
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
           onClick={goToProfile}
         >
-          <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
-          <span className="text-xs">Profile</span>
+          <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
+          <span>Profile</span>
         </button>
         <button
-          className="text-purple-600 hover:text-gray-600"
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
           onClick={handleLogout}
         >
-          <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
-          <span className="text-xs">Logout</span>
+          <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6 mr-2" />
+          <span>Logout</span>
         </button>
       </nav>
-
-      {/* Dropdown Menu for Small Screens */}
-      {menuOpen && (
-        <div className="absolute top-16 right-0 w-48 bg-white shadow-lg rounded-md p-4 md:hidden">
-          <button
-            className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
-            onClick={goToJobs}
-          >
-            <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
-            <span>Jobs</span>
-          </button>
-          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
-            <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
-            <span>Messages</span>
-          </button>
-          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
-            <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
-            <span>Notifications</span>
-          </button>
-          <button
-            className="text-gray-600 hover:text-purple-600 mb-2"
-            onClick={goToProfile}
-          >
-            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
-            <span>Profile</span>
-          </button>
-          <button
-            className="flex items-center text-purple-600 hover:text-gray-600"
-            onClick={handleLogout}
-          >
-            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
-            <span>Logout</span>
-          </button>
-        </div>
-      )}
     </header>
   );
 };

@@ -49,5 +49,17 @@ const TYPES = {
     DeleteCommentUseCase: Symbol.for('DeleteCommentUseCase'),
     S3Service: Symbol.for('S3Service'),
     IPostRepository: Symbol.for('IPostRepository'),
+    EditPostUseCase: Symbol.for('EditPostUseCase'),
+    ReportJobUseCase: Symbol.for('ReportJobUseCase'),
+    IJobPostAdminRepository: Symbol.for("IJobPostAdminRepository"),
+    FetchJobPostsUseCase: Symbol.for("FetchJobPostsUseCase"),
+    BlockJobPostUseCase: Symbol.for("BlockJobPostUseCase"),
+    UnblockJobPostUseCase: Symbol.for("UnblockJobPostUseCase"),
+    ConnectionUseCase: Symbol.for("ConnectionUseCase"),
+    IConnectionRepository: Symbol.for("IConnectionRepository"),
+    ConnectionController: Symbol.for("ConnectionController"),
+    SocketIOServer: Symbol.for("SocketIOServer"),
+    UserManager: Symbol.for("UserManager"),
+    NotificationEventEmitter: Symbol.for("NotificationEventEmitter"),
 };
 exports.default = TYPES;

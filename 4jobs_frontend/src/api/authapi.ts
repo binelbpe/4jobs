@@ -139,7 +139,10 @@ export const updateUserCertificatesApi = async (
     if (cert.file) {
       formData.append(`certificateImage`, cert.file, cert.file.name); // Use a consistent key for the image
     }
+    console.log("cert.file",cert.file)
   });
+
+  console.log("form data",formData)
 
   return apiRequest('PUT', `/edit-certificates/${userId}`, formData, {
     'Content-Type': 'multipart/form-data',
@@ -198,8 +201,8 @@ export const fetchPostsAPI = async (page: number, limit: number = 10): Promise<P
 };
 
 // Fetch posts by user ID
-export const fetchPostsByUserIdAPI = async (userId: string): Promise<Post[]> => {
-  return apiRequest('GET', `/posts/user/${userId}`);
+export const fetchPostsByUserIdAPI = async (userId: string, page: number, limit: number): Promise<Post[]> => {
+  return apiRequest('GET', `/posts/user/${userId}?page=${page}&limit=${limit}`);
 };
 
 // Create a new post
@@ -240,5 +243,45 @@ export const commentOnPostAPI = async (commentData: CommentPostData): Promise<Po
 };
 
 export const deletePostAPI = async (postId: string): Promise<void> => {
-  return apiRequest('DELETE', `/posts/${postId}`);
+  return apiRequest('DELETE', `/posts/delete/${postId}`);
+};
+
+export const editPostAPI = async (postId: string,userId:string, postData: Partial<CreatePostData>): Promise<Post> => {
+  const formData = new FormData();
+  
+  if (postData.content) {
+    formData.append('content', postData.content);
+  }
+  
+  if (postData.image instanceof File) {
+    formData.append('image', postData.image, postData.image.name);
+  }
+  
+  if (postData.video instanceof File) {
+    formData.append('video', postData.video, postData.video.name);
+  }
+
+  return apiUploadRequest('PUT', `/posts/edit/${postId}/${userId}`, formData);
+};
+
+export const reportJobApi = async (userId: string, jobId: string): Promise<void> => {
+  return apiRequest('POST', `/jobs/${jobId}/report`, { userId });
+};
+
+export const fetchConnectionProfileApi = async (userId: string) => {
+  return apiRequest('GET', `/connections/profile/${userId}`);
+};
+
+export const fetchNotificationsApi = async (userId: string) => {
+  return apiRequest('GET', `/notifications/${userId}`);
+};
+
+// Add the new function to fetch recommendations
+export const fetchRecommendationsApi = async (userId: string) => {
+  return apiRequest('GET', `/connections/recommendations/${userId}`);
+};
+
+// Add the new function to send a connection request
+export const sendConnectionRequestApi = async (senderId: string, recipientId: string) => {
+  return apiRequest('POST', '/connections/request', { senderId, recipientId });
 };

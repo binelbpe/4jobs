@@ -21,3 +21,6 @@ adminRouter.patch('/recruiters/:id/approve', authMiddleware_1.authenticateadmin,
 adminRouter.get('/users', authMiddleware_1.authenticateadmin, (req, res) => adminController.fetchUsers(req, res));
 adminRouter.patch('/users/:userId/block', authMiddleware_1.authenticateadmin, (req, res) => adminController.blockUser(req, res));
 adminRouter.patch('/users/:userId/unblock', authMiddleware_1.authenticateadmin, (req, res) => adminController.unblockUser(req, res));
+adminRouter.get('/job-posts', authMiddleware_1.authenticateadmin, (req, res) => adminController.fetchJobPosts(req, res));
+adminRouter.patch('/job-posts/:postId/block', authMiddleware_1.authenticateadmin, (req, res) => adminController.blockJobPost(req, res));
+adminRouter.patch('/job-posts/:postId/unblock', authMiddleware_1.authenticateadmin, (req, res) => adminController.unblockJobPost(req, res));

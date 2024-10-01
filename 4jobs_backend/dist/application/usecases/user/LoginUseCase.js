@@ -40,6 +40,7 @@ let LoginUseCase = class LoginUseCase {
                     throw new Error("User not found");
                 }
                 console.log("user login", user);
+                console.log("passsss", password);
                 if (user.isBlocked) {
                     throw new Error("User is blocked");
                 }

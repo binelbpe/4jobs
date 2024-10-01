@@ -5,66 +5,22 @@ import TYPES from '../../types';
 import { AuthController } from '../controllers/user/AuthController';
 import { ProfileController } from '../controllers/user/ProfileController';
 import { JobPostControllerUser } from '../controllers/user/JobPostControllerUser';
-import path from 'path';
-import fs from 'fs';
-import {authenticate} from '../middlewares/authMiddleware'
-import  {PostController}  from '../controllers/user/PostController';
-import { upload } from '../middlewares/fileUploadMiddleware';
-
-
-// Create necessary upload directories
-const createUploadDirs = () => {
-  const dirs = [
-    'uploads/user/profile',
-    'uploads/user/resume',
-    'uploads/user/certificates',
-  ];
-  dirs.forEach((dir) => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-  });
-};
-
-createUploadDirs();
+import { PostController } from '../controllers/user/PostController';
+import { ConnectionController } from '../controllers/user/ConnectionController';
+import { authenticate } from '../middlewares/authMiddleware';
+import { S3Service } from '../../infrastructure/services/S3Service';
 
 const profileController = container.get<ProfileController>(TYPES.ProfileController);
 const authController = container.get<AuthController>(TYPES.AuthController);
 const jobPostControllerUser = container.get<JobPostControllerUser>(TYPES.JobPostControllerUser);
 const postController = container.get<PostController>(PostController);
+const s3Service = container.get<S3Service>(TYPES.S3Service);
+const connectionController = container.get<ConnectionController>(TYPES.ConnectionController);
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let dir = 'uploads/';
-    if (file.fieldname === 'profileImage') {
-      dir += 'user/profile';
-    } else if (file.fieldname === 'resume') {
-      dir += 'user/resume';
-    } else if (file.fieldname === 'certificateImage') {
-      dir += 'user/certificates';
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-const uploads = multer({ storage });
-
-
-// Initialize the router
 export const authRouter = Router();
-
-import { Request, Response, NextFunction } from 'express';
-
-const mid = (req: Request, res: Response, next: NextFunction) => {
-  console.log("req.body:", req.body);
-  console.log("req.files:", req.files);
-  next();
-};
 
 // Auth routes
 authRouter.post('/login', authController.login.bind(authController));
@@ -74,60 +30,162 @@ authRouter.post('/verify-otp', authController.verifyOtp.bind(authController));
 authRouter.post('/auth/google/callback', authController.googleAuth.bind(authController));
 
 // Profile routes
-authRouter.get('/profile/:userId',authenticate, profileController.getUserProfile.bind(profileController));
+authRouter.get('/profile/:userId', authenticate, profileController.getUserProfile.bind(profileController));
 
 // Update profile route
 authRouter.put(
   '/edit-profile/:userId',
-  uploads.fields([
+  authenticate,
+  upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'resume', maxCount: 1 },
-  ]),authenticate,
+  ]),
+  async (req, res, next) => {
+    if (req.files) {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      if (files['profileImage']) {
+        const profileImageUrl = await s3Service.uploadFile(files['profileImage'][0]);
+        req.body.profileImage = profileImageUrl;
+      }
+      
+      if (files['resume']) {
+        const resumeUrl = await s3Service.uploadFile(files['resume'][0]);
+        req.body.resume = resumeUrl;
+      }
+    }
+    next();
+  },
   profileController.updateUserProfile.bind(profileController)
 );
 
 // Update projects route
 authRouter.put(
-  '/edit-projects/:userId',authenticate,
+  '/edit-projects/:userId',
+  authenticate,
   profileController.updateUserProjects.bind(profileController)
 );
 
 // Update certificates route
 authRouter.put(
-  '/edit-certificates/:userId',authenticate,
-  mid,
-  uploads.fields([{ name: 'certificateImage', maxCount: 1 }]),
-  profileController.updateUserCertificates.bind(profileController)
-);
+  '/edit-certificates/:userId',
+  authenticate,
+  upload.array('certificateImage'), // Allow multiple files
+  async (req, res, next) => {
+    if (req.files && Array.isArray(req.files)) {
+      const certificateImages = await Promise.all(
+        req.files.map(file => s3Service.uploadFile(file))
+      );
+      req.body.certificateImages = certificateImages;
+    }
 
-// Update experiences route
-authRouter.put(
-  '/edit-experiences/:userId',authenticate,
-  profileController.updateUserExperiences.bind(profileController)
+    // Parse the certificateDetails JSON string if it's a string
+    if (typeof req.body.certificateDetails === 'string') {
+      req.body.certificateDetails = JSON.parse(req.body.certificateDetails);
+    }
+
+    // Update imageUrl with S3 URL for new uploads
+    if (req.body.certificateDetails && req.body.certificateImages) {
+      let s3UrlIndex = 0;
+      req.body.certificateDetails = req.body.certificateDetails.map((cert: any) => {
+        if (cert.imageUrl.startsWith('/uploads/') || cert.imageUrl === '') {
+          if (s3UrlIndex < req.body.certificateImages.length) {
+            cert.imageUrl = req.body.certificateImages[s3UrlIndex];
+            s3UrlIndex++;
+          }
+        }
+        return cert;
+      });
+    }
+
+    console.log("req.body", req.body);
+    next();
+  },
+  profileController.updateUserCertificates.bind(profileController)
 );
 
 // Update resume route
 authRouter.put(
-  '/edit-resume/:userId',authenticate,
-  uploads.single('resume'),
+  '/edit-resume/:userId',
+  authenticate,
+  upload.single('resume'),
+  async (req, res, next) => {
+    if (req.file) {
+      const resumeUrl = await s3Service.uploadFile(req.file);
+      req.body.resume = resumeUrl;
+    }
+    next();
+  },
   profileController.updateUserResume.bind(profileController)
 );
 
+// Job routes
+authRouter.get('/jobs', authenticate, jobPostControllerUser.getJobPosts.bind(jobPostControllerUser));
+authRouter.get('/jobs/:id', authenticate, jobPostControllerUser.getJobPostById.bind(jobPostControllerUser));
+authRouter.post('/jobs/:jobId/apply', authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
+authRouter.post("/jobs/:jobId/report", authenticate, (req, res) => jobPostControllerUser.reportJob(req, res));
 
-authRouter.get('/jobs',authenticate, jobPostControllerUser.getJobPosts.bind(jobPostControllerUser));
-authRouter.get('/jobs/:id',authenticate, jobPostControllerUser.getJobPostById.bind(jobPostControllerUser));
-authRouter.post('/jobs/:jobId/apply',authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
-
-
-authRouter.post('/posts/:userId',authenticate, upload.fields([
-  { name: 'image', maxCount: 1 },
-  { name: 'video', maxCount: 1 }
-]), postController.createPost.bind(postController));
-
+// Post routes
+authRouter.post('/posts/:userId',
+  authenticate,
+  upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+  ]),
+  async (req, res, next) => {
+    if (req.files) {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      if (files['image']) {
+        const imageUrl = await s3Service.uploadFile(files['image'][0]);
+        req.body.image = imageUrl;
+      }
+      
+      if (files['video']) {
+        const videoUrl = await s3Service.uploadFile(files['video'][0]);
+        req.body.video = videoUrl;
+      }
+    }
+    next();
+  },
+  postController.createPost.bind(postController)
+);
 
 authRouter.get('/posts', authenticate, postController.getPosts.bind(postController));
+authRouter.get('/posts/user/:id', authenticate, postController.getPostsForUser.bind(postController));
+authRouter.delete('/posts/delete/:id', authenticate, postController.deletePost.bind(postController));
+authRouter.put(
+  '/posts/edit/:postId/:userId',
+  authenticate,
+  upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+  ]),
+  async (req, res, next) => {
+    if (req.files) {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      if (files['image']) {
+        const imageUrl = await s3Service.uploadFile(files['image'][0]);
+        req.body.imageUrl = imageUrl;
+      }
+      
+      if (files['video']) {
+        const videoUrl = await s3Service.uploadFile(files['video'][0]);
+        req.body.videoUrl = videoUrl;
+      }
+    }
+    console.log("req,body",req.body)
+    console.log("idsss",req.params.userId)
+    next();
+  },
+  postController.editPost.bind(postController)
+);
 
+
+authRouter.get('/connections/recommendations/:userId', authenticate, connectionController.getRecommendations.bind(connectionController));
+authRouter.post('/connections/request', authenticate, connectionController.sendConnectionRequest.bind(connectionController));
+authRouter.get('/notifications/:userId', authenticate, connectionController.getNotifications.bind(connectionController));
 
 
 export default authRouter;
-

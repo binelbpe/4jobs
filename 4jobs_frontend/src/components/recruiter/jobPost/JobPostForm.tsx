@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BasicJobPostFormData } from '../../../types/jobPostTypes';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
-import { Briefcase, Building, Globe, MapPin, DollarSign, Users, Book, CheckSquare, Laptop } from 'lucide-react';
+import { Briefcase, Building, Globe, MapPin, IndianRupee, Users, Book, CheckSquare, Laptop } from 'lucide-react';
 import { validateJobPostForm } from './formValidation';
 
 interface JobPostFormProps {
@@ -158,7 +158,7 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="salaryRange.min" className=" mb-1 font-medium text-gray-700 flex items-center">
-            <DollarSign className="mr-2 text-purple-600" size={20} />
+            <IndianRupee className="mr-2 text-purple-600" size={20} />
             Minimum Salary
           </label>
           <input
@@ -172,7 +172,7 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
         </div>
         <div>
           <label htmlFor="salaryRange.max" className=" mb-1 font-medium text-gray-700 flex items-center">
-            <DollarSign className="mr-2 text-purple-600" size={20} />
+            <IndianRupee className="mr-2 text-purple-600" size={20} />
             Maximum Salary
           </label>
           <input

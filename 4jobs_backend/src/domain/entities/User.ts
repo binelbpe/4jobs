@@ -6,16 +6,16 @@ export interface User {
   password: string;
   phone?:number;
   name: string;
-  role: 'user' | 'recruiter' | 'admin';  
-  isAdmin: boolean;
+  role?: 'user' | 'recruiter' | 'admin';  
+  isAdmin?: boolean;
   appliedJobs?: string[];
   // Profile-related fields
   bio?: string;
   about?: string;
-  experiences: Experience[];
-  projects: Project[];
-  certificates: Certificate[];
-  skills: string[];
+  experiences?: Experience[];
+  projects?: Project[];
+  certificates?: Certificate[];
+  skills?: string[];
   profileImage?: string;
   dateOfBirth?: Date;
   gender?: 'male' | 'female' | 'other';
@@ -72,4 +72,11 @@ export interface Certificate {
   issuingOrganization: string;
   dateOfIssue: Date;
   imageUrl?: string;
+}
+export interface UserRecommendation {
+  id: string;
+  name: string;
+  email: string;
+  profileImage?: string;
+  connectionStatus: 'none' | 'pending' | 'accepted' | 'rejected';
 }

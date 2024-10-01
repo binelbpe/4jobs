@@ -36,6 +36,9 @@ import ContestantDetails from './components/recruiter/jobPost/ContestantDetails'
 import UserList from './components/admin/UserList';
 import PostList from './components/user/posts/PostList';
 import CreatePost from './components/user/posts/CreatePost';
+import UserPostsList from './components/user/posts/PostList'
+import EditPost from './components/user/posts/EditPost'
+import AdminJobPost from './components/admin/AdminJobPost'
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -57,6 +60,8 @@ const App: React.FC = () => {
       <Route path="/jobs/:jobId" element={<PrivateRoute><JobDetail /></PrivateRoute>} />
       <Route path="/posts/:userId" element={<PrivateRoute><PostList /></PrivateRoute>} />
       <Route path="/posts/create" element={<PrivateRoute><CreatePost /></PrivateRoute>}/>
+      <Route path="/posts/user/:userId" element={<PrivateRoute><UserPostsList /></PrivateRoute>}/>
+      <Route path="/edit-post/:postId" element={<PrivateRoute><EditPost /></PrivateRoute>}/>
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />
@@ -65,7 +70,7 @@ const App: React.FC = () => {
       <Route path="/admin/recruiters" element={<AdminPrivateRoute><AdminRecruiterList /></AdminPrivateRoute>} />
       <Route path="/admin/profile" element={<AdminPrivateRoute><AdminProfile /></AdminPrivateRoute>} />
       <Route path="/admin/user" element={<AdminPrivateRoute><UserList /></AdminPrivateRoute>} />
-
+      <Route path="/admin/jobpost" element={<AdminPrivateRoute><AdminJobPost /></AdminPrivateRoute>} />
       {/* Recruiter Routes */}
       <Route path="/recruiter" element={<RecruiterLogin />} />
       <Route path="/recruiter/login" element={<RecruiterLogin />} />

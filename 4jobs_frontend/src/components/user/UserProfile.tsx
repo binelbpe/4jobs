@@ -36,7 +36,7 @@ const UserProfile: React.FC = () => {
 
   const handleViewPosts = () => {
     if (userId) {
-      navigate(`/posts/${userId}`);
+      navigate(`/posts/user/${userId}`);
     }
   };
 
@@ -51,14 +51,14 @@ const UserProfile: React.FC = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Header />
-      <div className="container mx-auto p-6">
+      <div className="container m-5 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-purple-600 to-purple-300 p-6 text-white">
             <div className="flex flex-col md:flex-row items-center">
               <img
                 src={
                   user?.profileImage
-                    ? `http://localhost:5000${user.profileImage}`
+                    ? `${user.profileImage}`
                     : "/default-profile.png"
                 }
                 alt="Profile"
@@ -114,7 +114,7 @@ const UserProfile: React.FC = () => {
             <Section title="Resume" icon={<FileText />}>
               {user?.resume ? (
                 <a
-                  href={`http://localhost:5000${user.resume}`}
+                  href={`${user.resume}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300"
@@ -197,7 +197,7 @@ const CertificateCard: React.FC<{ certificate: any }> = ({ certificate }) => (
     </div>
     {certificate.imageUrl && (
       <img
-        src={`http://localhost:5000${certificate.imageUrl}`}
+        src={`${certificate.imageUrl}`}
         alt={certificate.name}
         className="w-full h-48 object-cover"
       />

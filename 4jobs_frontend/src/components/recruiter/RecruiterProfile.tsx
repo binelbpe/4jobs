@@ -36,14 +36,14 @@ const RecruiterProfile: React.FC = () => {
           {profile?.governmentId && (
             <div>
               <p><strong>Government ID:</strong></p>
-              <img src={`http://localhost:5000/${profile.governmentId}`} alt="Government ID" className="w-24 h-auto border border-gray-300 rounded" />
+              <img src={`${profile.governmentId}`} alt="Government ID" className="w-24 h-auto border border-gray-300 rounded" />
             </div>
           )}
 
           {profile?.employeeIdImage && (
             <div>
               <p><strong>Employee ID Image:</strong></p>
-              <img src={`http://localhost:5000/${profile.employeeIdImage}`} alt="Employee ID" className="w-24 h-auto border border-gray-300 rounded" />
+              <img src={`${profile.employeeIdImage}`} alt="Employee ID" className="w-24 h-auto border border-gray-300 rounded" />
             </div>
           )}
 

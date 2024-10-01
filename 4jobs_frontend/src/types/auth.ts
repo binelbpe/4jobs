@@ -129,3 +129,8 @@ export interface FetchUserDetailsResponse {
 export interface ApiError {
   message: string;
 }
+
+
+export interface RecommendationUser extends User {
+  connectionStatus: 'none' | 'pending' | 'rejected';
+}

@@ -27,128 +27,105 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfileController = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const GetUserProfileUseCase_1 = require("../../../application/usecases/user/GetUserProfileUseCase");
-const UpdateUserProfileUseCase_1 = require("../../../application/usecases/user/UpdateUserProfileUseCase");
 let ProfileController = class ProfileController {
-    constructor(getUserProfileUseCase, updateUserProfileUseCase) {
-        this.getUserProfileUseCase = getUserProfileUseCase;
-        this.updateUserProfileUseCase = updateUserProfileUseCase;
+    constructor(userRepository) {
+        this.userRepository = userRepository;
     }
     getUserProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
             try {
-                const userId = req.params.userId;
-                const profile = yield this.getUserProfileUseCase.execute(userId);
-                if (!profile) {
-                    return res.status(404).json({ message: "Profile not found" });
+                const user = yield this.userRepository.findByUserId(userId);
+                if (!user) {
+                    return res.status(404).json({ message: 'User not found' });
                 }
-                if (profile.isBlocked) {
-                    throw new Error("User is blocked");
-                }
-                res.status(200).json(profile);
+                res.json(user);
             }
             catch (error) {
-                console.error("Error retrieving user profile:", error);
-                res.status(500).json({ error: "Error retrieving user profile" });
+                res.status(500).json({ message: 'Error fetching user profile' });
             }
         });
     }
     updateUserProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
+            const updateData = req.body;
             try {
-                const userId = req.params.userId;
-                const profileData = req.body;
-                if (req.files && "profileImage" in req.files) {
-                    const file = req.files["profileImage"][0];
-                    profileData.profileImage = `/uploads/user/profile/${file.filename}`;
+                const updatedUser = yield this.userRepository.update(userId, updateData);
+                if (!updatedUser) {
+                    return res.status(404).json({ message: 'User not found' });
                 }
-                const updatedProfile = yield this.updateUserProfileUseCase.execute(userId, profileData);
-                res.status(200).json(updatedProfile);
+                res.json(updatedUser);
             }
             catch (error) {
-                console.error("Error updating user profile:", error);
-                res.status(500).json({ error: "Error updating user profile" });
+                res.status(500).json({ message: 'Error updating user profile' });
             }
         });
     }
     updateUserProjects(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
+            const { projects } = req.body;
             try {
-                const userId = req.params.userId;
-                const { projects } = req.body;
-                const updatedProfile = yield this.updateUserProfileUseCase.execute(userId, { projects });
-                res.status(200).json(updatedProfile);
+                const updatedUser = yield this.userRepository.update(userId, { projects });
+                if (!updatedUser) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+                res.json(updatedUser);
             }
             catch (error) {
-                console.error("Error updating user projects:", error);
-                res.status(500).json({ error: "Error updating user projects" });
+                res.status(500).json({ message: 'Error updating user projects' });
             }
         });
     }
     updateUserCertificates(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            const userId = req.params.userId;
+            const { certificateDetails, certificateImages } = req.body;
             try {
-                const userId = req.params.userId;
-                const files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a["certificateImage"]) || [];
-                let certificateDetails;
-                try {
-                    certificateDetails = JSON.parse(req.body.certificateDetails || "[]");
-                    if (!Array.isArray(certificateDetails)) {
-                        throw new Error("certificateDetails must be an array");
-                    }
+                // Combine certificate details with uploaded image URLs
+                const certificates = certificateDetails.map((cert, index) => (Object.assign(Object.assign({}, cert), { image: certificateImages[index] || null })));
+                const updatedUser = yield this.userRepository.update(userId, { certificates });
+                if (!updatedUser) {
+                    return res.status(404).json({ message: 'User not found' });
                 }
-                catch (error) {
-                    console.error("Error parsing certificateDetails:", error);
-                    return res
-                        .status(400)
-                        .json({ error: "Invalid certificateDetails format" });
-                }
-                const certificates = certificateDetails.map((details, index) => {
-                    const file = files[index]; // Map the correct file for each certificate
-                    return Object.assign(Object.assign({}, details), { imageUrl: file
-                            ? `/uploads/user/certificates/${file.filename}`
-                            : details.imageUrl });
-                });
-                const updatedProfile = yield this.updateUserProfileUseCase.execute(userId, { certificates });
-                res
-                    .status(200)
-                    .json({ message: "Certificates updated successfully", updatedProfile });
+                res.json(updatedUser);
             }
             catch (error) {
-                console.error("Error updating user certificates:", error);
-                res.status(500).json({ error: "Error updating user certificates" });
+                console.error('Error updating user certificates:', error);
+                res.status(500).json({ message: 'Error updating user certificates' });
             }
         });
     }
     updateUserExperiences(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
+            const { experiences } = req.body;
             try {
-                const userId = req.params.userId;
-                const { experiences } = req.body;
-                const updatedProfile = yield this.updateUserProfileUseCase.execute(userId, { experiences });
-                res.status(200).json(updatedProfile);
+                const updatedUser = yield this.userRepository.update(userId, { experiences });
+                if (!updatedUser) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+                res.json(updatedUser);
             }
             catch (error) {
-                console.error("Error updating user experiences:", error);
-                res.status(500).json({ error: "Error updating user experiences" });
+                res.status(500).json({ message: 'Error updating user experiences' });
             }
         });
     }
     updateUserResume(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
+            const { resume } = req.body;
             try {
-                const userId = req.params.userId;
-                if (!req.file) {
-                    return res.status(400).json({ error: "No resume file uploaded" });
+                const updatedUser = yield this.userRepository.update(userId, { resume });
+                if (!updatedUser) {
+                    return res.status(404).json({ message: 'User not found' });
                 }
-                const resumePath = `/uploads/user/resume/${req.file.filename}`;
-                const updatedProfile = yield this.updateUserProfileUseCase.execute(userId, { resume: resumePath });
-                res.status(200).json(updatedProfile);
+                res.json(updatedUser);
             }
             catch (error) {
-                console.error("Error updating user resume:", error);
-                res.status(500).json({ error: "Error updating user resume" });
+                res.status(500).json({ message: 'Error updating user resume' });
             }
         });
     }
@@ -156,8 +133,6 @@ let ProfileController = class ProfileController {
 exports.ProfileController = ProfileController;
 exports.ProfileController = ProfileController = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_1.default.GetUserProfileUseCase)),
-    __param(1, (0, inversify_1.inject)(types_1.default.UpdateUserProfileUseCase)),
-    __metadata("design:paramtypes", [GetUserProfileUseCase_1.GetUserProfileUseCase,
-        UpdateUserProfileUseCase_1.UpdateUserProfileUseCase])
+    __param(0, (0, inversify_1.inject)(types_1.default.IUserRepository)),
+    __metadata("design:paramtypes", [Object])
 ], ProfileController);

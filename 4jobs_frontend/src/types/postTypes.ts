@@ -1,6 +1,6 @@
 // src/types/postTypes.ts
 export interface Post {
-  id: string;
+  _id: string;
   userId: string;
   author: string;
   content?: string;

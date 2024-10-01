@@ -11,26 +11,23 @@ import { User } from "../../../../domain/entities/User";
 
 @injectable()
 export class MongoJobPostUserRepository implements IJobPostUserRepository {
- 
   async findById(id: string): Promise<JobPost | null> {
-    return await JobPostModel.findById(id).lean();
+    return await JobPostModel.findOne({ _id: id, isBlock: false }).lean();
   }
   
   async update(
     id: string,
     userId: string
   ): Promise<JobPost | null> {
-    let updatedJobPost= await JobPostModel.findByIdAndUpdate(
-      id, 
-      { $addToSet: { applicants: userId } }, // Use $addToSet to avoid duplicate entries
+    let updatedJobPost = await JobPostModel.findOneAndUpdate(
+      { _id: id, isBlock: false },
+      { $addToSet: { applicants: userId } },
       { new: true }
     );
 
-    console.log("updatedjob post applied -------------------",updatedJobPost)
+    console.log("updatedjob post applied -------------------", updatedJobPost)
     return updatedJobPost
   }
-  
-
 
   async findAll(
     page: number,
@@ -44,10 +41,13 @@ export class MongoJobPostUserRepository implements IJobPostUserRepository {
       [sortBy]: sortOrder === "asc" ? 1 : -1,
     };
 
-    const totalCount = await JobPostModel.countDocuments(filter);
+    // Add isBlock: false to the filter
+    const blockFilter = { ...filter, isBlock: false };
+
+    const totalCount = await JobPostModel.countDocuments(blockFilter);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const jobPosts = await JobPostModel.find(filter)
+    const jobPosts = await JobPostModel.find(blockFilter)
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -58,5 +58,15 @@ export class MongoJobPostUserRepository implements IJobPostUserRepository {
       totalPages,
       totalCount,
     };
+  }
+
+  async reportJob(userId: string, jobId: string): Promise<JobPost | null> {
+    const updatedJobPost = await JobPostModel.findByIdAndUpdate(
+      jobId,
+      { $addToSet: { reportedBy: userId } },
+      { new: true }
+    );
+
+    return updatedJobPost;
   }
 }

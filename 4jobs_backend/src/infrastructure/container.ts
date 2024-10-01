@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { Secret } from "jsonwebtoken";
 import { Container } from "inversify";
 import TYPES from "../types";
+import { Server as SocketIOServer } from 'socket.io';
 import { MongoUserRepository } from "./database/mongoose/repositories/MongoUserRepository";
 import { MongoRecruiterRepository } from "./database/mongoose/repositories/MongoRecruiterRepository";
 import { MongoAdminRepository } from "./database/mongoose/repositories/MongoAdminRepository";
@@ -10,6 +11,8 @@ import { JwtAuthService } from "./services/JwtAuthService";
 import { OtpService } from "./services/OtpService";
 import { NodemailerEmailService } from "./services/NodemailerEmailService";
 import { GoogleAuthService } from "./services/GoogleAuthService";
+import { UserManager } from './services/UserManager';
+import { EventEmitter } from 'events';
 
 // Import Admin Use Cases
 import { LoginAdminUseCase } from "../application/usecases/admin/LoginAdminUseCase";
@@ -20,6 +23,11 @@ import { UnblockUserUseCase } from "../application/usecases/admin/UnblockUserUse
 import { FetchRecruitersUseCase } from "../application/usecases/admin/FetchRecruitersUseCase";
 import { ApproveRecruiterUseCase } from "../application/usecases/admin/ApproveRecruiterUseCase";
 import { AdminDashboardUseCase } from "../application/usecases/admin/AdminDashboardUseCase";
+import { IJobPostAdminRepository } from "../domain/interfaces/repositories/admin/IJobPostRepositoryAdmin";
+import { MongoJobPostAdminRepository } from "../infrastructure/database/mongoose/repositories/MongoJobPostAdminRepository";
+import { FetchJobPostsUseCase } from "../application/usecases/admin/FetchJobPostsUseCase";
+import { BlockJobPostUseCase } from "../application/usecases/admin/BlockJobPostUseCase";
+import { UnblockJobPostUseCase } from "../application/usecases/admin/UnblockJobPostUseCase";
 
 // Import Auth and Recruiter Use Cases
 import { SignupUserUseCase } from "../application/usecases/user/SignupUserUseCase";
@@ -55,6 +63,16 @@ import { CreatePostUseCase } from '../application/usecases/user/post/CreatePostU
 import { PostController } from '../presentation/controllers/user/PostController';
 import { S3Service } from './services/S3Service';
 import { GetAllPostsUseCase } from '../application/usecases/user/post/GetAllPostsUseCase';
+import { GetUserPostsUseCase } from '../application/usecases/user/post/GetUserPostsUseCase';
+import { DeletePostUseCase } from '../application/usecases/user/post/DeletePostUseCase';
+import { EditPostUseCase } from '../application/usecases/user/post/EditPostUseCase'
+import { ReportJobUseCase } from '../application/usecases/user/ReportJobUseCase'
+
+
+import { IConnectionRepository } from '../domain/interfaces/repositories/user/IConnectionRepository';
+import { ConnectionUseCase } from '../application/usecases/user/ConnectionUseCase';
+import { MongoConnectionRepository } from './database/mongoose/repositories/MongoConnectionRepository';
+import { ConnectionController } from '../presentation/controllers/user/ConnectionController';
 
 // Initialize Inversify Container
 const container = new Container();
@@ -99,6 +117,10 @@ container.bind(TYPES.UnblockUserUseCase).to(UnblockUserUseCase);
 container.bind(TYPES.FetchRecruitersUseCase).to(FetchRecruitersUseCase);
 container.bind(TYPES.ApproveRecruiterUseCase).to(ApproveRecruiterUseCase);
 container.bind(TYPES.AdminDashboardUseCase).to(AdminDashboardUseCase);
+container.bind<IJobPostAdminRepository>(TYPES.IJobPostAdminRepository).to(MongoJobPostAdminRepository);
+container.bind<FetchJobPostsUseCase>(TYPES.FetchJobPostsUseCase).to(FetchJobPostsUseCase);
+container.bind<BlockJobPostUseCase>(TYPES.BlockJobPostUseCase).to(BlockJobPostUseCase);
+container.bind<UnblockJobPostUseCase>(TYPES.UnblockJobPostUseCase).to(UnblockJobPostUseCase);
 
 // Bind Auth and Recruiter Use Cases
 container.bind(TYPES.SignupUserUseCase).to(SignupUserUseCase);
@@ -132,7 +154,23 @@ container
   container.bind<PostController>(PostController).toSelf();
 container.bind<CreatePostUseCase>(TYPES.CreatePostUseCase).to(CreatePostUseCase);
 container.bind<GetAllPostsUseCase>(TYPES.GetAllPostsUseCase).to(GetAllPostsUseCase);
+
+container.bind<GetUserPostsUseCase>(TYPES.GetUserPostsUseCase).to(GetUserPostsUseCase);
+container.bind<DeletePostUseCase>(TYPES.DeletePostUseCase).to(DeletePostUseCase)
+container.bind<EditPostUseCase>(TYPES.EditPostUseCase).to(EditPostUseCase)
+container.bind<ReportJobUseCase>(TYPES.ReportJobUseCase).to(ReportJobUseCase)
 container.bind<S3Service>(TYPES.S3Service).to(S3Service);
+
+
+container.bind<IConnectionRepository>(TYPES.IConnectionRepository).to(MongoConnectionRepository);
+container.bind<ConnectionUseCase>(TYPES.ConnectionUseCase).to(ConnectionUseCase);
+container.bind<ConnectionController>(TYPES.ConnectionController).to(ConnectionController);
+
+container.bind<SocketIOServer>(TYPES.SocketIOServer).toConstantValue(new SocketIOServer());
+container.bind<UserManager>(TYPES.UserManager).to(UserManager).inSingletonScope();
+container.bind<EventEmitter>(TYPES.NotificationEventEmitter).toDynamicValue(() => {
+  return new EventEmitter();
+}).inSingletonScope();
 
 console.log(container);
 export { container };

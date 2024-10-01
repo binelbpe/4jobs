@@ -11,7 +11,7 @@ const Sidebar: React.FC = () => {
       <div className="flex flex-col items-center mb-4">
         {user?.profileImage ? (
           <img
-          src={`http://localhost:5000${user.profileImage}`}
+          src={`${user.profileImage}`}
             alt="Profile"
             className="w-20 h-20 rounded-full object-cover"
           />
@@ -39,9 +39,9 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
       
-      <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300">
+      {/* <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300">
         Try Premium for free
-      </button>
+      </button> */}
     </div>
   );
 };

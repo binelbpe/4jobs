@@ -54,9 +54,7 @@ let MongoUserRepository = class MongoUserRepository {
     }
     updateAppliedJobs(id, jobPostId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const updatedUser = yield UserModel_1.UserModel.findByIdAndUpdate(id, { $addToSet: { appliedJobs: jobPostId } }, // Add jobPostId to appliedJobs array if not already present
-            { new: true }).lean();
-            console.log("updated user applied job 11111111111111111111", updatedUser);
+            const updatedUser = yield UserModel_1.UserModel.findByIdAndUpdate(id, { $addToSet: { appliedJobs: jobPostId } }, { new: true }).lean();
             return updatedUser ? this.mapToUser(updatedUser) : null;
         });
     }
@@ -76,10 +74,10 @@ let MongoUserRepository = class MongoUserRepository {
             certificates: doc.certificates || [],
             skills: doc.skills || [],
             appliedJobs: doc.appliedJobs || [],
-            profileImage: doc.profileImage,
+            profileImage: doc.profileImage, // This will now be an S3 URL
             dateOfBirth: doc.dateOfBirth,
             gender: doc.gender,
-            resume: doc.resume,
+            resume: doc.resume, // This will now be an S3 URL
             isBlocked: doc.isBlocked,
         };
     }

@@ -1,22 +1,27 @@
 import nodemailer from 'nodemailer';
-import { injectable } from 'inversify';  // Import @injectable
+import { injectable } from 'inversify';  
 import { IEmailService } from '../../domain/interfaces/services/IEmailService';
 
-@injectable()  // Add @injectable annotation
+@injectable()  
 export class NodemailerEmailService implements IEmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: false,  
+      port: parseInt(process.env.SMTP_PORT || '465', 10),
+      secure: true,  
       auth: {
         user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
-        pass: process.env.SMTP_PASS || 'slgg epir pxjq fojv',
+        pass: process.env.SMTP_PASS || 'layl xsji ajwz ksqh',
       },
+      tls: {
+        rejectUnauthorized: false 
+      },
+      connectionTimeout: 120000,
+      socketTimeout: 120000,
       logger: true,  
-      debug: true,    
+      debug: process.env.NODE_ENV === 'development',  
     });
   }
 
@@ -38,7 +43,7 @@ export class NodemailerEmailService implements IEmailService {
   async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM,
+        from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
         to,
         subject: 'Password Reset Request',
         text: `Please use the following token to reset your password: ${resetToken}`,

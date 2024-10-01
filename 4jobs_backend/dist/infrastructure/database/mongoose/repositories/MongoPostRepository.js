@@ -49,7 +49,7 @@ let MongoPostRepository = class MongoPostRepository {
                 imageUrl,
                 videoUrl,
                 likes: [],
-                comments: []
+                comments: [],
             });
             yield post.save();
             return post.toObject();
@@ -62,7 +62,39 @@ let MongoPostRepository = class MongoPostRepository {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-            return posts.map(post => post.toObject());
+            return posts.map((post) => post.toObject());
+        });
+    }
+    findByUserId(userId, page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("mongo limit page", limit, page);
+            console.log("userId", userId);
+            const skip = (page - 1) * limit;
+            const posts = yield PostModel_1.default.find({ userId: userId })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean();
+            console.log("posts", posts);
+            return posts;
+        });
+    }
+    deletePost(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const deletedPost = yield PostModel_1.default.findByIdAndDelete(id);
+            console.log("deletedPost", deletedPost);
+            return deletedPost ? true : false;
+        });
+    }
+    editPost(postId, userId, updatedPostData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findOne({ _id: postId, userId: userId });
+            if (!post) {
+                throw new Error('Post not found or user not authorized to edit this post');
+            }
+            Object.assign(post, updatedPostData);
+            yield post.save();
+            return post.toObject();
         });
     }
 };

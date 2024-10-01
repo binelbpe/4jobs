@@ -29,52 +29,42 @@ const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 const RegisterRecruiterUsecase_1 = require("../../../application/usecases/recruiter/RegisterRecruiterUsecase");
 const LoginRecruiterUseCase_1 = require("../../../application/usecases/recruiter/LoginRecruiterUseCase");
-const UpdateRecruiterUseCase_1 = require("../../../application/usecases/recruiter/UpdateRecruiterUseCase"); // Added
-const GetRecruiterProfileUseCase_1 = require("../../../application/usecases/recruiter/GetRecruiterProfileUseCase"); // Added
+const UpdateRecruiterUseCase_1 = require("../../../application/usecases/recruiter/UpdateRecruiterUseCase");
+const GetRecruiterProfileUseCase_1 = require("../../../application/usecases/recruiter/GetRecruiterProfileUseCase");
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
+const S3Service_1 = require("../../../infrastructure/services/S3Service");
 const tempRecruiterStore = {};
 let RecruiterController = class RecruiterController {
-    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository) {
+    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository, s3Service) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
         this.updateRecruiterUseCase = updateRecruiterUseCase;
         this.getRecruiterProfileUseCase = getRecruiterProfileUseCase;
         this.otpService = otpService;
         this.recruiterRepository = recruiterRepository;
+        this.s3Service = s3Service;
     }
-    // Register Recruiter
     registerRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             try {
                 const { email, password, companyName, phone, name } = req.body;
-                const governmentId = ((_a = req.files) === null || _a === void 0 ? void 0 : _a["governmentId"])
-                    ? req.files["governmentId"][0].path
-                    : undefined;
-                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b["employeeIdImage"])
-                    ? req.files["employeeIdImage"][0].path
-                    : undefined;
-                if (!email ||
-                    !password ||
-                    !companyName ||
-                    !phone ||
-                    !name ||
-                    !governmentId) {
-                    return res
-                        .status(400)
-                        .json({ error: "All fields are required, including government ID" });
+                const governmentIdFile = req.file;
+                console.log("governmentId", req.file);
+                if (!email || !password || !companyName || !phone || !name || !governmentIdFile) {
+                    return res.status(400).json({ error: "All fields are required, including government ID" });
                 }
                 const existingRecruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
                 if (existingRecruiter) {
                     return res.status(400).json({ error: "Recruiter already exists" });
                 }
+                const governmentIdUrl = yield this.s3Service.uploadFile(governmentIdFile);
                 tempRecruiterStore[email] = {
                     email,
                     password,
                     companyName,
                     phone,
                     name,
-                    governmentId,
+                    governmentId: governmentIdUrl,
                 };
                 const otp = this.otpService.generateOtp();
                 this.otpService.storeOtp(email, otp);
@@ -171,28 +161,23 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
-    // Update Recruiter Profile
     updateProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
+            var _a, _b, _c, _d;
             try {
                 const { id } = req.params;
                 const updates = req.body;
-                const governmentIdImage = ((_a = req.files) === null || _a === void 0 ? void 0 : _a["governmentId"])
-                    ? req.files["governmentId"][0].path
-                    : undefined;
-                const employeeIdImage = ((_b = req.files) === null || _b === void 0 ? void 0 : _b["employeeIdImage"])
-                    ? req.files["employeeIdImage"][0].path
-                    : undefined;
-                if (governmentIdImage) {
-                    updates.governmentId = governmentIdImage;
+                const governmentIdFile = (_b = (_a = req.files) === null || _a === void 0 ? void 0 : _a["governmentId"]) === null || _b === void 0 ? void 0 : _b[0];
+                const employeeIdFile = (_d = (_c = req.files) === null || _c === void 0 ? void 0 : _c["employeeIdImage"]) === null || _d === void 0 ? void 0 : _d[0];
+                if (governmentIdFile) {
+                    const governmentIdUrl = yield this.s3Service.uploadFile(governmentIdFile);
+                    updates.governmentId = governmentIdUrl;
                 }
-                if (employeeIdImage) {
-                    updates.employeeIdImage = employeeIdImage;
+                if (employeeIdFile) {
+                    const employeeIdUrl = yield this.s3Service.uploadFile(employeeIdFile);
+                    updates.employeeIdImage = employeeIdUrl;
                 }
-                const updatedRecruiter = yield this.updateRecruiterUseCase.execute(// Updated
-                id, updates);
-                console.log("updaterec", updatedRecruiter);
+                const updatedRecruiter = yield this.updateRecruiterUseCase.execute(id, updates);
                 if (!updatedRecruiter) {
                     return res.status(404).json({ error: "Recruiter not found" });
                 }
@@ -214,9 +199,10 @@ exports.RecruiterController = RecruiterController = __decorate([
     __param(3, (0, inversify_1.inject)(types_1.default.GetRecruiterProfileUseCase)),
     __param(4, (0, inversify_1.inject)(types_1.default.OtpService)),
     __param(5, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
+    __param(6, (0, inversify_1.inject)(types_1.default.S3Service)),
     __metadata("design:paramtypes", [RegisterRecruiterUsecase_1.RegisterRecruiterUseCase,
         LoginRecruiterUseCase_1.LoginRecruiterUseCase,
         UpdateRecruiterUseCase_1.UpdateRecruiterUseCase,
         GetRecruiterProfileUseCase_1.GetRecruiterProfileUseCase,
-        OtpService_1.OtpService, Object])
+        OtpService_1.OtpService, Object, S3Service_1.S3Service])
 ], RecruiterController);

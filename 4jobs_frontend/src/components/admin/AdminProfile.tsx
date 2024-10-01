@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
-import Header from '../admin/AdminHeader'; // Import the Header component
-import Sidebar from '../admin/AdminSidebar'; // Import the Sidebar component
+import Header from '../admin/AdminHeader'; 
+import Sidebar from '../admin/AdminSidebar'; 
 
 const AdminProfile: React.FC = () => {
   const { token, dashboardData } = useSelector((state: RootState) => state.admin);

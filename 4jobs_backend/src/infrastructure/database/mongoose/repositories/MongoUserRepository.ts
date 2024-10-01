@@ -17,11 +17,10 @@ export class MongoUserRepository implements IUserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await UserModel.findOne({ email }).lean();
-
     return user ? this.mapToUser(user) : null;
   }
 
-  async create(user: Omit<User, "id">): Promise<User> {
+  async create(user: Omit<User, 'id'>): Promise<User> {
     const newUser = new UserModel(user);
     await newUser.save();
     return this.mapToUser(newUser.toObject());
@@ -34,18 +33,14 @@ export class MongoUserRepository implements IUserRepository {
     return updatedUser ? this.mapToUser(updatedUser) : null;
   }
 
-  
   async updateAppliedJobs(id: string, jobPostId: string): Promise<User | null> {
     const updatedUser = await UserModel.findByIdAndUpdate(
         id,
-        { $addToSet: { appliedJobs: jobPostId } }, // Add jobPostId to appliedJobs array if not already present
+        { $addToSet: { appliedJobs: jobPostId } },
         { new: true }
     ).lean();
-    
-    console.log("updated user applied job 11111111111111111111",updatedUser)
     return updatedUser ? this.mapToUser(updatedUser) : null;
-}
-
+  }
 
   private mapToUser(doc: any): User {
     return {
@@ -55,7 +50,7 @@ export class MongoUserRepository implements IUserRepository {
       name: doc.name,
       role: doc.role,
       isAdmin: doc.isAdmin,
-      phone:doc.phone,
+      phone: doc.phone,
       bio: doc.bio,
       about: doc.about,
       experiences: doc.experiences || [],
@@ -63,10 +58,10 @@ export class MongoUserRepository implements IUserRepository {
       certificates: doc.certificates || [],
       skills: doc.skills || [],
       appliedJobs: doc.appliedJobs || [],
-      profileImage: doc.profileImage,
+      profileImage: doc.profileImage, // This will now be an S3 URL
       dateOfBirth: doc.dateOfBirth,
       gender: doc.gender,
-      resume: doc.resume,
+      resume: doc.resume, // This will now be an S3 URL
       isBlocked: doc.isBlocked,
     };
   }

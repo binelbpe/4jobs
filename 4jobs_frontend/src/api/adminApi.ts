@@ -70,3 +70,17 @@ return apiRequest('PATCH',`/users/${userId}/block`)
 export const unblockUserApi = async (userId: string) => {
   return apiRequest('PATCH',`/users/${userId}/unblock`)
 };
+
+export const fetchJobPostsApi = async () => {
+  return apiRequest('GET', '/job-posts');
+};
+
+export const blockJobPostApi = async (postId: string) => {
+  return apiRequest('PATCH', `/job-posts/${postId}/block`);
+};
+
+export const unblockJobPostApi = async (postId: string) => {
+  return apiRequest('PATCH', `/job-posts/${postId}/unblock`);
+};
+
+

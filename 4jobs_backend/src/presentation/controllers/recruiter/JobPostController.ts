@@ -25,10 +25,10 @@ export class JobPostController {
   async getJobPostById(req: Request, res: Response): Promise<void> {
     try {
       const jobPost = await this.jobPostUseCase.getJobPostById(req.params.id);
-      if (jobPost) {
+      if (jobPost && !jobPost.isBlock) {
         res.json(jobPost);
       } else {
-        res.status(404).json({ error: 'Job post not found' });
+        res.status(404).json({ error: 'Job post not found or blocked' });
       }
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch job post' });

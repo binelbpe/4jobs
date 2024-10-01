@@ -23,19 +23,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodemailerEmailService = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const inversify_1 = require("inversify"); // Import @injectable
+const inversify_1 = require("inversify");
 let NodemailerEmailService = class NodemailerEmailService {
     constructor() {
         this.transporter = nodemailer_1.default.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '587', 10),
-            secure: false,
+            port: parseInt(process.env.SMTP_PORT || '465', 10),
+            secure: true,
             auth: {
                 user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
-                pass: process.env.SMTP_PASS || 'slgg epir pxjq fojv',
+                pass: process.env.SMTP_PASS || 'layl xsji ajwz ksqh',
             },
+            tls: {
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 120000,
+            socketTimeout: 120000,
             logger: true,
-            debug: true,
+            debug: process.env.NODE_ENV === 'development',
         });
     }
     sendWelcomeEmail(to, name) {
@@ -59,7 +64,7 @@ let NodemailerEmailService = class NodemailerEmailService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.transporter.sendMail({
-                    from: process.env.EMAIL_FROM,
+                    from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
                     to,
                     subject: 'Password Reset Request',
                     text: `Please use the following token to reset your password: ${resetToken}`,
@@ -75,7 +80,6 @@ let NodemailerEmailService = class NodemailerEmailService {
 };
 exports.NodemailerEmailService = NodemailerEmailService;
 exports.NodemailerEmailService = NodemailerEmailService = __decorate([
-    (0, inversify_1.injectable)() // Add @injectable annotation
-    ,
+    (0, inversify_1.injectable)(),
     __metadata("design:paramtypes", [])
 ], NodemailerEmailService);

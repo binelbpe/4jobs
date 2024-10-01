@@ -27,14 +27,19 @@ const MainFeed: React.FC = () => {
   useEffect(() => {
     dispatch(resetPosts());
     dispatch(fetchPosts());
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
   }, [dispatch]);
 
   return (
-    <div className="w-full md:w-3/4 p-4 mx-auto">
+    <div className="w-full">
       <CreatePostButton />
-      <div className="post-list space-y-6">
+      <div className="post-list space-y-4">
         {posts.map((post, index) => (
-          <div key={post.id} ref={index === posts.length - 1 ? lastPostElementRef : null}>
+          <div key={`${post._id}-${index}`} ref={index === posts.length - 1 ? lastPostElementRef : null}>
             <Post {...post} />
           </div>
         ))}

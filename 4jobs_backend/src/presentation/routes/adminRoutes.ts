@@ -20,4 +20,7 @@ adminRouter.patch('/recruiters/:id/approve',authenticateadmin, (req, res) => adm
 adminRouter.get('/users', authenticateadmin, (req, res) => adminController.fetchUsers(req, res));
 adminRouter.patch('/users/:userId/block',authenticateadmin, (req, res) => adminController.blockUser(req, res))
 adminRouter.patch('/users/:userId/unblock',authenticateadmin, (req, res) => adminController.unblockUser(req, res))
+adminRouter.get('/job-posts', authenticateadmin, (req, res) => adminController.fetchJobPosts(req, res));
+adminRouter.patch('/job-posts/:postId/block', authenticateadmin, (req, res) => adminController.blockJobPost(req, res));
+adminRouter.patch('/job-posts/:postId/unblock', authenticateadmin, (req, res) => adminController.unblockJobPost(req, res));
 export { adminRouter };

@@ -7,6 +7,7 @@ exports.container = void 0;
 require("reflect-metadata");
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../types"));
+const socket_io_1 = require("socket.io");
 const MongoUserRepository_1 = require("./database/mongoose/repositories/MongoUserRepository");
 const MongoRecruiterRepository_1 = require("./database/mongoose/repositories/MongoRecruiterRepository");
 const MongoAdminRepository_1 = require("./database/mongoose/repositories/MongoAdminRepository");
@@ -15,6 +16,8 @@ const JwtAuthService_1 = require("./services/JwtAuthService");
 const OtpService_1 = require("./services/OtpService");
 const NodemailerEmailService_1 = require("./services/NodemailerEmailService");
 const GoogleAuthService_1 = require("./services/GoogleAuthService");
+const UserManager_1 = require("./services/UserManager");
+const events_1 = require("events");
 // Import Admin Use Cases
 const LoginAdminUseCase_1 = require("../application/usecases/admin/LoginAdminUseCase");
 const FetchAllUsersUseCase_1 = require("../application/usecases/admin/FetchAllUsersUseCase");
@@ -23,6 +26,10 @@ const UnblockUserUseCase_1 = require("../application/usecases/admin/UnblockUserU
 const FetchRecruitersUseCase_1 = require("../application/usecases/admin/FetchRecruitersUseCase");
 const ApproveRecruiterUseCase_1 = require("../application/usecases/admin/ApproveRecruiterUseCase");
 const AdminDashboardUseCase_1 = require("../application/usecases/admin/AdminDashboardUseCase");
+const MongoJobPostAdminRepository_1 = require("../infrastructure/database/mongoose/repositories/MongoJobPostAdminRepository");
+const FetchJobPostsUseCase_1 = require("../application/usecases/admin/FetchJobPostsUseCase");
+const BlockJobPostUseCase_1 = require("../application/usecases/admin/BlockJobPostUseCase");
+const UnblockJobPostUseCase_1 = require("../application/usecases/admin/UnblockJobPostUseCase");
 // Import Auth and Recruiter Use Cases
 const SignupUserUseCase_1 = require("../application/usecases/user/SignupUserUseCase");
 const LoginUseCase_1 = require("../application/usecases/user/LoginUseCase");
@@ -49,6 +56,13 @@ const CreatePostUseCase_1 = require("../application/usecases/user/post/CreatePos
 const PostController_1 = require("../presentation/controllers/user/PostController");
 const S3Service_1 = require("./services/S3Service");
 const GetAllPostsUseCase_1 = require("../application/usecases/user/post/GetAllPostsUseCase");
+const GetUserPostsUseCase_1 = require("../application/usecases/user/post/GetUserPostsUseCase");
+const DeletePostUseCase_1 = require("../application/usecases/user/post/DeletePostUseCase");
+const EditPostUseCase_1 = require("../application/usecases/user/post/EditPostUseCase");
+const ReportJobUseCase_1 = require("../application/usecases/user/ReportJobUseCase");
+const ConnectionUseCase_1 = require("../application/usecases/user/ConnectionUseCase");
+const MongoConnectionRepository_1 = require("./database/mongoose/repositories/MongoConnectionRepository");
+const ConnectionController_1 = require("../presentation/controllers/user/ConnectionController");
 // Initialize Inversify Container
 const container = new inversify_1.Container();
 exports.container = container;
@@ -87,6 +101,10 @@ container.bind(types_1.default.UnblockUserUseCase).to(UnblockUserUseCase_1.Unblo
 container.bind(types_1.default.FetchRecruitersUseCase).to(FetchRecruitersUseCase_1.FetchRecruitersUseCase);
 container.bind(types_1.default.ApproveRecruiterUseCase).to(ApproveRecruiterUseCase_1.ApproveRecruiterUseCase);
 container.bind(types_1.default.AdminDashboardUseCase).to(AdminDashboardUseCase_1.AdminDashboardUseCase);
+container.bind(types_1.default.IJobPostAdminRepository).to(MongoJobPostAdminRepository_1.MongoJobPostAdminRepository);
+container.bind(types_1.default.FetchJobPostsUseCase).to(FetchJobPostsUseCase_1.FetchJobPostsUseCase);
+container.bind(types_1.default.BlockJobPostUseCase).to(BlockJobPostUseCase_1.BlockJobPostUseCase);
+container.bind(types_1.default.UnblockJobPostUseCase).to(UnblockJobPostUseCase_1.UnblockJobPostUseCase);
 // Bind Auth and Recruiter Use Cases
 container.bind(types_1.default.SignupUserUseCase).to(SignupUserUseCase_1.SignupUserUseCase);
 container.bind(types_1.default.LoginUseCase).to(LoginUseCase_1.LoginUseCase);
@@ -117,5 +135,17 @@ container.bind(types_1.default.IPostRepository).to(MongoPostRepository_1.MongoPo
 container.bind(PostController_1.PostController).toSelf();
 container.bind(types_1.default.CreatePostUseCase).to(CreatePostUseCase_1.CreatePostUseCase);
 container.bind(types_1.default.GetAllPostsUseCase).to(GetAllPostsUseCase_1.GetAllPostsUseCase);
+container.bind(types_1.default.GetUserPostsUseCase).to(GetUserPostsUseCase_1.GetUserPostsUseCase);
+container.bind(types_1.default.DeletePostUseCase).to(DeletePostUseCase_1.DeletePostUseCase);
+container.bind(types_1.default.EditPostUseCase).to(EditPostUseCase_1.EditPostUseCase);
+container.bind(types_1.default.ReportJobUseCase).to(ReportJobUseCase_1.ReportJobUseCase);
 container.bind(types_1.default.S3Service).to(S3Service_1.S3Service);
+container.bind(types_1.default.IConnectionRepository).to(MongoConnectionRepository_1.MongoConnectionRepository);
+container.bind(types_1.default.ConnectionUseCase).to(ConnectionUseCase_1.ConnectionUseCase);
+container.bind(types_1.default.ConnectionController).to(ConnectionController_1.ConnectionController);
+container.bind(types_1.default.SocketIOServer).toConstantValue(new socket_io_1.Server());
+container.bind(types_1.default.UserManager).to(UserManager_1.UserManager).inSingletonScope();
+container.bind(types_1.default.NotificationEventEmitter).toDynamicValue(() => {
+    return new events_1.EventEmitter();
+}).inSingletonScope();
 console.log(container);

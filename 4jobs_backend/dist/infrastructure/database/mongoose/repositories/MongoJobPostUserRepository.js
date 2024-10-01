@@ -24,13 +24,12 @@ const jobPostModel_1 = __importDefault(require("../models/jobPostModel"));
 let MongoJobPostUserRepository = class MongoJobPostUserRepository {
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield jobPostModel_1.default.findById(id).lean();
+            return yield jobPostModel_1.default.findOne({ _id: id, isBlock: false }).lean();
         });
     }
     update(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let updatedJobPost = yield jobPostModel_1.default.findByIdAndUpdate(id, { $addToSet: { applicants: userId } }, // Use $addToSet to avoid duplicate entries
-            { new: true });
+            let updatedJobPost = yield jobPostModel_1.default.findOneAndUpdate({ _id: id, isBlock: false }, { $addToSet: { applicants: userId } }, { new: true });
             console.log("updatedjob post applied -------------------", updatedJobPost);
             return updatedJobPost;
         });
@@ -41,9 +40,11 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
             const sort = {
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
             };
-            const totalCount = yield jobPostModel_1.default.countDocuments(filter);
+            // Add isBlock: false to the filter
+            const blockFilter = Object.assign(Object.assign({}, filter), { isBlock: false });
+            const totalCount = yield jobPostModel_1.default.countDocuments(blockFilter);
             const totalPages = Math.ceil(totalCount / limit);
-            const jobPosts = yield jobPostModel_1.default.find(filter)
+            const jobPosts = yield jobPostModel_1.default.find(blockFilter)
                 .sort(sort)
                 .skip(skip)
                 .limit(limit)
@@ -53,6 +54,12 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
                 totalPages,
                 totalCount,
             };
+        });
+    }
+    reportJob(userId, jobId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedJobPost = yield jobPostModel_1.default.findByIdAndUpdate(jobId, { $addToSet: { reportedBy: userId } }, { new: true });
+            return updatedJobPost;
         });
     }
 };

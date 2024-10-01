@@ -4,6 +4,8 @@ import TYPES from "../../../types";
 import { ApplyForJobUseCase } from "../../../application/usecases/user/ApplyForJobUseCase";
 import { GetJobPostByIdUseCase } from "../../../application/usecases/user/GetJobPostByIdUseCase";
 import { GetJobPostsUseCase } from "../../../application/usecases/user/GetJobPostsUseCase";
+import { ReportJobUseCase } from "../../../application/usecases/user/ReportJobUseCase";
+
 
 @injectable()
 export class JobPostControllerUser {
@@ -15,7 +17,9 @@ export class JobPostControllerUser {
     private getJobPostByIdUseCase: GetJobPostByIdUseCase,
 
     @inject(TYPES.GetJobPostsUseCase)
-    private getJobPostsUseCase: GetJobPostsUseCase
+    private getJobPostsUseCase: GetJobPostsUseCase,
+    @inject(TYPES.ReportJobUseCase)
+    private reportJobUseCase: ReportJobUseCase
   ) {}
 
   // Fetch all job posts
@@ -55,8 +59,8 @@ export class JobPostControllerUser {
       const jobPostId = req.params.id;
       const jobPost = await this.getJobPostByIdUseCase.execute(jobPostId);
 
-      if (!jobPost) {
-        return res.status(404).json({ error: "Job post not found" });
+      if (!jobPost || jobPost.isBlock) {
+        return res.status(404).json({ error: "Job post not found or blocked" });
       }
 
       res.status(200).json(jobPost);
@@ -66,11 +70,15 @@ export class JobPostControllerUser {
     }
   }
 
-  // Apply for a job post
   async applyForJob(req: Request, res: Response) {
     try {
       const { userId } = req.body;
       const { jobId } = req.params;
+
+      const jobPost = await this.getJobPostByIdUseCase.execute(jobId);
+      if (!jobPost || jobPost.isBlock) {
+        return res.status(400).json({ error: "Job post not found or blocked" });
+      }
 
       const result = await this.applyForJobUseCase.execute(userId, jobId);
       console.log("apply", result);
@@ -79,7 +87,6 @@ export class JobPostControllerUser {
     } catch (error: any) {
       console.error("Error applying for job:", error.message);
 
-      // If it's a known error (business logic error), return 400 (Bad Request)
       if (
         error.message === "User not found" ||
         error.message === "Job post not found" ||
@@ -88,7 +95,28 @@ export class JobPostControllerUser {
         return res.status(400).json({ error: error.message });
       }
 
-      // Otherwise, return 500 (Internal Server Error)
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
+  }
+
+
+  async reportJob(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+      const { jobId } = req.params;
+      console.log(userId)
+      console.log(jobId)
+
+      await this.reportJobUseCase.execute(userId, jobId);
+
+      res.status(200).json({ message: "Job reported successfully" });
+    } catch (error: any) {
+      console.error("Error reporting job:", error.message);
+
+      if (error.message === "Failed to report job") {
+        return res.status(400).json({ error: error.message });
+      }
+
       res.status(500).json({ message: "An unexpected error occurred" });
     }
   }

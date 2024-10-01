@@ -35,8 +35,11 @@ const UnblockUserUseCase_1 = require("../../application/usecases/admin/UnblockUs
 const FetchRecruitersUseCase_1 = require("../../application/usecases/admin/FetchRecruitersUseCase");
 const ApproveRecruiterUseCase_1 = require("../../application/usecases/admin/ApproveRecruiterUseCase");
 const AdminDashboardUseCase_1 = require("../../application/usecases/admin/AdminDashboardUseCase");
+const FetchJobPostsUseCase_1 = require("../../application/usecases/admin/FetchJobPostsUseCase");
+const BlockJobPostUseCase_1 = require("../../application/usecases/admin/BlockJobPostUseCase");
+const UnblockJobPostUseCase_1 = require("../../application/usecases/admin/UnblockJobPostUseCase");
 let AdminController = class AdminController {
-    constructor(loginAdminUseCase, fetchAllUsersUseCase, blockUserUseCase, unblockUserUseCase, fetchRecruitersUseCase, approveRecruiterUseCase, adminDashboardUseCase) {
+    constructor(loginAdminUseCase, fetchAllUsersUseCase, blockUserUseCase, unblockUserUseCase, fetchRecruitersUseCase, approveRecruiterUseCase, adminDashboardUseCase, fetchJobPostsUseCase, blockJobPostUseCase, unblockJobPostUseCase) {
         this.loginAdminUseCase = loginAdminUseCase;
         this.fetchAllUsersUseCase = fetchAllUsersUseCase;
         this.blockUserUseCase = blockUserUseCase;
@@ -44,6 +47,9 @@ let AdminController = class AdminController {
         this.fetchRecruitersUseCase = fetchRecruitersUseCase;
         this.approveRecruiterUseCase = approveRecruiterUseCase;
         this.adminDashboardUseCase = adminDashboardUseCase;
+        this.fetchJobPostsUseCase = fetchJobPostsUseCase;
+        this.blockJobPostUseCase = blockJobPostUseCase;
+        this.unblockJobPostUseCase = unblockJobPostUseCase;
     }
     // Admin login
     login(req, res) {
@@ -152,6 +158,54 @@ let AdminController = class AdminController {
             }
         });
     }
+    // Fetch all job posts
+    fetchJobPosts(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const jobPosts = yield this.fetchJobPostsUseCase.execute();
+                console.log("admin jobposts:", jobPosts);
+                res.status(200).json(jobPosts);
+            }
+            catch (error) {
+                console.error("Error fetching job posts:", error);
+                res.status(500).json({ error: "Failed to fetch job posts" });
+            }
+        });
+    }
+    // Block job post
+    blockJobPost(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId } = req.params;
+                const jobPost = yield this.blockJobPostUseCase.execute(postId);
+                if (!jobPost) {
+                    return res.status(404).json({ error: "Job post not found" });
+                }
+                res.status(200).json(jobPost);
+            }
+            catch (error) {
+                console.error("Error blocking job post:", error);
+                res.status(500).json({ error: "Failed to block job post" });
+            }
+        });
+    }
+    // Unblock job post
+    unblockJobPost(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId } = req.params;
+                const jobPost = yield this.unblockJobPostUseCase.execute(postId);
+                if (!jobPost) {
+                    return res.status(404).json({ error: "Job post not found" });
+                }
+                res.status(200).json(jobPost);
+            }
+            catch (error) {
+                console.error("Error unblocking job post:", error);
+                res.status(500).json({ error: "Failed to unblock job post" });
+            }
+        });
+    }
 };
 exports.AdminController = AdminController;
 exports.AdminController = AdminController = __decorate([
@@ -163,11 +217,17 @@ exports.AdminController = AdminController = __decorate([
     __param(4, (0, inversify_1.inject)(types_1.default.FetchRecruitersUseCase)),
     __param(5, (0, inversify_1.inject)(types_1.default.ApproveRecruiterUseCase)),
     __param(6, (0, inversify_1.inject)(types_1.default.AdminDashboardUseCase)),
+    __param(7, (0, inversify_1.inject)(types_1.default.FetchJobPostsUseCase)),
+    __param(8, (0, inversify_1.inject)(types_1.default.BlockJobPostUseCase)),
+    __param(9, (0, inversify_1.inject)(types_1.default.UnblockJobPostUseCase)),
     __metadata("design:paramtypes", [LoginAdminUseCase_1.LoginAdminUseCase,
         FetchAllUsersUseCase_1.FetchAllUsersUseCase,
         BlockUserUseCase_1.BlockUserUseCase,
         UnblockUserUseCase_1.UnblockUserUseCase,
         FetchRecruitersUseCase_1.FetchRecruitersUseCase,
         ApproveRecruiterUseCase_1.ApproveRecruiterUseCase,
-        AdminDashboardUseCase_1.AdminDashboardUseCase])
+        AdminDashboardUseCase_1.AdminDashboardUseCase,
+        FetchJobPostsUseCase_1.FetchJobPostsUseCase,
+        BlockJobPostUseCase_1.BlockJobPostUseCase,
+        UnblockJobPostUseCase_1.UnblockJobPostUseCase])
 ], AdminController);

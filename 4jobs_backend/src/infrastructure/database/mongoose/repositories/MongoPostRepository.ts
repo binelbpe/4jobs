@@ -1,19 +1,17 @@
-import { injectable, inject } from 'inversify';
-import { IPostRepository } from '../../../../domain/interfaces/repositories/user/IPostRepository';
-import { IPost, CreatePostDTO } from '../../../../domain/entities/Post';
-import PostModel from '../models/PostModel';
-import { S3Service } from '../../../services/S3Service';
-import TYPES from '../../../../types';
+import { injectable, inject } from "inversify";
+import { IPostRepository } from "../../../../domain/interfaces/repositories/user/IPostRepository";
+import { IPost, CreatePostDTO } from "../../../../domain/entities/Post";
+import PostModel from "../models/PostModel";
+import { S3Service } from "../../../services/S3Service";
+import TYPES from "../../../../types";
 
 @injectable()
 export class MongoPostRepository implements IPostRepository {
-  constructor(
-    @inject(TYPES.S3Service) private s3Service: S3Service
-  ) {}
+  constructor(@inject(TYPES.S3Service) private s3Service: S3Service) {}
 
   async create(postData: CreatePostDTO): Promise<IPost> {
     const { userId, content, image, video } = postData;
-    
+
     let imageUrl, videoUrl;
 
     if (image) {
@@ -30,7 +28,7 @@ export class MongoPostRepository implements IPostRepository {
       imageUrl,
       videoUrl,
       likes: [],
-      comments: []
+      comments: [],
     });
 
     await post.save();
@@ -44,9 +42,47 @@ export class MongoPostRepository implements IPostRepository {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    return posts.map(post => post.toObject());
+    return posts.map((post) => post.toObject());
   }
+
+  async findByUserId(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<IPost[]> {
+    console.log("mongo limit page", limit, page);
+    console.log("userId", userId);
+    const skip = (page - 1) * limit;
+
+    const posts = await PostModel.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    console.log("posts", posts);
+    return posts;
+  }
+
+  async deletePost(id: string):  Promise<boolean> {
+    const deletedPost = await PostModel.findByIdAndDelete(id);
+    console.log("deletedPost",deletedPost)
+    return deletedPost? true:false;
+  }
+  
+
+  async editPost(postId: string, userId: string, updatedPostData: Partial<IPost>): Promise<IPost> {
+    const post = await PostModel.findOne({ _id: postId, userId: userId });
+
+    if (!post) {
+      throw new Error('Post not found or user not authorized to edit this post');
+    }
+
+    Object.assign(post, updatedPostData);
+    await post.save();
+
+    return post.toObject();
+  }
+
   // Implement other methods for future expansion
 }
-
-

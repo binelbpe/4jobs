@@ -38,7 +38,7 @@ let LoginAdminUseCase = class LoginAdminUseCase {
             if (!user || !user.isAdmin) {
                 throw new Error("Unauthorized,You are not an admin");
             }
-            const isPasswordValid = yield this.authService.comparePasswords(password, user.password);
+            const isPasswordValid = yield this.authService.comparePasswords(password, user.password || "");
             if (!isPasswordValid) {
                 throw new Error("Invalid credentials");
             }

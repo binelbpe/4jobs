@@ -30,11 +30,13 @@ const types_1 = __importDefault(require("../../../types"));
 const ApplyForJobUseCase_1 = require("../../../application/usecases/user/ApplyForJobUseCase");
 const GetJobPostByIdUseCase_1 = require("../../../application/usecases/user/GetJobPostByIdUseCase");
 const GetJobPostsUseCase_1 = require("../../../application/usecases/user/GetJobPostsUseCase");
+const ReportJobUseCase_1 = require("../../../application/usecases/user/ReportJobUseCase");
 let JobPostControllerUser = class JobPostControllerUser {
-    constructor(applyForJobUseCase, getJobPostByIdUseCase, getJobPostsUseCase) {
+    constructor(applyForJobUseCase, getJobPostByIdUseCase, getJobPostsUseCase, reportJobUseCase) {
         this.applyForJobUseCase = applyForJobUseCase;
         this.getJobPostByIdUseCase = getJobPostByIdUseCase;
         this.getJobPostsUseCase = getJobPostsUseCase;
+        this.reportJobUseCase = reportJobUseCase;
     }
     // Fetch all job posts
     getJobPosts(req, res) {
@@ -66,8 +68,8 @@ let JobPostControllerUser = class JobPostControllerUser {
             try {
                 const jobPostId = req.params.id;
                 const jobPost = yield this.getJobPostByIdUseCase.execute(jobPostId);
-                if (!jobPost) {
-                    return res.status(404).json({ error: "Job post not found" });
+                if (!jobPost || jobPost.isBlock) {
+                    return res.status(404).json({ error: "Job post not found or blocked" });
                 }
                 res.status(200).json(jobPost);
             }
@@ -77,25 +79,45 @@ let JobPostControllerUser = class JobPostControllerUser {
             }
         });
     }
-    // Apply for a job post
     applyForJob(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { userId } = req.body;
                 const { jobId } = req.params;
+                const jobPost = yield this.getJobPostByIdUseCase.execute(jobId);
+                if (!jobPost || jobPost.isBlock) {
+                    return res.status(400).json({ error: "Job post not found or blocked" });
+                }
                 const result = yield this.applyForJobUseCase.execute(userId, jobId);
                 console.log("apply", result);
                 res.status(200).json(result);
             }
             catch (error) {
                 console.error("Error applying for job:", error.message);
-                // If it's a known error (business logic error), return 400 (Bad Request)
                 if (error.message === "User not found" ||
                     error.message === "Job post not found" ||
                     error.message === "Already applied for this job") {
                     return res.status(400).json({ error: error.message });
                 }
-                // Otherwise, return 500 (Internal Server Error)
+                res.status(500).json({ message: "An unexpected error occurred" });
+            }
+        });
+    }
+    reportJob(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.body;
+                const { jobId } = req.params;
+                console.log(userId);
+                console.log(jobId);
+                yield this.reportJobUseCase.execute(userId, jobId);
+                res.status(200).json({ message: "Job reported successfully" });
+            }
+            catch (error) {
+                console.error("Error reporting job:", error.message);
+                if (error.message === "Failed to report job") {
+                    return res.status(400).json({ error: error.message });
+                }
                 res.status(500).json({ message: "An unexpected error occurred" });
             }
         });
@@ -107,7 +129,9 @@ exports.JobPostControllerUser = JobPostControllerUser = __decorate([
     __param(0, (0, inversify_1.inject)(types_1.default.ApplyForJobUseCase)),
     __param(1, (0, inversify_1.inject)(types_1.default.GetJobPostByIdUseCase)),
     __param(2, (0, inversify_1.inject)(types_1.default.GetJobPostsUseCase)),
+    __param(3, (0, inversify_1.inject)(types_1.default.ReportJobUseCase)),
     __metadata("design:paramtypes", [ApplyForJobUseCase_1.ApplyForJobUseCase,
         GetJobPostByIdUseCase_1.GetJobPostByIdUseCase,
-        GetJobPostsUseCase_1.GetJobPostsUseCase])
+        GetJobPostsUseCase_1.GetJobPostsUseCase,
+        ReportJobUseCase_1.ReportJobUseCase])
 ], JobPostControllerUser);

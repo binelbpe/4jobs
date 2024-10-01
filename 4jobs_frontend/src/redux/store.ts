@@ -9,6 +9,9 @@ import recruiterReducer from './slices/recruiterSlice';
 import jobPostReducer from './slices/jobPostSlice';
 import contestantReducer from './slices/contestantSlice';
 import postReducer from './slices/postSlice'; 
+import adminJobPostReducer from './slices/adminJobPostSlice'; 
+import connectionReducer from './slices/connectionSlice'; 
+import notificationReducer from './slices/notificationSlice'; // Add this line
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'fallback-key';
 
@@ -73,12 +76,34 @@ const postPersistConfig = {
   whitelist: ['posts', 'loading', 'selectedPost'],
 };
 
+const adminJobPostPersistConfig = {
+  key: 'adminJobPost',
+  storage,
+  whitelist: ['jobPosts', 'loading', 'error'],
+};
+
+
+const connectionPersistConfig = {
+  key: 'connections',
+  storage,
+  whitelist: ['recommendations', 'pendingRequests', 'loading', 'error'],
+};
+
+const notificationPersistConfig = {
+  key: 'notifications',
+  storage,
+  whitelist: ['items', 'unreadCount'],
+};
+
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedAdminReducer = persistReducer(adminPersistConfig, adminReducer);
 const persistedRecruiterReducer = persistReducer(recruiterPersistConfig, recruiterReducer);
 const persistedJobPostReducer = persistReducer(jobPostPersistConfig, jobPostReducer);
 const persistedContestantReducer = persistReducer(contestantPersistConfig, contestantReducer);
 const persistedPostReducer = persistReducer(postPersistConfig, postReducer);
+const persistedAdminJobPostReducer = persistReducer(adminJobPostPersistConfig, adminJobPostReducer);
+const persistedConnectionReducer = persistReducer(connectionPersistConfig, connectionReducer); 
+const persistedNotificationReducer = persistReducer(notificationPersistConfig, notificationReducer);
 
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
@@ -87,6 +112,9 @@ const rootReducer = combineReducers({
   jobPosts: persistedJobPostReducer,
   contestants: persistedContestantReducer,
   posts: persistedPostReducer,
+  adminJobPost: persistedAdminJobPostReducer,
+  connections: persistedConnectionReducer, 
+  notifications: persistedNotificationReducer,
 });
 
 const store = configureStore({

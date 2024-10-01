@@ -15,14 +15,7 @@ const recruiterController = container_1.container.get(types_1.default.RecruiterC
 const jobPostController = container_1.container.get(types_1.default.JobPostController);
 // Configure multer for file uploads
 const upload = (0, multer_1.default)({
-    storage: multer_1.default.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, 'uploads/recruiter/');
-        },
-        filename: (req, file, cb) => {
-            cb(null, `${Date.now()}${path_1.default.extname(file.originalname)}`);
-        },
-    }),
+    storage: multer_1.default.memoryStorage(),
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png|pdf|webp/;
         const extname = filetypes.test(path_1.default.extname(file.originalname).toLowerCase());
@@ -36,7 +29,7 @@ const upload = (0, multer_1.default)({
     },
 });
 // Route for registering recruiters with file uploads (governmentId and employeeIdImage)
-recruiterRouter.post('/register', upload.fields([{ name: 'governmentId' }]), recruiterController.registerRecruiter.bind(recruiterController));
+recruiterRouter.post('/register', upload.single('governmentId'), recruiterController.registerRecruiter.bind(recruiterController));
 // Route for verifying OTP
 recruiterRouter.post('/verify-otp', recruiterController.verifyOtp.bind(recruiterController));
 // Route for logging in

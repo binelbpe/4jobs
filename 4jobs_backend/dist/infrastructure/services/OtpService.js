@@ -26,6 +26,7 @@ class OtpService {
     sendOtp(email, otp) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(`Sending OTP ${otp} to email ${email}`);
                 yield this.emailService.sendWelcomeEmail(email, `Your OTP: ${otp}`);
                 console.log(`Sending OTP ${otp} to email ${email}`);
             }

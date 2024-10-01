@@ -11,7 +11,9 @@ import { UnblockUserUseCase } from "../../application/usecases/admin/UnblockUser
 import { FetchRecruitersUseCase } from "../../application/usecases/admin/FetchRecruitersUseCase";
 import { ApproveRecruiterUseCase } from "../../application/usecases/admin/ApproveRecruiterUseCase";
 import { AdminDashboardUseCase } from "../../application/usecases/admin/AdminDashboardUseCase";
-
+import { FetchJobPostsUseCase } from "../../application/usecases/admin/FetchJobPostsUseCase";
+import { BlockJobPostUseCase } from "../../application/usecases/admin/BlockJobPostUseCase";
+import { UnblockJobPostUseCase } from "../../application/usecases/admin/UnblockJobPostUseCase";
 @injectable()
 export class AdminController {
   constructor(
@@ -28,7 +30,13 @@ export class AdminController {
     @inject(TYPES.ApproveRecruiterUseCase)
     private approveRecruiterUseCase: ApproveRecruiterUseCase,
     @inject(TYPES.AdminDashboardUseCase)
-    private adminDashboardUseCase: AdminDashboardUseCase
+    private adminDashboardUseCase: AdminDashboardUseCase,
+    @inject(TYPES.FetchJobPostsUseCase)
+    private fetchJobPostsUseCase: FetchJobPostsUseCase,
+    @inject(TYPES.BlockJobPostUseCase)
+    private blockJobPostUseCase: BlockJobPostUseCase,
+    @inject(TYPES.UnblockJobPostUseCase)
+    private unblockJobPostUseCase: UnblockJobPostUseCase
   ) {}
 
   // Admin login
@@ -125,6 +133,48 @@ export class AdminController {
     } catch (error) {
       console.error("Error loading admin dashboard:", error);
       res.status(500).json({ error: "Failed to load admin dashboard" });
+    }
+  }
+
+   // Fetch all job posts
+   async fetchJobPosts(req: Request, res: Response) {
+    try {
+      const jobPosts = await this.fetchJobPostsUseCase.execute();
+      console.log("admin jobposts:",jobPosts)
+      res.status(200).json(jobPosts);
+    } catch (error) {
+      console.error("Error fetching job posts:", error);
+      res.status(500).json({ error: "Failed to fetch job posts" });
+    }
+  }
+
+  // Block job post
+  async blockJobPost(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+      const jobPost = await this.blockJobPostUseCase.execute(postId);
+      if (!jobPost) {
+        return res.status(404).json({ error: "Job post not found" });
+      }
+      res.status(200).json(jobPost);
+    } catch (error) {
+      console.error("Error blocking job post:", error);
+      res.status(500).json({ error: "Failed to block job post" });
+    }
+  }
+
+  // Unblock job post
+  async unblockJobPost(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+      const jobPost = await this.unblockJobPostUseCase.execute(postId);
+      if (!jobPost) {
+        return res.status(404).json({ error: "Job post not found" });
+      }
+      res.status(200).json(jobPost);
+    } catch (error) {
+      console.error("Error unblocking job post:", error);
+      res.status(500).json({ error: "Failed to unblock job post" });
     }
   }
 }

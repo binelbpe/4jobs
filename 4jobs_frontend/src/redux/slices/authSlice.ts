@@ -15,7 +15,8 @@ import {
   fetchJobPostsuser,
   FetchJobPostsParams,
   applyForJob,
-  fetchJobPostApi
+  fetchJobPostApi,
+  reportJobApi 
 } from '../../api/authapi';
 
 
@@ -125,6 +126,7 @@ export const updateUserCertificates = createAsyncThunk(
   }, thunkAPI) => {
     try {
       const updatedCertificatesData = await updateUserCertificatesApi(userId, certificates);
+      console.log("updatedCertificatesData",updatedCertificatesData)
       return updatedCertificatesData;
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -204,7 +206,20 @@ export const fetchJobPost = createAsyncThunk(
   }
 );
 
-
+export const reportJobAsync = createAsyncThunk(
+  'auth/reportJob',
+  async ({ userId, jobId }: { userId: string; jobId: string }, { rejectWithValue }) => {
+    try {
+      await reportJobApi(userId, jobId);
+      return jobId;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.error || 'Failed to report job');
+      }
+      return rejectWithValue('Failed to report job');
+    }
+  }
+);
 
 export const updateUserAppliedJobs = (jobId: string) => ({
   type: 'auth/updateAppliedJobs',
@@ -408,6 +423,18 @@ const authSlice = createSlice({
         // You might want to store the fetched job post somewhere in the state
       })
       .addCase(fetchJobPost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(reportJobAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(reportJobAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        // You might want to update the state to reflect that the job has been reported
+      })
+      .addCase(reportJobAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

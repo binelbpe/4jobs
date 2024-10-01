@@ -4,7 +4,11 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
+import http from 'http';
 import { container } from './infrastructure/container';
+import TYPES from './types';
+import { setupSocketServer } from './infrastructure/services/socketServer';
+
 // Import routers
 import { authRouter } from './presentation/routes/authRoutes';
 import { adminRouter } from './presentation/routes/adminRoutes';
@@ -18,6 +22,9 @@ import { errorHandler } from './presentation/middlewares/errorHandler';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
+const server = http.createServer(app);
+
+const { io, userManager, eventEmitter } = setupSocketServer(server, container);
 
 // Middleware setup
 app.use(express.json());
@@ -32,20 +39,22 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Routes setup
-app.use('/', authRouter); // Changed to '/auth' to match naming conventions
-app.use('/admin', adminRouter); // Apply admin authentication middleware
-app.use('/recruiter', recruiterRouter); // Apply recruiter authentication middleware
+app.use('/', authRouter);
+app.use('/admin', adminRouter);
+app.use('/recruiter', recruiterRouter);
 
 // Validation and error handling middleware
 app.use(validateRequest);
 app.use(errorHandler);
-app.use((req, res, next) => {
+
+app.use((req: any, res, next) => {
   req.container = container;
   next();
 });
+
 // Connect to MongoDB
 mongoose.connect(process.env.DATABASE_URL!)
   .then(() => console.log('Connected to MongoDB'))
@@ -53,6 +62,8 @@ mongoose.connect(process.env.DATABASE_URL!)
 
 // Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export { io, userManager, eventEmitter };

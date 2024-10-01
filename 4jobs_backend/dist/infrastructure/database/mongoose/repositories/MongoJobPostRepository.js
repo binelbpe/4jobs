@@ -56,9 +56,10 @@ let MongoJobPostRepository = class MongoJobPostRepository {
             const sort = {
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
             };
-            const totalCount = yield jobPostModel_1.default.countDocuments(filter);
+            const blockFilter = Object.assign(Object.assign({}, filter), { isBlock: false });
+            const totalCount = yield jobPostModel_1.default.countDocuments(blockFilter);
             const totalPages = Math.ceil(totalCount / limit);
-            const jobPosts = yield jobPostModel_1.default.find(filter)
+            const jobPosts = yield jobPostModel_1.default.find(blockFilter)
                 .sort(sort)
                 .skip(skip)
                 .limit(limit)

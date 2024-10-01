@@ -30,6 +30,8 @@ export interface BasicJobPost {
   isApplied?: boolean;
   createdAt: string; 
   updatedAt: string;
+  isBlock?: boolean;
+  reportedBy?:string[];
 }
 
 export interface BasicJobPostFormData extends Omit<BasicJobPost, '_id'> {}

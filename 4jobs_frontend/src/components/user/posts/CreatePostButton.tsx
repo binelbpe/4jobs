@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { PencilIcon } from 'lucide-react';
+import { PencilIcon,UserCircle } from 'lucide-react';
 import { RootState } from '../../../redux/store';
+
 
 const CreatePostButton: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -11,7 +12,9 @@ const CreatePostButton: React.FC = () => {
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
       <Link to="/posts/create" className="flex items-center space-x-4">
         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-          <img src={`http://localhost:5000${user?.profileImage}`} alt="User avatar" className="rounded-full" />
+         {user?.profileImage?( <img src={`${user?.profileImage}`} alt="User avatar" className="rounded-full" />): (
+          <UserCircle className="w-20 h-20 text-gray-400" />
+        )}
         </div>
         <div className="flex-grow">
           <div className="bg-purple-50 text-purple-500 rounded-full py-2 px-4">

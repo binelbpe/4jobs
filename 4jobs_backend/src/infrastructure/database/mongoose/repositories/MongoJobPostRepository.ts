@@ -48,10 +48,12 @@ export class MongoJobPostRepository implements IJobPostRepository {
       [sortBy]: sortOrder === "asc" ? 1 : -1,
     };
 
-    const totalCount = await JobPostModel.countDocuments(filter);
+    const blockFilter = { ...filter, isBlock: false };
+
+    const totalCount = await JobPostModel.countDocuments(blockFilter);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const jobPosts = await JobPostModel.find(filter)
+    const jobPosts = await JobPostModel.find(blockFilter)
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -63,6 +65,7 @@ export class MongoJobPostRepository implements IJobPostRepository {
       totalCount,
     };
   }
+  
   async findApplicantsByJobId(
     jobId: string,
     page: number,

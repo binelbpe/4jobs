@@ -19,7 +19,7 @@ export class LoginAdminUseCase {
 
     const isPasswordValid = await this.authService.comparePasswords(
       password,
-      user.password
+      user.password||""
     );
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");

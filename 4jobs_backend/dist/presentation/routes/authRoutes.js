@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,57 +17,17 @@ const express_1 = require("express");
 const container_1 = require("../../infrastructure/container");
 const multer_1 = __importDefault(require("multer"));
 const types_1 = __importDefault(require("../../types"));
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const authMiddleware_1 = require("../middlewares/authMiddleware");
 const PostController_1 = require("../controllers/user/PostController");
-const fileUploadMiddleware_1 = require("../middlewares/fileUploadMiddleware");
-// Create necessary upload directories
-const createUploadDirs = () => {
-    const dirs = [
-        'uploads/user/profile',
-        'uploads/user/resume',
-        'uploads/user/certificates',
-    ];
-    dirs.forEach((dir) => {
-        if (!fs_1.default.existsSync(dir)) {
-            fs_1.default.mkdirSync(dir, { recursive: true });
-        }
-    });
-};
-createUploadDirs();
+const authMiddleware_1 = require("../middlewares/authMiddleware");
 const profileController = container_1.container.get(types_1.default.ProfileController);
 const authController = container_1.container.get(types_1.default.AuthController);
 const jobPostControllerUser = container_1.container.get(types_1.default.JobPostControllerUser);
 const postController = container_1.container.get(PostController_1.PostController);
-// Configure multer for file uploads
-const storage = multer_1.default.diskStorage({
-    destination: (req, file, cb) => {
-        let dir = 'uploads/';
-        if (file.fieldname === 'profileImage') {
-            dir += 'user/profile';
-        }
-        else if (file.fieldname === 'resume') {
-            dir += 'user/resume';
-        }
-        else if (file.fieldname === 'certificateImage') {
-            dir += 'user/certificates';
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path_1.default.extname(file.originalname));
-    },
-});
-const uploads = (0, multer_1.default)({ storage });
-// Initialize the router
+const s3Service = container_1.container.get(types_1.default.S3Service);
+const connectionController = container_1.container.get(types_1.default.ConnectionController);
+const storage = multer_1.default.memoryStorage();
+const upload = (0, multer_1.default)({ storage });
 exports.authRouter = (0, express_1.Router)();
-const mid = (req, res, next) => {
-    console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
-    next();
-};
 // Auth routes
 exports.authRouter.post('/login', authController.login.bind(authController));
 exports.authRouter.post('/signup', authController.signupUser.bind(authController));
@@ -68,24 +37,106 @@ exports.authRouter.post('/auth/google/callback', authController.googleAuth.bind(
 // Profile routes
 exports.authRouter.get('/profile/:userId', authMiddleware_1.authenticate, profileController.getUserProfile.bind(profileController));
 // Update profile route
-exports.authRouter.put('/edit-profile/:userId', uploads.fields([
+exports.authRouter.put('/edit-profile/:userId', authMiddleware_1.authenticate, upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'resume', maxCount: 1 },
-]), authMiddleware_1.authenticate, profileController.updateUserProfile.bind(profileController));
+]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.files) {
+        const files = req.files;
+        if (files['profileImage']) {
+            const profileImageUrl = yield s3Service.uploadFile(files['profileImage'][0]);
+            req.body.profileImage = profileImageUrl;
+        }
+        if (files['resume']) {
+            const resumeUrl = yield s3Service.uploadFile(files['resume'][0]);
+            req.body.resume = resumeUrl;
+        }
+    }
+    next();
+}), profileController.updateUserProfile.bind(profileController));
 // Update projects route
 exports.authRouter.put('/edit-projects/:userId', authMiddleware_1.authenticate, profileController.updateUserProjects.bind(profileController));
 // Update certificates route
-exports.authRouter.put('/edit-certificates/:userId', authMiddleware_1.authenticate, mid, uploads.fields([{ name: 'certificateImage', maxCount: 1 }]), profileController.updateUserCertificates.bind(profileController));
-// Update experiences route
-exports.authRouter.put('/edit-experiences/:userId', authMiddleware_1.authenticate, profileController.updateUserExperiences.bind(profileController));
+exports.authRouter.put('/edit-certificates/:userId', authMiddleware_1.authenticate, upload.array('certificateImage'), // Allow multiple files
+(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.files && Array.isArray(req.files)) {
+        const certificateImages = yield Promise.all(req.files.map(file => s3Service.uploadFile(file)));
+        req.body.certificateImages = certificateImages;
+    }
+    // Parse the certificateDetails JSON string if it's a string
+    if (typeof req.body.certificateDetails === 'string') {
+        req.body.certificateDetails = JSON.parse(req.body.certificateDetails);
+    }
+    // Update imageUrl with S3 URL for new uploads
+    if (req.body.certificateDetails && req.body.certificateImages) {
+        let s3UrlIndex = 0;
+        req.body.certificateDetails = req.body.certificateDetails.map((cert) => {
+            if (cert.imageUrl.startsWith('/uploads/') || cert.imageUrl === '') {
+                if (s3UrlIndex < req.body.certificateImages.length) {
+                    cert.imageUrl = req.body.certificateImages[s3UrlIndex];
+                    s3UrlIndex++;
+                }
+            }
+            return cert;
+        });
+    }
+    console.log("req.body", req.body);
+    next();
+}), profileController.updateUserCertificates.bind(profileController));
 // Update resume route
-exports.authRouter.put('/edit-resume/:userId', authMiddleware_1.authenticate, uploads.single('resume'), profileController.updateUserResume.bind(profileController));
+exports.authRouter.put('/edit-resume/:userId', authMiddleware_1.authenticate, upload.single('resume'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.file) {
+        const resumeUrl = yield s3Service.uploadFile(req.file);
+        req.body.resume = resumeUrl;
+    }
+    next();
+}), profileController.updateUserResume.bind(profileController));
+// Job routes
 exports.authRouter.get('/jobs', authMiddleware_1.authenticate, jobPostControllerUser.getJobPosts.bind(jobPostControllerUser));
 exports.authRouter.get('/jobs/:id', authMiddleware_1.authenticate, jobPostControllerUser.getJobPostById.bind(jobPostControllerUser));
 exports.authRouter.post('/jobs/:jobId/apply', authMiddleware_1.authenticate, jobPostControllerUser.applyForJob.bind(jobPostControllerUser));
-exports.authRouter.post('/posts/:userId', authMiddleware_1.authenticate, fileUploadMiddleware_1.upload.fields([
+exports.authRouter.post("/jobs/:jobId/report", authMiddleware_1.authenticate, (req, res) => jobPostControllerUser.reportJob(req, res));
+// Post routes
+exports.authRouter.post('/posts/:userId', authMiddleware_1.authenticate, upload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'video', maxCount: 1 }
-]), postController.createPost.bind(postController));
+]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.files) {
+        const files = req.files;
+        if (files['image']) {
+            const imageUrl = yield s3Service.uploadFile(files['image'][0]);
+            req.body.image = imageUrl;
+        }
+        if (files['video']) {
+            const videoUrl = yield s3Service.uploadFile(files['video'][0]);
+            req.body.video = videoUrl;
+        }
+    }
+    next();
+}), postController.createPost.bind(postController));
 exports.authRouter.get('/posts', authMiddleware_1.authenticate, postController.getPosts.bind(postController));
+exports.authRouter.get('/posts/user/:id', authMiddleware_1.authenticate, postController.getPostsForUser.bind(postController));
+exports.authRouter.delete('/posts/delete/:id', authMiddleware_1.authenticate, postController.deletePost.bind(postController));
+exports.authRouter.put('/posts/edit/:postId/:userId', authMiddleware_1.authenticate, upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.files) {
+        const files = req.files;
+        if (files['image']) {
+            const imageUrl = yield s3Service.uploadFile(files['image'][0]);
+            req.body.imageUrl = imageUrl;
+        }
+        if (files['video']) {
+            const videoUrl = yield s3Service.uploadFile(files['video'][0]);
+            req.body.videoUrl = videoUrl;
+        }
+    }
+    console.log("req,body", req.body);
+    console.log("idsss", req.params.userId);
+    next();
+}), postController.editPost.bind(postController));
+exports.authRouter.get('/connections/recommendations/:userId', authMiddleware_1.authenticate, connectionController.getRecommendations.bind(connectionController));
+exports.authRouter.post('/connections/request', authMiddleware_1.authenticate, connectionController.sendConnectionRequest.bind(connectionController));
+exports.authRouter.get('/notifications/:userId', authMiddleware_1.authenticate, connectionController.getNotifications.bind(connectionController));
 exports.default = exports.authRouter;
