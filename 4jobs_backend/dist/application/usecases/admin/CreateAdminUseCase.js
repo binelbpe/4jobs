@@ -38,10 +38,10 @@ let CreateAdminUseCase = class CreateAdminUseCase {
                 name,
                 role: "admin",
                 isAdmin: true,
-                experiences: [], // Provide default value
-                projects: [], // Provide default value
-                certificates: [], // Provide default value
-                skills: [], // Provide default value
+                experiences: [],
+                projects: [],
+                certificates: [],
+                skills: [],
             });
             const adminUser = Object.assign(Object.assign({}, admin), { adminLevel });
             yield this.userRepository.update(admin.id, adminUser);

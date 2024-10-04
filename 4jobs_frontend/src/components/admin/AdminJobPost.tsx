@@ -1,64 +1,86 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { fetchJobPosts, blockJobPost, unblockJobPost } from '../../redux/slices/adminJobPostSlice';
-import { BasicJobPost } from '../../types/jobPostTypes';
-import { FaExclamationTriangle, FaUserFriends, FaEye, FaBan, FaUnlock, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import Header from '../admin/AdminHeader';
-import Sidebar from '../admin/AdminSidebar';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import {
+  fetchJobPosts,
+  blockJobPost,
+  unblockJobPost,
+} from "../../redux/slices/adminJobPostSlice";
+import { BasicJobPost } from "../../types/jobPostTypes";
+import {
+  FaExclamationTriangle,
+  FaUserFriends,
+  FaEye,
+  FaBan,
+  FaUnlock,
+  FaSearch,
+  FaChevronLeft,
+  FaChevronRight,
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+import Header from "../admin/AdminHeader";
+import Sidebar from "../admin/AdminSidebar";
 
 const ITEMS_PER_PAGE = 10;
 
 const AdminJobPost: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const { jobPosts, loading, error } = useSelector((state: RootState) => state.adminJobPost);
+  const { jobPosts, loading, error } = useSelector(
+    (state: RootState) => state.adminJobPost
+  );
   const [selectedPost, setSelectedPost] = useState<BasicJobPost | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [confirmAction, setConfirmAction] = useState<{ type: 'block' | 'unblock', postId: string } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [confirmAction, setConfirmAction] = useState<{
+    type: "block" | "unblock";
+    postId: string;
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [localJobPosts, setLocalJobPosts] = useState<BasicJobPost[]>([]);
+  const [sortCriteria, setSortCriteria] = useState<"reports" | "date">("reports");
+  const [showApplicants, setShowApplicants] = useState(false);
 
   useEffect(() => {
     dispatch(fetchJobPosts());
   }, [dispatch]);
 
   useEffect(() => {
-    // Sort job posts by reported count (descending) and update date (descending)
     const sortedPosts = [...jobPosts].sort((a, b) => {
-      const aReportCount = a.reportedBy?.length || 0;
-      const bReportCount = b.reportedBy?.length || 0;
-      if (bReportCount !== aReportCount) {
-        return bReportCount - aReportCount;
+      if (sortCriteria === "reports") {
+        const aReportCount = a.reports?.length || 0;
+        const bReportCount = b.reports?.length || 0;
+        if (bReportCount !== aReportCount) {
+          return bReportCount - aReportCount;
+        }
       }
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
     setLocalJobPosts(sortedPosts);
-  }, [jobPosts]);
+  }, [jobPosts, sortCriteria]);
 
   const handleViewDetails = (post: BasicJobPost) => {
     setSelectedPost(post);
   };
 
   const handleBlockPost = (postId: string) => {
-    setConfirmAction({ type: 'block', postId });
+    setConfirmAction({ type: "block", postId });
   };
 
   const handleUnblockPost = (postId: string) => {
-    setConfirmAction({ type: 'unblock', postId });
+    setConfirmAction({ type: "unblock", postId });
   };
 
   const confirmBlockUnblock = () => {
     if (confirmAction) {
-      if (confirmAction.type === 'block') {
+      if (confirmAction.type === "block") {
         dispatch(blockJobPost(confirmAction.postId));
       } else {
         dispatch(unblockJobPost(confirmAction.postId));
       }
-      // Update local state
-      setLocalJobPosts(prevPosts =>
-        prevPosts.map(post =>
+      setLocalJobPosts((prevPosts) =>
+        prevPosts.map((post) =>
           post._id === confirmAction.postId
-            ? { ...post, isBlock: confirmAction.type === 'block' }
+            ? { ...post, isBlock: confirmAction.type === "block" }
             : post
         )
       );
@@ -66,9 +88,12 @@ const AdminJobPost: React.FC = () => {
     }
   };
 
-  const filteredPosts = localJobPosts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.company.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPosts = localJobPosts.filter(
+    (post) =>
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (post.company?.name
+        ? post.company.name.toLowerCase().includes(searchTerm.toLowerCase())
+        : false)
   );
 
   const totalPages = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE);
@@ -81,8 +106,18 @@ const AdminJobPost: React.FC = () => {
     setCurrentPage(newPage);
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        Error: {error}
+      </div>
+    );
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
@@ -91,8 +126,8 @@ const AdminJobPost: React.FC = () => {
         <Header />
         <div className="p-4 md:p-8 overflow-y-auto h-[calc(100vh-64px)]">
           <h1 className="text-2xl font-bold mb-4 text-purple-800">Job Posts</h1>
-          <div className="mb-4">
-            <div className="relative">
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
+            <div className="relative w-full sm:w-64 mb-2 sm:mb-0">
               <input
                 type="text"
                 placeholder="Search job posts..."
@@ -102,59 +137,97 @@ const AdminJobPost: React.FC = () => {
               />
               <FaSearch className="absolute left-3 top-3 text-purple-400" />
             </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-sm text-gray-600">Sort by:</span>
+              <select
+                value={sortCriteria}
+                onChange={(e) =>
+                  setSortCriteria(e.target.value as "reports" | "date")
+                }
+                className="border border-purple-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+              >
+                <option value="reports">Reports</option>
+                <option value="date">Date</option>
+              </select>
+            </div>
           </div>
           <div className="overflow-x-auto bg-white rounded-lg shadow">
             <table className="min-w-full divide-y divide-purple-200">
               <thead className="bg-purple-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden md:table-cell">Company</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden lg:table-cell">Location</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden xl:table-cell">Applicants</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden sm:table-cell">Reported By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Block Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden md:table-cell">
+                    Company
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden lg:table-cell">
+                    Location
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden xl:table-cell">
+                    Posted Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden sm:table-cell">
+                    Reports
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-purple-200">
                 {paginatedPosts.map((post) => (
-                  <tr key={post._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{post.title}</td>
-                    <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">{post.company.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">{post.location}</td>
-                    <td className="px-6 py-4 hidden xl:table-cell">
-                      <div className="flex items-center">
-                        <FaUserFriends className="mr-2 text-purple-500" />
-                        <span>{post.applicants?.length || 0}</span>
+                  <tr
+                    key={post._id}
+                    className="hover:bg-purple-50 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {post.title}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {post.applicants?.slice(0, 3).join(', ')}
-                        {post.applicants && post.applicants.length > 3 ? '...' : ''}
+                      <div className="text-sm text-gray-500">
+                        {post.company?.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                      <div className="text-sm text-gray-900">
+                        {post.company?.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaMapMarkerAlt className="mr-1 text-purple-500" />
+                        {post.location || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap hidden xl:table-cell">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaCalendarAlt className="mr-1 text-purple-500" />
+                        {new Date(post.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 hidden sm:table-cell">
-                      {post.reportedBy && post.reportedBy.length > 0 ? (
+                      {post.reports && post.reports.length > 0 ? (
                         <div className="flex items-center text-red-500">
                           <FaExclamationTriangle className="mr-2" />
-                          <span>{post.reportedBy.length} user(s)</span>
+                          <span>{post.reports.length} report(s)</span>
                         </div>
                       ) : (
                         <span className="text-green-500">No reports</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        post.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          post.status === "Open"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
                         {post.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        post.isBlock ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {post.isBlock ? 'Blocked' : 'Active'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -192,34 +265,38 @@ const AdminJobPost: React.FC = () => {
           </div>
           {/* Pagination */}
           <div className="mt-4 flex flex-col sm:flex-row justify-between items-center">
-            <div className="mb-2 sm:mb-0">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredPosts.length)} of {filteredPosts.length} entries
+            <div className="mb-2 sm:mb-0 text-sm text-gray-600">
+              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
+              {Math.min(currentPage * ITEMS_PER_PAGE, filteredPosts.length)} of{" "}
+              {filteredPosts.length} entries
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50"
+                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50 hover:bg-purple-200 transition-colors duration-200"
               >
                 <FaChevronLeft />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === page
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === page
+                        ? "bg-purple-600 text-white"
+                        : "bg-purple-100 text-purple-800 hover:bg-purple-200"
+                    } transition-colors duration-200`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50"
+                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50 hover:bg-purple-200 transition-colors duration-200"
               >
                 <FaChevronRight />
               </button>
@@ -230,46 +307,220 @@ const AdminJobPost: React.FC = () => {
       {selectedPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
           <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4 text-purple-800">{selectedPost.title}</h2>
-            <p className="mb-2"><strong>Company:</strong> {selectedPost.company.name}</p>
-            <p className="mb-2"><strong>Location:</strong> {selectedPost.location}</p>
-            <p className="mb-2"><strong>Way of Work:</strong> {selectedPost.wayOfWork}</p>
-            <p className="mb-2"><strong>Salary Range:</strong> ${selectedPost.salaryRange.min} - ${selectedPost.salaryRange.max}</p>
-            <p className="mb-2"><strong>Description:</strong> {selectedPost.description}</p>
-            <p className="mb-2"><strong>Skills Required:</strong> {selectedPost.skillsRequired.join(', ')}</p>
-            <p className="mb-2"><strong>Qualifications:</strong> {selectedPost.qualifications.join(', ')}</p>
-            <p className="mb-2"><strong>Status:</strong> {selectedPost.status}</p>
-            <p className="mb-2"><strong>Block Status:</strong> {selectedPost.isBlock ? 'Blocked' : 'Active'}</p>
-            <p className="mb-2"><strong>Applicants:</strong> {selectedPost.applicants?.join(', ') || 'None'}</p>
-            {selectedPost.reportedBy && selectedPost.reportedBy.length > 0 && (
-              <p className="mb-2 text-red-500"><strong>Reported By:</strong> {selectedPost.reportedBy.join(', ')}</p>
-            )}
-            <button
-              onClick={() => setSelectedPost(null)}
-              className="mt-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-            >
-              Close
-            </button>
+            <h2 className="text-2xl font-bold mb-4 text-purple-800">
+              {selectedPost.title}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="mb-2">
+                  <strong>Company:</strong>{" "}
+                  {selectedPost.company?.name || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Location:</strong> {selectedPost.location || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Way of Work:</strong>{" "}
+                  {selectedPost.wayOfWork || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Salary Range:</strong> $
+                  {selectedPost.salaryRange?.min || "N/A"} - $
+                  {selectedPost.salaryRange?.max || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Status:</strong> {selectedPost.status || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Block Status:</strong>{" "}
+                  {selectedPost.isBlock ? "Blocked" : "Active"}
+                </p>
+              </div>
+              <div>
+                <p className="mb-2">
+                  <strong>Posted Date:</strong>{" "}
+                  {new Date(selectedPost.createdAt).toLocaleDateString()}
+                </p>
+                <p className="mb-2">
+                  <strong>Last Updated:</strong>{" "}
+                  {new Date(selectedPost.updatedAt).toLocaleDateString()}
+                </p>
+                <p className="mb-2">
+                  <strong>Job Priority:</strong>{" "}
+                  {selectedPost.jobPriority || "N/A"}
+                </p>
+                <p className="mb-2">
+                  <strong>Recruiter:</strong>{" "}
+                  {selectedPost.recruiterId?.name || "N/A"}- {selectedPost.recruiterId?.email}
+                </p>
+                <p className="mb-2">
+                      <strong>Applicants:</strong>{" "}
+                      {selectedPost.applicants?.length || 0}
+                    </p>
+                    <button
+                      onClick={() => setShowApplicants(true)}
+                      className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors duration-200"
+                    >
+                      <FaUserFriends className="inline mr-1" /> View Applicants
+                    </button>
+                <p className="mb-2">
+                  <strong>Reports:</strong> {selectedPost.reports?.length || 0}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Description:</h3>
+              <p className="mb-4 text-gray-700">
+                {selectedPost.description || "N/A"}
+              </p>
+              <h3 className="text-lg font-semibold mb-2">Skills Required:</h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedPost.skillsRequired?.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm"
+                  >
+                    {skill}
+                  </span>
+                )) || "N/A"}
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Qualifications:</h3>
+              <ul className="list-disc list-inside mb-4 text-gray-700">
+                {selectedPost.qualifications?.map((qualification, index) => (
+                  <li key={index}>{qualification}</li>
+                )) || <li>N/A</li>}
+              </ul>
+              {selectedPost.reports && selectedPost.reports.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 text-red-600">
+                    Reports:
+                  </h3>
+                  <ul className="list-disc list-inside mb-4 text-gray-700">
+                    {selectedPost.reports.map((report, index) => (
+                      <li key={index}>
+                        <strong>{report.user?.name}</strong>: {report.reason}
+                        <span className="text-sm text-gray-500 ml-2">
+                          ({new Date(report.createdAt).toLocaleDateString()})
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            {showApplicants && selectedPost && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+              <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <h2 className="text-2xl font-bold mb-4 text-purple-800">
+                  Applicants for {selectedPost.title}
+                </h2>
+                {selectedPost.applicants && selectedPost.applicants.length > 0 ? (
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {selectedPost.applicants.map((applicant, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {applicant.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {applicant.email}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-gray-700">No applicants yet.</p>
+                )}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowApplicants(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors duration-200"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+            <div className="mt-6 flex justify-end space-x-2">
+              {!selectedPost.isBlock ? (
+                <button
+                  onClick={() => {
+                    setConfirmAction({
+                      type: "block",
+                      postId: selectedPost._id,
+                    });
+                    setSelectedPost(null);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200"
+                >
+                  Block Post
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setConfirmAction({
+                      type: "unblock",
+                      postId: selectedPost._id,
+                    });
+                    setSelectedPost(null);
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200"
+                >
+                  Unblock Post
+                </button>
+              )}
+              <button
+                onClick={() => setSelectedPost(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
-     {confirmAction && (
+      {confirmAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Confirm Action</h2>
-            <p className="mb-4">Are you sure you want to {confirmAction.type} this job post?</p>
+            <h2 className="text-xl font-bold mb-4 text-purple-800">
+              Confirm Action
+            </h2>
+            <p className="mb-4">
+              Are you sure you want to{" "}
+              {confirmAction.type === "block" ? "block" : "unblock"} this job
+              post?
+              {confirmAction.type === "block"
+                ? " This will prevent users from viewing or applying to this job."
+                : " This will make the job post visible and allow users to apply again."}
+            </p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setConfirmAction(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmBlockUnblock}
-                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                className={`px-4 py-2 text-white rounded transition-colors duration-200 ${
+                  confirmAction.type === "block"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
               >
-                Confirm
+                Confirm {confirmAction.type === "block" ? "Block" : "Unblock"}
               </button>
             </div>
           </div>

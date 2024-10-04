@@ -208,9 +208,9 @@ export const fetchJobPost = createAsyncThunk(
 
 export const reportJobAsync = createAsyncThunk(
   'auth/reportJob',
-  async ({ userId, jobId }: { userId: string; jobId: string }, { rejectWithValue }) => {
+  async ({ userId, jobId, reason }: { userId: string; jobId: string; reason: string }, { rejectWithValue }) => {
     try {
-      await reportJobApi(userId, jobId);
+      await reportJobApi(userId, jobId, reason);
       return jobId;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
@@ -220,6 +220,7 @@ export const reportJobAsync = createAsyncThunk(
     }
   }
 );
+
 
 export const updateUserAppliedJobs = (jobId: string) => ({
   type: 'auth/updateAppliedJobs',
@@ -420,7 +421,6 @@ const authSlice = createSlice({
       })
       .addCase(fetchJobPost.fulfilled, (state, action) => {
         state.loading = false;
-        // You might want to store the fetched job post somewhere in the state
       })
       .addCase(fetchJobPost.rejected, (state, action) => {
         state.loading = false;
@@ -432,7 +432,6 @@ const authSlice = createSlice({
       })
       .addCase(reportJobAsync.fulfilled, (state, action) => {
         state.loading = false;
-        // You might want to update the state to reflect that the job has been reported
       })
       .addCase(reportJobAsync.rejected, (state, action) => {
         state.loading = false;

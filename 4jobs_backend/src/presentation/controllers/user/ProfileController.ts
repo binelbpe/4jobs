@@ -57,7 +57,6 @@ export class ProfileController {
     const { certificateDetails, certificateImages } = req.body;
 
     try {
-      // Combine certificate details with uploaded image URLs
       const certificates = certificateDetails.map((cert: any, index: number) => ({
         ...cert,
         image: certificateImages[index] || null,

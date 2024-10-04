@@ -12,6 +12,7 @@ export interface IJobPostUserRepository {
 
   findById(id: string): Promise<JobPost | null>;
 
-  update(id: string,userId:string): Promise<JobPost | null>;
-  reportJob(userId: string, jobId: string): Promise<JobPost | null>;
+  update(id: string, userId: string): Promise<JobPost | null>;
+  
+  reportJob(userId: string, jobId: string, reason: string): Promise<JobPost | null>;
 }

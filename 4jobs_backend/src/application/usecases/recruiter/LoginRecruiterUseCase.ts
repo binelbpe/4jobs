@@ -12,7 +12,7 @@ export class LoginRecruiterUseCase {
   ) {}
 
   async execute(email: string, password: string) {
-    // Find recruiter by email
+
     const recruiter = await this.recruiterRepository.findRecruiterByEmail(
       email
     );

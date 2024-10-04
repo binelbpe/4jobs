@@ -27,7 +27,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApplyForJobUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const mongodb_1 = require("mongodb"); // Import ObjectId from MongoDB
+const mongodb_1 = require("mongodb");
 let ApplyForJobUseCase = class ApplyForJobUseCase {
     constructor(userRepository, jobPostRepository) {
         this.userRepository = userRepository;
@@ -42,22 +42,15 @@ let ApplyForJobUseCase = class ApplyForJobUseCase {
             const jobPost = yield this.jobPostRepository.findById(jobId);
             if (!jobPost)
                 throw new Error("Job post not found");
-            // Convert jobId and userId to ObjectId if needed
             const jobObjectId = new mongodb_1.ObjectId(jobId);
             const userObjectId = new mongodb_1.ObjectId(userId);
-            console.log("job post applied===========================", user.appliedJobs);
-            console.log("user applied===============================", jobPost.applicants);
-            // Check if the job is already applied by the user
             const userHasApplied = (_a = user.appliedJobs) === null || _a === void 0 ? void 0 : _a.some((appliedJobId) => appliedJobId.toString() === jobObjectId.toString());
-            // Check if the user is already an applicant for the job post
             const jobHasApplicant = (_b = jobPost.applicants) === null || _b === void 0 ? void 0 : _b.some((applicantId) => applicantId.toString() === userObjectId.toString());
             if (userHasApplied)
                 throw new Error("Already applied for this job");
             if (jobHasApplicant)
                 throw new Error("Already applied for this job");
-            // Update user applied jobs
             let result = yield this.userRepository.updateAppliedJobs(userId, jobId);
-            // Update job post applicants
             yield this.jobPostRepository.update(jobId, userId);
             return result;
         });

@@ -22,7 +22,7 @@ export class JobPostControllerUser {
     private reportJobUseCase: ReportJobUseCase
   ) {}
 
-  // Fetch all job posts
+ 
   async getJobPosts(req: Request, res: Response) {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -53,7 +53,7 @@ export class JobPostControllerUser {
     }
   }
 
-  // Fetch job post by ID
+
   async getJobPostById(req: Request, res: Response) {
     try {
       const jobPostId = req.params.id;
@@ -102,21 +102,22 @@ export class JobPostControllerUser {
 
   async reportJob(req: Request, res: Response) {
     try {
-      const { userId } = req.body;
+      const { userId, reason } = req.body;
       const { jobId } = req.params;
       console.log(userId)
       console.log(jobId)
-
-      await this.reportJobUseCase.execute(userId, jobId);
-
+      console.log(reason)
+  
+      await this.reportJobUseCase.execute(userId, jobId, reason);
+  
       res.status(200).json({ message: "Job reported successfully" });
     } catch (error: any) {
       console.error("Error reporting job:", error.message);
-
+  
       if (error.message === "Failed to report job") {
         return res.status(400).json({ error: error.message });
       }
-
+  
       res.status(500).json({ message: "An unexpected error occurred" });
     }
   }

@@ -25,8 +25,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtAuthService = void 0;
-// src/infrastructure/services/JwtAuthService.ts
-const inversify_1 = require("inversify"); // Add this import
+const inversify_1 = require("inversify");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const types_1 = __importDefault(require("../../types"));
@@ -36,7 +35,7 @@ let JwtAuthService = class JwtAuthService {
     }
     hashPassword(password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const saltRounds = 10; // You can adjust the salt rounds based on your preference
+            const saltRounds = 10;
             return yield bcrypt_1.default.hash(password, saltRounds);
         });
     }

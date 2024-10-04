@@ -1,4 +1,4 @@
-// utils/formValidation.ts
+
 
 import { BasicJobPostFormData } from '../../../types/jobPostTypes';
 
@@ -7,8 +7,8 @@ export const validateJobPostForm = (formData: BasicJobPostFormData): { [key: str
 
   if (!formData.title.trim()) errors.title = 'Job title is required';
   if (!formData.description.trim()) errors.description = 'Job description is required';
-  if (!formData.company.name.trim()) errors.companyName = 'Company name is required';
-  if (formData.company.website && !/^https?:\/\/\S+$/.test(formData.company.website)) {
+  if (!formData.company?.name.trim()) errors.companyName = 'Company name is required';
+  if (formData.company?.website && !/^https?:\/\/\S+$/.test(formData.company.website)) {
     errors.companyWebsite = 'Invalid website URL';
   }
   if (!formData.location.trim()) errors.location = 'Location is required';

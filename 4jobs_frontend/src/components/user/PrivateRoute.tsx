@@ -11,7 +11,6 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const token = localStorage.getItem('token');
 console.log("token in user",token)
-  // Ensure token and Redux authentication state sync correctly
   if (!isAuthenticated && !token) {
     return <Navigate to="/login" replace />;
   }

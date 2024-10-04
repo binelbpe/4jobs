@@ -22,7 +22,7 @@ export interface AuthState {
 export interface LoginCredentials {
   email: string;
   password: string;
-  googleToken?: string; // Optional for Google login
+  googleToken?: string; 
 }
 
 export interface SignupCredentials {
@@ -33,7 +33,7 @@ export interface SignupCredentials {
 
 export interface OtpVerificationCredentials {
   email: string;
-  otp: string; // One-time password for verification
+  otp: string; 
 }
 
 export interface User {
@@ -42,13 +42,13 @@ export interface User {
   name: string;
   phone?: number;
   token?: string;
-  role?: 'user' | 'admin'; // Consider using enums for roles
+  role?: 'user' | 'admin'; 
   profileImage?: string;
   bio?: string;
   about?: string;
-  dateOfBirth?: string; // Consider Date type for better handling
-  gender?: 'male' | 'female' | 'other'; // Consider using enums for gender
-  skills?: string[]; // Retaining as array for flexibility
+  dateOfBirth?: string; 
+  gender?: 'male' | 'female' | 'other'; 
+  skills?: string[]; 
   experiences?: Experience[];
   appliedJobs?: string[];
   projects?: Project[];
@@ -62,17 +62,17 @@ export interface UpdateProfileFormData {
   email: string;
   bio?: string;
   about?: string;
-  dateOfBirth?: string; // Consider Date type for better handling
-  gender?: 'male' | 'female' | 'other'; // Optional, matching User
-  skills: string[]; // Keeping as array for flexibility
+  dateOfBirth?: string;
+  gender?: 'male' | 'female' | 'other';
+  skills: string[]; 
   profileImage: File | null;
   resume: File | null;
   experiences?: Experience[];
   appliedJobs?: string[];
   projects?: Project[];
   certificates: {
-    file: File | null; // Optional file property
-    details: Certificate; // Aligned with Certificate type
+    file: File | null; 
+    details: Certificate; 
   }[];
 }
 
@@ -80,8 +80,8 @@ export interface Experience {
   id: string;
   title: string;
   company: string;
-  startDate: string; // Keep as string for form handling
-  endDate?: string; // Keep as string for form handling
+  startDate: string; 
+  endDate?: string; 
   currentlyWorking?: boolean;
   description?: string;
 }
@@ -95,13 +95,13 @@ export interface Project {
 }
 
 export interface Certificate {
-  id: string; // Unique identifier for the certificate
-  name: string; // Name of the certificate
-  issuingOrganization: string; // Organization that issued the certificate
-  dateOfIssue: string; // Keep as string for consistency
-  description?: string; // Optional description of the certificate
-  imageUrl?: string; // Optional URL for the certificate image
-  file?: File | null; // File property for uploads
+  id: string; 
+  name: string; 
+  issuingOrganization: string; 
+  dateOfIssue: string; 
+  description?: string; 
+  imageUrl?: string; 
+  file?: File | null;
 }
 
 export interface UserDetails extends User {
@@ -133,4 +133,25 @@ export interface ApiError {
 
 export interface RecommendationUser extends User {
   connectionStatus: 'none' | 'pending' | 'rejected';
+}
+
+export interface UserConnection {
+  _id: string;
+  email: string;
+  name: string;
+  phone?: number;
+  token?: string;
+  role?: 'user' | 'admin'; 
+  profileImage?: string;
+  bio?: string;
+  about?: string;
+  dateOfBirth?: string; 
+  gender?: 'male' | 'female' | 'other'; 
+  skills?: string[]; 
+  experiences?: Experience[];
+  appliedJobs?: string[];
+  projects?: Project[];
+  certificates?: Certificate[];
+  resume?: string;
+  isBlocked?:boolean;
 }

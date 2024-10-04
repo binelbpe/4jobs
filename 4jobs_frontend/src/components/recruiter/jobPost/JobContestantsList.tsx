@@ -68,7 +68,7 @@ const JobContestantsList: React.FC = () => {
                   <div className="flex items-center mb-4">
                     {contestant.profileImage ? (
                       <img
-                        src={`http://localhost:5000${contestant.profileImage}`}
+                        src={`${contestant.profileImage}`}
                         alt={contestant.name}
                         className="w-16 h-16 rounded-full mr-4 object-cover"
                       />

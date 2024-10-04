@@ -32,47 +32,39 @@ export class MongoPostRepository implements IPostRepository {
     });
 
     await post.save();
-
-    return post.toObject();
+    return this.populateUserInfo(post);
   }
 
   async findAll(page: number, limit: number): Promise<IPost[]> {
     const skip = (page - 1) * limit;
     const posts = await PostModel.find()
+      .populate('userId', 'name profileImage bio')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    return posts.map((post) => post.toObject());
+
+    return posts.map(post => this.populateUserInfo(post));
   }
 
-  async findByUserId(
-    userId: string,
-    page: number,
-    limit: number
-  ): Promise<IPost[]> {
-    console.log("mongo limit page", limit, page);
-    console.log("userId", userId);
+  async findByUserId(userId: string, page: number, limit: number): Promise<IPost[]> {
     const skip = (page - 1) * limit;
-
-    const posts = await PostModel.find({ userId: userId })
+    const posts = await PostModel.find({ userId })
+      .populate('userId', 'name profileImage bio')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
-    console.log("posts", posts);
-    return posts;
+    return posts.map(post => this.populateUserInfo(post));
   }
 
-  async deletePost(id: string):  Promise<boolean> {
+  async deletePost(id: string): Promise<boolean> {
     const deletedPost = await PostModel.findByIdAndDelete(id);
-    console.log("deletedPost",deletedPost)
-    return deletedPost? true:false;
+    return !!deletedPost;
   }
-  
 
   async editPost(postId: string, userId: string, updatedPostData: Partial<IPost>): Promise<IPost> {
-    const post = await PostModel.findOne({ _id: postId, userId: userId });
+    const post = await PostModel.findOne({ _id: postId, userId })
+      .populate('userId', 'name profileImage bio');
 
     if (!post) {
       throw new Error('Post not found or user not authorized to edit this post');
@@ -80,9 +72,19 @@ export class MongoPostRepository implements IPostRepository {
 
     Object.assign(post, updatedPostData);
     await post.save();
-
-    return post.toObject();
+    
+    return this.populateUserInfo(post);
   }
 
-  // Implement other methods for future expansion
+  private populateUserInfo(post: any): IPost {
+    const postObj = post.toObject();
+    return {
+      ...postObj,
+      user: post.userId ? {
+        name: post.userId.name,
+        profileImage: post.userId.profileImage,
+        bio: post.userId.bio,
+      } : undefined,
+    };
+  }
 }

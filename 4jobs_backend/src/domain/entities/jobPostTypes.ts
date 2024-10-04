@@ -1,6 +1,4 @@
-
 import mongoose from 'mongoose';
-// domain/entities/JobPost.ts
 
 export interface JobPost {
   _id?: string;
@@ -20,12 +18,17 @@ export interface JobPost {
   skillsRequired: string[];
   qualifications: string[];
   status: 'Open' | 'Closed';
-  recruiterId: string;
-  applicants?: string[];
-  reportedBy?: string[];
+  recruiterId: mongoose.Types.ObjectId | string;
+  applicants?: mongoose.Types.ObjectId[] | string[];
+  reports?: {
+    userId: mongoose.Types.ObjectId | string;
+    reason: string;
+    createdAt: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
-  isBlock:boolean;
+  isBlock: boolean;
 }
-export type CreateJobPostParams = Omit<JobPost, '_id'>;
+
+export type CreateJobPostParams = Omit<JobPost, '_id' | 'createdAt' | 'updatedAt'>;
 export type UpdateJobPostParams = Partial<JobPost>;

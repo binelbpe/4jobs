@@ -42,6 +42,23 @@ export class MongoUserRepository implements IUserRepository {
     return updatedUser ? this.mapToUser(updatedUser) : null;
   }
 
+  async searchUsers(query: string, userIds: string[]): Promise<User[]> {
+    const users = await UserModel.find({
+      _id: { $in: userIds },
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    }).limit(20);
+    return users.map(this.mapToUser);
+  }
+
+  // New method
+  async findUsersByIds(userIds: string[]): Promise<User[]> {
+    const users = await UserModel.find({ _id: { $in: userIds } }).lean();
+    return users.map(this.mapToUser);
+  }
+
   private mapToUser(doc: any): User {
     return {
       id: doc._id.toString(),
@@ -58,10 +75,10 @@ export class MongoUserRepository implements IUserRepository {
       certificates: doc.certificates || [],
       skills: doc.skills || [],
       appliedJobs: doc.appliedJobs || [],
-      profileImage: doc.profileImage, // This will now be an S3 URL
+      profileImage: doc.profileImage, 
       dateOfBirth: doc.dateOfBirth,
       gender: doc.gender,
-      resume: doc.resume, // This will now be an S3 URL
+      resume: doc.resume, 
       isBlocked: doc.isBlocked,
     };
   }

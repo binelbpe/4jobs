@@ -35,11 +35,10 @@ let RegisterRecruiterUseCase = class RegisterRecruiterUseCase {
     }
     execute(email, password, companyName, phone, name, governmentId) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Hash the password before saving
             const hashedPassword = yield this.authService.hashPassword(password);
             const recruiter = yield this.recruiterRepository.create({
                 email,
-                password: hashedPassword, // Save the hashed password
+                password: hashedPassword,
                 companyName,
                 phone,
                 name,
@@ -54,9 +53,9 @@ let RegisterRecruiterUseCase = class RegisterRecruiterUseCase {
                 role: recruiter.role,
                 name: recruiter.name,
                 isAdmin: false,
-                experiences: [], // Provide default value
-                projects: [], // Provide default value
-                certificates: [], // Provide default value
+                experiences: [],
+                projects: [],
+                certificates: [],
                 skills: [],
             });
             return { recruiter, token, isApproved: recruiter.isApproved };

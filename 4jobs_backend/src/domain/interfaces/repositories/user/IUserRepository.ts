@@ -7,5 +7,6 @@ export interface IUserRepository {
   create(user: Omit<User, "id">): Promise<User>;
   updateAppliedJobs(id: string, jobPostId:string): Promise<User | null>;
   update(id: string, user: Partial<User>): Promise<User | null>;
- 
+  searchUsers(query: string, userIds: string[]): Promise<User[]>;
+  findUsersByIds(userIds: string[]): Promise<User[]>;
 }

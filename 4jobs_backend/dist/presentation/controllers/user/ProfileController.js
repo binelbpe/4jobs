@@ -83,7 +83,6 @@ let ProfileController = class ProfileController {
             const userId = req.params.userId;
             const { certificateDetails, certificateImages } = req.body;
             try {
-                // Combine certificate details with uploaded image URLs
                 const certificates = certificateDetails.map((cert, index) => (Object.assign(Object.assign({}, cert), { image: certificateImages[index] || null })));
                 const updatedUser = yield this.userRepository.update(userId, { certificates });
                 if (!updatedUser) {

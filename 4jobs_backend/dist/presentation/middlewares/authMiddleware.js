@@ -20,11 +20,9 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         return res.status(401).json({ error: 'Authentication required' });
     }
     try {
-        // Verify the token
         const decoded = authService.verifyToken(token);
         console.log('Token:', token);
         console.log('Decoded:', decoded);
-        // Fetch user from the database using the decoded token information (e.g., userId)
         const user = yield UserModel_1.UserModel.findById(decoded.id).lean();
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -36,7 +34,6 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             req.user = user;
             next();
         }
-        // Attach the user object to the request
     }
     catch (error) {
         console.error('Error authenticating user:', error);

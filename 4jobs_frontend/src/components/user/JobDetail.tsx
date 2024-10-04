@@ -62,7 +62,7 @@ const JobDetail: React.FC = () => {
 
   if (!jobPost) return <LoadingSpinner />;
 
-  const hasApplied = jobPost.applicants?.includes(userId || "");
+  const hasApplied = jobPost.applicants?.some(applicant => applicant._id === userId);
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -73,7 +73,7 @@ const JobDetail: React.FC = () => {
             <h1 className="text-3xl font-bold mb-2">{jobPost.title}</h1>
             <p className="text-xl flex items-center">
               <Briefcase className="mr-2" size={20} />
-              {jobPost.company.name}
+              {jobPost.company?.name}
             </p>
           </div>
           <div className="p-6">

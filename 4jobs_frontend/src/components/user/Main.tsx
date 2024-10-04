@@ -25,7 +25,6 @@ const MainFeed: React.FC = () => {
   }, [status, hasMore, dispatch]);
 
   useEffect(() => {
-    dispatch(resetPosts());
     dispatch(fetchPosts());
     return () => {
       if (observer.current) {

@@ -31,7 +31,6 @@ let EditPostUseCase = class EditPostUseCase {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
-    // ... other methods ...
     editPost(postId, userId, updatedPostData) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.postRepository.editPost(postId, userId, updatedPostData);

@@ -14,8 +14,8 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout()); // Dispatch the logout action
-    navigate('/recruiter/login'); // Navigate to the login page
+    dispatch(logout());
+    navigate('/recruiter/login');
   };
 
   if (!isApproved) {
@@ -39,17 +39,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
+   
       <Header />
 
-      {/* Body Grid Layout */}
       <div className="grid grid-cols-12 gap-4 flex-1 p-4">
-        {/* Left Sidebar (hidden below 800px) */}
         <div className="hidden md:block md:col-span-2">
           <Sidebar />
         </div>
 
-        {/* Main Content Area */}
         <main className="col-span-12 md:col-span-8 bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-4 text-purple-600">Welcome, Recruiter!</h1>
           <div className="bg-white p-4 shadow-md rounded-lg mb-6">
@@ -68,8 +65,7 @@ const Dashboard: React.FC = () => {
           </div>
           <MainContent/>
         </main>
-
-        {/* Right Sidebar (hidden below 800px) */}
+        
         <div className="hidden md:block md:col-span-2">
           <Connections />
         </div>

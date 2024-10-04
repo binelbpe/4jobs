@@ -38,7 +38,6 @@ let JobPostControllerUser = class JobPostControllerUser {
         this.getJobPostsUseCase = getJobPostsUseCase;
         this.reportJobUseCase = reportJobUseCase;
     }
-    // Fetch all job posts
     getJobPosts(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -62,7 +61,6 @@ let JobPostControllerUser = class JobPostControllerUser {
             }
         });
     }
-    // Fetch job post by ID
     getJobPostById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,11 +104,12 @@ let JobPostControllerUser = class JobPostControllerUser {
     reportJob(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { userId } = req.body;
+                const { userId, reason } = req.body;
                 const { jobId } = req.params;
                 console.log(userId);
                 console.log(jobId);
-                yield this.reportJobUseCase.execute(userId, jobId);
+                console.log(reason);
+                yield this.reportJobUseCase.execute(userId, jobId, reason);
                 res.status(200).json({ message: "Job reported successfully" });
             }
             catch (error) {

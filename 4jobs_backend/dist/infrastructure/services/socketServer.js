@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupSocketServer = setupSocketServer;
 const socket_io_1 = require("socket.io");
 const socketAuthMiddleware_1 = require("../../presentation/middlewares/socketAuthMiddleware");
+const NotificationModel_1 = require("../database/mongoose/models/NotificationModel");
 const types_1 = __importDefault(require("../../types"));
 function setupSocketServer(server, container) {
     const io = new socket_io_1.Server(server, {
@@ -38,7 +39,7 @@ function setupSocketServer(server, container) {
         });
         socket.on('markNotificationAsRead', (notificationId) => __awaiter(this, void 0, void 0, function* () {
             console.log("Marking notification as read:", notificationId);
-            // Implement your notification marking logic here
+            yield NotificationModel_1.NotificationModel.findByIdAndUpdate(notificationId, { status: "read" });
             io.to(socket.id).emit('notificationMarkedAsRead', notificationId);
         }));
     });
@@ -55,7 +56,6 @@ function setupSocketServer(server, container) {
             console.log(`User ${notification.recipientId} is not currently connected. Notification will be shown on next login.`);
         }
     });
-    // Update the SocketIOServer binding
     container.unbind(types_1.default.SocketIOServer);
     container.bind(types_1.default.SocketIOServer).toConstantValue(io);
     return { io, userManager, eventEmitter };

@@ -4,6 +4,7 @@ import { Container } from 'inversify';
 import { EventEmitter } from 'events';
 import { UserManager } from './UserManager';
 import { socketAuthMiddleware } from '../../presentation/middlewares/socketAuthMiddleware';
+import { NotificationModel } from '../database/mongoose/models/NotificationModel';
 import TYPES from "../../types";
 
 export function setupSocketServer(server: HTTPServer, container: Container) {
@@ -34,7 +35,7 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
 
     socket.on('markNotificationAsRead', async (notificationId: string) => {
       console.log("Marking notification as read:", notificationId);
-      // Implement your notification marking logic here
+await NotificationModel.findByIdAndUpdate(notificationId,{status:"read"})
       io.to(socket.id).emit('notificationMarkedAsRead', notificationId);
     });
   });
@@ -51,8 +52,7 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
       console.log(`User ${notification.recipientId} is not currently connected. Notification will be shown on next login.`);
     }
   });
-
-  // Update the SocketIOServer binding
+ 
   container.unbind(TYPES.SocketIOServer);
   container.bind<SocketIOServer>(TYPES.SocketIOServer).toConstantValue(io);
 

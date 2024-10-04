@@ -1,7 +1,7 @@
-import { injectable } from 'inversify';  // Import @injectable
+import { injectable } from 'inversify'; 
 import { OAuth2Client } from 'google-auth-library';
 
-@injectable()  // Add @injectable annotation
+@injectable() 
 export class GoogleAuthService {
   private client: OAuth2Client;
 

@@ -43,7 +43,11 @@ const JobPostSchema = new mongoose_1.Schema({
     status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
     recruiterId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Recruiter', required: true },
     applicants: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
-    reportedBy: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
+    reports: [{
+            userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+            reason: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now }
+        }],
     isBlock: { type: Boolean, default: false },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('JobPost', JobPostSchema);

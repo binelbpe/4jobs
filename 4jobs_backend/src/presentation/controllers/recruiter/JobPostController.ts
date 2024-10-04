@@ -12,8 +12,8 @@ export class JobPostController {
 
  async createJobPost(req: Request, res: Response): Promise<void> {
     try {
-      const recruiterId = req.params.id; // Get recruiterId from route params
-      const jobPostData = { ...req.body, recruiterId }; // Combine body data with recruiterId
+      const recruiterId = req.params.id; 
+      const jobPostData = { ...req.body, recruiterId }; 
       const jobPost = await this.jobPostUseCase.createJobPost(jobPostData);
       res.status(201).json(jobPost);
     } catch (error) {

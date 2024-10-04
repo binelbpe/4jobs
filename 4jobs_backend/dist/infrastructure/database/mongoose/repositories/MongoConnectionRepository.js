@@ -27,7 +27,8 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 throw new Error('User not found');
             }
             const connections = yield ConnectionModel_1.ConnectionModel.find({
-                $or: [{ requester: userId }, { recipient: userId }]
+                $or: [{ requester: userId }, { recipient: userId }],
+                status: { $in: ['accepted', 'pending'] }
             });
             const connectedUserIds = connections.flatMap((conn) => [
                 conn.requester.toString(),
@@ -38,25 +39,29 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 _id: { $nin: [userId, ...uniqueConnectedUserIds] },
                 isAdmin: { $ne: true },
             }).limit(10);
-            const connectionMap = new Map(connections.map(conn => [
-                conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString(),
-                conn.status
-            ]));
-            const recommendations = recommendedUsers.map((user) => {
-                const recommendedUserId = user._id.toString();
-                let connectionStatus = 'none';
-                if (connectionMap.has(recommendedUserId)) {
-                    connectionStatus = connectionMap.get(recommendedUserId);
-                }
-                return {
-                    id: recommendedUserId,
-                    name: user.name,
-                    email: user.email,
-                    profileImage: user.profileImage,
-                    connectionStatus
-                };
+            const pendingConnections = yield ConnectionModel_1.ConnectionModel.find({
+                $or: [
+                    { requester: userId, status: 'pending' },
+                    { recipient: userId, status: 'pending' }
+                ]
             });
-            return recommendations;
+            const pendingConnectionMap = new Map(pendingConnections.map(conn => [
+                conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString(),
+                conn.requester.toString() === userId ? 'sent' : 'received'
+            ]));
+            return recommendedUsers.map((user) => ({
+                id: user._id.toString(),
+                name: user.name,
+                email: user.email,
+                profileImage: user.profileImage,
+                connectionStatus: this.mapConnectionStatus(pendingConnectionMap.get(user._id.toString()))
+            }));
+        });
+    }
+    getConnectionProfile(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield UserModel_1.UserModel.findById(connectionId);
+            return user ? this.mapUserToEntity(user) : null;
         });
     }
     createConnectionRequest(requesterId, recipientId) {
@@ -67,13 +72,7 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 status: 'pending'
             });
             const savedConnection = yield newConnection.save();
-            return {
-                id: savedConnection._id.toString(),
-                requesterId: savedConnection.requester.toString(),
-                recipientId: savedConnection.recipient.toString(),
-                status: savedConnection.status,
-                createdAt: savedConnection.createdAt
-            };
+            return this.mapConnectionToEntity(savedConnection);
         });
     }
     getConnectionStatus(requesterId, recipientId) {
@@ -82,18 +81,117 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 $or: [
                     { requester: requesterId, recipient: recipientId },
                     { requester: recipientId, recipient: requesterId }
-                ]
+                ],
+                status: { $in: ['pending', 'accepted'] }
             });
-            if (!connection) {
-                return null;
+            return connection ? this.mapConnectionToEntity(connection) : null;
+        });
+    }
+    getRequests(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield ConnectionModel_1.ConnectionModel.find({ recipient: userId, status: 'pending' })
+                .populate('requester', 'name profileImage headline bio');
+            return connections.map(this.mapConnectionRequestToEntity);
+        });
+    }
+    getConnectionById(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connection = yield ConnectionModel_1.ConnectionModel.findById(connectionId);
+            return connection ? this.mapConnectionToEntity(connection) : null;
+        });
+    }
+    updateConnectionStatus(connectionId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedConnection = yield ConnectionModel_1.ConnectionModel.findByIdAndUpdate(connectionId, { status }, { new: true });
+            if (!updatedConnection) {
+                throw new Error('Connection not found');
             }
-            return {
-                id: connection._id.toString(),
-                requesterId: connection.requester.toString(),
-                recipientId: connection.recipient.toString(),
-                status: connection.status,
-                createdAt: connection.createdAt
-            };
+            console.log("updatedConnection", updatedConnection);
+            return this.mapConnectionToEntity(updatedConnection);
+        });
+    }
+    mapUserToEntity(user) {
+        return {
+            id: user._id.toString(),
+            email: user.email,
+            password: user.password,
+            phone: user.phone,
+            name: user.name,
+            role: user.role,
+            isAdmin: user.isAdmin,
+            appliedJobs: user.appliedJobs,
+            bio: user.bio,
+            about: user.about,
+            experiences: user.experiences,
+            projects: user.projects,
+            certificates: user.certificates,
+            skills: user.skills,
+            profileImage: user.profileImage,
+            dateOfBirth: user.dateOfBirth,
+            gender: user.gender,
+            resume: user.resume,
+            isBlocked: user.isBlocked,
+        };
+    }
+    mapConnectionToEntity(connection) {
+        return {
+            id: connection._id.toString(),
+            requesterId: connection.requester.toString(),
+            recipientId: connection.recipient.toString(),
+            status: connection.status,
+            createdAt: connection.createdAt
+        };
+    }
+    mapConnectionRequestToEntity(connection) {
+        return {
+            id: connection._id.toString(),
+            requester: {
+                id: connection.requester._id.toString(),
+                name: connection.requester.name,
+                profileImage: connection.requester.profileImage || '',
+                headline: connection.requester.about || '',
+                bio: connection.requester.bio || '',
+            },
+            status: connection.status || ''
+        };
+    }
+    mapConnectionStatus(status) {
+        if (status === 'sent' || status === 'received') {
+            return 'pending';
+        }
+        return 'none';
+    }
+    getConnections(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield ConnectionModel_1.ConnectionModel.find({
+                $or: [{ requester: userId }, { recipient: userId }],
+                status: 'accepted'
+            }).populate('requester recipient', 'name profileImage');
+            return connections.map(conn => conn.requester._id.toString() === userId ? conn.recipient : conn.requester);
+        });
+    }
+    getConnectionRequestsALL(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return ConnectionModel_1.ConnectionModel.find({
+                recipient: userId,
+                status: 'pending'
+            }).populate('requester', 'name profileImage');
+        });
+    }
+    deleteConnection(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const deletedConnection = yield ConnectionModel_1.ConnectionModel.findByIdAndDelete(connectionId);
+            return deletedConnection ? this.mapConnectionToEntity(deletedConnection) : null;
+        });
+    }
+    searchConnections(userId, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield this.getConnections(userId);
+            const connectionIds = connections.map(conn => conn._id);
+            return UserModel_1.UserModel.find({
+                _id: { $in: connectionIds },
+                name: { $regex: query, $options: 'i' }
+            }).select('name profileImage');
         });
     }
 };

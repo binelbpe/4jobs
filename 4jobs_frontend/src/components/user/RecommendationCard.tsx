@@ -62,7 +62,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user, onViewPro
     <div className="flex flex-col justify-between p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 ease-in-out h-full">
       <div className="flex flex-col items-center mb-3">
         {user?.profileImage ? (
-          <img src={user.profileImage} alt={user.name} className="rounded-full h-16 w-16 object-cover mb-2"/>
+          <img src={`${user.profileImage}`} alt={user.name} className="rounded-full h-16 w-16 object-cover mb-2"/>
         ) : (
           <UserCircle className="w-20 h-20 text-gray-400" />
         )}

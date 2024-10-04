@@ -51,7 +51,6 @@ let PostController = class PostController {
                 const { content } = req.body;
                 const image = (_b = (_a = req.files) === null || _a === void 0 ? void 0 : _a["image"]) === null || _b === void 0 ? void 0 : _b[0];
                 const video = (_d = (_c = req.files) === null || _c === void 0 ? void 0 : _c["video"]) === null || _d === void 0 ? void 0 : _d[0];
-                // Log the extracted data
                 console.log("Extracted data:", { userId, content, image, video });
                 const post = yield this.createPostUseCase.execute({
                     userId,
@@ -76,7 +75,6 @@ let PostController = class PostController {
                 const limit = parseInt(req.query.limit) || 10;
                 console.log("Fetching posts for page:", page);
                 const posts = yield this.getAllPostsUseCase.execute(page, limit);
-                console.log("postssssss==================:", posts);
                 res.status(200).json(posts);
             }
             catch (error) {
@@ -91,10 +89,7 @@ let PostController = class PostController {
                 const userId = req.params.id;
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 10;
-                console.log("Fetching posts for page:", page);
-                console.log("page limit", page, limit);
                 const posts = yield this.getUserPostsUseCase.findByUserIdPosts(userId, page, limit);
-                console.log("postssssss==================:", posts);
                 res.status(200).json(posts);
             }
             catch (error) {
@@ -108,7 +103,6 @@ let PostController = class PostController {
             try {
                 const userId = req.params.id;
                 const posts = yield this.deletePostUseCase.execute(userId);
-                console.log("postssssss==================delete:", posts);
                 res.status(200).json({ message: "success" });
             }
             catch (error) {
@@ -121,7 +115,7 @@ let PostController = class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const postId = req.params.postId;
-                const userId = req.params.userId; // Assuming you have user information in the request after authentication
+                const userId = req.params.userId;
                 const updatedPostData = req.body;
                 console.log("updatedPostData", updatedPostData);
                 console.log("postIddd", postId);

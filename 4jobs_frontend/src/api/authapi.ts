@@ -2,6 +2,9 @@ import axios from 'axios';
 import { LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../types/auth';
 import { BasicJobPost } from '../types/jobPostTypes';
 import { CreatePostData, LikePostData, CommentPostData, Post } from '../types/postTypes';
+import { Message } from '../types/messageType';
+import { User,UserConnection } from '../types/auth';
+
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -131,13 +134,13 @@ export const updateUserCertificatesApi = async (
 ) => {
   const formData = new FormData();
   
-  // Append the certificate details
+
   formData.append('certificateDetails', JSON.stringify(certificates.map(cert => cert.details)));
 
-  // If you only need one image per certificate, append the file correctly
+
   certificates.forEach((cert, index) => {
     if (cert.file) {
-      formData.append(`certificateImage`, cert.file, cert.file.name); // Use a consistent key for the image
+      formData.append(`certificateImage`, cert.file, cert.file.name); 
     }
     console.log("cert.file",cert.file)
   });
@@ -192,20 +195,14 @@ export const fetchJobPostApi = async (jobId: string): Promise<BasicJobPost> => {
   return apiRequest('GET', `/jobs/${jobId}`);
 };
 
-
-
-/* ------------------ Post APIs ------------------ */
-
 export const fetchPostsAPI = async (page: number, limit: number = 10): Promise<Post[]> => {
   return apiRequest('GET', `/posts?page=${page}&limit=${limit}`);
 };
 
-// Fetch posts by user ID
 export const fetchPostsByUserIdAPI = async (userId: string, page: number, limit: number): Promise<Post[]> => {
   return apiRequest('GET', `/posts/user/${userId}?page=${page}&limit=${limit}`);
 };
 
-// Create a new post
 export const createPostAPI = async (postData: CreatePostData, userId: string): Promise<Post> => {
   const formData = new FormData();
   
@@ -221,7 +218,6 @@ export const createPostAPI = async (postData: CreatePostData, userId: string): P
     formData.append('video', postData.video, postData.video.name);
   }
 
-  // Log FormData entries
   for (let [key, value] of formData.entries()) {
     console.log(`${key}: ${value instanceof File ? value.name : value}`);
   }
@@ -229,12 +225,10 @@ export const createPostAPI = async (postData: CreatePostData, userId: string): P
   return apiUploadRequest('POST', `/posts/${userId}`, formData);
 };
 
-// Like a post
 export const likePostAPI = async (likeData: LikePostData): Promise<Post> => {
   return apiRequest('POST', `/posts/${likeData.postId}/like`, { userId: likeData.userId });
 };
 
-// Comment on a post
 export const commentOnPostAPI = async (commentData: CommentPostData): Promise<Post> => {
   return apiRequest('POST', `/posts/${commentData.postId}/comment`, {
     userId: commentData.userId,
@@ -264,24 +258,68 @@ export const editPostAPI = async (postId: string,userId:string, postData: Partia
   return apiUploadRequest('PUT', `/posts/edit/${postId}/${userId}`, formData);
 };
 
-export const reportJobApi = async (userId: string, jobId: string): Promise<void> => {
-  return apiRequest('POST', `/jobs/${jobId}/report`, { userId });
-};
-
-export const fetchConnectionProfileApi = async (userId: string) => {
-  return apiRequest('GET', `/connections/profile/${userId}`);
+export const reportJobApi = async (userId: string, jobId: string, reason: string): Promise<void> => {
+  return apiRequest('POST', `/jobs/${jobId}/report`, { userId, reason });
 };
 
 export const fetchNotificationsApi = async (userId: string) => {
   return apiRequest('GET', `/notifications/${userId}`);
 };
 
-// Add the new function to fetch recommendations
+
 export const fetchRecommendationsApi = async (userId: string) => {
   return apiRequest('GET', `/connections/recommendations/${userId}`);
 };
 
-// Add the new function to send a connection request
 export const sendConnectionRequestApi = async (senderId: string, recipientId: string) => {
   return apiRequest('POST', '/connections/request', { senderId, recipientId });
+};
+
+export const fetchConnectionProfileApi = async (userId: string) => {
+  return apiRequest('GET', `/connections/profile/${userId}`);
+};
+export const fetchConnectionRequestsApi = async (userId: string) => {
+  return apiRequest('GET', `/connections/requests/${userId}`);
+};
+
+export const acceptConnectionRequestApi = async (requestId: string, userId: string) => {
+  return apiRequest('POST', `/connections/accept/${requestId}`, { userId });
+};
+
+export const rejectConnectionRequestApi = async (requestId: string, userId: string) => {
+  return apiRequest('POST', `/connections/reject/${requestId}`, { userId });
+};
+
+
+export const fetchConnectionsApi = async (userId: string) => {
+  return apiRequest('GET', `/connections/${userId}`);
+};
+
+export const searchConnectionsApi = async (userId: string, query: string) => {
+  return apiRequest('GET', `/connections/${userId}/search?query=${query}`);
+};
+
+
+export const sendMessageApi = async (senderId: string, recipientId: string, content: string): Promise<Message> => {
+  return apiRequest('POST', '/messages', { senderId, recipientId, content });
+};
+
+export const getConversationApi = async (userId1: string, userId2: string): Promise<Message[]> => {
+  return apiRequest('GET', `/messages/${userId1}/${userId2}`);
+};
+
+export const markMessageAsReadApi = async (messageId: string): Promise<string> => {
+  return apiRequest('PUT', `/messages/${messageId}/read`);
+};
+
+export const getUnreadMessageCountApi = async (userId: string): Promise<number> => {
+  return apiRequest('GET', `/messages/unread/${userId}`);
+};
+
+export const fetchConnectionsMessageApi = async (userId: string): Promise<User[]> => {
+  return apiRequest('GET', `/connections/message/${userId}`);
+};
+
+export const searchConnectionsMessageApi = async (userId: string, query: string): Promise<UserConnection[]> => {
+  return apiRequest('GET', `/connections/${userId}/search?query=${query}`);
 };

@@ -20,7 +20,11 @@ const JobPostSchema: Schema = new Schema({
   status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
   recruiterId: { type: Schema.Types.ObjectId, ref: 'Recruiter', required: true },
   applicants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  reportedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }], 
+  reports: [{
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    reason: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
   isBlock: { type: Boolean, default: false },
 }, { timestamps: true });
 

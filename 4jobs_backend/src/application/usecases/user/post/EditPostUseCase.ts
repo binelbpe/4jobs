@@ -9,7 +9,6 @@ export class EditPostUseCase implements EditPostUseCase {
     @inject(TYPES.IPostRepository) private postRepository: IPostRepository
   ) {}
 
-  // ... other methods ...
 
   async editPost(postId: string, userId: string, updatedPostData: Partial<IPost>): Promise<IPost> {
     return this.postRepository.editPost(postId, userId, updatedPostData);

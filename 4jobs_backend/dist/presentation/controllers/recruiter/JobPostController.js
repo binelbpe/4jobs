@@ -35,8 +35,8 @@ let JobPostController = class JobPostController {
     createJobPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const recruiterId = req.params.id; // Get recruiterId from route params
-                const jobPostData = Object.assign(Object.assign({}, req.body), { recruiterId }); // Combine body data with recruiterId
+                const recruiterId = req.params.id;
+                const jobPostData = Object.assign(Object.assign({}, req.body), { recruiterId });
                 const jobPost = yield this.jobPostUseCase.createJobPost(jobPostData);
                 res.status(201).json(jobPost);
             }

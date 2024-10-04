@@ -21,31 +21,62 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MongoJobPostAdminRepository = void 0;
 const inversify_1 = require("inversify");
 const jobPostModel_1 = __importDefault(require("../models/jobPostModel"));
+const UserModel_1 = require("../models/UserModel"); // Assuming you have a User model
 let MongoJobPostAdminRepository = class MongoJobPostAdminRepository {
     findAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("job post list admin mongo");
-            return jobPostModel_1.default.find().lean();
+            const jobPosts = yield jobPostModel_1.default.find().lean().populate({
+                path: 'recruiterId',
+                select: 'name email'
+            }).populate({
+                path: 'applicants',
+                select: 'name email'
+            });
+            const populatedJobPosts = yield Promise.all(jobPosts.map((post) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
+                const reportedByUsers = yield UserModel_1.UserModel.find({ _id: { $in: (_a = post.reports) === null || _a === void 0 ? void 0 : _a.map(report => report.userId) } })
+                    .select('name email')
+                    .lean();
+                const reportsWithUserDetails = (_b = post.reports) === null || _b === void 0 ? void 0 : _b.map(report => (Object.assign(Object.assign({}, report), { user: reportedByUsers.find(user => user._id.toString() === report.userId.toString()) })));
+                return Object.assign(Object.assign({}, post), { reports: reportsWithUserDetails });
+            })));
+            return populatedJobPosts;
         });
     }
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return jobPostModel_1.default.findById(id).lean();
+            return jobPostModel_1.default.findById(id)
+                .populate('recruiterId', 'name email')
+                .populate('applicants', 'name email')
+                .populate('reports.userId', 'name email')
+                .lean();
         });
     }
     update(id, jobPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            return jobPostModel_1.default.findByIdAndUpdate(id, jobPost, { new: true }).lean();
+            return jobPostModel_1.default.findByIdAndUpdate(id, jobPost, { new: true })
+                .populate('recruiterId', 'name email')
+                .populate('applicants', 'name email')
+                .populate('reports.userId', 'name email')
+                .lean();
         });
     }
     blockJobPost(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return jobPostModel_1.default.findByIdAndUpdate(id, { isBlock: true }, { new: true }).lean();
+            return jobPostModel_1.default.findByIdAndUpdate(id, { isBlock: true }, { new: true })
+                .populate('recruiterId', 'name email')
+                .populate('applicants', 'name email')
+                .populate('reports.userId', 'name email')
+                .lean();
         });
     }
     unblockJobPost(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return jobPostModel_1.default.findByIdAndUpdate(id, { isBlock: false }, { new: true }).lean();
+            return jobPostModel_1.default.findByIdAndUpdate(id, { isBlock: false }, { new: true })
+                .populate('recruiterId', 'name email')
+                .populate('applicants', 'name email')
+                .populate('reports.userId', 'name email')
+                .lean();
         });
     }
 };

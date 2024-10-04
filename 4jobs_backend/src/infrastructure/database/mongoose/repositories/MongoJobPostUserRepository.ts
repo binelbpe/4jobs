@@ -2,6 +2,7 @@ import { injectable } from "inversify";
 import JobPostModel from "../models/jobPostModel";
 import { UserModel } from "../models/UserModel";
 import { IJobPostUserRepository } from "../../../../domain/interfaces/repositories/user/IJobPostUserRepository";
+import mongoose from "mongoose";
 import {
   JobPost,
   CreateJobPostParams,
@@ -25,7 +26,7 @@ export class MongoJobPostUserRepository implements IJobPostUserRepository {
       { new: true }
     );
 
-    console.log("updatedjob post applied -------------------", updatedJobPost)
+
     return updatedJobPost
   }
 
@@ -60,10 +61,18 @@ export class MongoJobPostUserRepository implements IJobPostUserRepository {
     };
   }
 
-  async reportJob(userId: string, jobId: string): Promise<JobPost | null> {
+  async reportJob(userId: string, jobId: string, reason: string): Promise<JobPost | null> {
     const updatedJobPost = await JobPostModel.findByIdAndUpdate(
       jobId,
-      { $addToSet: { reportedBy: userId } },
+      {
+        $push: {
+          reports: {
+            userId: new mongoose.Types.ObjectId(userId),
+            reason: reason,
+            createdAt: new Date()
+          }
+        }
+      },
       { new: true }
     );
 

@@ -19,7 +19,7 @@ const initialState: JobPostState = {
   totalPages: 0,
   totalCount: 0,
   currentPage: 1,
-  selectedPost: null, // Add this line to store the selected job post
+  selectedPost: null, 
 };
 
 export const fetchJobPosts = createAsyncThunk(

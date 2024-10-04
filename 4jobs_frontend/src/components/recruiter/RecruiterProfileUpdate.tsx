@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import RecruiterHeader from '../recruiter/RecruiterHeader';
 import { toast } from 'react-toastify';
 
-// Define the form data interface
+
 interface FormData {
   name: string;
   email: string;
@@ -42,7 +42,7 @@ const RecruiterProfileUpdate: React.FC = () => {
     employeeIdImage: '',
   });
 
-  // Regex patterns for validation
+
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
   const nameRegex = /^[a-zA-Z\s]{3,20}$/;
@@ -60,31 +60,30 @@ const RecruiterProfileUpdate: React.FC = () => {
       employeeIdImage: '',
     };
 
-    // Validate name
+
     if (!nameRegex.test(formData.name)) {
       newErrors.name = 'Name must be 3-20 characters and contain only letters and spaces.';
       valid = false;
     }
 
-    // Validate email
+   
     if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address.';
       valid = false;
     }
 
-    // Validate company name (same as name regex)
+
     if (!nameRegex.test(formData.companyName)) {
       newErrors.companyName = 'Company name must be 3-20 characters and contain only letters and spaces.';
       valid = false;
     }
 
-    // Validate phone
+
     if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = 'Phone number must be a valid 10-digit number.';
       valid = false;
     }
 
-    // Validate location
     if (!locationRegex.test(formData.location)) {
       newErrors.location = 'Location must be 3-15 characters and can contain letters, spaces, and commas.';
       valid = false;
@@ -94,19 +93,16 @@ const RecruiterProfileUpdate: React.FC = () => {
       const fileName = formData.governmentId.name; 
       const validExtensions = /\.(jpg|jpeg|png|pdf|webp)$/i;
 
-      // Check if file type matches the allowed types
       if (!validExtensions.test(fileName)) {
         newErrors.governmentId = 'Government ID must be a valid jpg, jpeg, png, or pdf file.';
         valid = false;
       }
     }
 
-    // Validate employee ID image (optional) if provided
     if (formData.employeeIdImage) {
       const fileName = formData.employeeIdImage.name; 
       const validExtensions = /\.(jpg|jpeg|png|pdf|webp)$/i;
 
-      // Check if file type matches the allowed types
       if (!validExtensions.test(fileName)) {
         newErrors.employeeIdImage = 'Employee ID Image must be a valid jpg, jpeg, png, or pdf file.';
         valid = false;
@@ -199,7 +195,7 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.companyName && <p className="text-red-500 text-sm">{errors.companyName}</p>}
           </div>
 
-          {/* Location */}
+    
           <div>
             <label className="block font-semibold">Company Location:</label>
             <input
@@ -213,7 +209,7 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.location && <p className="text-red-500 text-sm">{errors.location}</p>}
           </div>
 
-          {/* Phone */}
+       
           <div>
             <label className="block font-semibold">Phone:</label>
             <input
@@ -227,7 +223,7 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
           </div>
 
-          {/* Employee ID Image */}
+        
           <div>
             <label className="block font-semibold">Employee ID Image:</label>
             <input
@@ -239,7 +235,7 @@ const RecruiterProfileUpdate: React.FC = () => {
             {errors.employeeIdImage && <p className="text-red-500 text-sm">{errors.employeeIdImage}</p>}
           </div>
 
-          {/* Submit Button */}
+       
           <div>
             <button type="submit" className="bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-600">
               Update Profile

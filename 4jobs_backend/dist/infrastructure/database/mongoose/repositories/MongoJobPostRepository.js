@@ -107,9 +107,9 @@ let MongoJobPostRepository = class MongoJobPostRepository {
             dateOfBirth: doc.dateOfBirth,
             gender: doc.gender,
             resume: doc.resume,
-            password: doc.password || "", // Optional, based on your need
-            role: doc.role || "", // Optional, based on your need
-            isAdmin: doc.isAdmin || false, // Optional, based on your need
+            password: doc.password || "",
+            role: doc.role || "",
+            isAdmin: doc.isAdmin || false,
         };
     }
 };

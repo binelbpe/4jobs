@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/admin';
 
 const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PATCH', endpoint: string, data: any = {}) => {
-  const token = localStorage.getItem('adminToken'); // Fetch the token
+  const token = localStorage.getItem('adminToken'); 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

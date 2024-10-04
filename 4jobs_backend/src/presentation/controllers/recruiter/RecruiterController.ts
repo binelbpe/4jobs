@@ -76,7 +76,7 @@ console.log("governmentId",req.file)
     }
   }
 
-  // Verify OTP
+  
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
@@ -111,7 +111,7 @@ console.log("governmentId",req.file)
     }
   }
 
-  // Login Recruiter
+  
   async loginRecruiter(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
@@ -129,8 +129,7 @@ console.log("governmentId",req.file)
       res.status(400).json({ error: (error as Error).message });
     }
   }
-
-  // Send OTP
+  
   async sendOtp(req: Request, res: Response) {
     try {
       const { email } = req.body;
@@ -150,7 +149,7 @@ console.log("governmentId",req.file)
     }
   }
 
-  // Get Recruiter Profile
+  
   async getProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;

@@ -13,12 +13,11 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   }
 
   try {
-    // Verify the token
+
     const decoded = authService.verifyToken(token);
     console.log('Token:', token);
     console.log('Decoded:', decoded);
 
-    // Fetch user from the database using the decoded token information (e.g., userId)
     const user = await UserModel.findById(decoded.id).lean();
 
     if (!user) {
@@ -30,7 +29,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       next();
     }
 
-    // Attach the user object to the request
    
   } catch (error) {
     console.error('Error authenticating user:', error);

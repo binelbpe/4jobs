@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MongoJobPostUserRepository = void 0;
 const inversify_1 = require("inversify");
 const jobPostModel_1 = __importDefault(require("../models/jobPostModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 let MongoJobPostUserRepository = class MongoJobPostUserRepository {
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,7 +31,6 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
     update(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             let updatedJobPost = yield jobPostModel_1.default.findOneAndUpdate({ _id: id, isBlock: false }, { $addToSet: { applicants: userId } }, { new: true });
-            console.log("updatedjob post applied -------------------", updatedJobPost);
             return updatedJobPost;
         });
     }
@@ -56,9 +56,17 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
             };
         });
     }
-    reportJob(userId, jobId) {
+    reportJob(userId, jobId, reason) {
         return __awaiter(this, void 0, void 0, function* () {
-            const updatedJobPost = yield jobPostModel_1.default.findByIdAndUpdate(jobId, { $addToSet: { reportedBy: userId } }, { new: true });
+            const updatedJobPost = yield jobPostModel_1.default.findByIdAndUpdate(jobId, {
+                $push: {
+                    reports: {
+                        userId: new mongoose_1.default.Types.ObjectId(userId),
+                        reason: reason,
+                        createdAt: new Date()
+                    }
+                }
+            }, { new: true });
             return updatedJobPost;
         });
     }

@@ -32,7 +32,6 @@ const LoginUseCase_1 = require("../../../application/usecases/user/LoginUseCase"
 const JwtAuthService_1 = require("../../../infrastructure/services/JwtAuthService");
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const GoogleAuthService_1 = require("../../../infrastructure/services/GoogleAuthService");
-// Define tempUserStore globally within the file
 const tempUserStore = {};
 let AuthController = class AuthController {
     constructor(signupUseCase, loginUseCase, otpService, userRepository, googleAuthService, jwtAuthService) {

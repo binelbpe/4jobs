@@ -1,14 +1,18 @@
-// src/types/postTypes.ts
 export interface Post {
   _id: string;
   userId: string;
-  author: string;
-  content?: string;
-  videoUrl?: string;
+  content: string;
   imageUrl?: string;
-  likes: number;
+  videoUrl?: string;
+  likes: string[];
   comments: Comment[];
+  user: {
+    name: string;
+    profileImage?: string;
+    bio?: string;
+  };
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Comment {

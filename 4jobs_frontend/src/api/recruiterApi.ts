@@ -4,7 +4,7 @@ import { FetchUsersResponse, FetchUserDetailsResponse } from '../types/auth';
 
 const API_BASE_URL = 'http://localhost:5000/recruiter';
 
-// Function to handle API requests
+
 const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: string, data: any = {}) => {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {};
@@ -36,7 +36,7 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: s
   }
 };
 
-// API functions
+
 export const registerRecruiterApi = async (recruiterData: FormData) => {
   console.log('Attempting recruiter registration with file:', recruiterData);
   return apiRequest('POST', '/register', recruiterData);
@@ -72,7 +72,6 @@ export const getJobPosts = async (recruiterId: string) => {
   }
   try {
     const response = await apiRequest('GET', `/recruiters/${recruiterId}/job-posts`);
-    console.log('Job posts fetched:', response); // Add this line for debugging
     return response;
   } catch (error) {
     console.error('Error fetching job posts:', error);

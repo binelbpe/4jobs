@@ -115,7 +115,7 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
             type="text"
             name="company.name"
             id="company.name"
-            value={formData.company.name}
+            value={formData.company?.name}
             onChange={handleChange}
             className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
           />
@@ -131,7 +131,7 @@ const JobPostForm: React.FC<JobPostFormProps> = ({ initialData, recruiterId, isE
             type="text"
             name="company.website"
             id="company.website"
-            value={formData.company.website}
+            value={formData.company?.website}
             onChange={handleChange}
             className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
           />

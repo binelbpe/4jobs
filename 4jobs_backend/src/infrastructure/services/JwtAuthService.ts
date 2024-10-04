@@ -1,5 +1,4 @@
-// src/infrastructure/services/JwtAuthService.ts
-import { injectable,inject  } from 'inversify'; // Add this import
+import { injectable,inject  } from 'inversify'; 
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import { IAuthService } from '../../domain/interfaces/services/IAuthService';
@@ -17,7 +16,7 @@ export class JwtAuthService implements IAuthService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10; // You can adjust the salt rounds based on your preference
+    const saltRounds = 10; 
     return await bcrypt.hash(password, saltRounds);
   }
 

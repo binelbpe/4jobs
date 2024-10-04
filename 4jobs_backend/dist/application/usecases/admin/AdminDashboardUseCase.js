@@ -20,10 +20,8 @@ const inversify_1 = require("inversify");
 let AdminDashboardUseCase = class AdminDashboardUseCase {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            // Logic for gathering data/statistics for the admin dashboard
             const data = {
                 message: "Welcome to the Admin Dashboard",
-                // Add more data/statistics if needed
             };
             return data;
         });

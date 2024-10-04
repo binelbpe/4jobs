@@ -71,7 +71,7 @@ const CreatePost: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex items-start space-x-4">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex-shrink-0 overflow-hidden">
-                  <img src={user?.profileImage} alt="User avatar" className="w-full h-full object-cover" />
+                  <img src={`${user?.profileImage}`} alt="User avatar" className="w-full h-full object-cover" />
                 </div>
                 <textarea
                   value={content}

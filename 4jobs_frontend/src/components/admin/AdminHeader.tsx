@@ -20,7 +20,7 @@ const Header: React.FC = () => {
   };
 
   const goToProfile = () => {
-    navigate('/admin/profile'); // Redirect to the admin profile page
+    navigate('/admin/profile'); 
   };
 
   return (
@@ -48,7 +48,7 @@ const Header: React.FC = () => {
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
             <ul className="py-1">
               <li
-                onClick={goToProfile} // Call goToProfile on click
+                onClick={goToProfile} 
                 className="px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 cursor-pointer"
               >
                 <FaUserCircle />

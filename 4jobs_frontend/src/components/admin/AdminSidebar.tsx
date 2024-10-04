@@ -6,21 +6,18 @@ import '../../styles/admin/Sidebar.css';
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Function to toggle the sidebar
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
   return (
     <>
-      {/* Toggle Button for smaller screens */}
       <div className="md:hidden flex justify-between items-start bg-white-700 text-white p-4 absolute top-1">
         <button onClick={toggleSidebar}  style={{borderRadius: 10}}>
           {isOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-black text-3xl" />}
         </button>
       </div>
-
-      {/* Sidebar - Slide in and out */}
       <aside
         className={`fixed top-0 left-0 h-screen w-64 bg-purple-700 text-white transform transition-transform duration-300 z-50 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'

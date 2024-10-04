@@ -25,6 +25,7 @@ const jobPostControllerUser = container_1.container.get(types_1.default.JobPostC
 const postController = container_1.container.get(PostController_1.PostController);
 const s3Service = container_1.container.get(types_1.default.S3Service);
 const connectionController = container_1.container.get(types_1.default.ConnectionController);
+const messageController = container_1.container.get(types_1.default.MessageController);
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 exports.authRouter = (0, express_1.Router)();
@@ -139,4 +140,25 @@ exports.authRouter.put('/posts/edit/:postId/:userId', authMiddleware_1.authentic
 exports.authRouter.get('/connections/recommendations/:userId', authMiddleware_1.authenticate, connectionController.getRecommendations.bind(connectionController));
 exports.authRouter.post('/connections/request', authMiddleware_1.authenticate, connectionController.sendConnectionRequest.bind(connectionController));
 exports.authRouter.get('/notifications/:userId', authMiddleware_1.authenticate, connectionController.getNotifications.bind(connectionController));
+exports.authRouter.get('/connections/profile/:userId', authMiddleware_1.authenticate, connectionController.getConnectionProfile.bind(connectionController));
+exports.authRouter.get('/connections/requests/:userId', authMiddleware_1.authenticate, connectionController.getConnectionRequests.bind(connectionController));
+exports.authRouter.post('/connections/accept/:connectionId', authMiddleware_1.authenticate, connectionController.acceptConnectionRequest.bind(connectionController));
+exports.authRouter.post('/connections/reject/:connectionId', authMiddleware_1.authenticate, connectionController.rejectConnectionRequest.bind(connectionController));
+exports.authRouter.get('/connections/:userId', authMiddleware_1.authenticate, connectionController.getConnections.bind(connectionController));
+exports.authRouter.get('/connections/:userId/search', authMiddleware_1.authenticate, connectionController.searchConnections.bind(connectionController));
+exports.authRouter.post('/messages', authMiddleware_1.authenticate, messageController.sendMessage.bind(messageController));
+exports.authRouter.get('/messages/conversation/:userId1/:userId2', authMiddleware_1.authenticate, messageController.getConversation.bind(messageController));
+exports.authRouter.post('/messages/:messageId/read', authMiddleware_1.authenticate, messageController.markMessageAsRead.bind(messageController));
+exports.authRouter.get('/messages/unread/:userId', authMiddleware_1.authenticate, messageController.getUnreadMessageCount.bind(messageController));
+exports.authRouter.get('/messages/search/:userId', authMiddleware_1.authenticate, messageController.searchMessages.bind(messageController));
+exports.authRouter.get('/connections/message/:userId', authMiddleware_1.authenticate, connectionController.getConnections.bind(connectionController));
+// Connection routes for messaging
+exports.authRouter.get('/connections/message/:userId', authMiddleware_1.authenticate, connectionController.getMessageConnections.bind(connectionController));
+exports.authRouter.get('/connections/:userId/search', authMiddleware_1.authenticate, connectionController.searchMessageConnections.bind(connectionController));
+// Message routes
+exports.authRouter.post('/messages', authMiddleware_1.authenticate, messageController.sendMessage.bind(messageController));
+exports.authRouter.get('/messages/:userId1/:userId2', authMiddleware_1.authenticate, messageController.getConversation.bind(messageController));
+exports.authRouter.put('/messages/:messageId/read', authMiddleware_1.authenticate, messageController.markMessageAsRead.bind(messageController));
+exports.authRouter.get('/messages/unread/:userId', authMiddleware_1.authenticate, messageController.getUnreadMessageCount.bind(messageController));
+exports.authRouter.get('/messages/search/:userId', authMiddleware_1.authenticate, messageController.searchMessages.bind(messageController));
 exports.default = exports.authRouter;

@@ -11,7 +11,8 @@ import contestantReducer from './slices/contestantSlice';
 import postReducer from './slices/postSlice'; 
 import adminJobPostReducer from './slices/adminJobPostSlice'; 
 import connectionReducer from './slices/connectionSlice'; 
-import notificationReducer from './slices/notificationSlice'; // Add this line
+import notificationReducer from './slices/notificationSlice'; 
+import messageReducer from './slices/messageSlice';
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'fallback-key';
 
@@ -95,6 +96,12 @@ const notificationPersistConfig = {
   whitelist: ['items', 'unreadCount'],
 };
 
+const messagePersistConfig = {
+  key: 'messages',
+  storage,
+  whitelist: ['conversations', 'unreadCount'],
+};
+
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedAdminReducer = persistReducer(adminPersistConfig, adminReducer);
 const persistedRecruiterReducer = persistReducer(recruiterPersistConfig, recruiterReducer);
@@ -104,6 +111,7 @@ const persistedPostReducer = persistReducer(postPersistConfig, postReducer);
 const persistedAdminJobPostReducer = persistReducer(adminJobPostPersistConfig, adminJobPostReducer);
 const persistedConnectionReducer = persistReducer(connectionPersistConfig, connectionReducer); 
 const persistedNotificationReducer = persistReducer(notificationPersistConfig, notificationReducer);
+const persistMessageReducer = persistReducer(messagePersistConfig, messageReducer)
 
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
@@ -113,8 +121,9 @@ const rootReducer = combineReducers({
   contestants: persistedContestantReducer,
   posts: persistedPostReducer,
   adminJobPost: persistedAdminJobPostReducer,
-  connections: persistedConnectionReducer, 
+  connections: persistedConnectionReducer,
   notifications: persistedNotificationReducer,
+  messages: persistMessageReducer,
 });
 
 const store = configureStore({

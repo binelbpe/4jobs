@@ -10,7 +10,6 @@ import { Post as PostType } from "../../../types/postTypes";
 import { Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from '../Header';
 
-// Modal Component
 const Modal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -44,7 +43,7 @@ const Modal: React.FC<{
   );
 };
 
-// Toast Component
+
 const Toast: React.FC<{
   message: string;
   type: "success" | "error";
@@ -137,7 +136,7 @@ const UserPostsList: React.FC = () => {
     return <div className="text-red-500 text-center py-4">Error: {error}</div>;
   }
 
-  // Change page
+
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (

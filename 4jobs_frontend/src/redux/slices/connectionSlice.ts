@@ -1,36 +1,73 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RecommendationUser, User } from '../../types/auth';
-import { fetchRecommendationsApi, sendConnectionRequestApi, fetchConnectionProfileApi } from '../../api/authapi';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { RecommendationUser, User ,UserConnection} from '../../types/auth';
+import { RootState } from '../store';
+import {
+  fetchRecommendationsApi,
+  sendConnectionRequestApi,
+  fetchConnectionProfileApi,
+  fetchConnectionRequestsApi,
+  acceptConnectionRequestApi,
+  rejectConnectionRequestApi,
+  fetchConnectionsApi,
+  searchConnectionsApi,
+  fetchConnectionsMessageApi, 
+  searchConnectionsMessageApi 
+} from '../../api/authapi';
 
 interface ConnectionState {
   recommendations: RecommendationUser[];
-  connectionProfile: User | null;  
+  connectionProfile: User | null;
+  profilesConnection: { [key: string]: User };
+  connectionRequests: any[];
   loading: boolean;
   error: string | null;
+  connections: User[] | null;
+  lastFetchedAt: number | null;
+  messageConnections: User[];
+  messageSearchResults: UserConnection[];
 }
 
 const initialState: ConnectionState = {
   recommendations: [],
-  connectionProfile: null, 
+  connectionProfile: null,
+  profilesConnection: {},
+  connectionRequests: [],
   loading: false,
   error: null,
+  connections: [],
+  lastFetchedAt: null,
+  messageConnections: [],
+  messageSearchResults:[]
 };
+
+export const fetchConnectionProfile = createAsyncThunk(
+  'connections/fetchProfile',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await fetchConnectionProfileApi(userId);
+      return { userId, profile: response };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to fetch connection profile. Please try again later.');
+    }
+  }
+);
 
 export const fetchRecommendations = createAsyncThunk(
   'connections/fetchRecommendations',
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await fetchRecommendationsApi(userId);
-      console.log("API response:", response);
-      
       if (!response) {
-        console.error("API did not return an array of recommendations:", response);
         return rejectWithValue('Invalid response from server');
       }
-      
       return response;
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
       return rejectWithValue('Failed to fetch recommendations. Please try again later.');
     }
   }
@@ -41,29 +78,120 @@ export const sendConnectionRequest = createAsyncThunk(
   async ({ senderId, recipientId }: { senderId: string; recipientId: string }, { rejectWithValue }) => {
     try {
       const response = await sendConnectionRequestApi(senderId, recipientId);
-      console.log("Connection request response:", response);
-
       if (response && response.connection) {
         return response.connection;
       } else {
         return rejectWithValue('Invalid response from server');
       }
-    } catch (error) {
-      console.error("Error sending connection request:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
       return rejectWithValue('Failed to send connection request. Please try again later.');
     }
   }
 );
 
-export const fetchConnectionProfile = createAsyncThunk(
-  'connections/fetchProfile',
+export const fetchConnectionRequests = createAsyncThunk(
+  'connections/fetchRequests',
+  async (userId: string, { getState, rejectWithValue }) => {
+    const state = getState() as { connections: ConnectionState };
+    const lastFetchedAt = state.connections.lastFetchedAt;
+    const currentTime = Date.now();
+
+    if (lastFetchedAt && currentTime - lastFetchedAt < 5 * 60 * 1000) {
+      return null;
+    }
+
+    try {
+      const response = await fetchConnectionRequestsApi(userId);
+      return response;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to fetch connection requests. Please try again later.');
+    }
+  }
+);
+
+export const acceptConnectionRequest = createAsyncThunk(
+  'connections/acceptRequest',
+  async ({ requestId, userId }: { requestId: string; userId: string }, { rejectWithValue }) => {
+    try {
+      const response = await acceptConnectionRequestApi(requestId, userId);
+      return response;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to accept connection request. Please try again later.');
+    }
+  }
+);
+
+export const rejectConnectionRequest = createAsyncThunk(
+  'connections/rejectRequest',
+  async ({ requestId, userId }: { requestId: string; userId: string }, { rejectWithValue }) => {
+    try {
+      const response = await rejectConnectionRequestApi(requestId, userId);
+      return response;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to reject connection request. Please try again later.');
+    }
+  }
+);
+
+export const fetchConnections = createAsyncThunk(
+  'connections/fetchConnections',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await fetchConnectionProfileApi(userId);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch connection profile. Please try again later.');
+      const response = await fetchConnectionsApi(userId);
+      return response;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to fetch connections. Please try again later.');
     }
+  }
+);
+
+export const searchConnections = createAsyncThunk(
+  'connections/searchConnections',
+  async ({ userId, query }: { userId: string; query: string }, { rejectWithValue }) => {
+    try {
+      const response = await searchConnectionsApi(userId, query);
+      return response;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to search connections. Please try again later.');
+    }
+  }
+);
+
+export const fetchConnectionsMessage = createAsyncThunk(
+  'connections/fetchConnections/message',
+  async (userId: string) => {
+    let response= await fetchConnectionsMessageApi(userId);
+    console.log("response connection message",response)
+    return response
+  }
+);
+
+export const searchConnectionsMessage = createAsyncThunk(
+  'connections/searchConnections/message',
+  async (payload: { userId: string; query: string }) => {
+    const { userId, query } = payload;
+
+    let response=await searchConnectionsMessageApi(userId, query);
+    console.log(response)
+    return response
   }
 );
 
@@ -74,6 +202,12 @@ const connectionSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    clearConnectionProfile: (state, action: PayloadAction<string>) => {
+      delete state.profilesConnection[action.payload];
+    },
+    clearAllConnectionProfiles: (state) => {
+      state.profilesConnection = {};
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -81,18 +215,18 @@ const connectionSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchRecommendations.fulfilled, (state, action) => {
+      .addCase(fetchRecommendations.fulfilled, (state, action: PayloadAction<RecommendationUser[]>) => {
         state.loading = false;
         state.recommendations = action.payload;
       })
       .addCase(fetchRecommendations.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An unexpected error occurred';
+        state.error = action.payload as string || 'Failed to fetch recommendations. Please try again.';
       })
       .addCase(sendConnectionRequest.pending, (state) => {
         state.error = null;
       })
-      .addCase(sendConnectionRequest.fulfilled, (state, action) => {
+      .addCase(sendConnectionRequest.fulfilled, (state, action: PayloadAction<any>) => {
         if (action.payload && action.payload.recipientId) {
           const updatedConnection = action.payload;
           state.recommendations = state.recommendations.map(user => 
@@ -105,23 +239,121 @@ const connectionSlice = createSlice({
         }
       })
       .addCase(sendConnectionRequest.rejected, (state, action) => {
-        state.error = action.payload as string || 'An unexpected error occurred';
+        state.error = action.payload as string || 'Failed to send connection request. Please try again.';
       })
       .addCase(fetchConnectionProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchConnectionProfile.fulfilled, (state, action) => {
+      .addCase(fetchConnectionProfile.fulfilled, (state, action: PayloadAction<{ userId: string; profile: User }>) => {
         state.loading = false;
-        state.connectionProfile = action.payload;
+        const { userId, profile } = action.payload;
+        state.profilesConnection[userId] = profile;
+        if (!state.connectionProfile || state.connectionProfile.id !== profile.id) {
+          state.connectionProfile = profile;
+        }
       })
       .addCase(fetchConnectionProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An unexpected error occurred';
+        state.error = action.payload as string || 'Failed to fetch connection profile. Please try again.';
+      })
+      .addCase(fetchConnectionRequests.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchConnectionRequests.fulfilled, (state, action: PayloadAction<any[] | null>) => {
+        state.loading = false;
+        if (action.payload !== null) {
+          state.connectionRequests = action.payload;
+          state.lastFetchedAt = Date.now();
+        }
+      })
+      .addCase(fetchConnectionRequests.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to fetch connection requests. Please try again.';
+      })
+      .addCase(acceptConnectionRequest.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(acceptConnectionRequest.fulfilled, (state, action: PayloadAction<{ requestId: string }>) => {
+        state.loading = false;
+        state.connectionRequests = state.connectionRequests.filter(
+          request => request.id !== action.payload.requestId
+        );
+      })
+      .addCase(acceptConnectionRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to accept connection request. Please try again.';
+      })
+      .addCase(rejectConnectionRequest.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(rejectConnectionRequest.fulfilled, (state, action: PayloadAction<{ requestId: string }>) => {
+        state.loading = false;
+        state.connectionRequests = state.connectionRequests.filter(
+          request => request.id !== action.payload.requestId
+        );
+      })
+      .addCase(rejectConnectionRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to reject connection request. Please try again.';
+      })
+      .addCase(fetchConnections.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchConnections.fulfilled, (state, action: PayloadAction<{ connections: User[], connectionRequests: any[] }>) => {
+        state.loading = false;
+        state.connections = action.payload.connections;
+        state.connectionRequests = action.payload.connectionRequests;
+      })
+      .addCase(fetchConnections.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to fetch connections. Please try again.';
+      })
+      .addCase(searchConnections.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchConnections.fulfilled, (state, action: PayloadAction<User[]>) => {
+        state.loading = false;
+        state.connections = action.payload;
+      })
+      .addCase(searchConnections.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to search connections. Please try again.';
+      })
+      .addCase(fetchConnectionsMessage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchConnectionsMessage.fulfilled, (state, action) => {
+        state.loading = false;
+        state.messageConnections = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchConnectionsMessage.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch connections';
+      })
+      .addCase(searchConnectionsMessage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchConnectionsMessage.fulfilled, (state, action) => {
+        state.loading = false;
+        state.messageSearchResults = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(searchConnectionsMessage.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to search connections';
       });
   },
 });
 
-export const { clearError } = connectionSlice.actions;
+export const { clearError, clearConnectionProfile, clearAllConnectionProfiles } = connectionSlice.actions;
+export const selectConnections = (state: RootState) => state.connections.messageConnections;
+export const selectSearchResults = (state: RootState) => state.connections.messageSearchResults;
 
 export default connectionSlice.reducer;

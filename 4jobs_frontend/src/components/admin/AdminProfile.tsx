@@ -8,10 +8,9 @@ const AdminProfile: React.FC = () => {
   const { token, dashboardData } = useSelector((state: RootState) => state.admin);
 
   useEffect(() => {
-    // Fetch admin details logic goes here, using the token if needed
   }, [token]);
 
-  // Sample data (replace with actual fetched data)
+
   const adminDetails = dashboardData || { name: "Admin Name", email: "admin@example.com", role: "Administrator" };
 
   return (

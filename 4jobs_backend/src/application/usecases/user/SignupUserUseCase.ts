@@ -1,4 +1,3 @@
-// src/application/usecases/auth/SignupUserUseCase.ts
 import { inject, injectable } from "inversify";
 import TYPES from "../../../types";
 import { IUserRepository } from "../../../domain/interfaces/repositories/user/IUserRepository";
@@ -29,12 +28,12 @@ export class SignupUserUseCase {
         throw new Error("User already exists");
       }
 
-      // Ensure password is hashed before saving the user
+  
       const hashedPassword = await this.authService.hashPassword(password);
 
       const user = await this.userRepository.create({
         email,
-        password: hashedPassword, // Save hashed password
+        password: hashedPassword, 
         name,
         role: "user",
         isAdmin: false,
@@ -54,7 +53,7 @@ export class SignupUserUseCase {
 
       user = await this.userRepository.create({
         email,
-        password: "", // No password required for Google Auth
+        password: "",
         name,
         role: "user",
         isAdmin: false,

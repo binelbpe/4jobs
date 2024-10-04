@@ -9,6 +9,7 @@ import { PostController } from '../controllers/user/PostController';
 import { ConnectionController } from '../controllers/user/ConnectionController';
 import { authenticate } from '../middlewares/authMiddleware';
 import { S3Service } from '../../infrastructure/services/S3Service';
+import { MessageController } from '../controllers/user/MessageController';
 
 const profileController = container.get<ProfileController>(TYPES.ProfileController);
 const authController = container.get<AuthController>(TYPES.AuthController);
@@ -16,6 +17,7 @@ const jobPostControllerUser = container.get<JobPostControllerUser>(TYPES.JobPost
 const postController = container.get<PostController>(PostController);
 const s3Service = container.get<S3Service>(TYPES.S3Service);
 const connectionController = container.get<ConnectionController>(TYPES.ConnectionController);
+const messageController = container.get<MessageController>(TYPES.MessageController);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -186,6 +188,32 @@ authRouter.put(
 authRouter.get('/connections/recommendations/:userId', authenticate, connectionController.getRecommendations.bind(connectionController));
 authRouter.post('/connections/request', authenticate, connectionController.sendConnectionRequest.bind(connectionController));
 authRouter.get('/notifications/:userId', authenticate, connectionController.getNotifications.bind(connectionController));
+authRouter.get('/connections/profile/:userId', authenticate,connectionController.getConnectionProfile.bind(connectionController));
+authRouter.get('/connections/requests/:userId', authenticate, connectionController.getConnectionRequests.bind(connectionController));
+
+
+authRouter.post('/connections/accept/:connectionId', authenticate, connectionController.acceptConnectionRequest.bind(connectionController));
+authRouter.post('/connections/reject/:connectionId', authenticate, connectionController.rejectConnectionRequest.bind(connectionController));
+
+
+authRouter.get('/connections/:userId', authenticate, connectionController.getConnections.bind(connectionController));
+authRouter.get('/connections/:userId/search', authenticate, connectionController.searchConnections.bind(connectionController));
+authRouter.post('/messages', authenticate, messageController.sendMessage.bind(messageController));
+authRouter.get('/messages/conversation/:userId1/:userId2', authenticate, messageController.getConversation.bind(messageController));
+authRouter.post('/messages/:messageId/read', authenticate, messageController.markMessageAsRead.bind(messageController));
+authRouter.get('/messages/unread/:userId', authenticate, messageController.getUnreadMessageCount.bind(messageController));
+authRouter.get('/messages/search/:userId', authenticate, messageController.searchMessages.bind(messageController));
+authRouter.get('/connections/message/:userId', authenticate, connectionController.getConnections.bind(connectionController));
+// Connection routes for messaging
+authRouter.get('/connections/message/:userId', authenticate, connectionController.getMessageConnections.bind(connectionController));
+authRouter.get('/connections/:userId/search', authenticate, connectionController.searchMessageConnections.bind(connectionController));
+
+// Message routes
+authRouter.post('/messages', authenticate, messageController.sendMessage.bind(messageController));
+authRouter.get('/messages/:userId1/:userId2', authenticate, messageController.getConversation.bind(messageController));
+authRouter.put('/messages/:messageId/read', authenticate, messageController.markMessageAsRead.bind(messageController));
+authRouter.get('/messages/unread/:userId', authenticate, messageController.getUnreadMessageCount.bind(messageController));
+authRouter.get('/messages/search/:userId', authenticate, messageController.searchMessages.bind(messageController));
 
 
 export default authRouter;

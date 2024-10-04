@@ -28,23 +28,75 @@ exports.ConnectionUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 let ConnectionUseCase = class ConnectionUseCase {
-    constructor(IConnectionRepository) {
-        this.IConnectionRepository = IConnectionRepository;
+    constructor(connectionRepository, userRepository) {
+        this.connectionRepository = connectionRepository;
+        this.userRepository = userRepository;
     }
     getRecommendations(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.IConnectionRepository.getRecommendations(userId);
+            return this.connectionRepository.getRecommendations(userId);
+        });
+    }
+    getConnectionProfile(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connectionRepository.getConnectionProfile(connectionId);
+        });
+    }
+    getConnectionRequests(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connectionRepository.getRequests(userId);
         });
     }
     sendConnectionRequest(requesterId, recipientId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const existingConnection = yield this.IConnectionRepository.getConnectionStatus(requesterId, recipientId);
+            const existingConnection = yield this.connectionRepository.getConnectionStatus(requesterId, recipientId);
             if (existingConnection) {
                 throw new Error('Connection request already exists');
             }
-            let response = this.IConnectionRepository.createConnectionRequest(requesterId, recipientId);
-            console.log("tcfgyuhijokpkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", response);
-            return response;
+            return this.connectionRepository.createConnectionRequest(requesterId, recipientId);
+        });
+    }
+    acceptConnectionRequest(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connection = yield this.connectionRepository.getConnectionById(connectionId);
+            if (!connection) {
+                throw new Error('Connection request not found');
+            }
+            return this.connectionRepository.updateConnectionStatus(connectionId, 'accepted');
+        });
+    }
+    rejectConnectionRequest(connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connection = yield this.connectionRepository.getConnectionById(connectionId);
+            if (!connection) {
+                throw new Error('Connection request not found');
+            }
+            return this.connectionRepository.updateConnectionStatus(connectionId, 'rejected');
+        });
+    }
+    getConnections(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield this.connectionRepository.getConnections(userId);
+            const connectionRequests = yield this.connectionRepository.getConnectionRequestsALL(userId);
+            return { connections, connectionRequests };
+        });
+    }
+    searchConnections(userId, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connectionRepository.searchConnections(userId, query);
+        });
+    }
+    getMessageConnections(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield this.connectionRepository.getConnections(userId);
+            return this.userRepository.findUsersByIds(connections.map((c) => c.requesterId === userId ? c.recipientId : c.requesterId));
+        });
+    }
+    searchMessageConnections(userId, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield this.connectionRepository.getConnections(userId);
+            const connectedUserIds = connections.map((c) => c.requesterId === userId ? c.recipientId : c.requesterId);
+            return this.userRepository.searchUsers(query, connectedUserIds);
         });
     }
 };
@@ -52,5 +104,6 @@ exports.ConnectionUseCase = ConnectionUseCase;
 exports.ConnectionUseCase = ConnectionUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.IConnectionRepository)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
+    __metadata("design:paramtypes", [Object, Object])
 ], ConnectionUseCase);

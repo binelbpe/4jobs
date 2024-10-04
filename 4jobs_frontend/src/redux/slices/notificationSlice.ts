@@ -9,14 +9,15 @@ export const fetchNotifications = createAsyncThunk<
 >('notifications/fetch', async (userId: string, { rejectWithValue }) => {
   try {
     const response = await fetchNotificationsApi(userId);
-    console.log('Fetched notifications:', response);
     if (!response || !Array.isArray(response)) {
       throw new Error('Invalid response format');
     }
     return response;
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    return rejectWithValue((error as Error).message || 'Failed to fetch notifications');
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return rejectWithValue(error.message);
+    }
+    return rejectWithValue('Failed to fetch notifications');
   }
 });
 
@@ -25,6 +26,7 @@ interface NotificationState {
   unreadCount: number;
   loading: boolean;
   error: string | null;
+  lastFetchedAt: number | null;
 }
 
 const initialState: NotificationState = {
@@ -32,6 +34,7 @@ const initialState: NotificationState = {
   unreadCount: 0,
   loading: false,
   error: null,
+  lastFetchedAt: null,
 };
 
 const notificationSlice = createSlice({
@@ -70,10 +73,14 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
-        state.unreadCount = action.payload.filter(
-          (notification) => !notification.isRead
-        ).length;
+        // Only update if there are new notifications
+        if (JSON.stringify(state.items) !== JSON.stringify(action.payload)) {
+          state.items = action.payload;
+          state.unreadCount = action.payload.filter(
+            (notification) => !notification.isRead
+          ).length;
+        }
+        state.lastFetchedAt = Date.now();
         state.error = null;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {

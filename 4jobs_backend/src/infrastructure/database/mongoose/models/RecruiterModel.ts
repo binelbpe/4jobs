@@ -12,8 +12,8 @@ const RecruiterSchema: Schema = new Schema({
   name: { type: String },
   governmentId: { type: String, required: true },
   governmentIdUrl: { type: String },
-  employeeId: { type: String },  // New field
-  employeeIdImage: { type: String },  // New field
+  employeeId: { type: String },  
+  employeeIdImage: { type: String }, 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

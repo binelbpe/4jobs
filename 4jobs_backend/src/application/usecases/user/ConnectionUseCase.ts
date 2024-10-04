@@ -1,26 +1,78 @@
 import { inject, injectable } from 'inversify';
 import TYPES from '../../../types';
 import { IConnectionRepository } from '../../../domain/interfaces/repositories/user/IConnectionRepository';
-import { UserRecommendation } from '../../../domain/entities/User';
-import { Connection } from '../../../domain/entities/Connection';
+import { UserRecommendation, User } from '../../../domain/entities/User';
+import { Connection, ConnectionRequest } from '../../../domain/entities/Connection';
+import { IUserRepository } from '../../../domain/interfaces/repositories/user/IUserRepository';
 
 @injectable()
 export class ConnectionUseCase {
   constructor(
-    @inject(TYPES.IConnectionRepository) private IConnectionRepository: IConnectionRepository
+    @inject(TYPES.IConnectionRepository) private connectionRepository: IConnectionRepository,
+    @inject(TYPES.IUserRepository) private userRepository: IUserRepository
   ) {}
 
   async getRecommendations(userId: string): Promise<UserRecommendation[]> {
-    return this.IConnectionRepository.getRecommendations(userId);
+    return this.connectionRepository.getRecommendations(userId);
+  }
+
+  async getConnectionProfile(connectionId: string): Promise<User | null> {
+    return this.connectionRepository.getConnectionProfile(connectionId);
+  }
+
+  async getConnectionRequests(userId: string): Promise<ConnectionRequest[]> {
+    return this.connectionRepository.getRequests(userId);
   }
 
   async sendConnectionRequest(requesterId: string, recipientId: string): Promise<Connection> {
-    const existingConnection = await this.IConnectionRepository.getConnectionStatus(requesterId, recipientId);
+    const existingConnection = await this.connectionRepository.getConnectionStatus(requesterId, recipientId);
     if (existingConnection) {
       throw new Error('Connection request already exists');
     }
-    let response= this.IConnectionRepository.createConnectionRequest(requesterId, recipientId);
- console.log("tcfgyuhijokpkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",response)
- return response
+    return this.connectionRepository.createConnectionRequest(requesterId, recipientId);
   }
+
+  async acceptConnectionRequest(connectionId: string): Promise<Connection> {
+    const connection = await this.connectionRepository.getConnectionById(connectionId);
+    if (!connection) {
+      throw new Error('Connection request not found');
+    }
+    return this.connectionRepository.updateConnectionStatus(connectionId, 'accepted');
+  }
+
+  async rejectConnectionRequest(connectionId: string): Promise<Connection> {
+    const connection = await this.connectionRepository.getConnectionById(connectionId);
+    if (!connection) {
+      throw new Error('Connection request not found');
+    }
+    return this.connectionRepository.updateConnectionStatus(connectionId, 'rejected');
+  }
+
+  async getConnections(userId: string) {
+    const connections = await this.connectionRepository.getConnections(userId);
+    const connectionRequests = await this.connectionRepository.getConnectionRequestsALL(userId);
+    return { connections, connectionRequests };
+  }
+
+  async searchConnections(userId: string, query: string) {
+    return this.connectionRepository.searchConnections(userId, query);
+  }
+
+  async getMessageConnections(userId: string): Promise<User[]> {
+    const connections = await this.connectionRepository.getConnections(userId);
+    return this.userRepository.findUsersByIds(connections.map((c: Connection) => 
+      c.requesterId === userId ? c.recipientId : c.requesterId
+    ));
+  }
+
+  async searchMessageConnections(userId: string, query: string): Promise<User[]> {
+    const connections = await this.connectionRepository.getConnections(userId);
+    const connectedUserIds = connections.map((c: Connection) => 
+      c.requesterId === userId ? c.recipientId : c.requesterId
+    );
+    return this.userRepository.searchUsers(query, connectedUserIds);
+  }
+
+
+
 }

@@ -78,5 +78,5 @@ export interface UserRecommendation {
   name: string;
   email: string;
   profileImage?: string;
-  connectionStatus: 'none' | 'pending' | 'accepted' | 'rejected';
+  connectionStatus: "none" | "pending" | "accepted" | "rejected";
 }

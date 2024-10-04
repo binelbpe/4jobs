@@ -25,7 +25,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignupUserUseCase = void 0;
-// src/application/usecases/auth/SignupUserUseCase.ts
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 let SignupUserUseCase = class SignupUserUseCase {
@@ -40,11 +39,10 @@ let SignupUserUseCase = class SignupUserUseCase {
                 if (existingUser) {
                     throw new Error("User already exists");
                 }
-                // Ensure password is hashed before saving the user
                 const hashedPassword = yield this.authService.hashPassword(password);
                 const user = yield this.userRepository.create({
                     email,
-                    password: hashedPassword, // Save hashed password
+                    password: hashedPassword,
                     name,
                     role: "user",
                     isAdmin: false,
@@ -63,7 +61,7 @@ let SignupUserUseCase = class SignupUserUseCase {
                 }
                 user = yield this.userRepository.create({
                     email,
-                    password: "", // No password required for Google Auth
+                    password: "",
                     name,
                     role: "user",
                     isAdmin: false,

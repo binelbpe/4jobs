@@ -18,7 +18,6 @@ const NodemailerEmailService_1 = require("./services/NodemailerEmailService");
 const GoogleAuthService_1 = require("./services/GoogleAuthService");
 const UserManager_1 = require("./services/UserManager");
 const events_1 = require("events");
-// Import Admin Use Cases
 const LoginAdminUseCase_1 = require("../application/usecases/admin/LoginAdminUseCase");
 const FetchAllUsersUseCase_1 = require("../application/usecases/admin/FetchAllUsersUseCase");
 const BlockUserUseCase_1 = require("../application/usecases/admin/BlockUserUseCase");
@@ -30,7 +29,6 @@ const MongoJobPostAdminRepository_1 = require("../infrastructure/database/mongoo
 const FetchJobPostsUseCase_1 = require("../application/usecases/admin/FetchJobPostsUseCase");
 const BlockJobPostUseCase_1 = require("../application/usecases/admin/BlockJobPostUseCase");
 const UnblockJobPostUseCase_1 = require("../application/usecases/admin/UnblockJobPostUseCase");
-// Import Auth and Recruiter Use Cases
 const SignupUserUseCase_1 = require("../application/usecases/user/SignupUserUseCase");
 const LoginUseCase_1 = require("../application/usecases/user/LoginUseCase");
 const GetUserProfileUseCase_1 = require("../application/usecases/user/GetUserProfileUseCase");
@@ -43,7 +41,6 @@ const GetJobPostByIdUseCase_1 = require("../application/usecases/user/GetJobPost
 const ApplyForJobUseCase_1 = require("../application/usecases/user/ApplyForJobUseCase");
 const UpdateRecruiterUseCase_1 = require("../application/usecases/recruiter/UpdateRecruiterUseCase");
 const GetRecruiterProfileUseCase_1 = require("../application/usecases/recruiter/GetRecruiterProfileUseCase");
-// Import Controllers
 const AdminController_1 = require("../presentation/controllers/AdminController");
 const RecruiterController_1 = require("../presentation/controllers/recruiter/RecruiterController");
 const AuthController_1 = require("../presentation/controllers/user/AuthController");
@@ -60,13 +57,14 @@ const GetUserPostsUseCase_1 = require("../application/usecases/user/post/GetUser
 const DeletePostUseCase_1 = require("../application/usecases/user/post/DeletePostUseCase");
 const EditPostUseCase_1 = require("../application/usecases/user/post/EditPostUseCase");
 const ReportJobUseCase_1 = require("../application/usecases/user/ReportJobUseCase");
+const MongoMessageRepository_1 = require("../infrastructure/database/mongoose/repositories/MongoMessageRepository");
+const MessageUseCase_1 = require("../application/usecases/user/MessageUseCase");
+const MessageController_1 = require("../presentation/controllers/user/MessageController");
 const ConnectionUseCase_1 = require("../application/usecases/user/ConnectionUseCase");
 const MongoConnectionRepository_1 = require("./database/mongoose/repositories/MongoConnectionRepository");
 const ConnectionController_1 = require("../presentation/controllers/user/ConnectionController");
-// Initialize Inversify Container
 const container = new inversify_1.Container();
 exports.container = container;
-// Bind Repositories
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
 container
     .bind(types_1.default.IRecruiterRepository)
@@ -78,7 +76,6 @@ container
     .bind(types_1.default.IAdminRepository)
     .to(MongoAdminRepository_1.MongoAdminRepository);
 container.bind(types_1.default.IJobPostUserRepository).to(MongoJobPostUserRepository_1.MongoJobPostUserRepository);
-// Bind Services
 container.bind(types_1.default.IAuthService).to(JwtAuthService_1.JwtAuthService);
 container.bind(types_1.default.NodemailerEmailService).to(NodemailerEmailService_1.NodemailerEmailService);
 container.bind(types_1.default.GoogleAuthService).to(GoogleAuthService_1.GoogleAuthService);
@@ -89,11 +86,9 @@ container
 container
     .bind(types_1.default.JwtSecret)
     .toConstantValue(process.env.JWT_SECRET || "secret_1");
-// Bind Dynamic OTP Service
 container
     .bind(types_1.default.OtpService)
     .toDynamicValue(() => new OtpService_1.OtpService(33 * 1000, container.get(types_1.default.NodemailerEmailService)));
-// Bind Admin Use Cases
 container.bind(types_1.default.LoginAdminUseCase).to(LoginAdminUseCase_1.LoginAdminUseCase);
 container.bind(types_1.default.FetchAllUsersUseCase).to(FetchAllUsersUseCase_1.FetchAllUsersUseCase);
 container.bind(types_1.default.BlockUserUseCase).to(BlockUserUseCase_1.BlockUserUseCase);
@@ -105,7 +100,6 @@ container.bind(types_1.default.IJobPostAdminRepository).to(MongoJobPostAdminRepo
 container.bind(types_1.default.FetchJobPostsUseCase).to(FetchJobPostsUseCase_1.FetchJobPostsUseCase);
 container.bind(types_1.default.BlockJobPostUseCase).to(BlockJobPostUseCase_1.BlockJobPostUseCase);
 container.bind(types_1.default.UnblockJobPostUseCase).to(UnblockJobPostUseCase_1.UnblockJobPostUseCase);
-// Bind Auth and Recruiter Use Cases
 container.bind(types_1.default.SignupUserUseCase).to(SignupUserUseCase_1.SignupUserUseCase);
 container.bind(types_1.default.LoginUseCase).to(LoginUseCase_1.LoginUseCase);
 container.bind(types_1.default.GetUserProfileUseCase).to(GetUserProfileUseCase_1.GetUserProfileUseCase);
@@ -118,7 +112,6 @@ container.bind(types_1.default.GetJobPostByIdUseCase).to(GetJobPostByIdUseCase_1
 container.bind(types_1.default.ApplyForJobUseCase).to(ApplyForJobUseCase_1.ApplyForJobUseCase);
 container.bind(types_1.default.UpdateRecruiterUseCase).to(UpdateRecruiterUseCase_1.UpdateRecruiterUseCase);
 container.bind(types_1.default.GetRecruiterProfileUseCase).to(GetRecruiterProfileUseCase_1.GetRecruiterProfileUseCase);
-// Bind Controllers
 container.bind(types_1.default.AdminController).to(AdminController_1.AdminController);
 container.bind(types_1.default.RecruiterController).to(RecruiterController_1.RecruiterController);
 container.bind(types_1.default.AuthController).to(AuthController_1.AuthController);
@@ -148,4 +141,7 @@ container.bind(types_1.default.UserManager).to(UserManager_1.UserManager).inSing
 container.bind(types_1.default.NotificationEventEmitter).toDynamicValue(() => {
     return new events_1.EventEmitter();
 }).inSingletonScope();
+container.bind(types_1.default.IMessageRepository).to(MongoMessageRepository_1.MongoMessageRepository);
+container.bind(types_1.default.MessageUseCase).to(MessageUseCase_1.MessageUseCase);
+container.bind(types_1.default.MessageController).to(MessageController_1.MessageController).inSingletonScope();
 console.log(container);

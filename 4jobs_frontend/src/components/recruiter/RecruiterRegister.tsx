@@ -53,33 +53,32 @@ const Register: React.FC = () => {
       governmentId: "",
     };
 
-    // Full Name Validation
+
     if (formData.name.trim().length < 3) {
       errors.name = "Full Name must be at least 3 characters long.";
     } else if (!formData.name.trim()) {
       errors.name = "Full Name is required.";
     }
 
-    // Company Name Validation
+
     if (formData.companyName.trim().length < 3) {
       errors.companyName = "Company Name must be at least 3 characters long.";
     } else if (!formData.companyName.trim()) {
       errors.companyName = "Company Name is required.";
     }
 
-    // Email Validation
+
     if (
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
     ) {
       errors.email = "Please enter a valid email address.";
     }
 
-    // Phone Validation
     if (!/^\d{10}$/.test(formData.phone)) {
       errors.phone = "Please enter a valid phone number with 10 digits.";
     }
 
-    // Password Validation
+   
     if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
         formData.password
@@ -89,7 +88,7 @@ const Register: React.FC = () => {
         "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
     }
 
-    // Government ID Validation
+
     if (!formData.governmentId) {
       errors.governmentId = "Please upload a government ID.";
     } else {
@@ -99,7 +98,7 @@ const Register: React.FC = () => {
         "image/webp",
         "application/pdf",
       ];
-      const fileSizeLimit = 2 * 1024 * 1024; // 2 MB
+      const fileSizeLimit = 2 * 1024 * 1024; 
 
       if (!validFileTypes.includes(formData.governmentId.type)) {
         errors.governmentId =
@@ -142,7 +141,7 @@ const Register: React.FC = () => {
         await dispatch(register(formDataWithFile)).unwrap();
         navigate("/recruiter/verify-otp", { state: { email: formData.email } });
       } catch (err) {
-        // Handle the error and display it
+       
         console.error("Error registering:", err);
       }
     }

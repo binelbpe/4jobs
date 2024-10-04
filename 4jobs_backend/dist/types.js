@@ -61,5 +61,8 @@ const TYPES = {
     SocketIOServer: Symbol.for("SocketIOServer"),
     UserManager: Symbol.for("UserManager"),
     NotificationEventEmitter: Symbol.for("NotificationEventEmitter"),
+    MessageUseCase: Symbol.for("MessageUseCase"),
+    MessageController: Symbol.for("MessageController"),
+    IMessageRepository: Symbol.for("IMessageRepository"),
 };
 exports.default = TYPES;

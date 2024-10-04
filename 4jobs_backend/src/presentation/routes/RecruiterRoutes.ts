@@ -10,7 +10,7 @@ const recruiterRouter = Router();
 const recruiterController = container.get<RecruiterController>(TYPES.RecruiterController);
 const jobPostController = container.get<JobPostController>(TYPES.JobPostController);
 
-// Configure multer for file uploads
+
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -25,7 +25,7 @@ const upload = multer({
   },
 });
 
-// Route for registering recruiters with file uploads (governmentId and employeeIdImage)
+
 recruiterRouter.post(
   '/register', 
   upload.single('governmentId'), 
@@ -33,23 +33,22 @@ recruiterRouter.post(
 );
 
 
-// Route for verifying OTP
 recruiterRouter.post('/verify-otp', recruiterController.verifyOtp.bind(recruiterController));
 
-// Route for logging in
+
 recruiterRouter.post('/login', recruiterController.loginRecruiter.bind(recruiterController));
 
-// Route for sending OTP
+
 recruiterRouter.post('/send-otp', recruiterController.sendOtp.bind(recruiterController));
 
-// Route for updating recruiter profiles with optional file uploads
+
 recruiterRouter.put(
   '/update-profile/:id', 
   upload.fields([{ name: 'governmentId' }, { name: 'employeeIdImage' }]), 
   recruiterController.updateProfile.bind(recruiterController)
 );
 
-// Route for fetching recruiter profile
+
 recruiterRouter.get('/profile/:id', recruiterController.getProfile.bind(recruiterController));
 recruiterRouter.post('/create-jobpost/:id', jobPostController.createJobPost.bind(jobPostController));
 recruiterRouter.get('/job-posts/:id', jobPostController.getJobPostById.bind(jobPostController));

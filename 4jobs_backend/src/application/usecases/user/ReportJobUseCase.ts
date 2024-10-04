@@ -9,8 +9,8 @@ export class ReportJobUseCase {
     private jobPostRepository: IJobPostUserRepository
   ) {}
 
-  async execute(userId: string, jobId: string): Promise<void> {
-    const result = await this.jobPostRepository.reportJob(userId, jobId);
+  async execute(userId: string, jobId: string, reason: string): Promise<void> {
+    const result = await this.jobPostRepository.reportJob(userId, jobId, reason);
     if (!result) {
       throw new Error("Failed to report job");
     }

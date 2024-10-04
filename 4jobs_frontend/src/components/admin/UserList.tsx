@@ -1,17 +1,17 @@
-// src/presentation/components/UserList.tsx
+
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers, blockUser, unblockUser } from '../../redux/slices/adminSlice';
 import { AppDispatch, RootState } from '../../redux/store';
-// Import the User interface
-import { User } from '../../types/auth'; // Adjust the path based on where the User interface is defined
+
+import { User } from '../../types/auth';
 import Header from './AdminHeader';
 import Sidebar from './AdminSidebar';
 
 const UserList: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   
-  // Access users from admin state
+
   const { users, loading, error } = useSelector((state: RootState) => state.admin);
 
   useEffect(() => {

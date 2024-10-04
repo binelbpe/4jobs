@@ -19,7 +19,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleAuthService = void 0;
-const inversify_1 = require("inversify"); // Import @injectable
+const inversify_1 = require("inversify");
 const google_auth_library_1 = require("google-auth-library");
 let GoogleAuthService = class GoogleAuthService {
     constructor() {
@@ -48,7 +48,6 @@ let GoogleAuthService = class GoogleAuthService {
 };
 exports.GoogleAuthService = GoogleAuthService;
 exports.GoogleAuthService = GoogleAuthService = __decorate([
-    (0, inversify_1.injectable)() // Add @injectable annotation
-    ,
+    (0, inversify_1.injectable)(),
     __metadata("design:paramtypes", [])
 ], GoogleAuthService);

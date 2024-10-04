@@ -13,8 +13,6 @@ import { NodemailerEmailService } from "./services/NodemailerEmailService";
 import { GoogleAuthService } from "./services/GoogleAuthService";
 import { UserManager } from './services/UserManager';
 import { EventEmitter } from 'events';
-
-// Import Admin Use Cases
 import { LoginAdminUseCase } from "../application/usecases/admin/LoginAdminUseCase";
 import { CreateAdminUseCase } from "../application/usecases/admin/CreateAdminUseCase";
 import { FetchAllUsersUseCase } from "../application/usecases/admin/FetchAllUsersUseCase";
@@ -28,8 +26,6 @@ import { MongoJobPostAdminRepository } from "../infrastructure/database/mongoose
 import { FetchJobPostsUseCase } from "../application/usecases/admin/FetchJobPostsUseCase";
 import { BlockJobPostUseCase } from "../application/usecases/admin/BlockJobPostUseCase";
 import { UnblockJobPostUseCase } from "../application/usecases/admin/UnblockJobPostUseCase";
-
-// Import Auth and Recruiter Use Cases
 import { SignupUserUseCase } from "../application/usecases/user/SignupUserUseCase";
 import { LoginUseCase } from "../application/usecases/user/LoginUseCase";
 import { GetUserProfileUseCase } from "../application/usecases/user/GetUserProfileUseCase";
@@ -42,16 +38,12 @@ import { GetJobPostByIdUseCase } from "../application/usecases/user/GetJobPostBy
 import { ApplyForJobUseCase } from "../application/usecases/user/ApplyForJobUseCase";
 import { UpdateRecruiterUseCase } from "../application/usecases/recruiter/UpdateRecruiterUseCase";
 import { GetRecruiterProfileUseCase } from "../application/usecases/recruiter/GetRecruiterProfileUseCase";
-
-// Import Controllers
 import { AdminController } from "../presentation/controllers/AdminController";
 import { RecruiterController } from "../presentation/controllers/recruiter/RecruiterController";
 import { AuthController } from "../presentation/controllers/user/AuthController";
 import { ProfileController } from "../presentation/controllers/user/ProfileController";
 import { JobPostController } from "../presentation/controllers/recruiter/JobPostController";
 import { JobPostControllerUser } from "../presentation/controllers/user/JobPostControllerUser";
-
-// Import Repositories and Interfaces
 import { IRecruiterRepository } from "../domain/interfaces/repositories/recruiter/IRecruiterRepository";
 import { IJobPostRepository } from "../domain/interfaces/repositories/recruiter/IJobPostRepository";
 import { MongoJobPostRepository } from "./database/mongoose/repositories/MongoJobPostRepository";
@@ -67,6 +59,10 @@ import { GetUserPostsUseCase } from '../application/usecases/user/post/GetUserPo
 import { DeletePostUseCase } from '../application/usecases/user/post/DeletePostUseCase';
 import { EditPostUseCase } from '../application/usecases/user/post/EditPostUseCase'
 import { ReportJobUseCase } from '../application/usecases/user/ReportJobUseCase'
+import { IMessageRepository } from '../domain/interfaces/repositories/user/IMessageRepository';
+import { MongoMessageRepository } from '../infrastructure/database/mongoose/repositories/MongoMessageRepository';
+import { MessageUseCase } from '../application/usecases/user/MessageUseCase';
+import { MessageController } from '../presentation/controllers/user/MessageController';
 
 
 import { IConnectionRepository } from '../domain/interfaces/repositories/user/IConnectionRepository';
@@ -74,10 +70,10 @@ import { ConnectionUseCase } from '../application/usecases/user/ConnectionUseCas
 import { MongoConnectionRepository } from './database/mongoose/repositories/MongoConnectionRepository';
 import { ConnectionController } from '../presentation/controllers/user/ConnectionController';
 
-// Initialize Inversify Container
+
 const container = new Container();
 
-// Bind Repositories
+
 container.bind(TYPES.IUserRepository).to(MongoUserRepository);
 container
   .bind<IRecruiterRepository>(TYPES.IRecruiterRepository)
@@ -90,7 +86,7 @@ container
   .to(MongoAdminRepository);
 container.bind(TYPES.IJobPostUserRepository).to(MongoJobPostUserRepository);
 
-// Bind Services
+
 container.bind(TYPES.IAuthService).to(JwtAuthService);
 container.bind(TYPES.NodemailerEmailService).to(NodemailerEmailService);
 container.bind(TYPES.GoogleAuthService).to(GoogleAuthService);
@@ -102,14 +98,14 @@ container
   .bind<Secret>(TYPES.JwtSecret)
   .toConstantValue(process.env.JWT_SECRET || "secret_1");
 
-// Bind Dynamic OTP Service
+
 container
   .bind(TYPES.OtpService)
   .toDynamicValue(
     () => new OtpService(33 * 1000, container.get(TYPES.NodemailerEmailService))
   );
 
-// Bind Admin Use Cases
+
 container.bind(TYPES.LoginAdminUseCase).to(LoginAdminUseCase);
 container.bind(TYPES.FetchAllUsersUseCase).to(FetchAllUsersUseCase);
 container.bind(TYPES.BlockUserUseCase).to(BlockUserUseCase);
@@ -121,8 +117,6 @@ container.bind<IJobPostAdminRepository>(TYPES.IJobPostAdminRepository).to(MongoJ
 container.bind<FetchJobPostsUseCase>(TYPES.FetchJobPostsUseCase).to(FetchJobPostsUseCase);
 container.bind<BlockJobPostUseCase>(TYPES.BlockJobPostUseCase).to(BlockJobPostUseCase);
 container.bind<UnblockJobPostUseCase>(TYPES.UnblockJobPostUseCase).to(UnblockJobPostUseCase);
-
-// Bind Auth and Recruiter Use Cases
 container.bind(TYPES.SignupUserUseCase).to(SignupUserUseCase);
 container.bind(TYPES.LoginUseCase).to(LoginUseCase);
 container.bind(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase);
@@ -136,7 +130,6 @@ container.bind(TYPES.ApplyForJobUseCase).to(ApplyForJobUseCase);
 container.bind(TYPES.UpdateRecruiterUseCase).to(UpdateRecruiterUseCase);
 container.bind(TYPES.GetRecruiterProfileUseCase).to(GetRecruiterProfileUseCase);
 
-// Bind Controllers
 container.bind(TYPES.AdminController).to(AdminController);
 container.bind(TYPES.RecruiterController).to(RecruiterController);
 container.bind<AuthController>(TYPES.AuthController).to(AuthController);
@@ -171,6 +164,11 @@ container.bind<UserManager>(TYPES.UserManager).to(UserManager).inSingletonScope(
 container.bind<EventEmitter>(TYPES.NotificationEventEmitter).toDynamicValue(() => {
   return new EventEmitter();
 }).inSingletonScope();
+
+container.bind<IMessageRepository>(TYPES.IMessageRepository).to(MongoMessageRepository);
+container.bind<MessageUseCase>(TYPES.MessageUseCase).to(MessageUseCase);
+container.bind<MessageController>(TYPES.MessageController).to(MessageController).inSingletonScope();
+
 
 console.log(container);
 export { container };

@@ -32,8 +32,7 @@ export class PostController {
       const { content } = req.body;
       const image = req.files?.["image"]?.[0];
       const video = req.files?.["video"]?.[0];
-
-      // Log the extracted data
+   
       console.log("Extracted data:", { userId, content, image, video });
 
       const post = await this.createPostUseCase.execute({
@@ -58,7 +57,6 @@ export class PostController {
       console.log("Fetching posts for page:", page);
 
       const posts = await this.getAllPostsUseCase.execute(page, limit);
-      console.log("postssssss==================:", posts);
       res.status(200).json(posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -71,14 +69,12 @@ export class PostController {
       const userId = req.params.id;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      console.log("Fetching posts for page:", page);
-      console.log("page limit", page, limit);
+     
       const posts = await this.getUserPostsUseCase.findByUserIdPosts(
         userId,
         page,
         limit
       );
-      console.log("postssssss==================:", posts);
       res.status(200).json(posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -91,7 +87,6 @@ export class PostController {
       const userId = req.params.id;
 
       const posts = await this.deletePostUseCase.execute(userId);
-      console.log("postssssss==================delete:", posts);
       res.status(200).json({ message: "success" });
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -102,7 +97,7 @@ export class PostController {
   async editPost(req: Request, res: Response): Promise<void> {
     try {
       const postId = req.params.postId;
-      const userId = req.params.userId; // Assuming you have user information in the request after authentication
+      const userId = req.params.userId; 
       const updatedPostData = req.body;
       console.log("updatedPostData",updatedPostData)
       console.log("postIddd",postId)
@@ -115,6 +110,5 @@ console.log("updatedPost",updatedPost)
       res.status(500).json({ error: 'An error occurred while editing the post' });
     }
   }
-
-  // Implement other controller methods for future expansion
+ 
 }

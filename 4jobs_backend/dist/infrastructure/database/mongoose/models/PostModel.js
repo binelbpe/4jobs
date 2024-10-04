@@ -1,5 +1,4 @@
 "use strict";
-// src/infrastructure/models/PostModel.ts
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -26,15 +25,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const PostSchema = new mongoose_1.Schema({
-    userId: { type: String, required: true },
+    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String },
     imageUrl: { type: String },
     videoUrl: { type: String },
-    likes: [{ type: String }],
+    likes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
     comments: [{
-            userId: { type: String, required: true },
+            userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
             content: { type: String, required: true },
             createdAt: { type: Date, default: Date.now }
         }],
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true }
+});
 exports.default = mongoose_1.default.model('Post', PostSchema);

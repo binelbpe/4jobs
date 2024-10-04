@@ -20,12 +20,12 @@ export class RegisterRecruiterUseCase {
     name: string,
     governmentId: string
   ): Promise<{ recruiter: IRecruiter; token: string; isApproved: boolean }> {
-    // Hash the password before saving
+    
     const hashedPassword = await this.authService.hashPassword(password);
 
     const recruiter = await this.recruiterRepository.create({
       email,
-      password: hashedPassword, // Save the hashed password
+      password: hashedPassword,
       companyName,
       phone,
       name,
@@ -40,9 +40,9 @@ export class RegisterRecruiterUseCase {
       role: recruiter.role,
       name: recruiter.name,
       isAdmin: false,
-      experiences: [], // Provide default value
-      projects: [], // Provide default value
-      certificates: [], // Provide default value
+      experiences: [], 
+      projects: [], 
+      certificates: [], 
       skills: [],
     });
 

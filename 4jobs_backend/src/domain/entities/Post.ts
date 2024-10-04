@@ -1,7 +1,5 @@
-// src/types/post.ts
-
 export interface IPost {
-  id: string;
+  _id: string;
   userId: string;
   content?: string;
   imageUrl?: string;
@@ -10,10 +8,15 @@ export interface IPost {
   comments: IComment[];
   createdAt: Date;
   updatedAt: Date;
+  user?: {
+    name: string;
+    profileImage?: string;
+    bio?: string;
+  };
 }
 
 export interface IComment {
-  id: string;
+  _id: string;
   userId: string;
   content: string;
   createdAt: Date;

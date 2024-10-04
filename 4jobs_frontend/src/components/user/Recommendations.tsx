@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "../../redux/store";
 import { fetchRecommendations } from "../../redux/slices/connectionSlice";
 import RecommendationCard from "./RecommendationCard";
-import ConnectionProfile from "./ConnectionProfile";
 import { RecommendationUser } from "../../types/auth";
 
 const Recommendations: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { recommendations, loading, error } = useSelector(
     (state: RootState) => state.connections
   );
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -21,12 +21,10 @@ const Recommendations: React.FC = () => {
   }, [dispatch, currentUser]);
 
   const handleViewProfile = (userId: string) => {
-    setSelectedUserId(userId);
+    console.log("View profile clicked for user:", userId);
+    navigate(`/connection/profile/${userId}`);
   };
 
-  const handleCloseProfile = () => {
-    setSelectedUserId(null);
-  };
 
   if (loading) {
     return (
@@ -70,8 +68,8 @@ const Recommendations: React.FC = () => {
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-4">
-    <h3 className="font-semibold text-lg mb-4 text-gray-800">Recommendations</h3>
-    <div className="grid grid-rows-1 sm:grid-rows-2 lg:grid-rows-3 xl:grid-rows-4 gap-4">
+      <h3 className="font-semibold text-lg mb-4 text-gray-800">Recommendations</h3>
+      <div className="grid grid-row-1 sm:grid-row-2 lg:grid-row-3 xl:grid-row-4 gap-4">
         {recommendations.map((user: RecommendationUser) => (
           <RecommendationCard
             key={user.id}
@@ -80,12 +78,6 @@ const Recommendations: React.FC = () => {
           />
         ))}
       </div>
-      {selectedUserId && (
-        <ConnectionProfile
-          userId={selectedUserId}
-          onClose={handleCloseProfile}
-        />
-      )}
     </div>
   );
 };

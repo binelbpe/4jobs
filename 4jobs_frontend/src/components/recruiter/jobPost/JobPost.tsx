@@ -1,6 +1,6 @@
 import React from 'react';
 import { BasicJobPost } from '../../../types/jobPostTypes';
-import { Briefcase, MapPin, IndianRupee, Users, Edit, Trash2, ToggleLeft, ToggleRight, Eye } from 'lucide-react';
+import { Briefcase, MapPin, IndianRupee, Users, Edit, Trash2, ToggleLeft, ToggleRight, Eye, AlertTriangle } from 'lucide-react';
 
 interface JobPostProps {
   jobPosts: BasicJobPost[];
@@ -14,13 +14,22 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {jobPosts.map((post) => (
-        <div key={post._id} className="bg-white border border-purple-200 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div 
+          key={post._id} 
+          className={`bg-white border ${post.isBlock ? 'border-red-500' : 'border-purple-200'} p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300`}
+        >
           <h3 className="text-xl font-bold mb-3 text-purple-800">{post.title}</h3>
+          {post.isBlock && (
+            <div className="flex items-center text-red-500 mb-3">
+              <AlertTriangle size={18} className="mr-2" />
+              <span className="font-semibold">Blocked by Admin</span>
+            </div>
+          )}
           <p className="mb-4 text-gray-600">{post.description.substring(0, 100)}...</p>
           <div className="space-y-2 mb-4">
             <div className="flex items-center text-gray-700">
               <Briefcase size={18} className="mr-2 text-purple-600" />
-              <span>{post.company.name}</span>
+              <span>{post.company?.name}</span>
             </div>
             <div className="flex items-center text-gray-700">
               <MapPin size={18} className="mr-2 text-purple-600" />
@@ -47,6 +56,7 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onEdit(post)} 
               className="flex items-center bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition-colors duration-300"
+              disabled={post.isBlock}
             >
               <Edit size={16} className="mr-1" />
               Edit
@@ -54,6 +64,7 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onDelete(post._id)} 
               className="flex items-center bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition-colors duration-300"
+              disabled={post.isBlock}
             >
               <Trash2 size={16} className="mr-1" />
               Delete
@@ -63,6 +74,7 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
               className={`flex items-center px-3 py-1 rounded transition-colors duration-300 ${
                 post.status === 'Open' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
+              disabled={post.isBlock}
             >
               {post.status === 'Open' ? <ToggleLeft size={16} className="mr-1" /> : <ToggleRight size={16} className="mr-1" />}
               {post.status === 'Open' ? 'Close' : 'Reopen'}
@@ -70,6 +82,7 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onViewContestants(post._id)} 
               className="flex items-center bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition-colors duration-300"
+              disabled={post.isBlock}
             >
               <Eye size={16} className="mr-1" />
               View Applicants

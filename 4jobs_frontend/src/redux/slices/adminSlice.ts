@@ -16,7 +16,7 @@ interface AdminState {
   dashboardData: any;
   recruiters: any[];
   users: User[];
-  token: string | null; // Add token to state
+  token: string | null; 
 }
 
 const initialState: AdminState = {
@@ -25,8 +25,8 @@ const initialState: AdminState = {
   error: null,
   dashboardData: null,
   recruiters: [],
-  users: [], // User state
-  token: localStorage.getItem('adminToken'), // Retrie
+  users: [], 
+  token: localStorage.getItem('adminToken'), 
 };
 
 // Thunks
@@ -108,7 +108,6 @@ export const initializeAdminState = createAsyncThunk(
   async (_, { dispatch }) => {
     const token = localStorage.getItem('adminToken');
     if (token) {
-      // You might want to verify the token here
       dispatch(loginAdmin.fulfilled({ token }, '', { email: '', password: '' }));
     }
   }
@@ -130,7 +129,7 @@ const adminSlice = createSlice({
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticatedAdmin = true;
-        state.token = action.payload.token; // Store token
+        state.token = action.payload.token; 
         state.error = null;
       })
       .addCase(loginAdmin.rejected, (state, action: PayloadAction<any>) => {

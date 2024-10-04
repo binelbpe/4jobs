@@ -79,7 +79,6 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
-    // Verify OTP
     verifyOtp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,7 +105,6 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
-    // Login Recruiter
     loginRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -125,7 +123,6 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
-    // Send OTP
     sendOtp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -144,7 +141,6 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
-    // Get Recruiter Profile
     getProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

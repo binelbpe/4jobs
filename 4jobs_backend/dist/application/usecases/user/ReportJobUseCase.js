@@ -31,9 +31,9 @@ let ReportJobUseCase = class ReportJobUseCase {
     constructor(jobPostRepository) {
         this.jobPostRepository = jobPostRepository;
     }
-    execute(userId, jobId) {
+    execute(userId, jobId, reason) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.jobPostRepository.reportJob(userId, jobId);
+            const result = yield this.jobPostRepository.reportJob(userId, jobId, reason);
             if (!result) {
                 throw new Error("Failed to report job");
             }

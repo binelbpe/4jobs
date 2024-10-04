@@ -28,10 +28,10 @@ export class CreateAdminUseCase {
       name,
       role: "admin",
       isAdmin: true,
-      experiences: [], // Provide default value
-      projects: [], // Provide default value
-      certificates: [], // Provide default value
-      skills: [], // Provide default value
+      experiences: [], 
+      projects: [], 
+      certificates: [], 
+      skills: [], 
     });
 
     const adminUser: Admin = {

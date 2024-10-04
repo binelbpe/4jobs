@@ -42,26 +42,12 @@ let ConnectionController = class ConnectionController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { senderId, recipientId } = req.body;
-                console.log(`Sending connection request from ${senderId} to ${recipientId}`);
                 const connection = yield this.connectionUseCase.sendConnectionRequest(senderId, recipientId);
-                const sender = yield UserModel_1.UserModel.findById(senderId);
-                if (sender) {
-                    const notification = yield NotificationModel_1.NotificationModel.create({
-                        type: 'connection_request',
-                        message: `${sender.name} sent you a connection request`,
-                        sender: senderId,
-                        recipient: recipientId,
-                        relatedItem: connection.id,
-                        status: 'unread'
-                    });
-                    console.log("notification", notification);
-                    this.eventEmitter.emit('sendNotification', notification);
-                }
+                yield this.createAndEmitNotification('connection_request', senderId, recipientId, connection.id);
                 res.json({ message: 'Connection request sent successfully', connection });
             }
             catch (error) {
-                console.error("Error sending connection request:", error);
-                res.status(500).json({ error: 'Failed to send connection request' });
+                this.handleError(res, error, 'Failed to send connection request');
             }
         });
     }
@@ -72,15 +58,11 @@ let ConnectionController = class ConnectionController {
                 const notifications = yield NotificationModel_1.NotificationModel.find({
                     recipient: userId,
                     status: { $ne: "read" }
-                })
-                    .sort({ createdAt: -1 })
-                    .limit(20);
-                console.log("Notifications fetched:", notifications);
+                }).sort({ createdAt: -1 }).limit(20);
                 res.json(notifications);
             }
             catch (error) {
-                console.error("Error fetching notifications:", error);
-                res.status(500).json({ error: 'Failed to get notifications' });
+                this.handleError(res, error, 'Failed to get notifications');
             }
         });
     }
@@ -92,10 +74,135 @@ let ConnectionController = class ConnectionController {
                 res.json(recommendations);
             }
             catch (error) {
-                console.error("Error fetching recommendations:", error);
-                res.status(500).json({ error: 'Failed to get recommendations' });
+                this.handleError(res, error, 'Failed to get recommendations');
             }
         });
+    }
+    getConnectionProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                console.log("object connectionId", userId);
+                const profile = yield this.connectionUseCase.getConnectionProfile(userId);
+                res.json(profile);
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to get connection profile');
+            }
+        });
+    }
+    getConnectionRequests(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                const requests = yield this.connectionUseCase.getConnectionRequests(userId);
+                res.json(requests);
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to get connection requests');
+            }
+        });
+    }
+    acceptConnectionRequest(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { connectionId } = req.params;
+                const { userId } = req.body;
+                const connection = yield this.connectionUseCase.acceptConnectionRequest(connectionId);
+                yield this.createAndEmitNotification('connection_accepted', userId, connection.requesterId, connection.id);
+                res.json({ message: 'Connection request accepted successfully', connection });
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to accept connection request');
+            }
+        });
+    }
+    rejectConnectionRequest(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { connectionId } = req.params;
+                const { userId } = req.body;
+                const connection = yield this.connectionUseCase.rejectConnectionRequest(connectionId);
+                console.log("connection", connection);
+                res.json({ message: 'Connection request rejected successfully', connection });
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to reject connection request');
+            }
+        });
+    }
+    createAndEmitNotification(type, senderId, recipientId, relatedItemId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sender = yield UserModel_1.UserModel.findById(senderId);
+            if (sender) {
+                const message = type === 'connection_request'
+                    ? `${sender.name} sent you a connection request`
+                    : `${sender.name} accepted your connection request`;
+                const notification = yield NotificationModel_1.NotificationModel.create({
+                    type,
+                    message,
+                    sender: senderId,
+                    recipient: recipientId,
+                    relatedItem: relatedItemId,
+                    status: 'unread'
+                });
+                this.eventEmitter.emit('sendNotification', notification);
+            }
+        });
+    }
+    getConnections(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                const result = yield this.connectionUseCase.getConnections(userId);
+                res.json(result);
+            }
+            catch (error) {
+                res.status(500).json({ error: 'Failed to fetch connections' });
+            }
+        });
+    }
+    searchConnections(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                const query = req.query.query;
+                const result = yield this.connectionUseCase.searchConnections(userId, query);
+                res.json(result);
+            }
+            catch (error) {
+                res.status(500).json({ error: 'Failed to search connections' });
+            }
+        });
+    }
+    getMessageConnections(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                const connections = yield this.connectionUseCase.getMessageConnections(userId);
+                res.json(connections);
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to fetch message connections');
+            }
+        });
+    }
+    searchMessageConnections(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId;
+                const query = req.query.query;
+                const results = yield this.connectionUseCase.searchMessageConnections(userId, query);
+                res.json(results);
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to search message connections');
+            }
+        });
+    }
+    handleError(res, error, message) {
+        console.error(`Error: ${message}`, error);
+        res.status(500).json({ error: message });
     }
 };
 exports.ConnectionController = ConnectionController;

@@ -38,7 +38,7 @@ const ContestantDetails: React.FC = () => {
               <div className="flex flex-col md:flex-row items-center mb-8">
                 {selectedContestant.profileImage ? (
                   <img 
-                    src={`http://localhost:5000${selectedContestant.profileImage}`} 
+                    src={`${selectedContestant.profileImage}`} 
                     alt={selectedContestant.name} 
                     className="w-32 h-32 rounded-full border-4 border-purple-200 mr-6 mb-4 md:mb-0" 
                   />

@@ -159,7 +159,7 @@ const Experiences: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4 text-center">Your Experiences</h2>
         {error && <p className="text-red-500">{error}</p>}
         
-        {/* List of Experiences */}
+ 
         <div className="space-y-4">
           {experiences.length > 0 ? (
             experiences.map((experience, index) => (
@@ -194,8 +194,7 @@ const Experiences: React.FC = () => {
             <p>No experiences added yet.</p>
           )}
         </div>
-
-        {/* Add/Edit Experience Form */}
+   
         <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-bold mb-4">
             {editingIndex !== null ? "Edit Experience" : "Add New Experience"}

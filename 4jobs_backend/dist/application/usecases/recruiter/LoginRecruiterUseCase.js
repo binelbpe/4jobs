@@ -35,7 +35,6 @@ let LoginRecruiterUseCase = class LoginRecruiterUseCase {
     }
     execute(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Find recruiter by email
             const recruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
             if (!recruiter) {
                 throw new Error("Invalid credentials");
