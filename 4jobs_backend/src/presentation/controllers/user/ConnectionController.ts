@@ -139,16 +139,7 @@ export class ConnectionController {
   
   
 
-  async getMessageConnections(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = req.params.userId;
-      const connections = await this.connectionUseCase.getMessageConnections(userId);
-      res.json(connections);
-    } catch (error) {
-      this.handleError(res, error, 'Failed to fetch message connections');
-    }
-  }
-
+ 
   async searchMessageConnections(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId;

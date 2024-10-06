@@ -151,9 +151,8 @@ exports.authRouter.get('/messages/conversation/:userId1/:userId2', authMiddlewar
 exports.authRouter.post('/messages/:messageId/read', authMiddleware_1.authenticate, messageController.markMessageAsRead.bind(messageController));
 exports.authRouter.get('/messages/unread/:userId', authMiddleware_1.authenticate, messageController.getUnreadMessageCount.bind(messageController));
 exports.authRouter.get('/messages/search/:userId', authMiddleware_1.authenticate, messageController.searchMessages.bind(messageController));
-exports.authRouter.get('/connections/message/:userId', authMiddleware_1.authenticate, connectionController.getConnections.bind(connectionController));
 // Connection routes for messaging
-exports.authRouter.get('/connections/message/:userId', authMiddleware_1.authenticate, connectionController.getMessageConnections.bind(connectionController));
+exports.authRouter.get('/connections/message/:userId', authMiddleware_1.authenticate, messageController.getMessageConnections.bind(messageController));
 exports.authRouter.get('/connections/:userId/search', authMiddleware_1.authenticate, connectionController.searchMessageConnections.bind(connectionController));
 // Message routes
 exports.authRouter.post('/messages', authMiddleware_1.authenticate, messageController.sendMessage.bind(messageController));

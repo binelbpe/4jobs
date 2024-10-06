@@ -86,12 +86,6 @@ let ConnectionUseCase = class ConnectionUseCase {
             return this.connectionRepository.searchConnections(userId, query);
         });
     }
-    getMessageConnections(userId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const connections = yield this.connectionRepository.getConnections(userId);
-            return this.userRepository.findUsersByIds(connections.map((c) => c.requesterId === userId ? c.recipientId : c.requesterId));
-        });
-    }
     searchMessageConnections(userId, query) {
         return __awaiter(this, void 0, void 0, function* () {
             const connections = yield this.connectionRepository.getConnections(userId);

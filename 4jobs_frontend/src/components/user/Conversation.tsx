@@ -1,96 +1,101 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../redux/store';
-import { sendMessage, markMessageAsRead } from '../../redux/slices/messageSlice';
-import { ConversationProps } from '../../types/messageType';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { sendMessage, markMessageAsRead, getConversation } from '../../redux/slices/messageSlice';
+import { Message } from '../../types/messageType';
+
+interface ConversationProps {
+  messages: Message[];
+  currentUserId: string;
+  recipientId: string;
+  onBackToList: () => void;
+}
 
 const Conversation: React.FC<ConversationProps> = ({ messages, currentUserId, recipientId, onBackToList }) => {
-  const dispatch = useDispatch<AppDispatch>();
   const [newMessage, setNewMessage] = useState('');
+  const dispatch = useDispatch<AppDispatch>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
-    messages.forEach((message) => {
-      if (!message.isRead && message.recipient.id === currentUserId) {
+    messages.forEach(message => {
+      if (!message.isRead && message.sender.id !== currentUserId) {
         dispatch(markMessageAsRead(message.id));
       }
     });
-  }, [dispatch, messages, currentUserId]);
+  }, [messages, currentUserId, dispatch]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
-      dispatch(sendMessage({ senderId: currentUserId, recipientId, content: newMessage }));
+      await dispatch(sendMessage({
+        senderId: currentUserId,
+        recipientId: recipientId,
+        content: newMessage.trim()
+      }));
       setNewMessage('');
+      dispatch(getConversation({ userId1: currentUserId, userId2: recipientId }));
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="flex flex-col h-full bg-purple-50">
-      <div className="bg-white p-4 border-b flex items-center">
-        <button onClick={onBackToList} className="md:hidden mr-4 text-purple-600">
-          <FontAwesomeIcon icon={faArrowLeft} />
+    <div className="flex flex-col h-full bg-gray-100">
+      <div className="p-4 bg-white border-b flex justify-between items-center shadow-sm">
+        <button onClick={onBackToList} className="md:hidden text-gray-600 hover:text-gray-800">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <div className="font-semibold text-purple-800">
-          {messages.length > 0 ? messages[0].sender.name : 'Conversation'}
-        </div>
+        <h2 className="text-lg font-semibold text-gray-800">{messages[0]?.recipient.name}</h2>
+        <div className="w-6 md:hidden"></div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-4">
-          {messages.map((message, index) => {
-            const isCurrentUser = message.sender.id === currentUserId;
-            const isConsecutive = index > 0 && messages[index - 1].sender.id === message.sender.id;
-
-            return (
-              <div
-                key={message.id}
-                className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} ${
-                  isConsecutive ? 'mt-1' : 'mt-4'
-                }`}
-              >
-                <div
-                  className={`max-w-[70%] rounded-lg p-3 ${
-                    isCurrentUser ? 'bg-purple-500 text-white' : 'bg-white text-purple-800'
-                  }`}
-                >
-                  {message.content}
-                  <div className="text-xs text-purple-300 mt-1">
-                    {formatDate(message.createdAt)}
-                  </div>
-                </div>
+      <div className="flex-grow overflow-y-auto p-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex mb-4 ${
+              message.sender.id === currentUserId ? 'justify-end' : 'justify-start'
+            }`}
+          >
+            <div
+              className={`max-w-[70%] p-3 rounded-lg shadow ${
+                message.sender.id === currentUserId
+                  ? 'bg-purple-500 text-white rounded-br-none'
+                  : 'bg-white text-gray-800 rounded-bl-none'
+              }`}
+            >
+              <p className="break-words">{message.content}</p>
+              <div className={`text-xs mt-1 ${
+                message.sender.id === currentUserId ? 'text-purple-200' : 'text-gray-500'
+              }`}>
+                {formatTimestamp(message.createdAt)}
               </div>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleSendMessage} className="p-4 border-t bg-white">
-        <div className="flex">
+      <form onSubmit={handleSendMessage} className="p-4 bg-white border-t">
+        <div className="flex rounded-full border overflow-hidden shadow-sm">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-grow p-2 pl-4 focus:outline-none"
           />
           <button
             type="submit"
-            className="bg-purple-500 text-white px-4 py-2 rounded-r-lg hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+            className="bg-purple-500 text-white p-2 px-4 hover:bg-purple-600 transition duration-300"
           >
-            <FontAwesomeIcon icon={faPaperPlane} />
+            Send
           </button>
         </div>
       </form>

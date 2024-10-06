@@ -141,7 +141,7 @@ container.bind(types_1.default.UserManager).to(UserManager_1.UserManager).inSing
 container.bind(types_1.default.NotificationEventEmitter).toDynamicValue(() => {
     return new events_1.EventEmitter();
 }).inSingletonScope();
-container.bind(types_1.default.IMessageRepository).to(MongoMessageRepository_1.MongoMessageRepository);
+container.bind(types_1.default.IMessageRepository).to(MongoMessageRepository_1.MessageRepository);
 container.bind(types_1.default.MessageUseCase).to(MessageUseCase_1.MessageUseCase);
 container.bind(types_1.default.MessageController).to(MessageController_1.MessageController).inSingletonScope();
 console.log(container);

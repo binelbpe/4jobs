@@ -203,9 +203,8 @@ authRouter.get('/messages/conversation/:userId1/:userId2', authenticate, message
 authRouter.post('/messages/:messageId/read', authenticate, messageController.markMessageAsRead.bind(messageController));
 authRouter.get('/messages/unread/:userId', authenticate, messageController.getUnreadMessageCount.bind(messageController));
 authRouter.get('/messages/search/:userId', authenticate, messageController.searchMessages.bind(messageController));
-authRouter.get('/connections/message/:userId', authenticate, connectionController.getConnections.bind(connectionController));
 // Connection routes for messaging
-authRouter.get('/connections/message/:userId', authenticate, connectionController.getMessageConnections.bind(connectionController));
+authRouter.get('/connections/message/:userId', authenticate, messageController.getMessageConnections.bind(messageController));
 authRouter.get('/connections/:userId/search', authenticate, connectionController.searchMessageConnections.bind(connectionController));
 
 // Message routes

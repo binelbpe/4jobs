@@ -154,4 +154,6 @@ export interface UserConnection {
   certificates?: Certificate[];
   resume?: string;
   isBlocked?:boolean;
+  lastMessage:string;
+  lastMessageDate:string;
 }

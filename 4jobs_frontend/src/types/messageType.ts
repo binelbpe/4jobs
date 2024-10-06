@@ -1,25 +1,23 @@
-import { User } from "./auth";
-
 export interface Message {
   id: string;
   content: string;
-  sender: User;
-  recipient: User;
+  sender: {
+    id: string;
+    name: string;
+  };
+  recipient: {
+    id: string;
+    name: string;
+  };
   createdAt: string;
   isRead: boolean;
 }
 
-export interface ConversationProps {
-  messages: Message[];
-  currentUserId: string;
-  recipientId: string;
-  onBackToList: () => void;  
-}
-
-export interface ConversationListProps {
-  conversations: Record<string, Message[]>;
-  onSelectUser: (userId: string) => void;
-  selectedUserId: string | null;
+export interface UserConnection {
+  id: string;
+  name: string;
+  email: string;
+  profileImage?: string;
 }
 
 export interface SendMessagePayload {
@@ -31,4 +29,9 @@ export interface SendMessagePayload {
 export interface GetConversationPayload {
   userId1: string;
   userId2: string;
+}
+
+export interface ConversationListItem {
+  user: UserConnection;
+  lastMessage: Message;
 }

@@ -10,7 +10,6 @@ import {
   rejectConnectionRequestApi,
   fetchConnectionsApi,
   searchConnectionsApi,
-  fetchConnectionsMessageApi, 
   searchConnectionsMessageApi 
 } from '../../api/authapi';
 
@@ -175,14 +174,7 @@ export const searchConnections = createAsyncThunk(
   }
 );
 
-export const fetchConnectionsMessage = createAsyncThunk(
-  'connections/fetchConnections/message',
-  async (userId: string) => {
-    let response= await fetchConnectionsMessageApi(userId);
-    console.log("response connection message",response)
-    return response
-  }
-);
+
 
 export const searchConnectionsMessage = createAsyncThunk(
   'connections/searchConnections/message',
@@ -325,18 +317,7 @@ const connectionSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string || 'Failed to search connections. Please try again.';
       })
-      .addCase(fetchConnectionsMessage.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchConnectionsMessage.fulfilled, (state, action) => {
-        state.loading = false;
-        state.messageConnections = Array.isArray(action.payload) ? action.payload : [];
-      })
-      .addCase(fetchConnectionsMessage.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch connections';
-      })
+      
       .addCase(searchConnectionsMessage.pending, (state) => {
         state.loading = true;
         state.error = null;

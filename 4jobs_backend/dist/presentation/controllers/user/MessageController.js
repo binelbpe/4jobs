@@ -101,6 +101,20 @@ let MessageController = class MessageController {
             }
         });
     }
+    getMessageConnections(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                const connections = yield this.messageUseCase.getMessageConnections(userId);
+                console.log("connection messagessss", connections);
+                res.status(200).json(connections);
+            }
+            catch (error) {
+                console.error("Error fetching message connections:", error);
+                res.status(500).json({ error: "An error occurred while fetching message connections" });
+            }
+        });
+    }
 };
 exports.MessageController = MessageController;
 exports.MessageController = MessageController = __decorate([

@@ -6,4 +6,5 @@ export interface IMessageRepository {
   markAsRead(messageId: string): Promise<void>;
   getUnreadCount(userId: string): Promise<number>;
   searchMessages(userId: string, query: string): Promise<Message[]>;
+  getMessageConnections(userId: string): Promise<{ user: string, lastMessage: Message }[]>;
 }

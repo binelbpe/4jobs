@@ -1,91 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../redux/store';
-import { fetchConnectionsMessage, searchConnectionsMessage } from '../../redux/slices/connectionSlice';
-import { User, UserConnection } from '../../types/auth';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { searchConnectionsMessage } from '../../redux/slices/connectionSlice';
+import { UserConnection } from '../../types/auth';
 
 interface MessageConnectionSearchProps {
   onSelectUser: (userId: string) => void;
 }
 
-const isUserConnection = (user: User | UserConnection): user is UserConnection => {
-  return '_id' in user;
-};
-
-const getUserId = (user: User | UserConnection): string => {
-  return isUserConnection(user) ? user._id : user.id;
-};
-
 const MessageConnectionSearch: React.FC<MessageConnectionSearchProps> = ({ onSelectUser }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch<AppDispatch>();
-  const connections = useSelector((state: RootState) => state.connections.messageConnections);
+  const user = useSelector((state: RootState) => state.auth.user);
   const searchResults = useSelector((state: RootState) => state.connections.messageSearchResults);
-  const currentUser = useSelector((state: RootState) => state.auth.user);
-  const loading = useSelector((state: RootState) => state.connections.loading);
-  const error = useSelector((state: RootState) => state.connections.error);
 
-  useEffect(() => {
-    if (currentUser) {
-      dispatch(fetchConnectionsMessage(getUserId(currentUser)));
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user && searchQuery.trim()) {
+      dispatch(searchConnectionsMessage({ userId: user.id, query: searchQuery.trim() }));
     }
-  }, [dispatch, currentUser]);
-
-  useEffect(() => {
-    if (searchTerm && currentUser) {
-      dispatch(searchConnectionsMessage({ userId: getUserId(currentUser), query: searchTerm }));
-    }
-  }, [dispatch, searchTerm, currentUser]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
   };
-
-  const handleSelectUser = (userId: string) => {
-    onSelectUser(userId);
-    setSearchTerm('');
-  };
-
-  const displayConnections: (User | UserConnection)[] = searchTerm ? searchResults : connections;
-console.log("displayConnections",displayConnections)
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-500">Error: {error}</div>;
-  }
 
   return (
-    <div className="p-4">
-      <input
-        type="text"
-        placeholder="Search connections..."
-        value={searchTerm}
-        onChange={handleSearch}
-        className="w-full p-2 border rounded mb-4"
-      />
-      <ul className="space-y-2">
-        {displayConnections.map((connection: User | UserConnection) => {
-          const userId = getUserId(connection);
-          return (
-            <li
-              key={userId}
-              onClick={() => handleSelectUser(userId)}
-              className="cursor-pointer hover:bg-gray-100 p-2 rounded"
-            >
-              <div className="flex items-center">
-                <img
-                  src={`${connection.profileImage}`}
-                  alt={connection.name}
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <span>{connection.name}</span>
+    <div className="flex flex-col h-full">
+      <form onSubmit={handleSearch} className="p-4 border-b">
+        <div className="flex">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search connections..."
+            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <button
+            type="submit"
+            className="bg-purple-500 text-white p-2 rounded-r hover:bg-purple-600 transition duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+      </form>
+      <div className="flex-grow overflow-y-auto">
+        {searchResults.map((connection: UserConnection) => (
+          <div
+            key={connection._id}
+            className="p-4 border-b cursor-pointer hover:bg-purple-100 transition duration-300"
+            onClick={() => onSelectUser(connection._id)}
+          >
+            <div className="flex items-center">
+              <div className="w-12 h-12 rounded-full bg-purple-300 mr-3 flex-shrink-0">
+                {connection.profileImage && (
+                  <img
+                    src={connection.profileImage}
+                    alt={connection.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
               </div>
-            </li>
-          );
-        })}
-      </ul>
+              <div>
+                <div className="font-semibold text-purple-800">{connection.name}</div>
+                <div className="text-sm text-purple-600">{connection.email}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

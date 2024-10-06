@@ -7,7 +7,12 @@ import { UserModel } from "../models/UserModel";
 import mongoose from "mongoose";
 
 @injectable()
-export class MongoMessageRepository implements IMessageRepository {
+export class MessageRepository implements IMessageRepository {
+  constructor() {
+    this.mapToEntity = this.mapToEntity.bind(this);
+    this.mapUserToEntity = this.mapUserToEntity.bind(this);
+  }
+
   async create(message: Partial<Message>): Promise<Message> {
     const newMessage = new MessageModel({
       ...message,
@@ -34,7 +39,6 @@ export class MongoMessageRepository implements IMessageRepository {
       .sort({ createdAt: 1 })
       .populate("sender", "name email profileImage")
       .populate("recipient", "name email profileImage");
-
     return messages.map(this.mapToEntity);
   }
 
@@ -130,18 +134,76 @@ export class MongoMessageRepository implements IMessageRepository {
     return messages.map(this.mapToEntity);
   }
 
-  private mapToEntity(message: any): Message {
+  async getMessageConnections(userId: string): Promise<{ user: string; lastMessage: Message }[]> {
+    const connections = await MessageModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: new mongoose.Types.ObjectId(userId) },
+            { recipient: new mongoose.Types.ObjectId(userId) },
+          ],
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ["$sender", new mongoose.Types.ObjectId(userId)] },
+              "$recipient",
+              "$sender",
+            ],
+          },
+          lastMessage: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $project: {
+          user: {
+            _id: "$user._id",
+            name: "$user.name",
+            email: "$user.email",
+            profileImage: "$user.profileImage",
+          },
+          lastMessage: 1,
+        },
+      },
+    ]);
+
+    return connections.map((conn) => ({
+      user: conn.user._id.toString(),
+      lastMessage: this.mapToEntity(conn.lastMessage),
+    }));
+  }
+
+  private mapToEntity = (message: any): Message => {
     return {
       id: message._id.toString(),
-      sender: this.mapUserToEntity(message.sender),
-      recipient: this.mapUserToEntity(message.recipient),
+      sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
+      recipient: message.recipient ? this.mapUserToEntity(message.recipient) : message.recipient,
       content: message.content,
       createdAt: message.createdAt,
       isRead: message.isRead,
     };
   }
 
-  private mapUserToEntity(user: any): User {
+  private mapUserToEntity = (user: any): User => {
+    if (!user) {
+      throw new Error("User object is undefined or null");
+    }
     return {
       id: user._id.toString(),
       email: user.email,

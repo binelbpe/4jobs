@@ -28,8 +28,9 @@ exports.MessageUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 let MessageUseCase = class MessageUseCase {
-    constructor(messageRepository) {
+    constructor(messageRepository, userRepository) {
         this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
     }
     sendMessage(senderId, recipientId, content) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -62,10 +63,23 @@ let MessageUseCase = class MessageUseCase {
             return this.messageRepository.searchMessages(userId, query);
         });
     }
+    getMessageConnections(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connections = yield this.messageRepository.getMessageConnections(userId);
+            const userIds = connections.map((c) => c.user);
+            const users = yield this.userRepository.findUsersByIds(userIds);
+            const resp = connections.map((conn) => ({
+                user: users.find((u) => u.id === conn.user),
+                lastMessage: conn.lastMessage
+            }));
+            return resp;
+        });
+    }
 };
 exports.MessageUseCase = MessageUseCase;
 exports.MessageUseCase = MessageUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.IMessageRepository)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
+    __metadata("design:paramtypes", [Object, Object])
 ], MessageUseCase);

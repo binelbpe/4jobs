@@ -175,18 +175,6 @@ let ConnectionController = class ConnectionController {
             }
         });
     }
-    getMessageConnections(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const userId = req.params.userId;
-                const connections = yield this.connectionUseCase.getMessageConnections(userId);
-                res.json(connections);
-            }
-            catch (error) {
-                this.handleError(res, error, 'Failed to fetch message connections');
-            }
-        });
-    }
     searchMessageConnections(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

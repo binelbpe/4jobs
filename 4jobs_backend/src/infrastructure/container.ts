@@ -60,7 +60,7 @@ import { DeletePostUseCase } from '../application/usecases/user/post/DeletePostU
 import { EditPostUseCase } from '../application/usecases/user/post/EditPostUseCase'
 import { ReportJobUseCase } from '../application/usecases/user/ReportJobUseCase'
 import { IMessageRepository } from '../domain/interfaces/repositories/user/IMessageRepository';
-import { MongoMessageRepository } from '../infrastructure/database/mongoose/repositories/MongoMessageRepository';
+import { MessageRepository } from '../infrastructure/database/mongoose/repositories/MongoMessageRepository';
 import { MessageUseCase } from '../application/usecases/user/MessageUseCase';
 import { MessageController } from '../presentation/controllers/user/MessageController';
 
@@ -165,7 +165,7 @@ container.bind<EventEmitter>(TYPES.NotificationEventEmitter).toDynamicValue(() =
   return new EventEmitter();
 }).inSingletonScope();
 
-container.bind<IMessageRepository>(TYPES.IMessageRepository).to(MongoMessageRepository);
+container.bind<IMessageRepository>(TYPES.IMessageRepository).to(MessageRepository);
 container.bind<MessageUseCase>(TYPES.MessageUseCase).to(MessageUseCase);
 container.bind<MessageController>(TYPES.MessageController).to(MessageController).inSingletonScope();
 

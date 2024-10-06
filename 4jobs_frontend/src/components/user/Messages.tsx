@@ -1,26 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
-import { selectConversations, getConversation } from '../../redux/slices/messageSlice';
-import { fetchConnectionsMessage } from '../../redux/slices/connectionSlice';
+import { 
+  selectConversations, 
+  getConversation, 
+  fetchConnectionsList, 
+  selectConnectionList, 
+  clearMessageState
+} from '../../redux/slices/messageSlice';
 import ConversationList from './ConversationList';
 import Conversation from './Conversation';
 import MessageConnectionSearch from './MessageConnectionSearch';
 import Header from './Header';
+import { Message } from '../../types/messageType';
+import { UserConnection } from '../../types/auth';
 
 const Messages: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const conversations = useSelector(selectConversations);
+  const connectionList = useSelector(selectConnectionList);
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileConversation, setShowMobileConversation] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const loadInitialData = useCallback(async () => {
     if (user) {
-      dispatch(fetchConnectionsMessage(user.id));
+      setIsLoading(true);
+      try {
+        await dispatch(fetchConnectionsList(user.id));
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, [dispatch, user]);
+
+  useEffect(() => {
+    loadInitialData();
+    return () => {
+      dispatch(clearMessageState());
+    };
+  }, [dispatch, loadInitialData]);
 
   useEffect(() => {
     if (user && selectedUserId) {
@@ -28,20 +51,21 @@ const Messages: React.FC = () => {
     }
   }, [dispatch, user, selectedUserId]);
 
-  const handleSelectUser = (userId: string) => {
+  const handleSelectUser = useCallback((userId: string) => {
     setSelectedUserId(userId);
     setShowSearch(false);
     setShowMobileConversation(true);
-    if (user) {
-      dispatch(getConversation({ userId1: user.id, userId2: userId }));
-    }
-  };
+  }, []);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setShowMobileConversation(false);
-  };
+  }, []);
 
   if (!user) return null;
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col h-screen bg-purple-50">
@@ -61,6 +85,7 @@ const Messages: React.FC = () => {
           ) : (
             <ConversationList
               conversations={conversations}
+              connectionList={connectionList}
               onSelectUser={handleSelectUser}
               selectedUserId={selectedUserId}
               currentUserId={user.id}
@@ -70,7 +95,7 @@ const Messages: React.FC = () => {
         <div className={`w-full md:w-2/3 ${showMobileConversation ? '' : 'hidden md:block'}`}>
           {selectedUserId && conversations[selectedUserId] ? (
             <Conversation
-              messages={conversations[selectedUserId]}
+              messages={conversations[selectedUserId] as Message[]}
               currentUserId={user.id}
               recipientId={selectedUserId}
               onBackToList={handleBackToList}

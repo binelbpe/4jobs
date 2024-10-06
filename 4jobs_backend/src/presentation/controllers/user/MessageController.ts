@@ -68,5 +68,15 @@ export class MessageController {
     }
   }
 
-  
+  async getMessageConnections(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const connections = await this.messageUseCase.getMessageConnections(userId);
+      console.log("connection messagessss",connections)
+      res.status(200).json(connections);
+    } catch (error) {
+      console.error("Error fetching message connections:", error);
+      res.status(500).json({ error: "An error occurred while fetching message connections" });
+    }
+  }
 }

@@ -58,12 +58,7 @@ export class ConnectionUseCase {
     return this.connectionRepository.searchConnections(userId, query);
   }
 
-  async getMessageConnections(userId: string): Promise<User[]> {
-    const connections = await this.connectionRepository.getConnections(userId);
-    return this.userRepository.findUsersByIds(connections.map((c: Connection) => 
-      c.requesterId === userId ? c.recipientId : c.requesterId
-    ));
-  }
+ 
 
   async searchMessageConnections(userId: string, query: string): Promise<User[]> {
     const connections = await this.connectionRepository.getConnections(userId);
