@@ -9,9 +9,10 @@ interface ConversationProps {
   currentUserId: string;
   recipientId: string;
   onBackToList: () => void;
+  onSendMessage: () => void;
 }
 
-const Conversation: React.FC<ConversationProps> = ({ messages, currentUserId, recipientId, onBackToList }) => {
+const Conversation: React.FC<ConversationProps> = ({ messages, currentUserId, recipientId, onBackToList, onSendMessage }) => {
   const [newMessage, setNewMessage] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -38,11 +39,18 @@ const Conversation: React.FC<ConversationProps> = ({ messages, currentUserId, re
       }));
       setNewMessage('');
       dispatch(getConversation({ userId1: currentUserId, userId2: recipientId }));
+      onSendMessage(); // Call the callback to refresh the conversation list
     }
   };
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getOtherUserName = () => {
+    if (messages.length === 0) return "Chat";
+    const otherUser = messages[0].sender.id === currentUserId ? messages[0].recipient : messages[0].sender;
+    return otherUser.name;
   };
 
   return (
@@ -53,7 +61,7 @@ const Conversation: React.FC<ConversationProps> = ({ messages, currentUserId, re
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 className="text-lg font-semibold text-gray-800">{messages[0]?.recipient.name}</h2>
+        <h2 className="text-lg font-semibold text-gray-800">{getOtherUserName()}</h2>
         <div className="w-6 md:hidden"></div>
       </div>
       <div className="flex-grow overflow-y-auto p-4">

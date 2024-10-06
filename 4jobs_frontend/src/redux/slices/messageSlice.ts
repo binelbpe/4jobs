@@ -20,16 +20,14 @@ const initialState: MessageState = {
   unreadCount: 0,
 };
 
-// Helper function to convert User to UserConnection
 const convertToUserConnection = (data: any): UserConnection => ({
   _id: data.user.id,
   name: data.user.name,
   email: data.user.email,
   profileImage: data.user.profileImage,
   role: data.user.role,
-  lastMessage:data.lastMessage.content,
-  lastMessageDate:data.lastMessage.createdAt
-  // Add other properties as needed
+  lastMessage: data.lastMessage.content,
+  lastMessageDate: data.lastMessage.createdAt
 });
 
 export const sendMessage = createAsyncThunk(
@@ -37,7 +35,6 @@ export const sendMessage = createAsyncThunk(
   async (payload: SendMessagePayload) => {
     const { senderId, recipientId, content } = payload;
     let response = await sendMessageApi(senderId, recipientId, content);
-    console.log("send message",response)
     return response;
   }
 );
@@ -47,7 +44,6 @@ export const getConversation = createAsyncThunk(
   async (payload: GetConversationPayload) => {
     const { userId1, userId2 } = payload;
     const messages = await getConversationApi(userId1, userId2);
-    console.log("messages getconversations",messages)
     return { userId: userId2, messages };
   }
 );
@@ -75,12 +71,8 @@ export const fetchConnectionsList = createAsyncThunk<
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await fetchConnectionsMessageApi(userId);
-      console.log("API response:", response);
-      
       if (Array.isArray(response)) {
-        const connections = response.map(convertToUserConnection);
-        console.log("Mapped connections:", connections);
-        return connections;
+        return response.map(convertToUserConnection);
       } else {
         return rejectWithValue('Invalid response format from API');
       }
@@ -90,7 +82,13 @@ export const fetchConnectionsList = createAsyncThunk<
   }
 );
 
-
+export const refreshConversationList = createAsyncThunk(
+  'messages/refreshConversationList',
+  async (userId: string) => {
+    const response = await fetchConnectionsMessageApi(userId);
+    return response.map(convertToUserConnection);
+  }
+);
 
 const messageSlice = createSlice({
   name: 'messages',
@@ -157,6 +155,17 @@ const messageSlice = createSlice({
       .addCase(fetchConnectionsList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch connections';
+      })
+      .addCase(refreshConversationList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(refreshConversationList.fulfilled, (state, action: PayloadAction<UserConnection[]>) => {
+        state.loading = false;
+        state.connectionList = action.payload;
+      })
+      .addCase(refreshConversationList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to refresh conversation list';
       });
   },
 });

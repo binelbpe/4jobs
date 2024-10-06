@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { 
@@ -6,14 +6,14 @@ import {
   getConversation, 
   fetchConnectionsList, 
   selectConnectionList, 
-  clearMessageState
+  clearMessageState,
+  refreshConversationList
 } from '../../redux/slices/messageSlice';
 import ConversationList from './ConversationList';
 import Conversation from './Conversation';
 import MessageConnectionSearch from './MessageConnectionSearch';
 import Header from './Header';
 import { Message } from '../../types/messageType';
-import { UserConnection } from '../../types/auth';
 
 const Messages: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -61,6 +61,12 @@ const Messages: React.FC = () => {
     setShowMobileConversation(false);
   }, []);
 
+  const handleSendMessage = useCallback(async () => {
+    if (user) {
+      await dispatch(refreshConversationList(user.id));
+    }
+  }, [dispatch, user]);
+
   if (!user) return null;
 
   if (isLoading) {
@@ -99,6 +105,7 @@ const Messages: React.FC = () => {
               currentUserId={user.id}
               recipientId={selectedUserId}
               onBackToList={handleBackToList}
+              onSendMessage={handleSendMessage}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
