@@ -28,6 +28,9 @@ let UserManager = class UserManager {
     getAllConnections() {
         return Array.from(this.userConnections.entries());
     }
+    isUserOnline(userId) {
+        return this.userConnections.has(userId);
+    }
 };
 exports.UserManager = UserManager;
 exports.UserManager = UserManager = __decorate([

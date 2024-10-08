@@ -23,58 +23,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageRepository = void 0;
 const inversify_1 = require("inversify");
-const MessageModel_1 = require("../models/MessageModel");
 const mongoose_1 = __importDefault(require("mongoose"));
+const MessageModel_1 = require("../models/MessageModel");
 let MessageRepository = class MessageRepository {
     constructor() {
-        this.mapToEntity = (message) => {
-            return {
-                id: message._id.toString(),
-                sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
-                recipient: message.recipient ? this.mapUserToEntity(message.recipient) : message.recipient,
-                content: message.content,
-                createdAt: message.createdAt,
-                isRead: message.isRead,
-            };
-        };
-        this.mapUserToEntity = (user) => {
-            if (!user) {
-                throw new Error("User object is undefined or null");
-            }
-            return {
-                id: user._id.toString(),
-                email: user.email,
-                name: user.name,
-                profileImage: user.profileImage,
-                password: "",
-                role: user.role || "user",
-                isAdmin: user.isAdmin || false,
-                phone: user.phone,
-                appliedJobs: user.appliedJobs || [],
-                bio: user.bio,
-                about: user.about,
-                experiences: user.experiences || [],
-                projects: user.projects || [],
-                certificates: user.certificates || [],
-                skills: user.skills || [],
-                dateOfBirth: user.dateOfBirth,
-                gender: user.gender,
-                resume: user.resume,
-                isBlocked: user.isBlocked || false,
-            };
-        };
         this.mapToEntity = this.mapToEntity.bind(this);
         this.mapUserToEntity = this.mapUserToEntity.bind(this);
     }
     create(message) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newMessage = new MessageModel_1.MessageModel(Object.assign(Object.assign({}, message), { sender: typeof message.sender === "string"
-                    ? new mongoose_1.default.Types.ObjectId(message.sender)
-                    : message.sender, recipient: typeof message.recipient === "string"
-                    ? new mongoose_1.default.Types.ObjectId(message.recipient)
-                    : message.recipient }));
+            const newMessage = new MessageModel_1.MessageModel(Object.assign(Object.assign({}, message), { sender: typeof message.sender === "string" ? new mongoose_1.default.Types.ObjectId(message.sender) : message.sender, recipient: typeof message.recipient === "string" ? new mongoose_1.default.Types.ObjectId(message.recipient) : message.recipient, status: message.status || 'sent' }));
             yield newMessage.save();
             return this.mapToEntity(yield newMessage.populate("sender recipient"));
+        });
+    }
+    findById(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const message = yield MessageModel_1.MessageModel.findById(messageId)
+                .populate("sender", "name email profileImage")
+                .populate("recipient", "name email profileImage");
+            return message ? this.mapToEntity(message) : null;
         });
     }
     findByUsers(userId1, userId2) {
@@ -91,84 +59,21 @@ let MessageRepository = class MessageRepository {
             return messages.map(this.mapToEntity);
         });
     }
-    getLatestMessagesForUser(userId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const messages = yield MessageModel_1.MessageModel.aggregate([
-                {
-                    $match: {
-                        $or: [
-                            { sender: new mongoose_1.default.Types.ObjectId(userId) },
-                            { recipient: new mongoose_1.default.Types.ObjectId(userId) },
-                        ],
-                    },
-                },
-                {
-                    $sort: { createdAt: -1 },
-                },
-                {
-                    $group: {
-                        _id: {
-                            $cond: [
-                                { $eq: ["$sender", new mongoose_1.default.Types.ObjectId(userId)] },
-                                "$recipient",
-                                "$sender",
-                            ],
-                        },
-                        latestMessage: { $first: "$$ROOT" },
-                    },
-                },
-                {
-                    $replaceRoot: { newRoot: "$latestMessage" },
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "sender",
-                        foreignField: "_id",
-                        as: "sender",
-                    },
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "recipient",
-                        foreignField: "_id",
-                        as: "recipient",
-                    },
-                },
-                {
-                    $unwind: "$sender",
-                },
-                {
-                    $unwind: "$recipient",
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        content: 1,
-                        createdAt: 1,
-                        isRead: 1,
-                        "sender._id": 1,
-                        "sender.name": 1,
-                        "sender.email": 1,
-                        "sender.profileImage": 1,
-                        "recipient._id": 1,
-                        "recipient.name": 1,
-                        "recipient.email": 1,
-                        "recipient.profileImage": 1,
-                    },
-                },
-            ]);
-            return messages.map(this.mapToEntity);
-        });
-    }
     markAsRead(messageId) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield MessageModel_1.MessageModel.findByIdAndUpdate(messageId, { isRead: true });
+            yield MessageModel_1.MessageModel.findByIdAndUpdate(messageId, { isRead: true, status: 'read' });
+        });
+    }
+    updateStatus(messageId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield MessageModel_1.MessageModel.findByIdAndUpdate(messageId, { status });
         });
     }
     getUnreadCount(userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            // if (!mongoose.Types.ObjectId.isValid(userId)) {
+            //     throw new Error("Invalid user ID format");
+            // }
             return MessageModel_1.MessageModel.countDocuments({ recipient: userId, isRead: false });
         });
     }
@@ -234,11 +139,49 @@ let MessageRepository = class MessageRepository {
                     },
                 },
             ]);
+            console.log("ivide kweriii", connections);
             return connections.map((conn) => ({
                 user: conn.user._id.toString(),
                 lastMessage: this.mapToEntity(conn.lastMessage),
             }));
         });
+    }
+    mapToEntity(message) {
+        return {
+            id: message._id.toString(),
+            sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
+            recipient: message.recipient ? this.mapUserToEntity(message.recipient) : message.recipient,
+            content: message.content,
+            createdAt: message.createdAt,
+            isRead: message.isRead,
+            status: message.status,
+        };
+    }
+    mapUserToEntity(user) {
+        if (!user) {
+            throw new Error("User object is undefined or null");
+        }
+        return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            profileImage: user.profileImage,
+            password: "",
+            role: user.role || "user",
+            isAdmin: user.isAdmin || false,
+            phone: user.phone,
+            appliedJobs: user.appliedJobs || [],
+            bio: user.bio,
+            about: user.about,
+            experiences: user.experiences || [],
+            projects: user.projects || [],
+            certificates: user.certificates || [],
+            skills: user.skills || [],
+            dateOfBirth: user.dateOfBirth,
+            gender: user.gender,
+            resume: user.resume,
+            isBlocked: user.isBlocked || false,
+        };
     }
 };
 exports.MessageRepository = MessageRepository;

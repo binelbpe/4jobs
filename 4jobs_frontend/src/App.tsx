@@ -43,6 +43,7 @@ import ConnectionProfile from './components/user/ConnectionProfile';
 import Connections from './components/user/Connections';
 import Messages from './components/user/Messages';
 
+
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -67,7 +68,8 @@ const App: React.FC = () => {
       <Route path="/edit-post/:postId" element={<PrivateRoute><EditPost /></PrivateRoute>}/>
       <Route path="/connection/profile/:userId" element={<PrivateRoute><ConnectionProfile /></PrivateRoute>} />
       <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
-      <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} /> 
+      <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+      
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />

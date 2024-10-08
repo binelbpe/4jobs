@@ -83,7 +83,6 @@ const adminJobPostPersistConfig = {
   whitelist: ['jobPosts', 'loading', 'error'],
 };
 
-
 const connectionPersistConfig = {
   key: 'connections',
   storage,
@@ -99,7 +98,7 @@ const notificationPersistConfig = {
 const messagePersistConfig = {
   key: 'messages',
   storage,
-  whitelist: ['conversations', 'unreadCount'],
+  whitelist: ['unreadCount'],
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
@@ -109,9 +108,9 @@ const persistedJobPostReducer = persistReducer(jobPostPersistConfig, jobPostRedu
 const persistedContestantReducer = persistReducer(contestantPersistConfig, contestantReducer);
 const persistedPostReducer = persistReducer(postPersistConfig, postReducer);
 const persistedAdminJobPostReducer = persistReducer(adminJobPostPersistConfig, adminJobPostReducer);
-const persistedConnectionReducer = persistReducer(connectionPersistConfig, connectionReducer); 
+const persistedConnectionReducer = persistReducer(connectionPersistConfig, connectionReducer);
 const persistedNotificationReducer = persistReducer(notificationPersistConfig, notificationReducer);
-const persistMessageReducer = persistReducer(messagePersistConfig, messageReducer)
+const persistedMessageReducer = persistReducer(messagePersistConfig, messageReducer);
 
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
@@ -123,7 +122,7 @@ const rootReducer = combineReducers({
   adminJobPost: persistedAdminJobPostReducer,
   connections: persistedConnectionReducer,
   notifications: persistedNotificationReducer,
-  messages: persistMessageReducer,
+  messages: persistedMessageReducer,
 });
 
 const store = configureStore({

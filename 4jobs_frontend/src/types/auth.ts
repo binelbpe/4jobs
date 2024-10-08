@@ -1,4 +1,3 @@
-
 import {BasicJobPost} from '../types/jobPostTypes'
 export interface AuthState {
   user: User | null;
@@ -38,23 +37,22 @@ export interface OtpVerificationCredentials {
 
 export interface User {
   id: string;
-  email: string;
   name: string;
-  phone?: number;
-  token?: string;
-  role?: 'user' | 'admin'; 
+  email: string;
   profileImage?: string;
+  role?: string;
+  phone?: string;
   bio?: string;
   about?: string;
-  dateOfBirth?: string; 
-  gender?: 'male' | 'female' | 'other'; 
-  skills?: string[]; 
+  dateOfBirth?: string;
+  gender?: 'male' | 'female' | 'other';
+  skills?: string[];
   experiences?: Experience[];
   appliedJobs?: string[];
   projects?: Project[];
   certificates?: Certificate[];
   resume?: string;
-  isBlocked?:boolean;
+  isBlocked?: boolean;
 }
 
 export interface UpdateProfileFormData {
@@ -153,7 +151,8 @@ export interface UserConnection {
   projects?: Project[];
   certificates?: Certificate[];
   resume?: string;
-  isBlocked?:boolean;
-  lastMessage:string;
-  lastMessageDate:string;
+  isBlocked?: boolean;
+  lastMessage: string;
+  lastMessageDate: string;
+  isOnline: boolean;
 }

@@ -198,11 +198,10 @@ authRouter.post('/connections/reject/:connectionId', authenticate, connectionCon
 
 authRouter.get('/connections/:userId', authenticate, connectionController.getConnections.bind(connectionController));
 authRouter.get('/connections/:userId/search', authenticate, connectionController.searchConnections.bind(connectionController));
-authRouter.post('/messages', authenticate, messageController.sendMessage.bind(messageController));
 authRouter.get('/messages/conversation/:userId1/:userId2', authenticate, messageController.getConversation.bind(messageController));
-authRouter.post('/messages/:messageId/read', authenticate, messageController.markMessageAsRead.bind(messageController));
-authRouter.get('/messages/unread/:userId', authenticate, messageController.getUnreadMessageCount.bind(messageController));
-authRouter.get('/messages/search/:userId', authenticate, messageController.searchMessages.bind(messageController));
+
+
+
 // Connection routes for messaging
 authRouter.get('/connections/message/:userId', authenticate, messageController.getMessageConnections.bind(messageController));
 authRouter.get('/connections/:userId/search', authenticate, connectionController.searchMessageConnections.bind(connectionController));

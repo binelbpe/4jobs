@@ -1,10 +1,9 @@
 import { injectable } from "inversify";
+import mongoose from "mongoose";
 import { IMessageRepository } from "../../../../domain/interfaces/repositories/user/IMessageRepository";
 import { Message } from "../../../../domain/entities/Message";
 import { User } from "../../../../domain/entities/User";
 import { MessageModel, IMessage } from "../models/MessageModel";
-import { UserModel } from "../models/UserModel";
-import mongoose from "mongoose";
 
 @injectable()
 export class MessageRepository implements IMessageRepository {
@@ -16,17 +15,19 @@ export class MessageRepository implements IMessageRepository {
   async create(message: Partial<Message>): Promise<Message> {
     const newMessage = new MessageModel({
       ...message,
-      sender:
-        typeof message.sender === "string"
-          ? new mongoose.Types.ObjectId(message.sender)
-          : message.sender,
-      recipient:
-        typeof message.recipient === "string"
-          ? new mongoose.Types.ObjectId(message.recipient)
-          : message.recipient,
+      sender: typeof message.sender === "string" ? new mongoose.Types.ObjectId(message.sender) : message.sender,
+      recipient: typeof message.recipient === "string" ? new mongoose.Types.ObjectId(message.recipient) : message.recipient,
+      status: message.status || 'sent', // Default to 'sent' if not provided
     });
     await newMessage.save();
     return this.mapToEntity(await newMessage.populate("sender recipient"));
+  }
+
+  async findById(messageId: string): Promise<Message | null> {
+    const message = await MessageModel.findById(messageId)
+      .populate("sender", "name email profileImage")
+      .populate("recipient", "name email profileImage");
+    return message ? this.mapToEntity(message) : null;
   }
 
   async findByUsers(userId1: string, userId2: string): Promise<Message[]> {
@@ -42,84 +43,20 @@ export class MessageRepository implements IMessageRepository {
     return messages.map(this.mapToEntity);
   }
 
-  async getLatestMessagesForUser(userId: string): Promise<Message[]> {
-    const messages = await MessageModel.aggregate([
-      {
-        $match: {
-          $or: [
-            { sender: new mongoose.Types.ObjectId(userId) },
-            { recipient: new mongoose.Types.ObjectId(userId) },
-          ],
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $group: {
-          _id: {
-            $cond: [
-              { $eq: ["$sender", new mongoose.Types.ObjectId(userId)] },
-              "$recipient",
-              "$sender",
-            ],
-          },
-          latestMessage: { $first: "$$ROOT" },
-        },
-      },
-      {
-        $replaceRoot: { newRoot: "$latestMessage" },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "sender",
-          foreignField: "_id",
-          as: "sender",
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "recipient",
-          foreignField: "_id",
-          as: "recipient",
-        },
-      },
-      {
-        $unwind: "$sender",
-      },
-      {
-        $unwind: "$recipient",
-      },
-      {
-        $project: {
-          _id: 1,
-          content: 1,
-          createdAt: 1,
-          isRead: 1,
-          "sender._id": 1,
-          "sender.name": 1,
-          "sender.email": 1,
-          "sender.profileImage": 1,
-          "recipient._id": 1,
-          "recipient.name": 1,
-          "recipient.email": 1,
-          "recipient.profileImage": 1,
-        },
-      },
-    ]);
-
-    return messages.map(this.mapToEntity);
+  async markAsRead(messageId: string): Promise<void> {
+    await MessageModel.findByIdAndUpdate(messageId, { isRead: true, status: 'read' });
   }
 
-  async markAsRead(messageId: string): Promise<void> {
-    await MessageModel.findByIdAndUpdate(messageId, { isRead: true });
+  async updateStatus(messageId: string, status: 'sent' | 'delivered' | 'read'): Promise<void> {
+    await MessageModel.findByIdAndUpdate(messageId, { status });
   }
 
   async getUnreadCount(userId: string): Promise<number> {
+    // if (!mongoose.Types.ObjectId.isValid(userId)) {
+    //     throw new Error("Invalid user ID format");
+    // }
     return MessageModel.countDocuments({ recipient: userId, isRead: false });
-  }
+}
 
   async searchMessages(userId: string, query: string): Promise<Message[]> {
     const messages = await MessageModel.find({
@@ -183,13 +120,15 @@ export class MessageRepository implements IMessageRepository {
       },
     ]);
 
+    console.log("ivide kweriii",connections)
+
     return connections.map((conn) => ({
       user: conn.user._id.toString(),
       lastMessage: this.mapToEntity(conn.lastMessage),
     }));
   }
 
-  private mapToEntity = (message: any): Message => {
+  private mapToEntity(message: IMessage): Message {
     return {
       id: message._id.toString(),
       sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
@@ -197,10 +136,11 @@ export class MessageRepository implements IMessageRepository {
       content: message.content,
       createdAt: message.createdAt,
       isRead: message.isRead,
+      status: message.status,
     };
   }
 
-  private mapUserToEntity = (user: any): User => {
+  private mapUserToEntity(user: any): User {
     if (!user) {
       throw new Error("User object is undefined or null");
     }

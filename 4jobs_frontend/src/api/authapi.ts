@@ -316,7 +316,7 @@ export const getUnreadMessageCountApi = async (userId: string): Promise<number> 
   return apiRequest('GET', `/messages/unread/${userId}`);
 };
 
-export const fetchConnectionsMessageApi = async (userId: string): Promise<User[]> => {
+export const fetchConnectionsMessageApi = async (userId: string): Promise<{ user: User; lastMessage: Message; isOnline: boolean }[]> => {
   return apiRequest('GET', `/connections/message/${userId}`);
 };
 

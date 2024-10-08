@@ -27,20 +27,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
+const UserManager_1 = require("../../../infrastructure/services/UserManager");
 let MessageUseCase = class MessageUseCase {
-    constructor(messageRepository, userRepository) {
+    constructor(messageRepository, userRepository, userManager) {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+        this.userManager = userManager;
     }
     sendMessage(senderId, recipientId, content) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.messageRepository.create({
+            const newMessage = {
                 sender: senderId,
                 recipient: recipientId,
                 content,
                 createdAt: new Date(),
                 isRead: false,
-            });
+                status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
+            };
+            return this.messageRepository.create(newMessage);
         });
     }
     getConversation(userId1, userId2) {
@@ -68,11 +72,20 @@ let MessageUseCase = class MessageUseCase {
             const connections = yield this.messageRepository.getMessageConnections(userId);
             const userIds = connections.map((c) => c.user);
             const users = yield this.userRepository.findUsersByIds(userIds);
-            const resp = connections.map((conn) => ({
-                user: users.find((u) => u.id === conn.user),
-                lastMessage: conn.lastMessage
-            }));
+            const resp = connections.map((conn) => {
+                const user = users.find((u) => u.id === conn.user);
+                return {
+                    user,
+                    lastMessage: conn.lastMessage,
+                    isOnline: this.userManager.isUserOnline(user.id)
+                };
+            });
             return resp;
+        });
+    }
+    getMessage(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.messageRepository.findById(messageId);
         });
     }
 };
@@ -81,5 +94,6 @@ exports.MessageUseCase = MessageUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.IMessageRepository)),
     __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, inversify_1.inject)(types_1.default.UserManager)),
+    __metadata("design:paramtypes", [Object, Object, UserManager_1.UserManager])
 ], MessageUseCase);

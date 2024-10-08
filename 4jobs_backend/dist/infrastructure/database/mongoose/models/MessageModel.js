@@ -31,5 +31,6 @@ const MessageSchema = new mongoose_1.Schema({
     content: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     isRead: { type: Boolean, default: false },
+    status: { type: String, default: 'sent' },
 });
 exports.MessageModel = mongoose_1.default.model('Message', MessageSchema);

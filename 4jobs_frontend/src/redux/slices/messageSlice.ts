@@ -1,178 +1,206 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { Message, SendMessagePayload, GetConversationPayload } from '../../types/messageType';
-import { UserConnection } from '../../types/auth';
-import { sendMessageApi, getConversationApi, markMessageAsReadApi, getUnreadMessageCountApi, fetchConnectionsMessageApi } from '../../api/authapi';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
+import { Message, User } from "../../types/messageType";  // Updated import path
+import {
+  sendMessageApi,
+  getConversationApi,
+  markMessageAsReadApi,
+  getUnreadMessageCountApi,
+  fetchConnectionsMessageApi,
+} from "../../api/authapi";
 
 interface MessageState {
-  conversations: Record<string, Message[]>;
-  connectionList: UserConnection[];
+  connections: { user: User; lastMessage: Message; isOnline: boolean; isTyping: boolean }[];
+  conversations: { [key: string]: Message[] };
+  unreadCount: number;
   loading: boolean;
   error: string | null;
-  unreadCount: number;
+  currentUserId: string | null;
 }
 
 const initialState: MessageState = {
+  connections: [],
   conversations: {},
-  connectionList: [],
+  unreadCount: 0,
   loading: false,
   error: null,
-  unreadCount: 0,
+  currentUserId: null,
 };
 
-const convertToUserConnection = (data: any): UserConnection => ({
-  _id: data.user.id,
-  name: data.user.name,
-  email: data.user.email,
-  profileImage: data.user.profileImage,
-  role: data.user.role,
-  lastMessage: data.lastMessage.content,
-  lastMessageDate: data.lastMessage.createdAt
+export const fetchMessageConnections = createAsyncThunk<
+  { user: User; lastMessage: Message; isOnline: boolean }[],
+  string
+>("messages/fetchConnections", async (userId: string) => {
+  const response = await fetchConnectionsMessageApi(userId);
+  return response;
 });
 
+export const fetchConversation = createAsyncThunk(
+  "messages/fetchConversation",
+  async ({ userId1, userId2 }: { userId1: string; userId2: string }) => {
+    const response = await getConversationApi(userId1, userId2);
+    const conversationId = userId1 < userId2 ? `${userId1}-${userId2}` : `${userId2}-${userId1}`;
+    return { conversationId, messages: response };
+  }
+);
+
 export const sendMessage = createAsyncThunk(
-  'messages/sendMessage',
-  async (payload: SendMessagePayload) => {
-    const { senderId, recipientId, content } = payload;
-    let response = await sendMessageApi(senderId, recipientId, content);
+  "messages/sendMessage",
+  async ({
+    senderId,
+    recipientId,
+    content,
+  }: {
+    senderId: string;
+    recipientId: string;
+    content: string;
+  }) => {
+    const response = await sendMessageApi(senderId, recipientId, content);
     return response;
   }
 );
 
-export const getConversation = createAsyncThunk(
-  'messages/getConversation',
-  async (payload: GetConversationPayload) => {
-    const { userId1, userId2 } = payload;
-    const messages = await getConversationApi(userId1, userId2);
-    return { userId: userId2, messages };
-  }
-);
-
-export const markMessageAsRead = createAsyncThunk(
-  'messages/markMessageAsRead',
-  async (messageId: string) => {
-    return await markMessageAsReadApi(messageId);
+export const markMessagesAsRead = createAsyncThunk(
+  "messages/markAsRead",
+  async ({ messageIds }: { messageIds: string[] }) => {
+    await Promise.all(messageIds.map((id) => markMessageAsReadApi(id)));
+    return messageIds;
   }
 );
 
 export const getUnreadMessageCount = createAsyncThunk(
-  'messages/getUnreadMessageCount',
+  "messages/getUnreadCount",
   async (userId: string) => {
-    return await getUnreadMessageCountApi(userId);
-  }
-);
-
-export const fetchConnectionsList = createAsyncThunk<
-  UserConnection[],
-  string,
-  { rejectValue: string }
->(
-  'messages/fetchConnectionsList',
-  async (userId: string, { rejectWithValue }) => {
-    try {
-      const response = await fetchConnectionsMessageApi(userId);
-      if (Array.isArray(response)) {
-        return response.map(convertToUserConnection);
-      } else {
-        return rejectWithValue('Invalid response format from API');
-      }
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
-  }
-);
-
-export const refreshConversationList = createAsyncThunk(
-  'messages/refreshConversationList',
-  async (userId: string) => {
-    const response = await fetchConnectionsMessageApi(userId);
-    return response.map(convertToUserConnection);
+    const response = await getUnreadMessageCountApi(userId);
+    return response;
   }
 );
 
 const messageSlice = createSlice({
-  name: 'messages',
+  name: "messages",
   initialState,
   reducers: {
-    clearMessageState: (state) => {
-      state.conversations = {};
-      state.connectionList = [];
+    resetUnreadCount: (state) => {
       state.unreadCount = 0;
+    },
+    updateMessageStatus: (
+      state,
+      action: PayloadAction<{
+        messageId: string;
+        status: "sent" | "delivered" | "read";
+      }>
+    ) => {
+      const { messageId, status } = action.payload;
+      Object.values(state.conversations).forEach((conversation) => {
+        const message = conversation.find((m: Message) => m.id === messageId);  // Added type annotation
+        if (message) {
+          message.status = status;
+        }
+      });
+    },
+    addMessage: (state, action: PayloadAction<Message>) => {
+      const { sender, recipient } = action.payload;
+      const conversationId = sender.id < recipient.id ? `${sender.id}-${recipient.id}` : `${recipient.id}-${sender.id}`;
+      if (!state.conversations[conversationId]) {
+        state.conversations[conversationId] = [];
+      }
+      // Check if the message already exists to prevent duplicates
+      const messageExists = state.conversations[conversationId].some(msg => msg.id === action.payload.id);
+      if (!messageExists) {
+        state.conversations[conversationId].push(action.payload);
+        
+        // Update the connections list with the new message
+        const connectionIndex = state.connections.findIndex(conn => 
+          conn.user.id === (sender.id === state.currentUserId ? recipient.id : sender.id)
+        );
+        if (connectionIndex !== -1) {
+          state.connections[connectionIndex].lastMessage = action.payload;
+          // Move this connection to the top of the list
+          const [updatedConnection] = state.connections.splice(connectionIndex, 1);
+          state.connections.unshift(updatedConnection);
+        }
+      }
+    },
+    setTypingStatus: (state, action: PayloadAction<{ userId: string; isTyping: boolean }>) => {
+      console.log('setTypingStatus action received:', action.payload);
+      const connectionIndex = state.connections.findIndex(conn => conn.user.id === action.payload.userId);
+      if (connectionIndex !== -1) {
+        state.connections[connectionIndex].isTyping = action.payload.isTyping ?? false;
+        console.log('Typing status updated:', state.connections[connectionIndex]);
+      } else {
+        console.log('Connection not found for user:', action.payload.userId);
+      }
+    },
+    setCurrentUserId: (state, action: PayloadAction<string>) => {
+      state.currentUserId = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendMessage.pending, (state) => {
+      .addCase(fetchMessageConnections.pending, (state) => {
         state.loading = true;
       })
-      .addCase(sendMessage.fulfilled, (state, action: PayloadAction<Message>) => {
-        state.loading = false;
-        const message = action.payload;
-        const conversationKey = message.recipient.id;
-        if (!state.conversations[conversationKey]) {
-          state.conversations[conversationKey] = [];
+      .addCase(
+        fetchMessageConnections.fulfilled,
+        (
+          state,
+          action: PayloadAction<
+            { user: User; lastMessage: Message; isOnline: boolean }[]
+          >
+        ) => {
+          state.loading = false;
+          state.connections = action.payload.map(conn => ({
+            ...conn,
+            isTyping: false
+          }));
         }
-        state.conversations[conversationKey].push(message);
-      })
-      .addCase(sendMessage.rejected, (state, action) => {
+      )
+      .addCase(fetchMessageConnections.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to send message';
+        state.error =
+          action.error.message || "Failed to fetch message connections";
       })
-      .addCase(getConversation.pending, (state) => {
-        state.loading = true;
+      .addCase(fetchConversation.fulfilled, (state, action) => {
+        const { conversationId, messages } = action.payload;
+        state.conversations[conversationId] = messages;
       })
-      .addCase(getConversation.fulfilled, (state, action: PayloadAction<{ userId: string; messages: Message[] }>) => {
-        state.loading = false;
-        const { userId, messages } = action.payload;
-        state.conversations[userId] = messages;
-      })
-      .addCase(getConversation.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to get conversation';
-      })
-      .addCase(markMessageAsRead.fulfilled, (state, action: PayloadAction<string>) => {
-        const messageId = action.payload;
-        for (const conversationKey in state.conversations) {
-          const conversation = state.conversations[conversationKey];
-          const messageIndex = conversation.findIndex(msg => msg.id === messageId);
-          if (messageIndex !== -1) {
-            conversation[messageIndex].isRead = true;
-            break;
-          }
+      .addCase(sendMessage.fulfilled, (state, action) => {
+        const { sender, recipient } = action.payload;
+        const conversationId = sender.id < recipient.id ? `${sender.id}-${recipient.id}` : `${recipient.id}-${sender.id}`;
+        if (!state.conversations[conversationId]) {
+          state.conversations[conversationId] = [];
+        }
+        state.conversations[conversationId].push(action.payload);
+      
+        // Update the connections list with the new message
+        const connectionIndex = state.connections.findIndex(conn => conn.user.id === recipient.id);
+        if (connectionIndex !== -1) {
+          state.connections[connectionIndex].lastMessage = action.payload;
+          // Move this connection to the top of the list
+          const [updatedConnection] = state.connections.splice(connectionIndex, 1);
+          state.connections.unshift(updatedConnection);
         }
       })
-      .addCase(getUnreadMessageCount.fulfilled, (state, action: PayloadAction<number>) => {
+      .addCase(markMessagesAsRead.fulfilled, (state, action) => {
+        const messageIds = action.payload;
+        Object.values(state.conversations).forEach((conversation) => {
+          conversation.forEach((message: Message) => {  // Added type annotation
+            if (messageIds.includes(message.id)) {
+              message.isRead = true;
+            }
+          });
+        });
+      })
+      .addCase(getUnreadMessageCount.fulfilled, (state, action) => {
         state.unreadCount = action.payload;
-      })
-      .addCase(fetchConnectionsList.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchConnectionsList.fulfilled, (state, action: PayloadAction<UserConnection[]>) => {
-        state.loading = false;
-        state.connectionList = action.payload;
-      })
-      .addCase(fetchConnectionsList.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'Failed to fetch connections';
-      })
-      .addCase(refreshConversationList.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(refreshConversationList.fulfilled, (state, action: PayloadAction<UserConnection[]>) => {
-        state.loading = false;
-        state.connectionList = action.payload;
-      })
-      .addCase(refreshConversationList.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to refresh conversation list';
       });
   },
 });
 
-export const { clearMessageState } = messageSlice.actions;
-export const selectConversations = (state: RootState) => state.messages.conversations;
-export const selectUnreadCount = (state: RootState) => state.messages.unreadCount;
-export const selectConnectionList = (state: RootState) => state.messages.connectionList;
+// Export the actions
+export const { resetUnreadCount, updateMessageStatus, addMessage, setTypingStatus, setCurrentUserId } = messageSlice.actions;
+
+export const selectUnreadCount = (state: RootState) =>
+  state.messages.unreadCount;
 
 export default messageSlice.reducer;

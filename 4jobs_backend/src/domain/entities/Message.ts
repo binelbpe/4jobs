@@ -7,4 +7,5 @@ export interface Message {
   content: string;
   createdAt: Date;
   isRead: boolean;
+  status: 'sent' | 'delivered' | 'read';
 }

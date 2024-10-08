@@ -23,4 +23,8 @@ export class UserManager {
   getAllConnections() {
     return Array.from(this.userConnections.entries());
   }
+
+  isUserOnline(userId: string): boolean {
+    return this.userConnections.has(userId);
+  }
 }

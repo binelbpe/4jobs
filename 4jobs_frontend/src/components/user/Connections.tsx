@@ -143,7 +143,7 @@ const Connections: React.FC = () => {
                 <ul className="divide-y divide-gray-200">
                   {connections?.map((connection: User) => (
                     <li key={connection.id} className="py-6 flex flex-col sm:flex-row items-start sm:items-center">
-                      <img src={connection.profileImage || '/default-avatar.png'} alt={connection.name} className="w-20 h-20 rounded-full object-cover mb-4 sm:mb-0 sm:mr-6" />
+                      <img src={`${connection.profileImage}`} alt={connection.name} className="w-20 h-20 rounded-full object-cover mb-4 sm:mb-0 sm:mr-6" />
                       <div className="flex-grow">
                         <h3 className="text-xl font-semibold text-purple-800">{connection.name}</h3>
                         <p className="text-gray-600 mb-2">{connection.bio || 'No bio available'}</p>

@@ -7,6 +7,7 @@ export interface IMessage extends Document {
   content: string;
   createdAt: Date;
   isRead: boolean;
+  status: "sent" | "delivered" | "read"; 
 }
 
 const MessageSchema: Schema = new Schema({
@@ -15,6 +16,7 @@ const MessageSchema: Schema = new Schema({
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   isRead: { type: Boolean, default: false },
+  status: { type: String, default: 'sent' },  
 });
 
 export const MessageModel = mongoose.model<IMessage>('Message', MessageSchema);

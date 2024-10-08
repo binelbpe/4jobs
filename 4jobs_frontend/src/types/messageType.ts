@@ -1,37 +1,17 @@
-export interface Message {
-  id: string;
-  content: string;
-  sender: {
-    id: string;
-    name: string;
-  };
-  recipient: {
-    id: string;
-    name: string;
-  };
-  createdAt: string;
-  isRead: boolean;
-}
-
-export interface UserConnection {
+export interface User {
   id: string;
   name: string;
-  email: string;
   profileImage?: string;
 }
 
-export interface SendMessagePayload {
+export interface Message {
+  id: string;
   senderId: string;
   recipientId: string;
   content: string;
-}
-
-export interface GetConversationPayload {
-  userId1: string;
-  userId2: string;
-}
-
-export interface ConversationListItem {
-  user: UserConnection;
-  lastMessage: Message;
+  createdAt: string;
+  isRead: boolean;
+  sender: User;
+  recipient: User;
+  status: 'sent' | 'delivered' | 'read';
 }
