@@ -1,33 +1,43 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit';
-import { fetchMessages, recruiterSendMessage } from '../../redux/slices/recruiterMessageSlice';
-import { RootState, AppDispatch } from '../../redux/store';
-import { Message } from '../../types/recruiterMessageType';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import { fetchMessages } from "../../redux/slices/recruiterMessageSlice";
+import { Message } from "../../types/recruiterMessageType";
+import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
+import { format, isValid } from "date-fns";
+import ConversationHeader from "../shared/ConversationHeader";
 
 interface ConversationProps {
   conversationId: string;
 }
 
-const selectMessages = createSelector(
-  (state: RootState) => state.recruiterMessages.RecruiterMessages,
-  (state: RootState, conversationId: string) => conversationId,
-  (messages, conversationId) => messages[conversationId] || []
-);
-
-const Conversation: React.FC<ConversationProps> = React.memo(({ conversationId }) => {
-  console.log('Rendering RecruiterConversation', conversationId);
-
+const RecruiterConversation: React.FC<ConversationProps> = ({
+  conversationId,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
-  const messages = useSelector((state: RootState) => selectMessages(state, conversationId));
-  const loading = useSelector((state: RootState) => state.recruiterMessages.recruiterLoading);
-  const error = useSelector((state: RootState) => state.recruiterMessages.recruiterError);
-  const recruiterId = useSelector((state: RootState) => state.recruiter.recruiter?.id);
-  const [newMessage, setNewMessage] = useState('');
-  const [sendError, setSendError] = useState<string | null>(null);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const prevMessagesRef = useRef<Message[]>([]);
+  const messages = useSelector(
+    (state: RootState) =>
+      state.recruiterMessages.RecruiterMessages[conversationId] || []
+  );
+  const currentRecruiter = useSelector(
+    (state: RootState) => state.recruiter.recruiter
+  );
+  const typingStatus = useSelector(
+    (state: RootState) =>
+      state.recruiterMessages.typingStatus[conversationId] || {}
+  );
+  const conversation = useSelector((state: RootState) =>
+    state.recruiterMessages.RecruiterConversations.find(
+      (conv) => conv.id === conversationId
+    )
+  );
+  const [newMessage, setNewMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const onlineStatus = useSelector(
+    (state: RootState) => state.recruiterMessages.onlineStatus
+  );
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -35,90 +45,139 @@ const Conversation: React.FC<ConversationProps> = React.memo(({ conversationId }
     }
   }, []);
 
-  const fetchMessagesCallback = useCallback(() => {
-    if (conversationId) {
-      dispatch(fetchMessages(conversationId));
-    }
+  useEffect(() => {
+    dispatch(fetchMessages(conversationId));
+    userRecruiterSocketService.joinConversation(conversationId);
+    return () => {
+      userRecruiterSocketService.leaveConversation(conversationId);
+    };
   }, [dispatch, conversationId]);
 
   useEffect(() => {
-    console.log('Fetching messages for conversation', conversationId);
-    fetchMessagesCallback();
-  }, [fetchMessagesCallback]);
-
-  useEffect(() => {
-    if (messages.length !== prevMessagesRef.current.length || 
-        messages[messages.length - 1]?.id !== prevMessagesRef.current[prevMessagesRef.current.length - 1]?.id) {
-      console.log('Messages updated', messages.length);
-      prevMessagesRef.current = messages;
-      scrollToBottom();
-    }
+    scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  useEffect(() => {
-    if (!loading && messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [loading, messages, scrollToBottom]);
-
-  const handleSendMessage = useCallback(async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      try {
-        console.log('Sending message', newMessage);
-        await dispatch(recruiterSendMessage({ conversationId, content: newMessage })).unwrap();
-        setNewMessage('');
-        setSendError(null);
-      } catch (error) {
-        console.error('Error sending message:', error);
-        setSendError('Failed to send message. Please try again.');
-      }
+    if (newMessage.trim() && currentRecruiter) {
+      userRecruiterSocketService.sendMessage(
+        conversationId,
+        newMessage,
+        currentRecruiter.id
+      );
+      setNewMessage("");
     }
-  }, [dispatch, conversationId, newMessage]);
+  };
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage(e.target.value);
-  }, []);
+  const handleTyping = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      userRecruiterSocketService.emitTyping(conversationId);
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      userRecruiterSocketService.emitStoppedTyping(conversationId);
+    }, 3000);
+  };
 
-  if (loading) return <div>Loading messages...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const handleMessageRead = (messageId: string) => {
+    if (currentRecruiter) {
+      userRecruiterSocketService.markMessageAsRead(messageId, conversationId);
+    }
+  };
+
+  const formatMessageTime = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isValid(date)) {
+      return format(date, "HH:mm");
+    }
+    return "Invalid Date";
+  };
+
+  const isParticipantTyping = Object.values(typingStatus).some(
+    (status) => status
+  );
 
   return (
     <div className="flex-1 flex flex-col">
+      <ConversationHeader
+        participantName={conversation?.participant.name || "Unknown"}
+        isOnline={onlineStatus[conversation?.participant.id || ""] || false}
+      />
       <div ref={messageListRef} className="flex-1 overflow-y-auto p-4">
-        {messages.map((message: Message) => {
-          const isRecruiterMessage = message.senderId === recruiterId;
-          return (
-            <div key={message.id} className={`mb-4 flex ${isRecruiterMessage ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] p-2 rounded-lg ${
-                isRecruiterMessage 
-                  ? 'bg-purple-500 text-white rounded-br-none' 
-                  : 'bg-gray-200 text-gray-800 rounded-bl-none'
-              }`}>
-                {message.content}
+        {messages.map((message: Message) => (
+          <div
+            key={message.id}
+            className={`mb-4 flex ${
+              message.senderId === currentRecruiter?.id
+                ? "justify-end"
+                : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-[70%] p-2 rounded-lg ${
+                message.senderId === currentRecruiter?.id
+                  ? "bg-purple-500 text-white rounded-br-none"
+                  : "bg-gray-200 text-gray-800 rounded-bl-none"
+              }`}
+              onMouseEnter={() => {
+                if (
+                  message.senderId !== currentRecruiter?.id &&
+                  !message.isRead
+                ) {
+                  handleMessageRead(message.id);
+                }
+              }}
+            >
+              <div>{message.content}</div>
+              <div className="text-xs mt-1 flex justify-between items-center">
+                <span className="text-gray-500">
+                  {formatMessageTime(message.timestamp)}
+                </span>
+                {message.senderId === currentRecruiter?.id && (
+                  <span className="ml-2">
+                    {message.isRead ? (
+                      <span className="text-blue-400">✓✓</span>
+                    ) : (
+                      <span className="text-gray-400">✓</span>
+                    )}
+                  </span>
+                )}
               </div>
             </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-      <form onSubmit={handleSendMessage} className="border-t p-4">
-        <div className="flex flex-col">
-          <div className="flex">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={handleInputChange}
-              className="flex-1 border rounded-l-lg p-2"
-              placeholder="Type a message..."
-            />
-            <button type="submit" className="bg-purple-500 text-white rounded-r-lg px-4 py-2">Send</button>
           </div>
-          {sendError && <div className="text-red-500 mt-2">{sendError}</div>}
-        </div>
-      </form>
+        ))}
+      </div>
+      <div className="border-t p-4">
+        {isParticipantTyping && (
+          <div className="text-sm text-gray-500 italic mb-2">
+            {conversation?.participant.name} is typing...
+          </div>
+        )}
+        <form onSubmit={handleSendMessage} className="flex">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
+            className="flex-1 border rounded-l-lg p-2"
+            placeholder="Type a message..."
+          />
+          <button
+            type="submit"
+            className="bg-purple-500 text-white rounded-r-lg px-4 py-2"
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   );
-});
+};
 
-export default Conversation;
+export default RecruiterConversation;

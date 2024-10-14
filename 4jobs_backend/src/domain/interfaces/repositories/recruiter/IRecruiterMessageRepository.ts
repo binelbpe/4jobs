@@ -20,4 +20,7 @@ export interface IRecruiterMessageRepository {
     userId: string
   ): Promise<Conversation | null>;
   saveConversation(conversation: Conversation): Promise<Conversation>;
+  markMessageAsRead(messageId: string): Promise<void>;
+  getMessageById(messageId: string): Promise<RecruiterMessage | null>;
+  updateMessage(message: RecruiterMessage): Promise<RecruiterMessage>;
 }

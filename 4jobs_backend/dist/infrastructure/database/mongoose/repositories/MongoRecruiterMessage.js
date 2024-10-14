@@ -63,11 +63,34 @@ let MongoRecruiterMessage = class MongoRecruiterMessage {
             return this.convertToConversation(savedConversation);
         });
     }
+    markMessageAsRead(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield RecruiterMessageModel_1.RecruiterMessageModel.findByIdAndUpdate(messageId, { isRead: true });
+        });
+    }
     convertToConversation(doc) {
         return new RecruiterMessage_1.Conversation(doc.id.toString(), doc.recruiterId, doc.applicantId, doc.lastMessage, doc.lastMessageTimestamp);
     }
     convertToRecruiterMessage(doc) {
-        return new RecruiterMessage_1.RecruiterMessage(doc.id.toString(), doc.conversationId, doc.senderId, doc.receiverId, doc.senderType, doc.content, doc.timestamp);
+        return new RecruiterMessage_1.RecruiterMessage(doc.id.toString(), doc.conversationId, doc.senderId, doc.receiverId, doc.senderType, doc.content, doc.timestamp, doc.isRead);
+    }
+    getMessageById(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const message = yield RecruiterMessageModel_1.RecruiterMessageModel.findById(messageId);
+            return message ? this.convertToRecruiterMessage(message) : null;
+        });
+    }
+    updateMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedMessage = yield RecruiterMessageModel_1.RecruiterMessageModel.findByIdAndUpdate(message.id, {
+                isRead: message.isRead,
+                // Add other fields that might need updating
+            }, { new: true });
+            if (!updatedMessage) {
+                throw new Error('Message not found');
+            }
+            return this.convertToRecruiterMessage(updatedMessage);
+        });
     }
 };
 exports.MongoRecruiterMessage = MongoRecruiterMessage;

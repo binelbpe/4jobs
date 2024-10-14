@@ -41,17 +41,29 @@ export class UserRecruiterMessageController {
   async getMessages(req: Request, res: Response): Promise<void> {
     try {
       const { conversationId } = req.params;
-      const messages = await this.userRecruiterMessageUseCase.getMessages(conversationId);
+      const userId = (req as any).user?.id;
+      let messages = await this.userRecruiterMessageUseCase.getMessages(conversationId);
 
-      const formattedMessages = messages.map((msg) => ({
-        id: msg.id,
-        conversationId: msg.conversationId,
-        senderId: msg.senderId,
-        senderType: msg.senderType,
-        content: msg.content,
-        timestamp: msg.timestamp.toISOString(),
+      const formattedMessages = await Promise.all(messages.map(async (msg) => {
+        if (msg.senderId !== userId && !msg.isRead) {
+          await this.userRecruiterMessageUseCase.markMessageAsRead(msg.id);
+          msg.isRead = true;
+        }
+
+        return {
+          id: msg.id,
+          conversationId: msg.conversationId,
+          senderId: msg.senderId,
+          senderType: msg.senderType,
+          content: msg.content,
+          timestamp: msg.timestamp.toISOString(),
+          isRead: msg.isRead,
+        };
       }));
-      console.log("formattedMessages getMessages",formattedMessages)
+
+      // Update the messages in the database
+      await Promise.all(messages.map(msg => this.userRecruiterMessageUseCase.updateMessage(msg)));
+     
       res.status(200).json(formattedMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -74,7 +86,6 @@ export class UserRecruiterMessageController {
         content: message.content,
         timestamp: message.timestamp.toISOString(),
       };
-      console.log("formattedMessages sendMessage",formattedMessage)
       res.status(201).json(formattedMessage);
     } catch (error) {
       console.error("Error sending message:", error);

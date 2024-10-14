@@ -28,20 +28,17 @@ exports.RecruiterMessageController = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 const RecruiterMessageUseCase_1 = require("../../../application/usecases/recruiter/RecruiterMessageUseCase");
+const events_1 = require("events");
 let RecruiterMessageController = class RecruiterMessageController {
-    constructor(recruiterMessageUseCase, userRepository) {
+    constructor(recruiterMessageUseCase, userRepository, eventEmitter) {
         this.recruiterMessageUseCase = recruiterMessageUseCase;
         this.userRepository = userRepository;
+        this.eventEmitter = eventEmitter;
     }
     getConversations(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { recruiterId } = req.params;
-                console.log("conversation recruiter>>>>>>>>>>>>>>", recruiterId, req.params);
-                if (!recruiterId) {
-                    res.status(401).json({ error: 'Unauthorized' });
-                    return;
-                }
+                const recruiterId = req.params.recruiterId;
                 const conversations = yield this.recruiterMessageUseCase.getConversations(recruiterId);
                 const formattedConversations = yield Promise.all(conversations.map((conv) => __awaiter(this, void 0, void 0, function* () {
                     const user = yield this.userRepository.findById(conv.applicantId);
@@ -59,41 +56,60 @@ let RecruiterMessageController = class RecruiterMessageController {
                 res.status(200).json({ data: formattedConversations });
             }
             catch (error) {
-                console.log("error", error);
+                console.error("Error fetching conversations:", error);
                 res.status(500).json({ error: 'An error occurred while fetching conversations' });
             }
         });
     }
     getMessages(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const { conversationId } = req.params;
-                const messages = yield this.recruiterMessageUseCase.getMessages(conversationId);
-                const formattedMessages = messages.map((msg) => ({
-                    id: msg.id,
-                    conversationId: msg.conversationId,
-                    senderId: msg.senderId,
-                    senderType: msg.senderType,
-                    content: msg.content,
-                    timestamp: msg.timestamp.toISOString(),
-                }));
+                const recruiterId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+                let messages = yield this.recruiterMessageUseCase.getMessages(conversationId);
+                const formattedMessages = yield Promise.all(messages.map((msg) => __awaiter(this, void 0, void 0, function* () {
+                    if (msg.senderId !== recruiterId && !msg.isRead) {
+                        yield this.recruiterMessageUseCase.markMessageAsRead(msg.id);
+                        msg.isRead = true;
+                    }
+                    return {
+                        id: msg.id,
+                        conversationId: msg.conversationId,
+                        senderId: msg.senderId,
+                        senderType: msg.senderType,
+                        content: msg.content,
+                        timestamp: msg.timestamp.toISOString(),
+                        isRead: msg.isRead,
+                    };
+                })));
+                // Update the messages in the database
+                yield Promise.all(messages.map(msg => this.recruiterMessageUseCase.updateMessage(msg)));
+                // Emit event for read messages
+                const readMessages = formattedMessages.filter(msg => msg.isRead && msg.senderId === recruiterId);
+                if (readMessages.length > 0) {
+                    this.eventEmitter.emit('recruiterMessagesRead', { messages: readMessages, conversationId });
+                }
                 res.status(200).json({ data: formattedMessages });
             }
             catch (error) {
+                console.error("Error fetching messages:", error);
                 res.status(500).json({ error: 'An error occurred while fetching messages' });
             }
         });
     }
     sendMessage(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const { conversationId } = req.params;
                 const { content } = req.body;
-                if (!conversationId) {
-                    res.status(400).json({ error: 'Conversation ID is required' });
+                const recruiterId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+                if (!recruiterId) {
+                    res.status(401).json({ error: 'Unauthorized' });
                     return;
                 }
-                const message = yield this.recruiterMessageUseCase.sendMessage(conversationId, content);
+                const message = yield this.recruiterMessageUseCase.sendMessage(conversationId, content, recruiterId);
                 const formattedMessage = {
                     id: message.id,
                     conversationId: message.conversationId,
@@ -101,7 +117,10 @@ let RecruiterMessageController = class RecruiterMessageController {
                     senderType: message.senderType,
                     content: message.content,
                     timestamp: message.timestamp.toISOString(),
+                    isRead: message.isRead,
                 };
+                // Emit real-time event
+                this.eventEmitter.emit('newRecruiterMessage', formattedMessage);
                 res.status(201).json({ data: formattedMessage });
             }
             catch (error) {
@@ -112,11 +131,15 @@ let RecruiterMessageController = class RecruiterMessageController {
     }
     startConversation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("start conversation>>>>>>>>>>>", req.body);
+            var _a;
             try {
-                const { applicantId, recruiterId } = req.body;
+                const recruiterId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+                const { applicantId } = req.body;
+                if (!recruiterId) {
+                    res.status(401).json({ error: 'Unauthorized' });
+                    return;
+                }
                 const conversation = yield this.recruiterMessageUseCase.startConversation(recruiterId, applicantId);
-                console.log("conversation start???????????", conversation);
                 const user = yield this.userRepository.findById(applicantId);
                 const formattedConversation = {
                     id: conversation.id,
@@ -128,11 +151,28 @@ let RecruiterMessageController = class RecruiterMessageController {
                     lastMessage: conversation.lastMessage,
                     lastMessageTimestamp: conversation.lastMessageTimestamp.toISOString(),
                 };
+                // Emit real-time event
+                this.eventEmitter.emit('newRecruiterConversation', formattedConversation);
                 res.status(201).json({ data: formattedConversation });
             }
             catch (error) {
                 console.error("Error starting conversation:", error);
                 res.status(500).json({ error: 'An error occurred while starting the conversation' });
+            }
+        });
+    }
+    markMessageAsRead(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { messageId } = req.params;
+                yield this.recruiterMessageUseCase.markMessageAsRead(messageId);
+                // Emit real-time event
+                this.eventEmitter.emit('recruiterMessageRead', { messageId });
+                res.status(200).json({ message: 'Message marked as read' });
+            }
+            catch (error) {
+                console.error("Error marking message as read:", error);
+                res.status(500).json({ error: 'An error occurred while marking the message as read' });
             }
         });
     }
@@ -142,5 +182,6 @@ exports.RecruiterMessageController = RecruiterMessageController = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.RecruiterMessageUseCase)),
     __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
-    __metadata("design:paramtypes", [RecruiterMessageUseCase_1.RecruiterMessageUseCase, Object])
+    __param(2, (0, inversify_1.inject)(types_1.default.NotificationEventEmitter)),
+    __metadata("design:paramtypes", [RecruiterMessageUseCase_1.RecruiterMessageUseCase, Object, events_1.EventEmitter])
 ], RecruiterMessageController);

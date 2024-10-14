@@ -28,14 +28,21 @@ exports.UserRecruiterMessageUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 const UserRecruitermessage_1 = require("../../../domain/entities/UserRecruitermessage");
+const events_1 = require("events");
 let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
-    constructor(userRecruiterMessageRepository, recruiterRepository) {
+    constructor(userRecruiterMessageRepository, recruiterRepository, eventEmitter) {
         this.userRecruiterMessageRepository = userRecruiterMessageRepository;
         this.recruiterRepository = recruiterRepository;
+        this.eventEmitter = eventEmitter;
     }
     getUserConversations(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.userRecruiterMessageRepository.getUserConversations(userId);
+        });
+    }
+    markMessageAsRead(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.userRecruiterMessageRepository.markMessageAsRead(messageId);
         });
     }
     getMessages(conversationId) {
@@ -50,10 +57,11 @@ let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
                 throw new Error('Conversation not found');
             }
             const receiverId = conversation.userId === senderId ? conversation.recruiterId : conversation.userId;
-            const senderType = conversation.userId === senderId ? 'user' : 'recruiter';
-            const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, senderId, receiverId, senderType, content, new Date());
+            const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, senderId, receiverId, 'user', content, new Date(), false);
             const savedMessage = yield this.userRecruiterMessageRepository.saveMessage(message);
             yield this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
+            // Emit an event for real-time updates
+            this.eventEmitter.emit('newUserRecruiterMessage', savedMessage);
             return savedMessage;
         });
     }
@@ -67,11 +75,22 @@ let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
             return this.userRecruiterMessageRepository.saveConversation(newConversation);
         });
     }
+    getMessageById(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.userRecruiterMessageRepository.getMessageById(messageId);
+        });
+    }
+    updateMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.userRecruiterMessageRepository.updateMessage(message);
+        });
+    }
 };
 exports.UserRecruiterMessageUseCase = UserRecruiterMessageUseCase;
 exports.UserRecruiterMessageUseCase = UserRecruiterMessageUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.IUserRecruiterMessageRepository)),
     __param(1, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, inversify_1.inject)(types_1.default.NotificationEventEmitter)),
+    __metadata("design:paramtypes", [Object, Object, events_1.EventEmitter])
 ], UserRecruiterMessageUseCase);

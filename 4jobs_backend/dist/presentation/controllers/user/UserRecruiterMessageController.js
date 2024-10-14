@@ -61,18 +61,28 @@ let UserRecruiterMessageController = class UserRecruiterMessageController {
     }
     getMessages(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const { conversationId } = req.params;
-                const messages = yield this.userRecruiterMessageUseCase.getMessages(conversationId);
-                const formattedMessages = messages.map((msg) => ({
-                    id: msg.id,
-                    conversationId: msg.conversationId,
-                    senderId: msg.senderId,
-                    senderType: msg.senderType,
-                    content: msg.content,
-                    timestamp: msg.timestamp.toISOString(),
-                }));
-                console.log("formattedMessages getMessages", formattedMessages);
+                const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+                let messages = yield this.userRecruiterMessageUseCase.getMessages(conversationId);
+                const formattedMessages = yield Promise.all(messages.map((msg) => __awaiter(this, void 0, void 0, function* () {
+                    if (msg.senderId !== userId && !msg.isRead) {
+                        yield this.userRecruiterMessageUseCase.markMessageAsRead(msg.id);
+                        msg.isRead = true;
+                    }
+                    return {
+                        id: msg.id,
+                        conversationId: msg.conversationId,
+                        senderId: msg.senderId,
+                        senderType: msg.senderType,
+                        content: msg.content,
+                        timestamp: msg.timestamp.toISOString(),
+                        isRead: msg.isRead,
+                    };
+                })));
+                // Update the messages in the database
+                yield Promise.all(messages.map(msg => this.userRecruiterMessageUseCase.updateMessage(msg)));
                 res.status(200).json(formattedMessages);
             }
             catch (error) {
@@ -95,7 +105,6 @@ let UserRecruiterMessageController = class UserRecruiterMessageController {
                     content: message.content,
                     timestamp: message.timestamp.toISOString(),
                 };
-                console.log("formattedMessages sendMessage", formattedMessage);
                 res.status(201).json(formattedMessage);
             }
             catch (error) {

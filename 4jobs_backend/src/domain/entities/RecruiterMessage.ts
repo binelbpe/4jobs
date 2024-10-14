@@ -6,7 +6,8 @@ export class RecruiterMessage {
     public receiverId: string,
     public senderType: 'recruiter' | 'user',
     public content: string,
-    public timestamp: Date
+    public timestamp: Date,
+    public isRead: boolean = false // Add this field
   ) {}
 }
 

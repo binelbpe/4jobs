@@ -68,6 +68,29 @@ let MongoUserRecruiterMessageRepository = class MongoUserRecruiterMessageReposit
             return this.convertToUserRecruiterConversation(savedConversation);
         });
     }
+    markMessageAsRead(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield RecruiterMessageModel_1.RecruiterMessageModel.findByIdAndUpdate(messageId, { isRead: true });
+        });
+    }
+    getMessageById(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const message = yield RecruiterMessageModel_1.RecruiterMessageModel.findById(messageId);
+            return message ? this.convertToUserRecruiterMessage(message) : null;
+        });
+    }
+    updateMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedMessage = yield RecruiterMessageModel_1.RecruiterMessageModel.findByIdAndUpdate(message.id, {
+                isRead: message.isRead,
+                // Add other fields that might need updating
+            }, { new: true });
+            if (!updatedMessage) {
+                throw new Error('Message not found');
+            }
+            return this.convertToUserRecruiterMessage(updatedMessage);
+        });
+    }
     convertToUserRecruiterConversation(doc) {
         return new UserRecruitermessage_1.UserRecruiterConversation(doc.id.toString(), doc.applicantId, doc.recruiterId, doc.lastMessage, doc.lastMessageTimestamp);
     }

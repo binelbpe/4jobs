@@ -41,6 +41,10 @@ export class MongoRecruiterMessage implements IRecruiterMessageRepository {
     return this.convertToConversation(savedConversation);
   }
 
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await RecruiterMessageModel.findByIdAndUpdate(messageId, { isRead: true });
+  }
+
   private convertToConversation(doc: IConversationDocument): Conversation {
     return new Conversation(
       doc.id.toString(),
@@ -59,7 +63,30 @@ export class MongoRecruiterMessage implements IRecruiterMessageRepository {
       doc.receiverId,
       doc.senderType,
       doc.content,
-      doc.timestamp
+      doc.timestamp,
+      doc.isRead
     );
+  }
+
+  async getMessageById(messageId: string): Promise<RecruiterMessage | null> {
+    const message = await RecruiterMessageModel.findById(messageId);
+    return message ? this.convertToRecruiterMessage(message) : null;
+  }
+
+  async updateMessage(message: RecruiterMessage): Promise<RecruiterMessage> {
+    const updatedMessage = await RecruiterMessageModel.findByIdAndUpdate(
+      message.id,
+      {
+        isRead: message.isRead,
+        // Add other fields that might need updating
+      },
+      { new: true }
+    );
+    
+    if (!updatedMessage) {
+      throw new Error('Message not found');
+    }
+    
+    return this.convertToRecruiterMessage(updatedMessage);
   }
 }

@@ -5,6 +5,8 @@ import { Conversation, Message } from '../../types/recruiterMessageType';
 interface MessageState {
   RecruiterConversations: Conversation[];
   RecruiterMessages: { [conversationId: string]: Message[] };
+  typingStatus: { [conversationId: string]: { [userId: string]: boolean } };
+  onlineStatus: { [userId: string]: boolean };
   recruiterLoading: boolean;
   recruiterError: string | null;
 }
@@ -12,6 +14,8 @@ interface MessageState {
 const initialState: MessageState = {
   RecruiterConversations: [],
   RecruiterMessages: {},
+  typingStatus: {},
+  onlineStatus: {},
   recruiterLoading: false,
   recruiterError: null,
 };
@@ -62,7 +66,46 @@ export const recruiterSendMessage = createAsyncThunk(
 const RecruitermessageSlice = createSlice({
   name: 'RecruiterMessages',
   initialState,
-  reducers: {},
+  reducers: {
+    addRecruiterMessage: (state, action: PayloadAction<Message>) => {
+      const { conversationId } = action.payload;
+      if (!state.RecruiterMessages[conversationId]) {
+        state.RecruiterMessages[conversationId] = [];
+      }
+      state.RecruiterMessages[conversationId].push(action.payload);
+    },
+    setRecruiterTypingStatus: (state, action: PayloadAction<{ userId: string, conversationId: string, isTyping: boolean }>) => {
+      const { userId, conversationId, isTyping } = action.payload;
+      if (!state.typingStatus[conversationId]) {
+        state.typingStatus[conversationId] = {};
+      }
+      state.typingStatus[conversationId][userId] = isTyping;
+    },
+    markRecruiterMessageAsRead: (state, action: PayloadAction<{ messageId: string, conversationId: string }>) => {
+      const { messageId, conversationId } = action.payload;
+      const conversation = state.RecruiterConversations.find(c => c.id === conversationId);
+      if (conversation) {
+        conversation.lastMessageRead = true;
+      }
+      const message = state.RecruiterMessages[conversationId]?.find(m => m.id === messageId);
+      if (message) {
+        message.isRead = true; // Changed from read to isRead
+      }
+    },
+    setRecruiterOnlineStatus: (state, action: PayloadAction<{ userId: string, online: boolean }>) => {
+      const { userId, online } = action.payload;
+      state.onlineStatus[userId] = online;
+    },
+    updateRecruiterConversation: (state, action: PayloadAction<Partial<Conversation>>) => {
+      const index = state.RecruiterConversations.findIndex(c => c.id === action.payload.id);
+      if (index !== -1) {
+        state.RecruiterConversations[index] = { ...state.RecruiterConversations[index], ...action.payload };
+      }
+    },
+    addNewRecruiterConversation: (state, action: PayloadAction<Conversation>) => {
+      state.RecruiterConversations.push(action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchConversations.pending, (state) => {
@@ -121,5 +164,14 @@ const RecruitermessageSlice = createSlice({
       });
   },
 });
+
+export const { 
+  addRecruiterMessage,
+  setRecruiterTypingStatus,
+  markRecruiterMessageAsRead,
+  setRecruiterOnlineStatus,
+  updateRecruiterConversation,
+  addNewRecruiterConversation
+} = RecruitermessageSlice.actions;
 
 export default RecruitermessageSlice.reducer;

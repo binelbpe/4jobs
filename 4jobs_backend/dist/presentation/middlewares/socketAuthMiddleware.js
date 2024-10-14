@@ -3,11 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.socketAuthMiddleware = void 0;
 const socketAuthMiddleware = (userManager) => (socket, next) => {
     const userId = socket.handshake.auth.userId;
-    if (!userId) {
-        return next(new Error("Invalid user ID"));
+    const userType = socket.handshake.auth.userType;
+    if (!userId || !userType) {
+        return next(new Error("Invalid user ID or user type"));
     }
     socket.userId = userId;
-    userManager.addUser(userId, socket.id);
+    socket.userType = userType;
+    userManager.addUser(userId, socket.id, userType);
     next();
 };
 exports.socketAuthMiddleware = socketAuthMiddleware;

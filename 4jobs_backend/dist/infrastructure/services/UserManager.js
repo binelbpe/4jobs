@@ -11,10 +11,11 @@ const inversify_1 = require("inversify");
 let UserManager = class UserManager {
     constructor() {
         this.userConnections = new Map();
+        this.typingUsers = new Map(); // conversationId -> Set of typing user IDs
     }
-    addUser(userId, socketId) {
-        this.userConnections.set(userId, socketId);
-        console.log(`User ${userId} connected with socket ${socketId}`);
+    addUser(userId, socketId, userType) {
+        this.userConnections.set(userId, { socketId, userType });
+        console.log(`${userType} ${userId} connected with socket ${socketId}`);
         console.log('Current userConnections:', Array.from(this.userConnections.entries()));
     }
     removeUser(userId) {
@@ -23,13 +24,32 @@ let UserManager = class UserManager {
         console.log('Current userConnections after disconnect:', Array.from(this.userConnections.entries()));
     }
     getUserSocketId(userId) {
-        return this.userConnections.get(userId);
+        var _a;
+        return (_a = this.userConnections.get(userId)) === null || _a === void 0 ? void 0 : _a.socketId;
+    }
+    getUserType(userId) {
+        var _a;
+        return (_a = this.userConnections.get(userId)) === null || _a === void 0 ? void 0 : _a.userType;
     }
     getAllConnections() {
         return Array.from(this.userConnections.entries());
     }
     isUserOnline(userId) {
         return this.userConnections.has(userId);
+    }
+    setUserTyping(userId, conversationId) {
+        if (!this.typingUsers.has(conversationId)) {
+            this.typingUsers.set(conversationId, new Set());
+        }
+        this.typingUsers.get(conversationId).add(userId);
+    }
+    setUserStoppedTyping(userId, conversationId) {
+        if (this.typingUsers.has(conversationId)) {
+            this.typingUsers.get(conversationId).delete(userId);
+        }
+    }
+    getTypingUsers(conversationId) {
+        return Array.from(this.typingUsers.get(conversationId) || []);
     }
 };
 exports.UserManager = UserManager;

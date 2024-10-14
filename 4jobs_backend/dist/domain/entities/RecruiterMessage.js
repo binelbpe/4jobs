@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Conversation = exports.RecruiterMessage = void 0;
 class RecruiterMessage {
-    constructor(id, conversationId, senderId, receiverId, senderType, content, timestamp) {
+    constructor(id, conversationId, senderId, receiverId, senderType, content, timestamp, isRead = false // Add this field
+    ) {
         this.id = id;
         this.conversationId = conversationId;
         this.senderId = senderId;
@@ -10,6 +11,7 @@ class RecruiterMessage {
         this.senderType = senderType;
         this.content = content;
         this.timestamp = timestamp;
+        this.isRead = isRead;
     }
 }
 exports.RecruiterMessage = RecruiterMessage;

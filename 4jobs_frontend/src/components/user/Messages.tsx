@@ -10,13 +10,16 @@ import Conversation from "./Conversation";
 import MessageConnectionSearch from "./MessageConnectionSearch";
 import Header from "./Header";
 import { Link } from "react-router-dom";
-import { FaUserTie } from "react-icons/fa"; // Import the recruiter icon
+import { FaUserTie } from "react-icons/fa";
 
 const Messages: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const recruiterUnreadCount = useSelector((state: RootState) => 
+    state.userRecruiterMessages.conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0)
+  );
 
   useEffect(() => {
     if (user?.id) {
@@ -44,8 +47,13 @@ const Messages: React.FC = () => {
               >
                 {showSearch ? "Back to Conversations" : "New Message"}
               </button>
-              <Link to="/user/messages" className="text-purple-600 hover:text-purple-800">
+              <Link to="/user/messages" className="text-purple-600 hover:text-purple-800 relative">
                 <FaUserTie size={24} title="Recruiter Messages" />
+                {recruiterUnreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                    {recruiterUnreadCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
@@ -55,7 +63,7 @@ const Messages: React.FC = () => {
             ) : (
               <ConversationList
                 onSelectConversation={handleSelectUser}
-                currentUserId={user?.id || ""} // Pass the current user's ID
+                currentUserId={user?.id || ""}
               />
             )}
           </div>

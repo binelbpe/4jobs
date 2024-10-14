@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import RecruiterHeader from './RecruiterHeader';
-import MessageList from './RecruiterMessageList';
-import Conversation from './RecruiterConversation';
+import React, { useState } from "react";
+import MessageList from "./RecruiterMessageList";
+import Conversation from "./RecruiterConversation";
+import RecruiterHeader from "./RecruiterHeader";
 
-const Messaging: React.FC = () => {
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+const RecruiterMessaging: React.FC = () => {
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex flex-col h-screen">
       <RecruiterHeader />
-      <div className="container mx-auto mt-8 bg-white rounded-lg shadow-lg overflow-hidden">
+     
         <div className="flex h-[calc(100vh-200px)]">
-          <MessageList onSelectConversation={setSelectedConversation} />
+          <MessageList
+            onSelectConversation={setSelectedConversation}
+            selectedConversationId={selectedConversation}
+          />
           {selectedConversation ? (
             <Conversation conversationId={selectedConversation} />
           ) : (
@@ -21,8 +26,7 @@ const Messaging: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
-export default Messaging;
+export default RecruiterMessaging;

@@ -3,16 +3,22 @@ import TYPES from '../../../types';
 import { IUserRecruiterMessageRepository } from '../../../domain/interfaces/repositories/user/IUserRecruiterMessageRepository';
 import { UserRecruiterMessage, UserRecruiterConversation } from '../../../domain/entities/UserRecruitermessage';
 import { IRecruiterRepository } from '../../../domain/interfaces/repositories/recruiter/IRecruiterRepository';
+import { EventEmitter } from 'events';
 
 @injectable()
 export class UserRecruiterMessageUseCase {
   constructor(
     @inject(TYPES.IUserRecruiterMessageRepository) private userRecruiterMessageRepository: IUserRecruiterMessageRepository,
-    @inject(TYPES.IRecruiterRepository) private recruiterRepository: IRecruiterRepository
+    @inject(TYPES.IRecruiterRepository) private recruiterRepository: IRecruiterRepository,
+    @inject(TYPES.NotificationEventEmitter) private eventEmitter: EventEmitter
   ) {}
 
   async getUserConversations(userId: string): Promise<UserRecruiterConversation[]> {
     return this.userRecruiterMessageRepository.getUserConversations(userId);
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await this.userRecruiterMessageRepository.markMessageAsRead(messageId);
   }
 
   async getMessages(conversationId: string): Promise<UserRecruiterMessage[]> {
@@ -26,20 +32,23 @@ export class UserRecruiterMessageUseCase {
     }
 
     const receiverId = conversation.userId === senderId ? conversation.recruiterId : conversation.userId;
-    const senderType = conversation.userId === senderId ? 'user' : 'recruiter';
 
     const message = new UserRecruiterMessage(
       '',
       conversationId,
       senderId,
       receiverId,
-      senderType,
+      'user',
       content,
-      new Date()
+      new Date(),
+      false
     );
 
     const savedMessage = await this.userRecruiterMessageRepository.saveMessage(message);
     await this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
+
+    // Emit an event for real-time updates
+    this.eventEmitter.emit('newUserRecruiterMessage', savedMessage);
 
     return savedMessage;
   }
@@ -59,5 +68,13 @@ export class UserRecruiterMessageUseCase {
     );
 
     return this.userRecruiterMessageRepository.saveConversation(newConversation);
+  }
+
+  async getMessageById(messageId: string): Promise<UserRecruiterMessage | null> {
+    return this.userRecruiterMessageRepository.getMessageById(messageId);
+  }
+
+  async updateMessage(message: UserRecruiterMessage): Promise<UserRecruiterMessage> {
+    return this.userRecruiterMessageRepository.updateMessage(message);
   }
 }

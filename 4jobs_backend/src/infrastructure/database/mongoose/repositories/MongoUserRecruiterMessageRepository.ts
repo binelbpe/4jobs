@@ -46,6 +46,32 @@ export class MongoUserRecruiterMessageRepository implements IUserRecruiterMessag
     return this.convertToUserRecruiterConversation(savedConversation);
   }
 
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await RecruiterMessageModel.findByIdAndUpdate(messageId, { isRead: true });
+  }
+
+  async getMessageById(messageId: string): Promise<UserRecruiterMessage | null> {
+    const message = await RecruiterMessageModel.findById(messageId);
+    return message ? this.convertToUserRecruiterMessage(message) : null;
+  }
+
+  async updateMessage(message: UserRecruiterMessage): Promise<UserRecruiterMessage> {
+    const updatedMessage = await RecruiterMessageModel.findByIdAndUpdate(
+      message.id,
+      {
+        isRead: message.isRead,
+        // Add other fields that might need updating
+      },
+      { new: true }
+    );
+    
+    if (!updatedMessage) {
+      throw new Error('Message not found');
+    }
+    
+    return this.convertToUserRecruiterMessage(updatedMessage);
+  }
+
   private convertToUserRecruiterConversation(doc: IConversationDocument): UserRecruiterConversation {
     return new UserRecruiterConversation(
       doc.id.toString(),

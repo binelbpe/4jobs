@@ -3,8 +3,9 @@ export interface URMessage {
   conversationId: string;
   senderId: string;
   content: string;
-  createdAt: string;
-  // Add any other necessary fields
+  timestamp: string;
+  isRead: boolean;
+  senderType: string;
 }
 
 export interface URConversation {
@@ -16,4 +17,6 @@ export interface URConversation {
   };
   lastMessage: string;
   lastMessageTimestamp: string;
+  lastMessageRead: boolean;
+  unreadCount: number;
 }

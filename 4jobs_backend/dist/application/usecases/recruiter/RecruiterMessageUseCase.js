@@ -28,10 +28,12 @@ exports.RecruiterMessageUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
 const RecruiterMessage_1 = require("../../../domain/entities/RecruiterMessage");
+const events_1 = require("events");
 let RecruiterMessageUseCase = class RecruiterMessageUseCase {
-    constructor(recruiterMessageRepository, userRepository) {
+    constructor(recruiterMessageRepository, userRepository, eventEmitter) {
         this.recruiterMessageRepository = recruiterMessageRepository;
         this.userRepository = userRepository;
+        this.eventEmitter = eventEmitter;
     }
     getConversations(recruiterId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -43,15 +45,17 @@ let RecruiterMessageUseCase = class RecruiterMessageUseCase {
             return this.recruiterMessageRepository.getMessages(conversationId);
         });
     }
-    sendMessage(conversationId, content) {
+    sendMessage(conversationId, content, recruiterId) {
         return __awaiter(this, void 0, void 0, function* () {
             const conversation = yield this.recruiterMessageRepository.getConversationById(conversationId);
             if (!conversation) {
                 throw new Error('Conversation not found');
             }
-            const message = new RecruiterMessage_1.RecruiterMessage('', conversationId, conversation.recruiterId, conversation.applicantId, 'recruiter', content, new Date());
+            const message = new RecruiterMessage_1.RecruiterMessage('', conversationId, recruiterId, conversation.applicantId, 'recruiter', content, new Date(), false);
             const savedMessage = yield this.recruiterMessageRepository.saveMessage(message);
             yield this.recruiterMessageRepository.updateConversation(conversationId, content, new Date());
+            // Emit an event for real-time updates
+            this.eventEmitter.emit('newRecruiterMessage', savedMessage);
             return savedMessage;
         });
     }
@@ -61,9 +65,35 @@ let RecruiterMessageUseCase = class RecruiterMessageUseCase {
             if (existingConversation) {
                 return existingConversation;
             }
-            const newConversation = new RecruiterMessage_1.Conversation('', recruiterId, applicantId, '', // This is fine now as we've set a default value in the schema
-            new Date());
-            return this.recruiterMessageRepository.saveConversation(newConversation);
+            const newConversation = new RecruiterMessage_1.Conversation('', recruiterId, applicantId, '', new Date());
+            const savedConversation = yield this.recruiterMessageRepository.saveConversation(newConversation);
+            // Emit an event for real-time updates
+            this.eventEmitter.emit('newRecruiterConversation', savedConversation);
+            return savedConversation;
+        });
+    }
+    markMessageAsRead(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const message = yield this.recruiterMessageRepository.getMessageById(messageId);
+            if (message && !message.isRead) {
+                message.isRead = true;
+                yield this.recruiterMessageRepository.updateMessage(message);
+                this.eventEmitter.emit('recruiterMessageRead', { messageId, conversationId: message.conversationId });
+            }
+        });
+    }
+    getMessageById(messageId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.recruiterMessageRepository.getMessageById(messageId);
+        });
+    }
+    updateMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedMessage = yield this.recruiterMessageRepository.updateMessage(message);
+            if (updatedMessage.isRead) {
+                this.eventEmitter.emit('recruiterMessageRead', { messageId: updatedMessage.id, conversationId: updatedMessage.conversationId });
+            }
+            return updatedMessage;
         });
     }
 };
@@ -72,5 +102,6 @@ exports.RecruiterMessageUseCase = RecruiterMessageUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.IRecruiterMessageRepository)),
     __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, inversify_1.inject)(types_1.default.NotificationEventEmitter)),
+    __metadata("design:paramtypes", [Object, Object, events_1.EventEmitter])
 ], RecruiterMessageUseCase);

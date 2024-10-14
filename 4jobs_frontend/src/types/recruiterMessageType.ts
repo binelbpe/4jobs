@@ -4,20 +4,27 @@ export interface Participant {
   profileImage?: string;
 }
 
-export interface Conversation {
-  id: string;
-  participant: Participant;
-  lastMessage: string;
-  lastMessageTimestamp: string;
-}
-
 export interface Message {
   id: string;
   conversationId: string;
   senderId: string;
   content: string;
   timestamp: string;
-  // Add any other properties that your API returns
+  isRead: boolean;
+  senderType: string;
+}
+
+export interface Conversation {
+  id: string;
+  participant: {
+    id: string;
+    name: string;
+    profileImage?: string;
+  };
+  lastMessage: string;
+  lastMessageTimestamp: string;
+  lastMessageRead: boolean;
+  unreadCount: number;
 }
 
 export interface NewMessagePayload {

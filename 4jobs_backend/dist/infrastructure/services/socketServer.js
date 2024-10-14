@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupSocketServer = setupSocketServer;
 const socket_io_1 = require("socket.io");
 const socketAuthMiddleware_1 = require("../../presentation/middlewares/socketAuthMiddleware");
-const NotificationModel_1 = require("../database/mongoose/models/NotificationModel");
 const types_1 = __importDefault(require("../../types"));
 function setupSocketServer(server, container) {
     const io = new socket_io_1.Server(server, {
@@ -27,110 +26,159 @@ function setupSocketServer(server, container) {
     const userManager = container.get(types_1.default.UserManager);
     const eventEmitter = container.get(types_1.default.NotificationEventEmitter);
     const messageUseCase = container.get(types_1.default.MessageUseCase);
+    const userRecruiterMessageUseCase = container.get(types_1.default.UserRecruiterMessageUseCase);
+    const recruiterMessageUseCase = container.get(types_1.default.RecruiterMessageUseCase);
     io.use((0, socketAuthMiddleware_1.socketAuthMiddleware)(userManager));
     io.on('connection', (socket) => {
-        console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}`);
-        if (!socket.userId) {
+        console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}, user type: ${socket.userType}`);
+        if (!socket.userId || !socket.userType) {
             console.error('User not authenticated, closing connection');
             socket.disconnect(true);
             return;
         }
-        userManager.addUser(socket.userId, socket.id);
+        userManager.addUser(socket.userId, socket.id, socket.userType);
         socket.join(socket.userId);
-        console.log(`User ${socket.userId} joined room`);
-        socket.emit('authenticated', socket.userId);
-        socket.broadcast.emit('userConnected', socket.userId);
-        socket.on('sendMessage', (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`Received sendMessage event from user ${socket.userId}:`, data);
+        io.emit('userOnlineStatus', { userId: socket.userId, online: true });
+        // Handle user-recruiter messaging
+        socket.on('sendUserRecruiterMessage', (data) => __awaiter(this, void 0, void 0, function* () {
             try {
-                if (!socket.userId)
+                if (!socket.userId) {
                     throw new Error('User not authenticated');
-                const message = yield messageUseCase.sendMessage(socket.userId, data.recipientId, data.content);
+                }
+                let message;
+                let recipientId;
+                if (socket.userType === 'user') {
+                    message = yield userRecruiterMessageUseCase.sendMessage(data.conversationId, data.content, socket.userId);
+                    recipientId = message.receiverId; // Set recipientId to the receiverId from the message
+                }
+                else {
+                    message = yield recruiterMessageUseCase.sendMessage(data.conversationId, data.content, socket.userId);
+                    recipientId = message.receiverId; // Set recipientId to the receiverId from the message
+                }
                 // Emit to sender
-                io.to(socket.userId).emit('messageSent', message);
-                console.log(`Message sent to sender ${socket.userId}:`, message);
+                socket.emit('userRecruiterMessageSent', message);
                 // Emit to recipient
-                io.to(data.recipientId).emit('newMessage', message);
-                console.log(`New message sent to recipient ${data.recipientId}:`, message);
+                const recipientSocket = userManager.getUserSocketId(recipientId);
+                if (recipientSocket) {
+                    io.to(recipientSocket).emit('newUserRecruiterMessage', message);
+                }
                 // Emit notification event
                 eventEmitter.emit('sendNotification', {
-                    type: 'NEW_MESSAGE',
-                    recipient: data.recipientId,
+                    type: 'NEW_USER_RECRUITER_MESSAGE',
+                    recipient: recipientId,
                     sender: socket.userId,
                     content: 'You have a new message'
                 });
             }
             catch (error) {
-                console.error('Error sending message:', error);
-                socket.emit('messageError', { error: 'Failed to send message' });
+                console.error('Error sending user-recruiter message:', error);
+                socket.emit('userRecruiterMessageError', { error: 'Failed to send message' });
             }
         }));
-        socket.on('markMessagesAsRead', (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`Marking messages as read for user ${socket.userId}:`, data.messageIds);
+        socket.on('markUserRecruiterMessageAsRead', (data) => __awaiter(this, void 0, void 0, function* () {
             try {
-                for (const messageId of data.messageIds) {
-                    yield messageUseCase.markMessageAsRead(messageId);
+                if (!socket.userId) {
+                    throw new Error('User not authenticated');
                 }
-                io.to(socket.userId).emit('messagesMarkedAsRead', data.messageIds);
-                console.log(`Messages marked as read for user ${socket.userId}:`, data.messageIds);
+                if (socket.userType === 'user') {
+                    yield userRecruiterMessageUseCase.markMessageAsRead(data.messageId);
+                }
+                else {
+                    yield recruiterMessageUseCase.markMessageAsRead(data.messageId);
+                }
+                // Emit to sender
+                socket.emit('userRecruiterMessageMarkedAsRead', { messageId: data.messageId });
+                // Emit to the other participant in the conversation
+                const message = socket.userType === 'user'
+                    ? yield userRecruiterMessageUseCase.getMessageById(data.messageId)
+                    : yield recruiterMessageUseCase.getMessageById(data.messageId);
+                if (message) {
+                    const recipientId = message.senderId === socket.userId ? message.receiverId : message.senderId;
+                    const recipientSocket = userManager.getUserSocketId(recipientId);
+                    if (recipientSocket) {
+                        io.to(recipientSocket).emit('userRecruiterMessageMarkedAsRead', { messageId: data.messageId });
+                    }
+                }
+                console.log(`Message ${data.messageId} marked as read by ${socket.userType} ${socket.userId}`);
             }
             catch (error) {
-                console.error('Error marking messages as read:', error);
-                socket.emit('markReadError', { error: 'Failed to mark messages as read' });
+                console.error('Error marking user-recruiter message as read:', error);
+                socket.emit('markUserRecruiterMessageError', { error: 'Failed to mark message as read' });
             }
         }));
-        socket.on('typing', (data) => {
-            console.log(`User ${socket.userId} is typing to ${data.recipientId}`);
-            io.to(data.recipientId).emit('userTyping', { userId: socket.userId });
+        // Update typing events for user-recruiter messaging
+        socket.on('userRecruiterTyping', (data) => {
+            console.log(`${socket.userType} ${socket.userId} is typing in conversation ${data.conversationId}`);
+            userManager.setUserTyping(socket.userId, data.conversationId);
+            socket.to(data.conversationId).emit('userRecruiterTyping', { userId: socket.userId, userType: socket.userType, conversationId: data.conversationId });
         });
-        socket.on('stopTyping', (data) => {
-            console.log(`User ${socket.userId} stopped typing to ${data.recipientId}`);
-            io.to(data.recipientId).emit('userStoppedTyping', { userId: socket.userId });
+        socket.on('userRecruiterStoppedTyping', (data) => {
+            console.log(`${socket.userType} ${socket.userId} stopped typing in conversation ${data.conversationId}`);
+            userManager.setUserStoppedTyping(socket.userId, data.conversationId);
+            socket.to(data.conversationId).emit('userRecruiterStoppedTyping', { userId: socket.userId, userType: socket.userType, conversationId: data.conversationId });
         });
-        socket.on('joinConversation', (conversationId) => {
+        // Join user-recruiter conversation room
+        socket.on('joinUserRecruiterConversation', (conversationId) => {
             socket.join(conversationId);
-            console.log(`User ${socket.userId} joined conversation ${conversationId}`);
+            console.log(`${socket.userType} ${socket.userId} joined conversation ${conversationId}`);
         });
-        socket.on('leaveConversation', (conversationId) => {
+        // Leave user-recruiter conversation room
+        socket.on('leaveUserRecruiterConversation', (conversationId) => {
             socket.leave(conversationId);
-            console.log(`User ${socket.userId} left conversation ${conversationId}`);
-        });
-        socket.on('markNotificationAsRead', (notificationId) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`Marking notification as read for user ${socket.userId}:`, notificationId);
-            try {
-                yield NotificationModel_1.NotificationModel.findByIdAndUpdate(notificationId, { status: "read" });
-                io.to(socket.id).emit('notificationMarkedAsRead', notificationId);
-            }
-            catch (error) {
-                console.error('Error marking notification as read:', error);
-                socket.emit('markNotificationError', { error: 'Failed to mark notification as read' });
-            }
-        }));
-        socket.on('ping', () => {
-            console.log(`Received ping from client, socket id: ${socket.id}, user id: ${socket.userId}`);
-            socket.emit('pong');
+            console.log(`${socket.userType} ${socket.userId} left conversation ${conversationId}`);
         });
         socket.on('disconnect', () => {
             if (socket.userId) {
                 userManager.removeUser(socket.userId);
-                console.log(`User disconnected, user id: ${socket.userId}`);
-                // Notify other users that this user is now offline
-                socket.broadcast.emit('userDisconnected', socket.userId);
+                io.emit('userOnlineStatus', { userId: socket.userId, online: false });
             }
         });
+        // Handle recruiter message read status
+        socket.on('markRecruiterMessageAsRead', (data) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (socket.userType === 'recruiter') {
+                    yield recruiterMessageUseCase.markMessageAsRead(data.messageId);
+                }
+            }
+            catch (error) {
+                console.error('Error marking recruiter message as read:', error);
+            }
+        }));
     });
+    // Handle notifications
     eventEmitter.on('sendNotification', (notification) => {
-        console.log("Sending notification:", notification);
-        const recipientSocketId = userManager.getUserSocketId(notification.recipient.toString());
-        if (recipientSocketId) {
-            io.to(recipientSocketId).emit('newNotification', notification);
-            console.log(`Notification sent to user ${notification.recipient}`);
+        try {
+            if (!notification || !notification.recipient) {
+                console.error('Invalid notification:', notification);
+                return;
+            }
+            const recipientId = typeof notification.recipient === 'string'
+                ? notification.recipient
+                : notification.recipient.toString();
+            const recipientSocketId = userManager.getUserSocketId(recipientId);
+            if (recipientSocketId) {
+                io.to(recipientSocketId).emit('newNotification', notification);
+            }
+            else {
+                console.log(`User ${recipientId} is not currently connected. Notification will be shown on next login.`);
+            }
         }
-        else {
-            console.log(`User ${notification.recipient} is not currently connected. Notification will be shown on next login.`);
+        catch (error) {
+            console.error('Error sending notification:', error);
         }
     });
-    container.unbind(types_1.default.SocketIOServer);
-    container.bind(types_1.default.SocketIOServer).toConstantValue(io);
+    // Add these event listeners
+    eventEmitter.on('recruiterMessageRead', (data) => {
+        const recipientSocketId = userManager.getUserSocketId(data.senderId);
+        if (recipientSocketId) {
+            io.to(recipientSocketId).emit('recruiterMessageRead', data);
+        }
+    });
+    eventEmitter.on('recruiterMessagesRead', (data) => {
+        const recipientSocketId = userManager.getUserSocketId(data.messages[0].senderId);
+        if (recipientSocketId) {
+            io.to(recipientSocketId).emit('recruiterMessagesRead', data);
+        }
+    });
     return { io, userManager, eventEmitter };
 }

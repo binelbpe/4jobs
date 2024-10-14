@@ -1,50 +1,104 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchConversations } from '../../redux/slices/recruiterMessageSlice';
-import { RootState, AppDispatch } from '../../redux/store';
-import { Conversation } from '../../types/recruiterMessageType';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchConversations } from "../../redux/slices/recruiterMessageSlice";
+import { RootState, AppDispatch } from "../../redux/store";
+import { Conversation } from "../../types/recruiterMessageType";
+import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 
 interface MessageListProps {
   onSelectConversation: (conversationId: string) => void;
+  selectedConversationId: string | null;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ onSelectConversation }) => {
+const MessageList: React.FC<MessageListProps> = ({
+  onSelectConversation,
+  selectedConversationId,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
-  const conversations = useSelector((state: RootState) => state.recruiterMessages.RecruiterConversations);
-  const loading = useSelector((state: RootState) => state.recruiterMessages.recruiterLoading);
-  const error = useSelector((state: RootState) => state.recruiterMessages.recruiterError);
-  const recruiterId = useSelector((state: RootState) => state.recruiter.recruiter?.id);
+  const conversations = useSelector(
+    (state: RootState) => state.recruiterMessages.RecruiterConversations
+  );
+  const recruiterId = useSelector(
+    (state: RootState) => state.recruiter.recruiter?.id
+  );
+  const onlineStatus = useSelector(
+    (state: RootState) => state.recruiterMessages.onlineStatus
+  );
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (recruiterId) {
-      dispatch(fetchConversations(recruiterId));
-    }
+    const fetchRecruiterConversations = async () => {
+      if (recruiterId) {
+        setIsLoading(true);
+        await dispatch(fetchConversations(recruiterId));
+        userRecruiterSocketService.connect(recruiterId, "recruiter");
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecruiterConversations();
   }, [dispatch, recruiterId]);
 
-  if (loading) return <div>Loading conversations...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) {
+    return <div>Loading conversations...</div>;
+  }
+
+  if (conversations.length === 0) {
+    return <div>No conversations found.</div>;
+  }
+
+  const totalUnreadCount = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
 
   return (
     <div className="w-1/3 border-r">
-      <h2 className="text-xl font-semibold p-4 border-b">Conversations</h2>
+      <h2 className="text-xl font-semibold p-4 border-b flex justify-between items-center">
+        Conversations
+        {totalUnreadCount > 0 && (
+          <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+            {totalUnreadCount}
+          </span>
+        )}
+      </h2>
       <ul>
         {conversations.map((conversation: Conversation) => (
-          <li 
-            key={conversation.id} 
-            className="p-4 border-b hover:bg-gray-100 cursor-pointer flex items-center"
+          <li
+            key={conversation.id}
+            className={`p-4 border-b hover:bg-gray-100 cursor-pointer flex items-center ${
+              conversation.id === selectedConversationId ? "bg-gray-100" : ""
+            }`}
             onClick={() => onSelectConversation(conversation.id)}
           >
-            <div className="w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0">
-              <img 
-                src={conversation.participant.profileImage || '/default-avatar.png'} 
-                alt={`${conversation.participant.name}'s avatar`}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative mr-4">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                {conversation.participant.profileImage ? (
+                  <img
+                    src={conversation.participant.profileImage}
+                    alt={`${conversation.participant.name}'s avatar`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-xl">
+                    {conversation.participant.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+              {onlineStatus[conversation.participant.id] && (
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white transform translate-x-1 translate-y-1"></div>
+              )}
             </div>
             <div className="flex-grow min-w-0">
-              <h3 className="font-semibold truncate">{conversation.participant.name}</h3>
-              <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
+              <h3 className="font-semibold truncate">
+                {conversation.participant.name}
+              </h3>
+              <p className="text-sm text-gray-600 truncate">
+                {conversation.lastMessage}
+              </p>
             </div>
+            {conversation.unreadCount > 0 && (
+              <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs ml-2">
+                {conversation.unreadCount}
+              </div>
+            )}
           </li>
         ))}
       </ul>
