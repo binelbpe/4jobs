@@ -24,6 +24,7 @@ import connectionReducer from "./slices/connectionSlice";
 import notificationReducer from "./slices/notificationSlice";
 import userMessageReducer from "./slices/userMessageSlice";
 import recruiterMessageReducer from "./slices/recruiterMessageSlice";
+import userRecruiterMessageReducer from "./slices/userRecruiterMessageSlice";
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "fallback-key";
 
@@ -195,6 +196,15 @@ const rootReducer = combineReducers({
   notifications: persistedNotificationReducer,
   messages: persistedUserMessageReducer,
   recruiterMessages: persistedRecruiterMessageReducer,
+  // Add the new userRecruiterMessages reducer
+  userRecruiterMessages: persistReducer(
+    {
+      key: 'userRecruiterMessages',
+      storage,
+      whitelist: ['conversations', 'messages'],
+    },
+    userRecruiterMessageReducer
+  ),
 });
 
 const store = configureStore({

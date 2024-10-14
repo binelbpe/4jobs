@@ -66,6 +66,9 @@ const TYPES = {
   IRecruiterMessageRepository: Symbol.for('IRecruiterMessageRepository'),
   RecruiterMessageUseCase: Symbol.for('RecruiterMessageUseCase'),
   RecruiterMessageController: Symbol.for('RecruiterMessageController'),
+  IUserRecruiterMessageRepository: Symbol.for('IUserRecruiterMessageRepository'),
+  UserRecruiterMessageUseCase: Symbol.for('UserRecruiterMessageUseCase'),
+  UserRecruiterMessageController: Symbol.for('UserRecruiterMessageController'),
 };
 
 export default TYPES;

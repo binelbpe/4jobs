@@ -43,6 +43,7 @@ import ConnectionProfile from './components/user/ConnectionProfile';
 import Connections from './components/user/Connections';
 import Messages from './components/user/Messages';
 import RecruiterMessage from './components/recruiter/RecruiterMessaging';
+import UserMessaging from './components/user/UserMessaging';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -69,6 +70,7 @@ const App: React.FC = () => {
       <Route path="/connection/profile/:userId" element={<PrivateRoute><ConnectionProfile /></PrivateRoute>} />
       <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
       <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+      <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />

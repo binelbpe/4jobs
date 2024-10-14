@@ -30,7 +30,7 @@ export interface IConversationDocument extends Document {
 const ConversationSchema: Schema = new Schema({
   recruiterId: { type: String, required: true },
   applicantId: { type: String, required: true },
-  lastMessage: { type: String, default: '' },
+  lastMessage: { type: String, default: '' }, 
   lastMessageTimestamp: { type: Date, default: Date.now },
 });
 

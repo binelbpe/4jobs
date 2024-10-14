@@ -26,6 +26,7 @@ const postController = container_1.container.get(PostController_1.PostController
 const s3Service = container_1.container.get(types_1.default.S3Service);
 const connectionController = container_1.container.get(types_1.default.ConnectionController);
 const messageController = container_1.container.get(types_1.default.MessageController);
+const userRecruiterMessageController = container_1.container.get(types_1.default.UserRecruiterMessageController);
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 exports.authRouter = (0, express_1.Router)();
@@ -156,4 +157,9 @@ exports.authRouter.get('/messages/:userId1/:userId2', authMiddleware_1.authentic
 exports.authRouter.put('/messages/:messageId/read', authMiddleware_1.authenticate, messageController.markMessageAsRead.bind(messageController));
 exports.authRouter.get('/messages/unread/:userId', authMiddleware_1.authenticate, messageController.getUnreadMessageCount.bind(messageController));
 exports.authRouter.get('/messages/search/:userId', authMiddleware_1.authenticate, messageController.searchMessages.bind(messageController));
+// User-Recruiter Messaging routes
+exports.authRouter.get('/user-conversations/:userId', authMiddleware_1.authenticate, userRecruiterMessageController.getUserConversations.bind(userRecruiterMessageController));
+exports.authRouter.get('/user-messages/:conversationId', authMiddleware_1.authenticate, userRecruiterMessageController.getMessages.bind(userRecruiterMessageController));
+exports.authRouter.post('/user-messages/:conversationId', authMiddleware_1.authenticate, userRecruiterMessageController.sendMessage.bind(userRecruiterMessageController));
+exports.authRouter.post('/user-conversations', authMiddleware_1.authenticate, userRecruiterMessageController.startConversation.bind(userRecruiterMessageController));
 exports.default = exports.authRouter;

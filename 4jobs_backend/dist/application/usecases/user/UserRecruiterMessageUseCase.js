@@ -24,53 +24,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RecruiterMessageUseCase = void 0;
+exports.UserRecruiterMessageUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-const RecruiterMessage_1 = require("../../../domain/entities/RecruiterMessage");
-let RecruiterMessageUseCase = class RecruiterMessageUseCase {
-    constructor(recruiterMessageRepository, userRepository) {
-        this.recruiterMessageRepository = recruiterMessageRepository;
-        this.userRepository = userRepository;
+const UserRecruitermessage_1 = require("../../../domain/entities/UserRecruitermessage");
+let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
+    constructor(userRecruiterMessageRepository, recruiterRepository) {
+        this.userRecruiterMessageRepository = userRecruiterMessageRepository;
+        this.recruiterRepository = recruiterRepository;
     }
-    getConversations(recruiterId) {
+    getUserConversations(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.recruiterMessageRepository.getConversations(recruiterId);
+            return this.userRecruiterMessageRepository.getUserConversations(userId);
         });
     }
     getMessages(conversationId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.recruiterMessageRepository.getMessages(conversationId);
+            return this.userRecruiterMessageRepository.getMessages(conversationId);
         });
     }
-    sendMessage(conversationId, content) {
+    sendMessage(conversationId, content, senderId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const conversation = yield this.recruiterMessageRepository.getConversationById(conversationId);
+            const conversation = yield this.userRecruiterMessageRepository.getConversationById(conversationId);
             if (!conversation) {
                 throw new Error('Conversation not found');
             }
-            const message = new RecruiterMessage_1.RecruiterMessage('', conversationId, conversation.recruiterId, conversation.applicantId, 'recruiter', content, new Date());
-            const savedMessage = yield this.recruiterMessageRepository.saveMessage(message);
-            yield this.recruiterMessageRepository.updateConversation(conversationId, content, new Date());
+            const receiverId = conversation.userId === senderId ? conversation.recruiterId : conversation.userId;
+            const senderType = conversation.userId === senderId ? 'user' : 'recruiter';
+            const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, senderId, receiverId, senderType, content, new Date());
+            const savedMessage = yield this.userRecruiterMessageRepository.saveMessage(message);
+            yield this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
             return savedMessage;
         });
     }
-    startConversation(recruiterId, applicantId) {
+    startConversation(userId, recruiterId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const existingConversation = yield this.recruiterMessageRepository.getConversationByParticipants(recruiterId, applicantId);
+            const existingConversation = yield this.userRecruiterMessageRepository.getConversationByParticipants(userId, recruiterId);
             if (existingConversation) {
                 return existingConversation;
             }
-            const newConversation = new RecruiterMessage_1.Conversation('', recruiterId, applicantId, '', // This is fine now as we've set a default value in the schema
-            new Date());
-            return this.recruiterMessageRepository.saveConversation(newConversation);
+            const newConversation = new UserRecruitermessage_1.UserRecruiterConversation('', userId, recruiterId, '', new Date());
+            return this.userRecruiterMessageRepository.saveConversation(newConversation);
         });
     }
 };
-exports.RecruiterMessageUseCase = RecruiterMessageUseCase;
-exports.RecruiterMessageUseCase = RecruiterMessageUseCase = __decorate([
+exports.UserRecruiterMessageUseCase = UserRecruiterMessageUseCase;
+exports.UserRecruiterMessageUseCase = UserRecruiterMessageUseCase = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_1.default.IRecruiterMessageRepository)),
-    __param(1, (0, inversify_1.inject)(types_1.default.IUserRepository)),
+    __param(0, (0, inversify_1.inject)(types_1.default.IUserRecruiterMessageRepository)),
+    __param(1, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
     __metadata("design:paramtypes", [Object, Object])
-], RecruiterMessageUseCase);
+], UserRecruiterMessageUseCase);

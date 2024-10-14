@@ -75,6 +75,10 @@ import { RecruiterMessageUseCase } from '../application/usecases/recruiter/Recru
 import { RecruiterMessageController } from '../presentation/controllers/recruiter/RecruiterMessageController';
 import { MongoRecruiterMessage } from './database/mongoose/repositories/MongoRecruiterMessage';
 import { IRecruiterMessageRepository } from '../domain/interfaces/repositories/recruiter/IRecruiterMessageRepository';
+import { UserRecruiterMessageUseCase } from '../application/usecases/user/UserRecruiterMessageUseCase';
+import { UserRecruiterMessageController } from '../presentation/controllers/user/UserRecruiterMessageController';
+import { MongoUserRecruiterMessageRepository } from './database/mongoose/repositories/MongoUserRecruiterMessageRepository';
+import { IUserRecruiterMessageRepository } from '../domain/interfaces/repositories/user/IUserRecruiterMessageRepository';
 
 const container = new Container();
 
@@ -177,6 +181,10 @@ container.bind<MessageController>(TYPES.MessageController).to(MessageController)
 container.bind<IRecruiterMessageRepository>(TYPES.IRecruiterMessageRepository).to(MongoRecruiterMessage);
 container.bind<RecruiterMessageUseCase>(TYPES.RecruiterMessageUseCase).to(RecruiterMessageUseCase);
 container.bind<RecruiterMessageController>(TYPES.RecruiterMessageController).to(RecruiterMessageController);
+
+container.bind<IUserRecruiterMessageRepository>(TYPES.IUserRecruiterMessageRepository).to(MongoUserRecruiterMessageRepository);
+container.bind<UserRecruiterMessageUseCase>(TYPES.UserRecruiterMessageUseCase).to(UserRecruiterMessageUseCase);
+container.bind<UserRecruiterMessageController>(TYPES.UserRecruiterMessageController).to(UserRecruiterMessageController);
 
 console.log(container);
 export { container };

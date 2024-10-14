@@ -2,8 +2,9 @@ import axios from 'axios';
 import { LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../types/auth';
 import { BasicJobPost } from '../types/jobPostTypes';
 import { CreatePostData, LikePostData, CommentPostData, Post } from '../types/postTypes';
-import { Message } from '../types/messageType';
+import { Message} from '../types/messageType';
 import { User,UserConnection } from '../types/auth';
+import { URMessage, URConversation } from '../types/userRecruiterMessage';
 
 
 export interface FetchJobPostsParams {
@@ -317,4 +318,16 @@ export const fetchConnectionsMessageApi = async (userId: string): Promise<{ user
 
 export const searchConnectionsMessageApi = async (userId: string, query: string): Promise<UserConnection[]> => {
   return apiRequest('GET', `/connections/${userId}/search?query=${query}`);
+};
+
+export const fetchUserConversationsApi = async (userId: string): Promise<URConversation[]> => {
+  return apiRequest('GET', `/user-conversations/${userId}`);
+};
+
+export const fetchUserMessagesApi = async (conversationId: string): Promise<URMessage[]> => {
+  return apiRequest('GET', `/user-messages/${conversationId}`);
+};
+
+export const sendUserMessageApi = async (conversationId: string, content: string, senderId: string): Promise<URMessage> => {
+  return apiRequest('POST', `/user-messages/${conversationId}`, { content, senderId });
 };

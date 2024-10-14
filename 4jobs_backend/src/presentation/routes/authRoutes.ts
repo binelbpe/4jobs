@@ -10,6 +10,7 @@ import { ConnectionController } from '../controllers/user/ConnectionController';
 import { authenticate } from '../middlewares/authMiddleware';
 import { S3Service } from '../../infrastructure/services/S3Service';
 import { MessageController } from '../controllers/user/MessageController';
+import { UserRecruiterMessageController } from '../controllers/user/UserRecruiterMessageController';
 
 const profileController = container.get<ProfileController>(TYPES.ProfileController);
 const authController = container.get<AuthController>(TYPES.AuthController);
@@ -18,6 +19,7 @@ const postController = container.get<PostController>(PostController);
 const s3Service = container.get<S3Service>(TYPES.S3Service);
 const connectionController = container.get<ConnectionController>(TYPES.ConnectionController);
 const messageController = container.get<MessageController>(TYPES.MessageController);
+const userRecruiterMessageController = container.get<UserRecruiterMessageController>(TYPES.UserRecruiterMessageController);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -213,5 +215,10 @@ authRouter.put('/messages/:messageId/read', authenticate, messageController.mark
 authRouter.get('/messages/unread/:userId', authenticate, messageController.getUnreadMessageCount.bind(messageController));
 authRouter.get('/messages/search/:userId', authenticate, messageController.searchMessages.bind(messageController));
 
+// User-Recruiter Messaging routes
+authRouter.get('/user-conversations/:userId', authenticate, userRecruiterMessageController.getUserConversations.bind(userRecruiterMessageController));
+authRouter.get('/user-messages/:conversationId', authenticate, userRecruiterMessageController.getMessages.bind(userRecruiterMessageController));
+authRouter.post('/user-messages/:conversationId', authenticate, userRecruiterMessageController.sendMessage.bind(userRecruiterMessageController));
+authRouter.post('/user-conversations', authenticate, userRecruiterMessageController.startConversation.bind(userRecruiterMessageController));
 
 export default authRouter;

@@ -66,6 +66,9 @@ const ConnectionController_1 = require("../presentation/controllers/user/Connect
 const RecruiterMessageUseCase_1 = require("../application/usecases/recruiter/RecruiterMessageUseCase");
 const RecruiterMessageController_1 = require("../presentation/controllers/recruiter/RecruiterMessageController");
 const MongoRecruiterMessage_1 = require("./database/mongoose/repositories/MongoRecruiterMessage");
+const UserRecruiterMessageUseCase_1 = require("../application/usecases/user/UserRecruiterMessageUseCase");
+const UserRecruiterMessageController_1 = require("../presentation/controllers/user/UserRecruiterMessageController");
+const MongoUserRecruiterMessageRepository_1 = require("./database/mongoose/repositories/MongoUserRecruiterMessageRepository");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -150,4 +153,7 @@ container.bind(types_1.default.MessageController).to(MessageController_1.Message
 container.bind(types_1.default.IRecruiterMessageRepository).to(MongoRecruiterMessage_1.MongoRecruiterMessage);
 container.bind(types_1.default.RecruiterMessageUseCase).to(RecruiterMessageUseCase_1.RecruiterMessageUseCase);
 container.bind(types_1.default.RecruiterMessageController).to(RecruiterMessageController_1.RecruiterMessageController);
+container.bind(types_1.default.IUserRecruiterMessageRepository).to(MongoUserRecruiterMessageRepository_1.MongoUserRecruiterMessageRepository);
+container.bind(types_1.default.UserRecruiterMessageUseCase).to(UserRecruiterMessageUseCase_1.UserRecruiterMessageUseCase);
+container.bind(types_1.default.UserRecruiterMessageController).to(UserRecruiterMessageController_1.UserRecruiterMessageController);
 console.log(container);
