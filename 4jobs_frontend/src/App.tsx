@@ -42,7 +42,7 @@ import AdminJobPost from './components/admin/AdminJobPost'
 import ConnectionProfile from './components/user/ConnectionProfile';
 import Connections from './components/user/Connections';
 import Messages from './components/user/Messages';
-
+import RecruiterMessage from './components/recruiter/RecruiterMessaging';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -92,6 +92,7 @@ const App: React.FC = () => {
       <Route path="/recruiter/jobs/edit/:id" element={<RecruiterPrivateRoute><EditJobPost /></RecruiterPrivateRoute>} />
       <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
       <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
+      <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
     </Routes>
   );
 };

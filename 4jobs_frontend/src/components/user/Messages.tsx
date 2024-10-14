@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { fetchMessageConnections, setCurrentUserId } from '../../redux/slices/messageSlice';
-import ConversationList from './ConversationList';
-import Conversation from './Conversation';
-import MessageConnectionSearch from './MessageConnectionSearch';
-import Header from './Header';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import {
+  fetchMessageConnections,
+  setCurrentUserId,
+} from "../../redux/slices/userMessageSlice";
+import ConversationList from "./ConversationList";
+import Conversation from "./Conversation";
+import MessageConnectionSearch from "./MessageConnectionSearch";
+import Header from "./Header";
 
 const Messages: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,16 +39,16 @@ const Messages: React.FC = () => {
               onClick={() => setShowSearch(!showSearch)}
               className="mt-2 w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition duration-300"
             >
-              {showSearch ? 'Back to Conversations' : 'New Message'}
+              {showSearch ? "Back to Conversations" : "New Message"}
             </button>
           </div>
           <div className="flex-grow overflow-y-auto">
             {showSearch ? (
               <MessageConnectionSearch onSelectUser={handleSelectUser} />
             ) : (
-              <ConversationList 
-                onSelectConversation={handleSelectUser} 
-                currentUserId={user?.id || ''}  // Pass the current user's ID
+              <ConversationList
+                onSelectConversation={handleSelectUser}
+                currentUserId={user?.id || ""} // Pass the current user's ID
               />
             )}
           </div>

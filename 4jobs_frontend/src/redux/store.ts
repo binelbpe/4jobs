@@ -1,20 +1,31 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import { persistStore, persistReducer, createTransform, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import * as CryptoJS from 'crypto-js';
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import {
+  persistStore,
+  persistReducer,
+  createTransform,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import * as CryptoJS from "crypto-js";
 
-import authReducer from './slices/authSlice';
-import adminReducer from './slices/adminSlice';
-import recruiterReducer from './slices/recruiterSlice';
-import jobPostReducer from './slices/jobPostSlice';
-import contestantReducer from './slices/contestantSlice';
-import postReducer from './slices/postSlice'; 
-import adminJobPostReducer from './slices/adminJobPostSlice'; 
-import connectionReducer from './slices/connectionSlice'; 
-import notificationReducer from './slices/notificationSlice'; 
-import messageReducer from './slices/messageSlice';
+import authReducer from "./slices/authSlice";
+import adminReducer from "./slices/adminSlice";
+import recruiterReducer from "./slices/recruiterSlice";
+import jobPostReducer from "./slices/jobPostSlice";
+import contestantReducer from "./slices/contestantSlice";
+import postReducer from "./slices/postSlice";
+import adminJobPostReducer from "./slices/adminJobPostSlice";
+import connectionReducer from "./slices/connectionSlice";
+import notificationReducer from "./slices/notificationSlice";
+import userMessageReducer from "./slices/userMessageSlice";
+import recruiterMessageReducer from "./slices/recruiterMessageSlice";
 
-const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'fallback-key';
+const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "fallback-key";
 
 interface EncryptedState {
   encryptedState: string;
@@ -22,16 +33,28 @@ interface EncryptedState {
 
 const encryptTransform = createTransform(
   (inboundState, key) => {
-    if (key === 'auth' || key === 'recruiter') {
-      return { encryptedState: CryptoJS.AES.encrypt(JSON.stringify(inboundState), ENCRYPTION_KEY).toString() };
+    if (key === "auth" || key === "recruiter") {
+      return {
+        encryptedState: CryptoJS.AES.encrypt(
+          JSON.stringify(inboundState),
+          ENCRYPTION_KEY
+        ).toString(),
+      };
     }
     return inboundState;
   },
   (outboundState, key) => {
-    if ((key === 'auth' || key === 'recruiter') && typeof outboundState === 'object' && outboundState !== null) {
+    if (
+      (key === "auth" || key === "recruiter") &&
+      typeof outboundState === "object" &&
+      outboundState !== null
+    ) {
       const encryptedState = (outboundState as EncryptedState).encryptedState;
-      if (typeof encryptedState === 'string') {
-        const decryptedState = CryptoJS.AES.decrypt(encryptedState, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+      if (typeof encryptedState === "string") {
+        const decryptedState = CryptoJS.AES.decrypt(
+          encryptedState,
+          ENCRYPTION_KEY
+        ).toString(CryptoJS.enc.Utf8);
         return JSON.parse(decryptedState);
       }
     }
@@ -40,77 +63,125 @@ const encryptTransform = createTransform(
 );
 
 const authPersistConfig = {
-  key: 'auth',
+  key: "auth",
   storage,
-  whitelist: ['isAuthenticated', 'user', 'loading', 'AuthState'],
-  transforms: [encryptTransform]
+  whitelist: ["isAuthenticated", "user", "loading", "AuthState"],
+  transforms: [encryptTransform],
 };
 
 const adminPersistConfig = {
-  key: 'admin',
+  key: "admin",
   storage,
-  whitelist: ['isAuthenticatedAdmin', 'dashboardData', 'users', 'loading', 'AdminState'],
+  whitelist: [
+    "isAuthenticatedAdmin",
+    "dashboardData",
+    "users",
+    "loading",
+    "AdminState",
+  ],
 };
 
 const recruiterPersistConfig = {
-  key: 'recruiter',
+  key: "recruiter",
   storage,
-  whitelist: ['isAuthenticatedRecruiter', 'isApproved', 'recruiterState', 'loading', 'recruiter'],
-  transforms: [encryptTransform]
+  whitelist: [
+    "isAuthenticatedRecruiter",
+    "isApproved",
+    "recruiterState",
+    "loading",
+    "recruiter",
+  ],
+  transforms: [encryptTransform],
 };
 
 const jobPostPersistConfig = {
-  key: 'jobPosts',
+  key: "jobPosts",
   storage,
-  whitelist: ['posts', 'loading', 'selectedPost', 'JobPostState'],
+  whitelist: ["posts", "loading", "selectedPost", "JobPostState"],
 };
 
 const contestantPersistConfig = {
-  key: 'contestants',
+  key: "contestants",
   storage,
-  whitelist: ['selectedContestant', 'contestants', 'loading', 'ContestantState'],
+  whitelist: [
+    "selectedContestant",
+    "contestants",
+    "loading",
+    "ContestantState",
+  ],
 };
 
 const postPersistConfig = {
-  key: 'posts',
+  key: "posts",
   storage,
-  whitelist: ['posts', 'loading', 'selectedPost'],
+  whitelist: ["posts", "loading", "selectedPost"],
 };
 
 const adminJobPostPersistConfig = {
-  key: 'adminJobPost',
+  key: "adminJobPost",
   storage,
-  whitelist: ['jobPosts', 'loading', 'error'],
+  whitelist: ["jobPosts", "loading", "error"],
 };
 
 const connectionPersistConfig = {
-  key: 'connections',
+  key: "connections",
   storage,
-  whitelist: ['recommendations', 'pendingRequests', 'loading', 'error'],
+  whitelist: ["recommendations", "pendingRequests", "loading", "error"],
 };
 
 const notificationPersistConfig = {
-  key: 'notifications',
+  key: "notifications",
   storage,
-  whitelist: ['items', 'unreadCount'],
+  whitelist: ["items", "unreadCount"],
 };
 
 const messagePersistConfig = {
-  key: 'messages',
+  key: "UserMessages",
   storage,
-  whitelist: ['unreadCount'],
+  whitelist: ["UserMessages", "unreadCount"],
+};
+
+const recruiterMessagePersistConfig = {
+  key: "recruiterMessages",
+  storage,
+  whitelist: ["RecruiterConversations", "RecruiterMessages"],
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedAdminReducer = persistReducer(adminPersistConfig, adminReducer);
-const persistedRecruiterReducer = persistReducer(recruiterPersistConfig, recruiterReducer);
-const persistedJobPostReducer = persistReducer(jobPostPersistConfig, jobPostReducer);
-const persistedContestantReducer = persistReducer(contestantPersistConfig, contestantReducer);
+const persistedRecruiterReducer = persistReducer(
+  recruiterPersistConfig,
+  recruiterReducer
+);
+const persistedJobPostReducer = persistReducer(
+  jobPostPersistConfig,
+  jobPostReducer
+);
+const persistedContestantReducer = persistReducer(
+  contestantPersistConfig,
+  contestantReducer
+);
 const persistedPostReducer = persistReducer(postPersistConfig, postReducer);
-const persistedAdminJobPostReducer = persistReducer(adminJobPostPersistConfig, adminJobPostReducer);
-const persistedConnectionReducer = persistReducer(connectionPersistConfig, connectionReducer);
-const persistedNotificationReducer = persistReducer(notificationPersistConfig, notificationReducer);
-const persistedMessageReducer = persistReducer(messagePersistConfig, messageReducer);
+const persistedAdminJobPostReducer = persistReducer(
+  adminJobPostPersistConfig,
+  adminJobPostReducer
+);
+const persistedConnectionReducer = persistReducer(
+  connectionPersistConfig,
+  connectionReducer
+);
+const persistedNotificationReducer = persistReducer(
+  notificationPersistConfig,
+  notificationReducer
+);
+const persistedUserMessageReducer = persistReducer(
+  messagePersistConfig,
+  userMessageReducer
+);
+const persistedRecruiterMessageReducer = persistReducer(
+  recruiterMessagePersistConfig,
+  recruiterMessageReducer
+);
 
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
@@ -122,7 +193,8 @@ const rootReducer = combineReducers({
   adminJobPost: persistedAdminJobPostReducer,
   connections: persistedConnectionReducer,
   notifications: persistedNotificationReducer,
-  messages: persistedMessageReducer,
+  messages: persistedUserMessageReducer,
+  recruiterMessages: persistedRecruiterMessageReducer,
 });
 
 const store = configureStore({

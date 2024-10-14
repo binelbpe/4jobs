@@ -64,5 +64,8 @@ const TYPES = {
     MessageUseCase: Symbol.for("MessageUseCase"),
     MessageController: Symbol.for("MessageController"),
     IMessageRepository: Symbol.for("IMessageRepository"),
+    IRecruiterMessageRepository: Symbol.for('IRecruiterMessageRepository'),
+    RecruiterMessageUseCase: Symbol.for('RecruiterMessageUseCase'),
+    RecruiterMessageController: Symbol.for('RecruiterMessageController'),
 };
 exports.default = TYPES;

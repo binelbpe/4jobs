@@ -2,7 +2,7 @@ import { io, Socket } from "socket.io-client";
 
 import store from "../redux/store";
 
-import { addMessage, setTypingStatus } from "../redux/slices/messageSlice"; // Add this import
+import { addMessage, setTypingStatus } from "../redux/slices/userMessageSlice"; // Add this import
 
 class SocketService {
   private socket: Socket | null = null;

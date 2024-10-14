@@ -24,7 +24,11 @@ import {
   markAllAsRead,
 } from "../../redux/slices/notificationSlice";
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
-import { getUnreadMessageCount, selectUnreadCount, resetUnreadCount } from "../../redux/slices/messageSlice";
+import {
+  getUnreadMessageCount,
+  selectUnreadCount,
+  resetUnreadCount,
+} from "../../redux/slices/userMessageSlice";
 import { socketService } from "../../services/socketService";
 
 const UserHeader: React.FC = () => {
@@ -34,26 +38,35 @@ const UserHeader: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const notifications = useSelector((state: RootState) => state.notifications.items);
-  const unreadCount = useSelector((state: RootState) => state.notifications.unreadCount);
-  const connectionRequests = useSelector((state: RootState) => state.connections.connectionRequests);
+  const notifications = useSelector(
+    (state: RootState) => state.notifications.items
+  );
+  const unreadCount = useSelector(
+    (state: RootState) => state.notifications.unreadCount
+  );
+  const connectionRequests = useSelector(
+    (state: RootState) => state.connections.connectionRequests
+  );
   const unreadMessageCount = useSelector(selectUnreadCount);
 
-  const pendingConnectionRequests = useMemo(() => 
-    connectionRequests.filter((request) => request.status === "pending"),
+  const pendingConnectionRequests = useMemo(
+    () => connectionRequests.filter((request) => request.status === "pending"),
     [connectionRequests]
   );
 
-  const totalNotificationCount = useMemo(() => 
-    unreadCount + pendingConnectionRequests.length + unreadMessageCount,
+  const totalNotificationCount = useMemo(
+    () => unreadCount + pendingConnectionRequests.length + unreadMessageCount,
     [unreadCount, pendingConnectionRequests.length, unreadMessageCount]
   );
 
-  const navigateTo = useCallback((path: string) => {
-    navigate(path);
-    setMenuOpen(false);
-    setShowNotifications(false);
-  }, [navigate]);
+  const navigateTo = useCallback(
+    (path: string) => {
+      navigate(path);
+      setMenuOpen(false);
+      setShowNotifications(false);
+    },
+    [navigate]
+  );
 
   const navigateToMessages = useCallback(() => {
     dispatch(resetUnreadCount());
@@ -64,16 +77,16 @@ const UserHeader: React.FC = () => {
     if (user) {
       dispatch(getUnreadMessageCount(user.id));
     }
-  }, [dispatch, user?.id]); // Only re-run if user.id changes
+  }, [dispatch,user, user?.id]); // Only re-run if user.id changes
 
   useEffect(() => {
     if (user) {
       const controller = new AbortController();
-      
+
       if (socketService && !socketService.getConnectionStatus()) {
         socketService.connect(user.id);
       }
-      
+
       dispatch(fetchNotifications(user.id));
       dispatch(fetchConnectionRequests(user.id));
 
@@ -82,17 +95,17 @@ const UserHeader: React.FC = () => {
         socketService?.disconnect();
       };
     }
-  }, [user?.id, dispatch]); // Only re-run if user.id changes
+  }, [user?.id,user, dispatch]); // Only re-run if user.id changes
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
       dispatch(addNotification(notification));
     };
 
-    socketService?.on('newNotification', handleNewNotification);
+    socketService?.on("newNotification", handleNewNotification);
 
     return () => {
-      socketService?.off('newNotification', handleNewNotification);
+      socketService?.off("newNotification", handleNewNotification);
     };
   }, [dispatch]);
 
@@ -145,29 +158,51 @@ const UserHeader: React.FC = () => {
     setMenuOpen(false);
   }, []);
 
-  const renderNavItem = useCallback((icon: any, text: string, onClick: () => void, badge?: number) => (
-    <button
-      key={text}
-      className="flex items-center text-purple-600 hover:text-gray-600 px-4 py-2 relative"
-      onClick={onClick}
-    >
-      <FontAwesomeIcon icon={icon} className="h-5 w-5 mr-2" />
-      <span>{text}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
-          {badge}
-        </span>
-      )}
-    </button>
-  ), []);
+  const renderNavItem = useCallback(
+    (icon: any, text: string, onClick: () => void, badge?: number) => (
+      <button
+        key={text}
+        className="flex items-center text-purple-600 hover:text-gray-600 px-4 py-2 relative"
+        onClick={onClick}
+      >
+        <FontAwesomeIcon icon={icon} className="h-5 w-5 mr-2" />
+        <span>{text}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+            {badge}
+          </span>
+        )}
+      </button>
+    ),
+    []
+  );
 
   const navItems = [
     { icon: faHome, text: "Home", onClick: () => navigateTo("/dashboard") },
     { icon: faBriefcase, text: "Jobs", onClick: goToJobs },
-    { icon: faComments, text: "Messages", onClick: navigateToMessages, badge: unreadMessageCount },
-    { icon: faUsers, text: "Connections", onClick: openConnectionRequests, badge: pendingConnectionRequests.length },
-    { icon: faBell, text: "Notifications", onClick: toggleNotifications, badge: totalNotificationCount },
-    { icon: faUser, text: "Profile", onClick: () => navigateTo(`/profile/${user?.id}`) },
+    {
+      icon: faComments,
+      text: "Messages",
+      onClick: navigateToMessages,
+      badge: unreadMessageCount,
+    },
+    {
+      icon: faUsers,
+      text: "Connections",
+      onClick: openConnectionRequests,
+      badge: pendingConnectionRequests.length,
+    },
+    {
+      icon: faBell,
+      text: "Notifications",
+      onClick: toggleNotifications,
+      badge: totalNotificationCount,
+    },
+    {
+      icon: faUser,
+      text: "Profile",
+      onClick: () => navigateTo(`/profile/${user?.id}`),
+    },
     { icon: faSignOutAlt, text: "Logout", onClick: handleLogout },
   ];
 
@@ -177,7 +212,10 @@ const UserHeader: React.FC = () => {
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="flex items-center">
-            <button onClick={() => navigateTo("/dashboard")} className="flex items-center">
+            <button
+              onClick={() => navigateTo("/dashboard")}
+              className="flex items-center"
+            >
               <img src="/logo.png" alt="Logo" className="h-10 w-10 mr-2" />
               <span className="text-purple-700 font-semibold text-lg hidden sm:inline">
                 4 Jobs
@@ -202,7 +240,9 @@ const UserHeader: React.FC = () => {
 
           {/* Navigation Items for larger screens */}
           <nav className="hidden lg:flex space-x-4 items-center">
-            {navItems.map((item) => renderNavItem(item.icon, item.text, item.onClick, item.badge))}
+            {navItems.map((item) =>
+              renderNavItem(item.icon, item.text, item.onClick, item.badge)
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -218,7 +258,10 @@ const UserHeader: React.FC = () => {
               className="text-purple-600 focus:outline-none"
               onClick={toggleMenu}
             >
-              <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} className="h-6 w-6" />
+              <FontAwesomeIcon
+                icon={menuOpen ? faTimes : faBars}
+                className="h-6 w-6"
+              />
             </button>
           </div>
         </div>
@@ -227,7 +270,9 @@ const UserHeader: React.FC = () => {
         {menuOpen && (
           <div className="lg:hidden bg-white border-t border-gray-200 py-4 mt-4">
             <div className="space-y-4">
-              {navItems.map((item) => renderNavItem(item.icon, item.text, item.onClick, item.badge))}
+              {navItems.map((item) =>
+                renderNavItem(item.icon, item.text, item.onClick, item.badge)
+              )}
             </div>
           </div>
         )}
@@ -264,21 +309,26 @@ const UserHeader: React.FC = () => {
                 >
                   <p className="text-sm flex items-center text-purple-600">
                     <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-                    {pendingConnectionRequests.length} pending connection request(s)
+                    {pendingConnectionRequests.length} pending connection
+                    request(s)
                   </p>
                 </div>
               )}
               {notifications.map((notification) => (
-                <div key={notification._id} className="p-4 border-b border-gray-100 hover:bg-purple-50 transition duration-300">
+                <div
+                  key={notification._id}
+                  className="p-4 border-b border-gray-100 hover:bg-purple-50 transition duration-300"
+                >
                   <p className="text-sm">{notification.message}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
                 </div>
               ))}
-              {notifications.length === 0 && pendingConnectionRequests.length === 0 && (
-                <div className="p-4 text-gray-500">No new notifications</div>
-              )}
+              {notifications.length === 0 &&
+                pendingConnectionRequests.length === 0 && (
+                  <div className="p-4 text-gray-500">No new notifications</div>
+                )}
             </div>
           </div>
         )}

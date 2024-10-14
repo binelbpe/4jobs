@@ -71,6 +71,11 @@ import { MongoConnectionRepository } from './database/mongoose/repositories/Mong
 import { ConnectionController } from '../presentation/controllers/user/ConnectionController';
 
 
+import { RecruiterMessageUseCase } from '../application/usecases/recruiter/RecruiterMessageUseCase';
+import { RecruiterMessageController } from '../presentation/controllers/recruiter/RecruiterMessageController';
+import { MongoRecruiterMessage } from './database/mongoose/repositories/MongoRecruiterMessage';
+import { IRecruiterMessageRepository } from '../domain/interfaces/repositories/recruiter/IRecruiterMessageRepository';
+
 const container = new Container();
 
 
@@ -169,6 +174,9 @@ container.bind<IMessageRepository>(TYPES.IMessageRepository).to(MessageRepositor
 container.bind<MessageUseCase>(TYPES.MessageUseCase).to(MessageUseCase);
 container.bind<MessageController>(TYPES.MessageController).to(MessageController).inSingletonScope();
 
+container.bind<IRecruiterMessageRepository>(TYPES.IRecruiterMessageRepository).to(MongoRecruiterMessage);
+container.bind<RecruiterMessageUseCase>(TYPES.RecruiterMessageUseCase).to(RecruiterMessageUseCase);
+container.bind<RecruiterMessageController>(TYPES.RecruiterMessageController).to(RecruiterMessageController);
 
 console.log(container);
 export { container };

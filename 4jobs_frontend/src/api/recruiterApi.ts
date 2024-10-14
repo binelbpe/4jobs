@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {  CreateBasicJobPostParams, UpdateBasicJobPostParams } from '../types/jobPostTypes';
 import { FetchUsersResponse, FetchUserDetailsResponse } from '../types/auth';
+import { Conversation, Message } from '../types/recruiterMessageType';
 
 const API_BASE_URL = 'http://localhost:5000/recruiter';
 
@@ -115,3 +116,40 @@ export const fetchJobApplicants = async (jobId: string, page: number = 1): Promi
 export const fetchUserDetails = async (userId: string): Promise<FetchUserDetailsResponse> => {
   return apiRequest('GET', `/applicants/${userId}`);
 };
+
+
+export const fetchConversationsApi = async (recruiterId:string): Promise<{ data: Conversation[] }> => {
+  console.log("recruiterId::::::",recruiterId)
+  return apiRequest('GET', `/conversations/${recruiterId}`);
+};
+
+export const fetchMessagesApi = async (conversationId: string): Promise<{ data: Message[] }> => {
+  const response = await apiRequest('GET', `/conversations/${conversationId}/messages`);
+  console.log('Raw API response:', response);
+  return { data: Array.isArray(response.data) ? response.data : response };
+};
+
+export const sendMessageApi = async (conversationId: string, content: string): Promise<Message> => {
+  try {
+    const response = await apiRequest('POST', `/conversations/${conversationId}/messages`, { content });
+    console.log('Raw response from sendMessageApi:', response);
+    if (response && typeof response === 'object' && 'id' in response) {
+      return response as Message;
+    } else if (response && typeof response === 'object' && 'data' in response && typeof response.data === 'object' && 'id' in response.data) {
+      return response.data as Message;
+    } else {
+      console.error('Invalid response structure from sendMessageApi:', response);
+      throw new Error('Invalid response structure from server');
+    }
+  } catch (error) {
+    console.error('Error in sendMessageApi:', error);
+    throw error;
+  }
+};
+
+
+export const startConversationApi = async (applicantId: string,recruiterId: string): Promise<{ data: Conversation }> => {
+  return apiRequest('POST', '/conversations', { applicantId,recruiterId });
+};
+
+

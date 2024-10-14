@@ -41,6 +41,10 @@ const RecruiterHeader = () => {
     navigate('/recruiter/dashboard');
   };
 
+  const handleMessagesClick = () => {
+    navigate('/recruiter/messages');
+  };
+
   return (
     <header className="bg-white shadow-md p-4 flex justify-between items-center">
       {/* Logo Section */}
@@ -83,7 +87,10 @@ const RecruiterHeader = () => {
           <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
           <span>ADD JOBS</span>
         </button>
-        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+        <button 
+          onClick={handleMessagesClick}
+          className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+        >
           <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
           <span>Messages</span>
         </button>
@@ -117,7 +124,10 @@ const RecruiterHeader = () => {
             <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
             <span>ADD JOBS</span>
           </button>
-          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
+          <button
+            className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
+            onClick={handleMessagesClick}
+          >
             <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
             <span>Messages</span>
           </button>

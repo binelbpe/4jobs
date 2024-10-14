@@ -299,11 +299,6 @@ export const searchConnectionsApi = async (userId: string, query: string) => {
   return apiRequest('GET', `/connections/${userId}/search?query=${query}`);
 };
 
-
-export const sendMessageApi = async (senderId: string, recipientId: string, content: string): Promise<Message> => {
-  return apiRequest('POST', '/messages', { senderId, recipientId, content });
-};
-
 export const getConversationApi = async (userId1: string, userId2: string): Promise<Message[]> => {
   return apiRequest('GET', `/messages/${userId1}/${userId2}`);
 };

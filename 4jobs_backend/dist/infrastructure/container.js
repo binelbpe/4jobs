@@ -63,6 +63,9 @@ const MessageController_1 = require("../presentation/controllers/user/MessageCon
 const ConnectionUseCase_1 = require("../application/usecases/user/ConnectionUseCase");
 const MongoConnectionRepository_1 = require("./database/mongoose/repositories/MongoConnectionRepository");
 const ConnectionController_1 = require("../presentation/controllers/user/ConnectionController");
+const RecruiterMessageUseCase_1 = require("../application/usecases/recruiter/RecruiterMessageUseCase");
+const RecruiterMessageController_1 = require("../presentation/controllers/recruiter/RecruiterMessageController");
+const MongoRecruiterMessage_1 = require("./database/mongoose/repositories/MongoRecruiterMessage");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -144,4 +147,7 @@ container.bind(types_1.default.NotificationEventEmitter).toDynamicValue(() => {
 container.bind(types_1.default.IMessageRepository).to(MongoMessageRepository_1.MessageRepository);
 container.bind(types_1.default.MessageUseCase).to(MessageUseCase_1.MessageUseCase);
 container.bind(types_1.default.MessageController).to(MessageController_1.MessageController).inSingletonScope();
+container.bind(types_1.default.IRecruiterMessageRepository).to(MongoRecruiterMessage_1.MongoRecruiterMessage);
+container.bind(types_1.default.RecruiterMessageUseCase).to(RecruiterMessageUseCase_1.RecruiterMessageUseCase);
+container.bind(types_1.default.RecruiterMessageController).to(RecruiterMessageController_1.RecruiterMessageController);
 console.log(container);

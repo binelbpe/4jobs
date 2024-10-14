@@ -13,6 +13,7 @@ const recruiterRouter = (0, express_1.Router)();
 exports.recruiterRouter = recruiterRouter;
 const recruiterController = container_1.container.get(types_1.default.RecruiterController);
 const jobPostController = container_1.container.get(types_1.default.JobPostController);
+const recruiterMessageController = container_1.container.get(types_1.default.RecruiterMessageController);
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
     fileFilter: (req, file, cb) => {
@@ -40,3 +41,8 @@ recruiterRouter.put('/update-jobpost/:id', jobPostController.updateJobPost.bind(
 recruiterRouter.delete('/jobpost-delete/:id', jobPostController.deleteJobPost.bind(jobPostController));
 recruiterRouter.get('/job-applicants/:jobId', jobPostController.getApplicantsByJobId.bind(jobPostController));
 recruiterRouter.get('/applicants/:applicantId', jobPostController.getApplicantsById.bind(jobPostController));
+// Add new routes for messaging
+recruiterRouter.get('/conversations/:recruiterId', (req, res) => recruiterMessageController.getConversations(req, res));
+recruiterRouter.get('/conversations/:conversationId/messages', (req, res) => recruiterMessageController.getMessages(req, res));
+recruiterRouter.post('/conversations/:conversationId/messages', (req, res) => recruiterMessageController.sendMessage(req, res));
+recruiterRouter.post('/conversations', (req, res) => recruiterMessageController.startConversation(req, res));

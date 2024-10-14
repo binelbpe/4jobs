@@ -5,6 +5,7 @@ import { AppDispatch, RootState } from '../../../redux/store';
 import { fetchContestantDetailsAsync, clearSelectedContestant } from '../../../redux/slices/contestantSlice';
 import ErrorMessage from '../jobPost/common/ErrorMessage';
 import LoadingSpinner from '../jobPost/common/LoadingSpinner';
+import { startConversationApi } from '../../../api/recruiterApi';
 import RecruiterHeader from '../RecruiterHeader';
 import { User, Mail , Phone, Calendar, Award, FileText, ArrowLeft,  Globe } from 'lucide-react';
 
@@ -13,6 +14,16 @@ const ContestantDetails: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { selectedContestant, loading, error } = useSelector((state: RootState) => state.contestants);
+  const recruiterId = useSelector((state: RootState) => state.recruiter.recruiter?.id);
+  const handleStartConversation = async () => {
+    try {
+      await startConversationApi(selectedContestant?.id?selectedContestant?.id:"",recruiterId);
+      navigate(`/recruiter/messages`);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      // Handle error (e.g., show an error message to the user)
+    }
+  };
 
   useEffect(() => {
     if (contestantId) {
@@ -108,7 +119,7 @@ const ContestantDetails: React.FC = () => {
                       <div key={project.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                         {project.imageUrl && (
                           <img 
-                            src={project.imageUrl} 
+                            src={`${project.imageUrl}`} 
                             alt={project.name} 
                             className="w-full h-48 object-cover" 
                           />
@@ -118,7 +129,7 @@ const ContestantDetails: React.FC = () => {
                           <p className="text-gray-700 mb-4">{project.description}</p>
                           {project.link && (
                             <a 
-                              href={project.link} 
+                              href={`${project.link}`} 
                               target="_blank" 
                               rel="noopener noreferrer" 
                               className="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors duration-300"
@@ -150,7 +161,7 @@ const ContestantDetails: React.FC = () => {
                         </p>
                         {cert.imageUrl && (
                           <img 
-                            src={cert.imageUrl} 
+                            src={`${cert.imageUrl}`} 
                             alt={cert.name} 
                             className="mt-2 w-full h-32 object-cover rounded-md" 
                           />
@@ -185,7 +196,7 @@ const ContestantDetails: React.FC = () => {
               {selectedContestant.resume && (
                 <div className="mt-8">
                   <a
-                    href={`http://localhost:5000${selectedContestant.resume}`}
+                    href={`${selectedContestant.resume}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors duration-300 shadow-md"
@@ -204,6 +215,12 @@ const ContestantDetails: React.FC = () => {
             <ArrowLeft size={20} className="mr-2" />
             Back to Applicants
           </button>
+          <button
+        onClick={handleStartConversation}
+        className="mt-4 bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition duration-300"
+      >
+        Start Conversation
+      </button>
         </div>
       </div>
     </div>
