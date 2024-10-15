@@ -6,12 +6,20 @@ export interface User {
 
 export interface Message {
   id: string;
-  senderId: string;
-  recipientId: string;
+  sender: {
+    id: string;
+    email: string;
+    name: string;
+    profileImage: string;
+  };
+  recipient: {
+    id: string;
+    email: string;
+    name: string;
+    profileImage: string;
+  };
   content: string;
   createdAt: string;
   isRead: boolean;
-  sender: User;
-  recipient: User;
   status: 'sent' | 'delivered' | 'read';
 }

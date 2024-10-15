@@ -2,7 +2,8 @@ import { useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socketService } from "../services/socketService";
 import { RootState } from "../redux/store";
-import { addMessage, setTypingStatus } from "../redux/slices/userMessageSlice";
+import { addMessage, setTypingStatus, updateUnreadCount } from "../redux/slices/userMessageSlice";
+import { addUserRecruiterMessage, updateTotalUnreadCount } from "../redux/slices/userRecruiterMessageSlice";
 
 export const useSocket = (recipientId: string) => {
   const dispatch = useDispatch();
@@ -29,7 +30,13 @@ export const useSocket = (recipientId: string) => {
 
       const handleNewMessage = (message: any) => {
         console.log("Received new message:", message);
-        dispatch(addMessage(message));
+        if (message.isRecruiterMessage) {
+          dispatch(addUserRecruiterMessage(message));
+          dispatch(updateTotalUnreadCount());
+        } else {
+          dispatch(addMessage(message));
+          dispatch(updateUnreadCount(message.unreadCount));
+        }
       };
 
       const handleUserTyping = (data: {

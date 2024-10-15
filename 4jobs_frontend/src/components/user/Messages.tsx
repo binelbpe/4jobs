@@ -58,7 +58,7 @@ const Messages: React.FC = () => {
               <Link to="/user/messages" className="text-purple-600 hover:text-purple-800 relative">
                 <FaUserTie size={24} title="Recruiter Messages" />
                 {recruiterUnreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                  <span className="absolute -top-2 -right-2 bg-purple-500 text-white rounded-full px-2 py-1 text-xs">
                     {recruiterUnreadCount}
                   </span>
                 )}

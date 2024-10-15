@@ -24,11 +24,7 @@ import {
   markAllAsRead,
 } from "../../redux/slices/notificationSlice";
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
-import {
-  getUnreadMessageCount,
-  selectUnreadCount,
-  resetUnreadCount,
-} from "../../redux/slices/userMessageSlice";
+import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
 import { socketService } from "../../services/socketService";
 
 const UserHeader: React.FC = () => {
@@ -47,7 +43,6 @@ const UserHeader: React.FC = () => {
   const connectionRequests = useSelector(
     (state: RootState) => state.connections.connectionRequests
   );
-  const unreadMessageCount = useSelector(selectUnreadCount);
 
   const pendingConnectionRequests = useMemo(
     () => connectionRequests.filter((request) => request.status === "pending"),
@@ -55,8 +50,8 @@ const UserHeader: React.FC = () => {
   );
 
   const totalNotificationCount = useMemo(
-    () => unreadCount + pendingConnectionRequests.length + unreadMessageCount,
-    [unreadCount, pendingConnectionRequests.length, unreadMessageCount]
+    () => unreadCount + pendingConnectionRequests.length,
+    [unreadCount, pendingConnectionRequests.length]
   );
 
   const navigateTo = useCallback(
@@ -73,11 +68,7 @@ const UserHeader: React.FC = () => {
     navigateTo("/messages");
   }, [dispatch, navigateTo]);
 
-  useEffect(() => {
-    if (user) {
-      dispatch(getUnreadMessageCount(user.id));
-    }
-  }, [dispatch,user, user?.id]); // Only re-run if user.id changes
+
 
   useEffect(() => {
     if (user) {
@@ -95,7 +86,7 @@ const UserHeader: React.FC = () => {
         socketService?.disconnect();
       };
     }
-  }, [user?.id,user, dispatch]); // Only re-run if user.id changes
+  }, [user?.id, user, dispatch]);
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
@@ -184,7 +175,6 @@ const UserHeader: React.FC = () => {
       icon: faComments,
       text: "Messages",
       onClick: navigateToMessages,
-      badge: unreadMessageCount,
     },
     {
       icon: faUsers,

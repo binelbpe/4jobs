@@ -83,6 +83,7 @@ let MessageController = class MessageController {
                     return;
                 }
                 const messages = yield this.messageUseCase.getConversation(userId1, userId2);
+                console.log("messages between two userssssssssss", messages);
                 res.status(200).json(messages);
             }
             catch (error) {

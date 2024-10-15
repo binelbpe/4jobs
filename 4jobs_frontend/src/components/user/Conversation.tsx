@@ -4,9 +4,9 @@ import { RootState, AppDispatch } from "../../redux/store";
 import {
   fetchConversation,
   markMessagesAsRead,
-  setTypingStatus,
-  addMessage,
+  updateUnreadCount,
 } from "../../redux/slices/userMessageSlice";
+import { updateTotalUnreadCount } from "../../redux/slices/userRecruiterMessageSlice";
 import { Message } from "../../types/messageType";
 import useSocket from "../../hooks/useSocket";
 import debounce from "lodash/debounce";
@@ -77,7 +77,10 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
 
   useEffect(() => {
     const unreadMessages = messages.filter(
-      (message: Message) => !message.isRead && message.sender.id === userId
+      (message: Message) =>
+        message.sender.id === userId &&
+        !message.isRead &&
+        message.status !== "read"
     );
     if (unreadMessages.length > 0) {
       dispatch(
@@ -85,6 +88,10 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
           messageIds: unreadMessages.map((m: Message) => m.id),
         })
       );
+      dispatch(
+        updateUnreadCount(messages.filter((m: Message) => !m.isRead).length)
+      );
+      dispatch(updateTotalUnreadCount());
     }
   }, [dispatch, messages, userId]);
 
@@ -108,7 +115,14 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
         }
       }
     },
-    [newMessage, currentUser, userId, sendSocketMessage, isConnected]
+    [
+      newMessage,
+      currentUser,
+      userId,
+      sendSocketMessage,
+      isConnected,
+      setNewMessage,
+    ]
   );
 
   const debouncedEmitTyping = useCallback(

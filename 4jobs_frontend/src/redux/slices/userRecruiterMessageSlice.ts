@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 import {
   fetchUserConversationsApi,
   fetchUserMessagesApi,
@@ -14,6 +15,7 @@ interface UserRecruiterMessageState {
   error: string | null;
   onlineStatus: { [userId: string]: boolean };
   currentUserId: string;
+  totalUnreadCount: number;
 }
 
 const initialState: UserRecruiterMessageState = {
@@ -24,6 +26,7 @@ const initialState: UserRecruiterMessageState = {
   error: null,
   onlineStatus: {},
   currentUserId: "",
+  totalUnreadCount: 0,
 };
 
 export const fetchUserRecruiterConversations = createAsyncThunk(
@@ -87,7 +90,7 @@ const userRecruiterMessageSlice = createSlice({
       }
       state.messages[conversationId].push({
         ...action.payload,
-        locallyRead: false, // Set locallyRead to false for new messages
+        locallyRead: false,
       });
 
       // Increment unread count if the message is not from the current user
@@ -181,6 +184,12 @@ const userRecruiterMessageSlice = createSlice({
         conversation.unreadCount = 0;
       }
     },
+    updateTotalUnreadCount: (state) => {
+      state.totalUnreadCount = state.conversations.reduce(
+        (sum, conversation) => sum + (conversation.unreadCount || 0),
+        0
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -266,6 +275,11 @@ export const {
   updateConversation,
   addNewConversation,
   incrementUnreadCount,
+  updateTotalUnreadCount,
 } = userRecruiterMessageSlice.actions;
+
+export const selectRecruiterUnreadCount = (state: RootState): number => {
+  return state.userRecruiterMessages.totalUnreadCount;
+};
 
 export default userRecruiterMessageSlice.reducer;

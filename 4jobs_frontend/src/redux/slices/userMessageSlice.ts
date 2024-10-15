@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { Message, User } from "../../types/messageType";  // Updated import path
+import { Message, User } from "../../types/messageType"; // Updated import path
 import {
   getConversationApi,
   markMessageAsReadApi,
@@ -9,7 +9,12 @@ import {
 } from "../../api/authapi";
 
 interface MessageState {
-  connections: { user: User; lastMessage: Message; isOnline: boolean; isTyping: boolean }[];
+  connections: {
+    user: User;
+    lastMessage: Message;
+    isOnline: boolean;
+    isTyping: boolean;
+  }[];
   conversations: { [key: string]: Message[] };
   unreadCount: number;
   loading: boolean;
@@ -38,7 +43,8 @@ export const fetchConversation = createAsyncThunk(
   "messages/fetchConversation",
   async ({ userId1, userId2 }: { userId1: string; userId2: string }) => {
     const response = await getConversationApi(userId1, userId2);
-    const conversationId = userId1 < userId2 ? `${userId1}-${userId2}` : `${userId2}-${userId1}`;
+    const conversationId =
+      userId1 < userId2 ? `${userId1}-${userId2}` : `${userId2}-${userId1}`;
     return { conversationId, messages: response };
   }
 );
@@ -91,7 +97,7 @@ const userMessageSlice = createSlice({
     ) => {
       const { messageId, status } = action.payload;
       Object.values(state.conversations).forEach((conversation) => {
-        const message = conversation.find((m: Message) => m.id === messageId);  // Added type annotation
+        const message = conversation.find((m: Message) => m.id === messageId); // Added type annotation
         if (message) {
           message.status = status;
         }
@@ -99,39 +105,61 @@ const userMessageSlice = createSlice({
     },
     addMessage: (state, action: PayloadAction<Message>) => {
       const { sender, recipient } = action.payload;
-      const conversationId = sender.id < recipient.id ? `${sender.id}-${recipient.id}` : `${recipient.id}-${sender.id}`;
+      const conversationId =
+        sender.id < recipient.id
+          ? `${sender.id}-${recipient.id}`
+          : `${recipient.id}-${sender.id}`;
       if (!state.conversations[conversationId]) {
         state.conversations[conversationId] = [];
       }
       // Check if the message already exists to prevent duplicates
-      const messageExists = state.conversations[conversationId].some(msg => msg.id === action.payload.id);
+      const messageExists = state.conversations[conversationId].some(
+        (msg) => msg.id === action.payload.id
+      );
       if (!messageExists) {
         state.conversations[conversationId].push(action.payload);
-        
+
         // Update the connections list with the new message
-        const connectionIndex = state.connections.findIndex(conn => 
-          conn.user.id === (sender.id === state.currentUserId ? recipient.id : sender.id)
+        const connectionIndex = state.connections.findIndex(
+          (conn) =>
+            conn.user.id ===
+            (sender.id === state.currentUserId ? recipient.id : sender.id)
         );
         if (connectionIndex !== -1) {
           state.connections[connectionIndex].lastMessage = action.payload;
           // Move this connection to the top of the list
-          const [updatedConnection] = state.connections.splice(connectionIndex, 1);
+          const [updatedConnection] = state.connections.splice(
+            connectionIndex,
+            1
+          );
           state.connections.unshift(updatedConnection);
         }
       }
     },
-    setTypingStatus: (state, action: PayloadAction<{ userId: string; isTyping: boolean }>) => {
-      console.log('setTypingStatus action received:', action.payload);
-      const connectionIndex = state.connections.findIndex(conn => conn.user.id === action.payload.userId);
+    setTypingStatus: (
+      state,
+      action: PayloadAction<{ userId: string; isTyping: boolean }>
+    ) => {
+      console.log("setTypingStatus action received:", action.payload);
+      const connectionIndex = state.connections.findIndex(
+        (conn) => conn.user.id === action.payload.userId
+      );
       if (connectionIndex !== -1) {
-        state.connections[connectionIndex].isTyping = action.payload.isTyping ?? false;
-        console.log('Typing status updated:', state.connections[connectionIndex]);
+        state.connections[connectionIndex].isTyping =
+          action.payload.isTyping ?? false;
+        console.log(
+          "Typing status updated:",
+          state.connections[connectionIndex]
+        );
       } else {
-        console.log('Connection not found for user:', action.payload.userId);
+        console.log("Connection not found for user:", action.payload.userId);
       }
     },
     setCurrentUserId: (state, action: PayloadAction<string>) => {
       state.currentUserId = action.payload;
+    },
+    updateUnreadCount: (state, action: PayloadAction<number>) => {
+      state.unreadCount = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -148,9 +176,9 @@ const userMessageSlice = createSlice({
           >
         ) => {
           state.loading = false;
-          state.connections = action.payload.map(conn => ({
+          state.connections = action.payload.map((conn) => ({
             ...conn,
-            isTyping: false
+            isTyping: false,
           }));
         }
       )
@@ -170,7 +198,7 @@ const userMessageSlice = createSlice({
       //     state.conversations[conversationId] = [];
       //   }
       //   state.conversations[conversationId].push(action.payload);
-      
+
       //   // Update the connections list with the new message
       //   const connectionIndex = state.connections.findIndex(conn => conn.user.id === recipient.id);
       //   if (connectionIndex !== -1) {
@@ -183,7 +211,8 @@ const userMessageSlice = createSlice({
       .addCase(markMessagesAsRead.fulfilled, (state, action) => {
         const messageIds = action.payload;
         Object.values(state.conversations).forEach((conversation) => {
-          conversation.forEach((message: Message) => {  // Added type annotation
+          conversation.forEach((message: Message) => {
+            // Added type annotation
             if (messageIds.includes(message.id)) {
               message.isRead = true;
             }
@@ -197,7 +226,14 @@ const userMessageSlice = createSlice({
 });
 
 // Export the actions
-export const { resetUnreadCount, updateMessageStatus, addMessage, setTypingStatus, setCurrentUserId } = userMessageSlice.actions;
+export const {
+  resetUnreadCount,
+  updateMessageStatus,
+  addMessage,
+  setTypingStatus,
+  setCurrentUserId,
+  updateUnreadCount,
+} = userMessageSlice.actions;
 
 export const selectUnreadCount = (state: RootState) =>
   state.messages.unreadCount;

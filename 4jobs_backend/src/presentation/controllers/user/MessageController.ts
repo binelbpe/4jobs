@@ -71,6 +71,7 @@ export class MessageController {
       }
 
       const messages = await this.messageUseCase.getConversation(userId1, userId2);
+      console.log("messages between two userssssssssss",messages)
       res.status(200).json(messages);
     } catch (error) {
       this.handleError(res, error, "Error fetching conversation");
