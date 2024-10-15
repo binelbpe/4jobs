@@ -9,6 +9,7 @@ interface MessageState {
   onlineStatus: { [userId: string]: boolean };
   recruiterLoading: boolean;
   recruiterError: string | null;
+  currentRecruiterId: string | null;
 }
 
 const initialState: MessageState = {
@@ -18,6 +19,7 @@ const initialState: MessageState = {
   onlineStatus: {},
   recruiterLoading: false,
   recruiterError: null,
+  currentRecruiterId: null,
 };
 
 export const fetchConversations = createAsyncThunk(
@@ -72,7 +74,16 @@ const RecruitermessageSlice = createSlice({
       if (!state.RecruiterMessages[conversationId]) {
         state.RecruiterMessages[conversationId] = [];
       }
-      state.RecruiterMessages[conversationId].push(action.payload);
+      state.RecruiterMessages[conversationId].push({
+        ...action.payload,
+        locallyRead: false
+      });
+
+      // Increment unread count if the message is not from the current recruiter
+      const conversation = state.RecruiterConversations.find(c => c.id === conversationId);
+      if (conversation && action.payload.senderId !== state.currentRecruiterId) {
+        conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+      }
     },
     setRecruiterTypingStatus: (state, action: PayloadAction<{ userId: string, conversationId: string, isTyping: boolean }>) => {
       const { userId, conversationId, isTyping } = action.payload;
@@ -86,10 +97,12 @@ const RecruitermessageSlice = createSlice({
       const conversation = state.RecruiterConversations.find(c => c.id === conversationId);
       if (conversation) {
         conversation.lastMessageRead = true;
+        conversation.unreadCount = 0; // Reset unread count when marking as read
       }
       const message = state.RecruiterMessages[conversationId]?.find(m => m.id === messageId);
       if (message) {
-        message.isRead = true; // Changed from read to isRead
+        message.isRead = true;
+        message.locallyRead = true;
       }
     },
     setRecruiterOnlineStatus: (state, action: PayloadAction<{ userId: string, online: boolean }>) => {
@@ -104,6 +117,22 @@ const RecruitermessageSlice = createSlice({
     },
     addNewRecruiterConversation: (state, action: PayloadAction<Conversation>) => {
       state.RecruiterConversations.push(action.payload);
+    },
+    markAllMessagesAsLocallyRead: (state, action: PayloadAction<string>) => {
+      const conversationId = action.payload;
+      if (state.RecruiterMessages[conversationId]) {
+        state.RecruiterMessages[conversationId] = state.RecruiterMessages[conversationId].map(message => ({
+          ...message,
+          locallyRead: true
+        }));
+      }
+      const conversation = state.RecruiterConversations.find(c => c.id === conversationId);
+      if (conversation) {
+        conversation.unreadCount = 0;
+      }
+    },
+    setCurrentRecruiterId: (state, action: PayloadAction<string>) => {
+      state.currentRecruiterId = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -169,9 +198,11 @@ export const {
   addRecruiterMessage,
   setRecruiterTypingStatus,
   markRecruiterMessageAsRead,
+  markAllMessagesAsLocallyRead,
   setRecruiterOnlineStatus,
   updateRecruiterConversation,
-  addNewRecruiterConversation
+  addNewRecruiterConversation,
+  setCurrentRecruiterId
 } = RecruitermessageSlice.actions;
 
 export default RecruitermessageSlice.reducer;

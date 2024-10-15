@@ -85,14 +85,17 @@ const userRecruiterMessageSlice = createSlice({
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = [];
       }
-      state.messages[conversationId].push(action.payload);
+      state.messages[conversationId].push({
+        ...action.payload,
+        locallyRead: false, // Set locallyRead to false for new messages
+      });
 
       // Increment unread count if the message is not from the current user
       const conversation = state.conversations.find(
         (c) => c.id === conversationId
       );
       if (conversation && action.payload.senderId !== state.currentUserId) {
-        conversation.unreadCount += 1;
+        conversation.unreadCount = (conversation.unreadCount || 0) + 1;
       }
     },
     setUserRecruiterTypingStatus: (
@@ -119,12 +122,14 @@ const userRecruiterMessageSlice = createSlice({
       );
       if (conversation) {
         conversation.lastMessageRead = true;
+        conversation.unreadCount = 0; // Reset unread count when marking as read
       }
       const message = state.messages[conversationId]?.find(
         (m) => m.id === messageId
       );
       if (message) {
         message.isRead = true;
+        message.locallyRead = true;
       }
     },
     setUserOnlineStatus: (
@@ -157,6 +162,23 @@ const userRecruiterMessageSlice = createSlice({
       );
       if (conversation) {
         conversation.unreadCount += 1;
+      }
+    },
+    markAllMessagesAsLocallyRead: (state, action: PayloadAction<string>) => {
+      const conversationId = action.payload;
+      if (state.messages[conversationId]) {
+        state.messages[conversationId] = state.messages[conversationId].map(
+          (message) => ({
+            ...message,
+            locallyRead: true,
+          })
+        );
+      }
+      const conversation = state.conversations.find(
+        (c) => c.id === conversationId
+      );
+      if (conversation) {
+        conversation.unreadCount = 0;
       }
     },
   },
@@ -239,6 +261,7 @@ export const {
   addUserRecruiterMessage,
   setUserRecruiterTypingStatus,
   markUserRecruiterMessageAsRead,
+  markAllMessagesAsLocallyRead,
   setUserOnlineStatus,
   updateConversation,
   addNewConversation,

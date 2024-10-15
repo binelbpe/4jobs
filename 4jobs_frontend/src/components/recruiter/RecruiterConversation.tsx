@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
-import { fetchMessages } from "../../redux/slices/recruiterMessageSlice";
+import { fetchMessages, markAllMessagesAsLocallyRead } from "../../redux/slices/recruiterMessageSlice";
 import { Message } from "../../types/recruiterMessageType";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid } from "date-fns";
@@ -47,6 +47,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
 
   useEffect(() => {
     dispatch(fetchMessages(conversationId));
+    dispatch(markAllMessagesAsLocallyRead(conversationId));
     userRecruiterSocketService.joinConversation(conversationId);
     return () => {
       userRecruiterSocketService.leaveConversation(conversationId);

@@ -6,6 +6,7 @@ export interface URMessage {
   timestamp: string;
   isRead: boolean;
   senderType: string;
+  locallyRead: boolean; // New field to track if the message has been read locally
 }
 
 export interface URConversation {

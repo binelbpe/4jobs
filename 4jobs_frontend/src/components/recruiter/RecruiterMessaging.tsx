@@ -12,7 +12,7 @@ const RecruiterMessaging: React.FC = () => {
     <div className="flex flex-col h-screen">
       <RecruiterHeader />
      
-        <div className="flex h-[calc(100vh-200px)]">
+        <div className="flex flex-1 overflow-hidden">
           <MessageList
             onSelectConversation={setSelectedConversation}
             selectedConversationId={selectedConversation}

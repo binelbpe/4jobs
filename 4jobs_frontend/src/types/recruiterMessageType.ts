@@ -11,6 +11,7 @@ export interface Message {
   content: string;
   timestamp: string;
   isRead: boolean;
+  locallyRead: boolean; // Add this line
   senderType: string;
 }
 

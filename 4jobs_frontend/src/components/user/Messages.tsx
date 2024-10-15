@@ -17,9 +17,17 @@ const Messages: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
-  const recruiterUnreadCount = useSelector((state: RootState) => 
-    state.userRecruiterMessages.conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0)
-  );
+  const recruiterUnreadCount = useSelector((state: RootState) => {
+    const conversations = state.userRecruiterMessages.conversations;
+    const messages = state.userRecruiterMessages.messages;
+    return conversations.reduce((sum, conv) => {
+      const conversationMessages = messages[conv.id] || [];
+      const unreadCount = conversationMessages.filter(
+        msg => !msg.isRead && !msg.locallyRead && msg.senderId !== user?.id
+      ).length;
+      return sum + unreadCount;
+    }, 0);
+  });
 
   useEffect(() => {
     if (user?.id) {

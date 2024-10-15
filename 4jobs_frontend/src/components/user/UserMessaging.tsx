@@ -14,7 +14,7 @@ const UserMessaging: React.FC = () => {
     const latestConversation = conversations[0];
     if (latestConversation && latestConversation.id !== selectedConversationId && latestConversation.unreadCount > 0) {
       setNewMessageNotification(`New message from ${latestConversation.participant.name}`);
-      setTimeout(() => setNewMessageNotification(null), 5000); // Clear notification after 5 seconds
+      setTimeout(() => setNewMessageNotification(null),0); 
     }
   }, [conversations, selectedConversationId]);
 
@@ -30,7 +30,7 @@ const UserMessaging: React.FC = () => {
         <UserConversationList onSelectConversation={handleSelectConversation} selectedConversationId={selectedConversationId} />
         <div className="flex-1 flex flex-col">
           {newMessageNotification && (
-            <div className="bg-blue-500 text-white p-2 text-center">
+            <div className="bg-purple-500 text-white p-2 text-center">
               {newMessageNotification}
             </div>
           )}
