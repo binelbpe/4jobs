@@ -5,23 +5,34 @@ import { injectable } from "inversify";
 
 @injectable()
 export class MongoRecruiterRepository implements IRecruiterRepository {
-  async create(recruiterData: {
-    email: string;
-    password: string;
-    companyName: string;
-    location: string;
-    phone: string;
-    name: string;
-    role: string;
-    isApproved: boolean;
-    governmentId: string;
-    employeeId: string;
-    employeeIdImage?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-  }): Promise<IRecruiter> {
+  private mapToIRecruiter(doc: any): IRecruiter {
+    return {
+      id: doc._id.toString(),
+      email: doc.email,
+      password: doc.password,
+      companyName: doc.companyName,
+      phone: doc.phone,
+      name: doc.name,
+      role: doc.role,
+      isApproved: doc.isApproved,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+      governmentId: doc.governmentId,
+      employeeId: doc.employeeId,
+      location: doc.location,
+      employeeIdImage: doc.employeeIdImage,
+      subscribed: doc.subscribed,
+      planDuration: doc.planDuration,
+      expiryDate: doc.expiryDate,
+      subscriptionAmount: doc.subscriptionAmount,
+      subscriptionStartDate: doc.subscriptionStartDate, 
+    };
+  }
+
+  async create(recruiterData: any): Promise<IRecruiter> {
     const recruiter = new Recruiter(recruiterData);
-    return recruiter.save() as Promise<IRecruiter>;
+    const savedRecruiter = await recruiter.save();
+    return this.mapToIRecruiter(savedRecruiter);
   }
 
   async findRecruiterByEmail(email: string): Promise<IRecruiter | null> {
@@ -44,12 +55,12 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
       recruiter,
       { new: true }
     ).exec();
-    return updatedRecruiter as IRecruiter;
+    return this.mapToIRecruiter(updatedRecruiter);
   }
 
   async findRecruiters(): Promise<IRecruiter[]> {
     const recruiters = await Recruiter.find().exec();
-    return recruiters as IRecruiter[];
+    return recruiters.map(this.mapToIRecruiter);
   }
 
   async updateRecruiter(
@@ -69,5 +80,23 @@ export class MongoRecruiterRepository implements IRecruiterRepository {
   async findRecruiterById(id: string): Promise<IRecruiter | null> {
     const recruiter = await Recruiter.findById(id).exec();
     return recruiter as IRecruiter | null;
+  }
+
+  async updateSubscription(
+    id: string,
+    subscriptionData: {
+      subscribed: boolean;
+      planDuration: string;
+      expiryDate: Date;
+      subscriptionAmount: number;
+      subscriptionStartDate: Date;
+    }
+  ): Promise<IRecruiter | null> {
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(
+      id,
+      { $set: subscriptionData },
+      { new: true }
+    ).exec();
+    return updatedRecruiter ? this.mapToIRecruiter(updatedRecruiter) : null;
   }
 }

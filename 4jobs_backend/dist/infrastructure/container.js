@@ -69,6 +69,8 @@ const MongoRecruiterMessage_1 = require("./database/mongoose/repositories/MongoR
 const UserRecruiterMessageUseCase_1 = require("../application/usecases/user/UserRecruiterMessageUseCase");
 const UserRecruiterMessageController_1 = require("../presentation/controllers/user/UserRecruiterMessageController");
 const MongoUserRecruiterMessageRepository_1 = require("./database/mongoose/repositories/MongoUserRecruiterMessageRepository");
+const SubscriptionController_1 = require("../presentation/controllers/recruiter/SubscriptionController");
+const UpdateSubscriptionUseCase_1 = require("../application/usecases/recruiter/UpdateSubscriptionUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -156,4 +158,6 @@ container.bind(types_1.default.RecruiterMessageController).to(RecruiterMessageCo
 container.bind(types_1.default.IUserRecruiterMessageRepository).to(MongoUserRecruiterMessageRepository_1.MongoUserRecruiterMessageRepository);
 container.bind(types_1.default.UserRecruiterMessageUseCase).to(UserRecruiterMessageUseCase_1.UserRecruiterMessageUseCase);
 container.bind(types_1.default.UserRecruiterMessageController).to(UserRecruiterMessageController_1.UserRecruiterMessageController);
+container.bind(types_1.default.SubscriptionController).to(SubscriptionController_1.SubscriptionController);
+container.bind(types_1.default.UpdateSubscriptionUseCase).to(UpdateSubscriptionUseCase_1.UpdateSubscriptionUseCase);
 console.log(container);

@@ -30,7 +30,11 @@ const RecruiterSchema = new mongoose_1.Schema({
     phone: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'recruiter' },
+    role: {
+        type: String,
+        enum: ["user", "recruiter", "admin"],
+        default: "recruiter",
+    },
     isApproved: { type: Boolean, default: false },
     name: { type: String },
     governmentId: { type: String, required: true },
@@ -39,5 +43,10 @@ const RecruiterSchema = new mongoose_1.Schema({
     employeeIdImage: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    subscribed: { type: Boolean, default: false },
+    planDuration: { type: String, default: null },
+    expiryDate: { type: Date, default: null },
+    subscriptionAmount: { type: Number, default: 0 },
+    subscriptionStartDate: { type: Date, default: null },
 });
-exports.default = mongoose_1.default.model('Recruiter', RecruiterSchema);
+exports.default = mongoose_1.default.model("Recruiter", RecruiterSchema);

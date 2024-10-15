@@ -18,6 +18,9 @@ interface RecruiterState {
   error: string | null;
   otpStep: boolean;
   profile: any | null;
+  subscribed: boolean;
+  planDuration: string | null;
+  expiryDate: string | null;
 }
 
 const initialState: RecruiterState = {
@@ -28,6 +31,9 @@ const initialState: RecruiterState = {
   error: null,
   otpStep: false,
   profile: null,
+  subscribed: false,
+  planDuration: null,
+  expiryDate: null,
 };
 
 // Async thunks
@@ -91,6 +97,19 @@ export const updateProfile = createAsyncThunk(
   async ({ recruiterId, profileData }: { recruiterId: string; profileData: FormData }, { rejectWithValue }) => {
     try {
       return await updateRecruiterProfileApi(recruiterId, profileData);
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
+    }
+  }
+);
+
+export const updateSubscription = createAsyncThunk(
+  "recruiter/updateSubscription",
+  async (subscriptionData: { subscribed: boolean; planDuration: string; expiryDate: string }, { rejectWithValue }) => {
+    try {
+      // Implement API call to update subscription on the server
+      // For now, we'll just return the data
+      return subscriptionData;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
@@ -206,6 +225,20 @@ const recruiterSlice = createSlice({
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(updateSubscription.fulfilled, (state, action) => {
+        state.subscribed = action.payload.subscribed;
+        state.planDuration = action.payload.planDuration;
+        state.expiryDate = action.payload.expiryDate; // This is now a string
+        // Update the recruiter object as well
+        if (state.recruiter) {
+          state.recruiter = {
+            ...state.recruiter,
+            subscribed: action.payload.subscribed,
+            planDuration: action.payload.planDuration,
+            expiryDate: action.payload.expiryDate,
+          };
+        }
       });
   },
 });

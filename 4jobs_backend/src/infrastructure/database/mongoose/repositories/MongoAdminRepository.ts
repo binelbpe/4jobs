@@ -5,14 +5,12 @@ import { UserModel } from "../../mongoose/models/UserModel";
 import { IRecruiter } from "../../../../domain/entities/Recruiter";
 import Recruiter from "../models/RecruiterModel";
 
+
 @injectable()
 export class MongoAdminRepository implements IAdminRepository {
-
-
   async findAllUsers(): Promise<User[]> {
     const usersList = await UserModel.find({ isAdmin: false }).exec();
-
-    // Map each document to ensure `id` is correctly mapped from `_id`
+   
     const mappedUsers = usersList.map(this.mapToUser);
     return mappedUsers;
   }
@@ -42,20 +40,6 @@ export class MongoAdminRepository implements IAdminRepository {
     return recruiter as IRecruiter | null;
   }
 
-  async save(recruiter: IRecruiter): Promise<IRecruiter> {
-    const updatedRecruiter = await Recruiter.findByIdAndUpdate(
-      recruiter.id,
-      recruiter,
-      { new: true }
-    ).exec();
-    return updatedRecruiter as IRecruiter;
-  }
-
-  async findRecruiters(): Promise<IRecruiter[]> {
-    const recruiters = await Recruiter.find().exec();
-    return recruiters as IRecruiter[];
-  }
-
   private mapToUser(doc: any): User {
     return {
       id: doc._id.toString(),
@@ -77,5 +61,110 @@ export class MongoAdminRepository implements IAdminRepository {
       resume: doc.resume,
       isBlocked: doc.isBlocked,
     };
+  }
+
+  private mapToIRecruiter(doc: any): IRecruiter {
+    return {
+      id: doc._id.toString(),
+      email: doc.email,
+      password: doc.password,
+      companyName: doc.companyName,
+      phone: doc.phone,
+      name: doc.name,
+      role: doc.role,
+      isApproved: doc.isApproved,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+      governmentId: doc.governmentId,
+      employeeId: doc.employeeId,
+      location: doc.location,
+      employeeIdImage: doc.employeeIdImage,
+      subscribed: doc.subscribed,
+      planDuration: doc.planDuration,
+      expiryDate: doc.expiryDate,
+      subscriptionAmount: doc.subscriptionAmount,
+      subscriptionStartDate: doc.subscriptionStartDate, // Add this line
+    };
+  }
+
+  async save(recruiter: IRecruiter): Promise<IRecruiter> {
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(
+      recruiter.id,
+      recruiter,
+      { new: true }
+    ).exec();
+    return this.mapToIRecruiter(updatedRecruiter);
+  }
+
+  async findRecruiters(): Promise<IRecruiter[]> {
+    const recruiters = await Recruiter.find().exec();
+    return recruiters.map(this.mapToIRecruiter);
+  }
+
+  async getUserCount(): Promise<number> {
+    return await UserModel.countDocuments({ role: "user" });
+  }
+
+  async getRecruiterCount(): Promise<number> {
+    return await Recruiter.countDocuments();
+  }
+
+  async getCompanyCount(): Promise<number> {
+    const uniqueCompanies = await Recruiter.aggregate([
+      {
+        $group: {
+          _id: "$companyName",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalUniqueCompanies: { $sum: 1 }
+        }
+      }
+    ]);
+
+    return uniqueCompanies[0]?.totalUniqueCompanies || 0;
+  }
+
+  async getTotalRevenue(): Promise<number> {
+    const result = await Recruiter.aggregate([
+      {
+        $match: { subscribed: true }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$subscriptionAmount" }
+        }
+      }
+    ]);
+    return result[0]?.totalRevenue || 0;
+  }
+
+  async getMonthlyRevenue(): Promise<{ month: string; amount: number }[]> {
+    const result = await Recruiter.aggregate([
+      {
+        $match: { subscribed: true }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" } },
+          amount: { $sum: "$subscriptionAmount" }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          month: "$_id",
+          amount: 1
+        }
+      }
+    ]);
+    return result;
   }
 }

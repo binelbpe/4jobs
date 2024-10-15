@@ -80,6 +80,10 @@ import { UserRecruiterMessageController } from '../presentation/controllers/user
 import { MongoUserRecruiterMessageRepository } from './database/mongoose/repositories/MongoUserRecruiterMessageRepository';
 import { IUserRecruiterMessageRepository } from '../domain/interfaces/repositories/user/IUserRecruiterMessageRepository';
 
+import { SubscriptionController } from "../presentation/controllers/recruiter/SubscriptionController";
+
+import { UpdateSubscriptionUseCase } from '../application/usecases/recruiter/UpdateSubscriptionUseCase';
+
 const container = new Container();
 
 
@@ -185,6 +189,10 @@ container.bind<RecruiterMessageController>(TYPES.RecruiterMessageController).to(
 container.bind<IUserRecruiterMessageRepository>(TYPES.IUserRecruiterMessageRepository).to(MongoUserRecruiterMessageRepository);
 container.bind<UserRecruiterMessageUseCase>(TYPES.UserRecruiterMessageUseCase).to(UserRecruiterMessageUseCase);
 container.bind<UserRecruiterMessageController>(TYPES.UserRecruiterMessageController).to(UserRecruiterMessageController);
+
+container.bind<SubscriptionController>(TYPES.SubscriptionController).to(SubscriptionController);
+
+container.bind<UpdateSubscriptionUseCase>(TYPES.UpdateSubscriptionUseCase).to(UpdateSubscriptionUseCase);
 
 console.log(container);
 export { container };

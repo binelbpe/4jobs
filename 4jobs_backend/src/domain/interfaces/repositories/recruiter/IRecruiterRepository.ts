@@ -25,4 +25,14 @@ export interface IRecruiterRepository {
     id: string,
     updates: Partial<IRecruiter>
   ): Promise<IRecruiter | null>;
+  updateSubscription(
+    id: string,
+    subscriptionData: {
+      subscribed: boolean;
+      planDuration: string;
+      expiryDate: Date;
+      subscriptionAmount: number;
+      subscriptionStartDate: Date; // Add this new field
+    }
+  ): Promise<IRecruiter | null>;
 }

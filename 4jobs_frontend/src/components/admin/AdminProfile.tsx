@@ -5,14 +5,13 @@ import Header from '../admin/AdminHeader';
 import Sidebar from '../admin/AdminSidebar'; 
 
 const AdminProfile: React.FC = () => {
-  const { token, dashboardData } = useSelector((state: RootState) => state.admin);
+  const { token, name,email,role } = useSelector((state: RootState) => state.admin);
 
   useEffect(() => {
   }, [token]);
 
 
-  const adminDetails = dashboardData || { name: "Admin Name", email: "admin@example.com", role: "Administrator" };
-
+  const adminDetails ={name,email,role}
   return (
     <div className="flex">
       <Sidebar /> 

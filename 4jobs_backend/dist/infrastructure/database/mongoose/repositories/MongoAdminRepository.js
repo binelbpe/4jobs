@@ -26,7 +26,6 @@ let MongoAdminRepository = class MongoAdminRepository {
     findAllUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             const usersList = yield UserModel_1.UserModel.find({ isAdmin: false }).exec();
-            // Map each document to ensure `id` is correctly mapped from `_id`
             const mappedUsers = usersList.map(this.mapToUser);
             return mappedUsers;
         });
@@ -47,18 +46,6 @@ let MongoAdminRepository = class MongoAdminRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const recruiter = yield RecruiterModel_1.default.findById(id).exec();
             return recruiter;
-        });
-    }
-    save(recruiter) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(recruiter.id, recruiter, { new: true }).exec();
-            return updatedRecruiter;
-        });
-    }
-    findRecruiters() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const recruiters = yield RecruiterModel_1.default.find().exec();
-            return recruiters;
         });
     }
     mapToUser(doc) {
@@ -82,6 +69,114 @@ let MongoAdminRepository = class MongoAdminRepository {
             resume: doc.resume,
             isBlocked: doc.isBlocked,
         };
+    }
+    mapToIRecruiter(doc) {
+        return {
+            id: doc._id.toString(),
+            email: doc.email,
+            password: doc.password,
+            companyName: doc.companyName,
+            phone: doc.phone,
+            name: doc.name,
+            role: doc.role,
+            isApproved: doc.isApproved,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            governmentId: doc.governmentId,
+            employeeId: doc.employeeId,
+            location: doc.location,
+            employeeIdImage: doc.employeeIdImage,
+            subscribed: doc.subscribed,
+            planDuration: doc.planDuration,
+            expiryDate: doc.expiryDate,
+            subscriptionAmount: doc.subscriptionAmount,
+            subscriptionStartDate: doc.subscriptionStartDate, // Add this line
+        };
+    }
+    save(recruiter) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(recruiter.id, recruiter, { new: true }).exec();
+            return this.mapToIRecruiter(updatedRecruiter);
+        });
+    }
+    findRecruiters() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const recruiters = yield RecruiterModel_1.default.find().exec();
+            return recruiters.map(this.mapToIRecruiter);
+        });
+    }
+    getUserCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield UserModel_1.UserModel.countDocuments({ role: "user" });
+        });
+    }
+    getRecruiterCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield RecruiterModel_1.default.countDocuments();
+        });
+    }
+    getCompanyCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const uniqueCompanies = yield RecruiterModel_1.default.aggregate([
+                {
+                    $group: {
+                        _id: "$companyName",
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalUniqueCompanies: { $sum: 1 }
+                    }
+                }
+            ]);
+            return ((_a = uniqueCompanies[0]) === null || _a === void 0 ? void 0 : _a.totalUniqueCompanies) || 0;
+        });
+    }
+    getTotalRevenue() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const result = yield RecruiterModel_1.default.aggregate([
+                {
+                    $match: { subscribed: true }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: { $sum: "$subscriptionAmount" }
+                    }
+                }
+            ]);
+            return ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.totalRevenue) || 0;
+        });
+    }
+    getMonthlyRevenue() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield RecruiterModel_1.default.aggregate([
+                {
+                    $match: { subscribed: true }
+                },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" } },
+                        amount: { $sum: "$subscriptionAmount" }
+                    }
+                },
+                {
+                    $sort: { _id: 1 }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        month: "$_id",
+                        amount: 1
+                    }
+                }
+            ]);
+            return result;
+        });
     }
 };
 exports.MongoAdminRepository = MongoAdminRepository;

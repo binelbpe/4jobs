@@ -22,10 +22,34 @@ exports.MongoRecruiterRepository = void 0;
 const RecruiterModel_1 = __importDefault(require("../models/RecruiterModel"));
 const inversify_1 = require("inversify");
 let MongoRecruiterRepository = class MongoRecruiterRepository {
+    mapToIRecruiter(doc) {
+        return {
+            id: doc._id.toString(),
+            email: doc.email,
+            password: doc.password,
+            companyName: doc.companyName,
+            phone: doc.phone,
+            name: doc.name,
+            role: doc.role,
+            isApproved: doc.isApproved,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            governmentId: doc.governmentId,
+            employeeId: doc.employeeId,
+            location: doc.location,
+            employeeIdImage: doc.employeeIdImage,
+            subscribed: doc.subscribed,
+            planDuration: doc.planDuration,
+            expiryDate: doc.expiryDate,
+            subscriptionAmount: doc.subscriptionAmount,
+            subscriptionStartDate: doc.subscriptionStartDate,
+        };
+    }
     create(recruiterData) {
         return __awaiter(this, void 0, void 0, function* () {
             const recruiter = new RecruiterModel_1.default(recruiterData);
-            return recruiter.save();
+            const savedRecruiter = yield recruiter.save();
+            return this.mapToIRecruiter(savedRecruiter);
         });
     }
     findRecruiterByEmail(email) {
@@ -48,13 +72,13 @@ let MongoRecruiterRepository = class MongoRecruiterRepository {
     save(recruiter) {
         return __awaiter(this, void 0, void 0, function* () {
             const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(recruiter.id, recruiter, { new: true }).exec();
-            return updatedRecruiter;
+            return this.mapToIRecruiter(updatedRecruiter);
         });
     }
     findRecruiters() {
         return __awaiter(this, void 0, void 0, function* () {
             const recruiters = yield RecruiterModel_1.default.find().exec();
-            return recruiters;
+            return recruiters.map(this.mapToIRecruiter);
         });
     }
     updateRecruiter(id, updates) {
@@ -72,6 +96,12 @@ let MongoRecruiterRepository = class MongoRecruiterRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const recruiter = yield RecruiterModel_1.default.findById(id).exec();
             return recruiter;
+        });
+    }
+    updateSubscription(id, subscriptionData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(id, { $set: subscriptionData }, { new: true }).exec();
+            return updatedRecruiter ? this.mapToIRecruiter(updatedRecruiter) : null;
         });
     }
 };

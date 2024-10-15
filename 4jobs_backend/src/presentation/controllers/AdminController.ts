@@ -114,7 +114,9 @@ export class AdminController {
   async approveRecruiter(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      console.log("idd admin approve",id)
       const recruiter = await this.approveRecruiterUseCase.execute(id);
+
       if (!recruiter) {
         return res.status(404).json({ error: "Recruiter not found" });
       }

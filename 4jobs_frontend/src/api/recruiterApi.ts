@@ -152,4 +152,7 @@ export const startConversationApi = async (applicantId: string,recruiterId: stri
   return apiRequest('POST', '/conversations', { applicantId,recruiterId });
 };
 
-
+export const updateSubscriptionApi = async (recruiterId: string, subscriptionData: any) => {
+  console.log(`Updating subscription for recruiter ID: ${recruiterId}`);
+  return apiRequest('PUT', `/update-subscription/${recruiterId}`, subscriptionData);
+};

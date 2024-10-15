@@ -111,7 +111,7 @@ const AdminRecruiterList: React.FC = () => {
                       <td className="border-b py-3 px-5 text-sm">
                         {!recruiter.isApproved && (
                           <button
-                            onClick={() => handleApprove(recruiter._id)}
+                            onClick={() => handleApprove(recruiter.id)}
                             className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                           >
                             Approve

@@ -79,6 +79,9 @@ const adminPersistConfig = {
     "users",
     "loading",
     "AdminState",
+    "name",
+    "email",
+    "role",
   ],
 };
 

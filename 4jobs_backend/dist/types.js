@@ -70,5 +70,7 @@ const TYPES = {
     IUserRecruiterMessageRepository: Symbol.for('IUserRecruiterMessageRepository'),
     UserRecruiterMessageUseCase: Symbol.for('UserRecruiterMessageUseCase'),
     UserRecruiterMessageController: Symbol.for('UserRecruiterMessageController'),
+    SubscriptionController: Symbol.for('SubscriptionController'),
+    UpdateSubscriptionUseCase: Symbol.for('UpdateSubscriptionUseCase'),
 };
 exports.default = TYPES;

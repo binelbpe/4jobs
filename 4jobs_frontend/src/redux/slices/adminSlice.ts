@@ -1,6 +1,6 @@
 // src/redux/slices/adminSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { adminLoginApi, fetchRecruitersApi, approveRecruiterApi, fetchUsersApi, blockUserApi, unblockUserApi } from '../../api/adminApi';
+import { adminLoginApi, fetchRecruitersApi, approveRecruiterApi, fetchUsersApi, blockUserApi, unblockUserApi, fetchDashboardDataApi } from '../../api/adminApi';
 
 interface User {
   id: string;
@@ -17,6 +17,9 @@ interface AdminState {
   recruiters: any[];
   users: User[];
   token: string | null; 
+  email:string;
+  name:string;
+  role:string;
 }
 
 const initialState: AdminState = {
@@ -27,6 +30,9 @@ const initialState: AdminState = {
   recruiters: [],
   users: [], 
   token: localStorage.getItem('adminToken'), 
+  email:"",
+  name:"",
+  role:"",
 };
 
 // Thunks
@@ -102,6 +108,17 @@ export const unblockUser = createAsyncThunk('admin/unblockUser', async (userId: 
   }
 });
 
+export const fetchDashboardData = createAsyncThunk(
+  'admin/fetchDashboardData',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetchDashboardDataApi();
+      return response;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'Failed to fetch dashboard data');
+    }
+  }
+);
 
 export const initializeAdminState = createAsyncThunk(
   'admin/initializeState',
@@ -130,6 +147,9 @@ const adminSlice = createSlice({
         state.loading = false;
         state.isAuthenticatedAdmin = true;
         state.token = action.payload.token; 
+        state.name=action.payload.user.name;
+        state.email=action.payload.user.email;
+        state.role=action.payload.user.role;
         state.error = null;
       })
       .addCase(loginAdmin.rejected, (state, action: PayloadAction<any>) => {
@@ -190,6 +210,18 @@ const adminSlice = createSlice({
       .addCase(approveRecruiter.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload || 'Failed to approve recruiter';
+      })
+      .addCase(fetchDashboardData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchDashboardData.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.dashboardData = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchDashboardData.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch dashboard data';
       });
   },
 });

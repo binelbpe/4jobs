@@ -51,11 +51,14 @@ export const fetchAdminDashboardDataApi = async () => {
 
 // API for fetching recruiters
 export const fetchRecruitersApi = async () => {
-  return apiRequest('GET', '/recruiters');
+   const response=apiRequest('GET', '/recruiters');
+   console.log("response",response)
+   return response
 };
 
 // API for approving a recruiter
 export const approveRecruiterApi = async (recruiterId: string) => {
+  console.log("recruiterId",recruiterId)
   return apiRequest('PATCH', `/recruiters/${recruiterId}/approve`);
 };
 
@@ -83,4 +86,7 @@ export const unblockJobPostApi = async (postId: string) => {
   return apiRequest('PATCH', `/job-posts/${postId}/unblock`);
 };
 
-
+// Add this new function to fetch dashboard data
+export const fetchDashboardDataApi = async () => {
+  return apiRequest('GET', '/dashboard');
+};

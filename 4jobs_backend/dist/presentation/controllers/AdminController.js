@@ -133,6 +133,7 @@ let AdminController = class AdminController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
+                console.log("idd admin approve", id);
                 const recruiter = yield this.approveRecruiterUseCase.execute(id);
                 if (!recruiter) {
                     return res.status(404).json({ error: "Recruiter not found" });
