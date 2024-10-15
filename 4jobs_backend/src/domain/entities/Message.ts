@@ -1,9 +1,9 @@
-import { User } from './User';
+import { MUser } from './User';
 
 export interface Message {
   id: string;
-  sender: User | string;
-  recipient: User | string;
+  sender: MUser;
+  recipient: MUser;
   content: string;
   createdAt: Date;
   isRead: boolean;

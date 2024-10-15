@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import mongoose from "mongoose";
 import { IMessageRepository } from "../../../../domain/interfaces/repositories/user/IMessageRepository";
 import { Message } from "../../../../domain/entities/Message";
-import { User } from "../../../../domain/entities/User";
+import { MUser } from "../../../../domain/entities/User";
 import { MessageModel, IMessage } from "../models/MessageModel";
 
 @injectable()
@@ -13,14 +13,20 @@ export class MessageRepository implements IMessageRepository {
   }
 
   async create(message: Partial<Message>): Promise<Message> {
+    console.log('MongoMessageRepository: Creating message', message);
     const newMessage = new MessageModel({
-      ...message,
-      sender: typeof message.sender === "string" ? new mongoose.Types.ObjectId(message.sender) : message.sender,
-      recipient: typeof message.recipient === "string" ? new mongoose.Types.ObjectId(message.recipient) : message.recipient,
-      status: message.status || 'sent', // Default to 'sent' if not provided
+      sender: message.sender ? this.toObjectId(message.sender) : undefined,
+      recipient: message.recipient ? this.toObjectId(message.recipient) : undefined,
+      content: message.content,
+      createdAt: message.createdAt,
+      isRead: message.isRead,
+      status: message.status || 'sent',
     });
+    console.log('MongoMessageRepository: Saving message', newMessage);
     await newMessage.save();
-    return this.mapToEntity(await newMessage.populate("sender recipient"));
+    const populatedMessage = await newMessage.populate("sender recipient");
+    console.log('MongoMessageRepository: Message saved and populated', populatedMessage);
+    return this.mapToEntity(populatedMessage);
   }
 
   async findById(messageId: string): Promise<Message | null> {
@@ -76,8 +82,8 @@ export class MessageRepository implements IMessageRepository {
       {
         $match: {
           $or: [
-            { sender: new mongoose.Types.ObjectId(userId) },
-            { recipient: new mongoose.Types.ObjectId(userId) },
+            { sender: this.toObjectId(userId) },
+            { recipient: this.toObjectId(userId) },
           ],
         },
       },
@@ -88,7 +94,7 @@ export class MessageRepository implements IMessageRepository {
         $group: {
           _id: {
             $cond: [
-              { $eq: ["$sender", new mongoose.Types.ObjectId(userId)] },
+              { $eq: ["$sender", this.toObjectId(userId)] },
               "$recipient",
               "$sender",
             ],
@@ -120,7 +126,7 @@ export class MessageRepository implements IMessageRepository {
       },
     ]);
 
-    console.log("ivide kweriii",connections)
+    console.log("ivide kweriii", connections);
 
     return connections.map((conn) => ({
       user: conn.user._id.toString(),
@@ -131,8 +137,8 @@ export class MessageRepository implements IMessageRepository {
   private mapToEntity(message: IMessage): Message {
     return {
       id: message._id.toString(),
-      sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
-      recipient: message.recipient ? this.mapUserToEntity(message.recipient) : message.recipient,
+      sender: this.mapUserToEntity(message.sender) as MUser,
+      recipient: this.mapUserToEntity(message.recipient) as MUser,
       content: message.content,
       createdAt: message.createdAt,
       isRead: message.isRead,
@@ -140,7 +146,7 @@ export class MessageRepository implements IMessageRepository {
     };
   }
 
-  private mapUserToEntity(user: any): User {
+  private mapUserToEntity(user: any): MUser {
     if (!user) {
       throw new Error("User object is undefined or null");
     }
@@ -149,21 +155,19 @@ export class MessageRepository implements IMessageRepository {
       email: user.email,
       name: user.name,
       profileImage: user.profileImage,
-      password: "",
-      role: user.role || "user",
-      isAdmin: user.isAdmin || false,
-      phone: user.phone,
-      appliedJobs: user.appliedJobs || [],
-      bio: user.bio,
-      about: user.about,
-      experiences: user.experiences || [],
-      projects: user.projects || [],
-      certificates: user.certificates || [],
-      skills: user.skills || [],
-      dateOfBirth: user.dateOfBirth,
-      gender: user.gender,
-      resume: user.resume,
-      isBlocked: user.isBlocked || false,
-    };
+    } as MUser;
+  }
+
+  private toObjectId(id: string | MUser | mongoose.Types.ObjectId): mongoose.Types.ObjectId {
+    if (id instanceof mongoose.Types.ObjectId) {
+      return id;
+    }
+    if (typeof id === 'string') {
+      return new mongoose.Types.ObjectId(id);
+    }
+    if (typeof id === 'object' && 'id' in id) {
+      return new mongoose.Types.ObjectId(id.id);
+    }
+    throw new Error('Invalid id type');
   }
 }

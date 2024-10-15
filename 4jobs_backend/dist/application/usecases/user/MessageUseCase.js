@@ -36,15 +36,25 @@ let MessageUseCase = class MessageUseCase {
     }
     sendMessage(senderId, recipientId, content) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('MessageUseCase: Sending message', { senderId, recipientId, content });
+            const sender = yield this.userRepository.findById(senderId);
+            const recipient = yield this.userRepository.findById(recipientId);
+            if (!sender || !recipient) {
+                console.error('Sender or recipient not found', { senderId, recipientId });
+                throw new Error('Sender or recipient not found');
+            }
             const newMessage = {
-                sender: senderId,
-                recipient: recipientId,
+                sender: sender,
+                recipient: recipient,
                 content,
                 createdAt: new Date(),
                 isRead: false,
                 status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
             };
-            return this.messageRepository.create(newMessage);
+            console.log('MessageUseCase: Creating new message', newMessage);
+            const savedMessage = yield this.messageRepository.create(newMessage);
+            console.log('MessageUseCase: Message saved', savedMessage);
+            return savedMessage;
         });
     }
     getConversation(userId1, userId2) {

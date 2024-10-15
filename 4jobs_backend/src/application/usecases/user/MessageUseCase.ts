@@ -15,15 +15,28 @@ export class MessageUseCase {
   ) {}
 
   async sendMessage(senderId: string, recipientId: string, content: string): Promise<Message> {
+    console.log('MessageUseCase: Sending message', { senderId, recipientId, content });
+    const sender = await this.userRepository.findById(senderId);
+    const recipient = await this.userRepository.findById(recipientId);
+
+    if (!sender || !recipient) {
+      console.error('Sender or recipient not found', { senderId, recipientId });
+      throw new Error('Sender or recipient not found');
+    }
+
     const newMessage: Partial<Message> = {
-      sender: senderId,
-      recipient: recipientId,
+      sender: sender,
+      recipient: recipient,
       content,
       createdAt: new Date(),
       isRead: false,
       status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
     };
-    return this.messageRepository.create(newMessage);
+
+    console.log('MessageUseCase: Creating new message', newMessage);
+    const savedMessage = await this.messageRepository.create(newMessage);
+    console.log('MessageUseCase: Message saved', savedMessage);
+    return savedMessage;
   }
 
   async getConversation(userId1: string, userId2: string): Promise<Message[]> {

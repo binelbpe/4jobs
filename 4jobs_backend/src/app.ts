@@ -7,24 +7,23 @@ import path from 'path';
 import http from 'http';
 import { container } from './infrastructure/container';
 import TYPES from './types';
+import { setupUserSocketServer } from './infrastructure/services/userSocketServer';
 import { setupSocketServer } from './infrastructure/services/socketServer';
 
 import { authRouter } from './presentation/routes/authRoutes';
 import { adminRouter } from './presentation/routes/adminRoutes';
 import { recruiterRouter } from './presentation/routes/RecruiterRoutes';
 
-
 import { validateRequest } from './presentation/middlewares/validateRequest';
 import { errorHandler } from './presentation/middlewares/errorHandler';
-
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const server = http.createServer(app);
 
-const { io, userManager, eventEmitter } = setupSocketServer(server, container);
-
+const { io: userIo, userManager: userSocketManager, eventEmitter: userEventEmitter } = setupUserSocketServer(server, container);
+const { io: recruiterIo, userManager: recruiterSocketManager, eventEmitter: recruiterEventEmitter } = setupSocketServer(server, container);
 
 app.use(express.json());
 app.use(cors({
@@ -40,11 +39,9 @@ app.use((req, res, next) => {
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-
 app.use('/', authRouter);
 app.use('/admin', adminRouter);
 app.use('/recruiter', recruiterRouter);
-
 
 app.use(validateRequest);
 app.use(errorHandler);
@@ -54,15 +51,13 @@ app.use((req: any, res, next) => {
   next();
 });
 
-
 mongoose.connect(process.env.DATABASE_URL!)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
-
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-export { io, userManager, eventEmitter };
+export { userIo, userSocketManager, userEventEmitter, recruiterIo, recruiterSocketManager, recruiterEventEmitter };

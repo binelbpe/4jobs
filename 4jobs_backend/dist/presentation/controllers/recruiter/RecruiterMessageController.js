@@ -131,10 +131,8 @@ let RecruiterMessageController = class RecruiterMessageController {
     }
     startConversation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             try {
-                const recruiterId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-                const { applicantId } = req.body;
+                const { applicantId, recruiterId } = req.body;
                 if (!recruiterId) {
                     res.status(401).json({ error: 'Unauthorized' });
                     return;

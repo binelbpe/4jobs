@@ -113,8 +113,8 @@ export class RecruiterMessageController {
 
   async startConversation(req: Request, res: Response): Promise<void> {
     try {
-      const recruiterId = (req as any).user?.id;
-      const { applicantId } = req.body;
+     
+      const { applicantId,recruiterId } = req.body;
 
       if (!recruiterId) {
         res.status(401).json({ error: 'Unauthorized' });

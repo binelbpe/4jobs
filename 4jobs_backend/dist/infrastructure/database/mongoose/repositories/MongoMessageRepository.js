@@ -32,9 +32,20 @@ let MessageRepository = class MessageRepository {
     }
     create(message) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newMessage = new MessageModel_1.MessageModel(Object.assign(Object.assign({}, message), { sender: typeof message.sender === "string" ? new mongoose_1.default.Types.ObjectId(message.sender) : message.sender, recipient: typeof message.recipient === "string" ? new mongoose_1.default.Types.ObjectId(message.recipient) : message.recipient, status: message.status || 'sent' }));
+            console.log('MongoMessageRepository: Creating message', message);
+            const newMessage = new MessageModel_1.MessageModel({
+                sender: message.sender ? this.toObjectId(message.sender) : undefined,
+                recipient: message.recipient ? this.toObjectId(message.recipient) : undefined,
+                content: message.content,
+                createdAt: message.createdAt,
+                isRead: message.isRead,
+                status: message.status || 'sent',
+            });
+            console.log('MongoMessageRepository: Saving message', newMessage);
             yield newMessage.save();
-            return this.mapToEntity(yield newMessage.populate("sender recipient"));
+            const populatedMessage = yield newMessage.populate("sender recipient");
+            console.log('MongoMessageRepository: Message saved and populated', populatedMessage);
+            return this.mapToEntity(populatedMessage);
         });
     }
     findById(messageId) {
@@ -96,8 +107,8 @@ let MessageRepository = class MessageRepository {
                 {
                     $match: {
                         $or: [
-                            { sender: new mongoose_1.default.Types.ObjectId(userId) },
-                            { recipient: new mongoose_1.default.Types.ObjectId(userId) },
+                            { sender: this.toObjectId(userId) },
+                            { recipient: this.toObjectId(userId) },
                         ],
                     },
                 },
@@ -108,7 +119,7 @@ let MessageRepository = class MessageRepository {
                     $group: {
                         _id: {
                             $cond: [
-                                { $eq: ["$sender", new mongoose_1.default.Types.ObjectId(userId)] },
+                                { $eq: ["$sender", this.toObjectId(userId)] },
                                 "$recipient",
                                 "$sender",
                             ],
@@ -149,8 +160,8 @@ let MessageRepository = class MessageRepository {
     mapToEntity(message) {
         return {
             id: message._id.toString(),
-            sender: message.sender ? this.mapUserToEntity(message.sender) : message.sender,
-            recipient: message.recipient ? this.mapUserToEntity(message.recipient) : message.recipient,
+            sender: this.mapUserToEntity(message.sender),
+            recipient: this.mapUserToEntity(message.recipient),
             content: message.content,
             createdAt: message.createdAt,
             isRead: message.isRead,
@@ -166,22 +177,19 @@ let MessageRepository = class MessageRepository {
             email: user.email,
             name: user.name,
             profileImage: user.profileImage,
-            password: "",
-            role: user.role || "user",
-            isAdmin: user.isAdmin || false,
-            phone: user.phone,
-            appliedJobs: user.appliedJobs || [],
-            bio: user.bio,
-            about: user.about,
-            experiences: user.experiences || [],
-            projects: user.projects || [],
-            certificates: user.certificates || [],
-            skills: user.skills || [],
-            dateOfBirth: user.dateOfBirth,
-            gender: user.gender,
-            resume: user.resume,
-            isBlocked: user.isBlocked || false,
         };
+    }
+    toObjectId(id) {
+        if (id instanceof mongoose_1.default.Types.ObjectId) {
+            return id;
+        }
+        if (typeof id === 'string') {
+            return new mongoose_1.default.Types.ObjectId(id);
+        }
+        if (typeof id === 'object' && 'id' in id) {
+            return new mongoose_1.default.Types.ObjectId(id.id);
+        }
+        throw new Error('Invalid id type');
     }
 };
 exports.MessageRepository = MessageRepository;

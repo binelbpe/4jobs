@@ -6,7 +6,7 @@ import { MessageUseCase } from '../../../application/usecases/user/MessageUseCas
 import { Server as SocketIOServer } from 'socket.io';
 import { UserManager } from '../../../infrastructure/services/UserManager';
 import { EventEmitter } from 'events';
-import { User } from '../../../domain/entities/User';
+import { MUser } from '../../../domain/entities/User';
 import { Message } from '../../../domain/entities/Message';
 
 @injectable()
@@ -20,6 +20,7 @@ export class MessageController {
 
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
+      console.log("ivide vrunnund send message")
       const { senderId, recipientId, content } = req.body;
       
       if (!this.isValidObjectId(senderId) || !this.isValidObjectId(recipientId)) {
@@ -174,7 +175,7 @@ console.log("ivideeee kerunnnundddddddddddddddddddddddddddddddddddddd")
     }
   }
 
-  private getSenderId(sender: User | string): string {
+  private getSenderId(sender: MUser | string): string {
     return typeof sender === 'string' ? sender : sender.id;
   }
 

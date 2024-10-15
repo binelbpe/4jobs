@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventEmitter = exports.userManager = exports.io = void 0;
+exports.recruiterEventEmitter = exports.recruiterSocketManager = exports.recruiterIo = exports.userEventEmitter = exports.userSocketManager = exports.userIo = void 0;
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -12,6 +12,7 @@ const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
 const container_1 = require("./infrastructure/container");
+const userSocketServer_1 = require("./infrastructure/services/userSocketServer");
 const socketServer_1 = require("./infrastructure/services/socketServer");
 const authRoutes_1 = require("./presentation/routes/authRoutes");
 const adminRoutes_1 = require("./presentation/routes/adminRoutes");
@@ -21,10 +22,14 @@ const errorHandler_1 = require("./presentation/middlewares/errorHandler");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
-const { io, userManager, eventEmitter } = (0, socketServer_1.setupSocketServer)(server, container_1.container);
-exports.io = io;
-exports.userManager = userManager;
-exports.eventEmitter = eventEmitter;
+const { io: userIo, userManager: userSocketManager, eventEmitter: userEventEmitter } = (0, userSocketServer_1.setupUserSocketServer)(server, container_1.container);
+exports.userIo = userIo;
+exports.userSocketManager = userSocketManager;
+exports.userEventEmitter = userEventEmitter;
+const { io: recruiterIo, userManager: recruiterSocketManager, eventEmitter: recruiterEventEmitter } = (0, socketServer_1.setupSocketServer)(server, container_1.container);
+exports.recruiterIo = recruiterIo;
+exports.recruiterSocketManager = recruiterSocketManager;
+exports.recruiterEventEmitter = recruiterEventEmitter;
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
     origin: 'http://localhost:3000',

@@ -42,6 +42,7 @@ let MessageController = class MessageController {
     sendMessage(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log("ivide vrunnund send message");
                 const { senderId, recipientId, content } = req.body;
                 if (!this.isValidObjectId(senderId) || !this.isValidObjectId(recipientId)) {
                     res.status(400).json({ error: "Invalid sender or recipient ID" });

@@ -40,7 +40,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
   const isOnline = connection?.isOnline || false;
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { sendMessage: sendSocketMessage, emitTyping } = useSocket(userId);
+  const {
+    sendMessage: sendSocketMessage,
+    emitTyping,
+    isConnected,
+  } = useSocket(userId);
   const [hasFetchedConversation, setHasFetchedConversation] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -88,24 +92,23 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (newMessage.trim() && currentUser) {
-        const messageData: Message = {
-          id: Date.now().toString(),
+        const messageData = {
           senderId: currentUser.id,
           recipientId: userId,
           content: newMessage,
-          createdAt: new Date().toISOString(),
-          isRead: false,
-          sender: currentUser,
-          recipient: { id: userId, name: connection?.user.name || "" },
-          status: "sent",
         };
 
-        dispatch(addMessage(messageData)); 
-        sendSocketMessage(messageData); 
-        setNewMessage("");
+        if (isConnected) {
+          console.log("Attempting to send message:", messageData);
+          sendSocketMessage(messageData);
+          setNewMessage("");
+        } else {
+          console.error("Cannot send message: Socket is not connected");
+          // Show an error message to the user
+        }
       }
     },
-    [newMessage, currentUser, userId, connection, dispatch, sendSocketMessage]
+    [newMessage, currentUser, userId, sendSocketMessage, isConnected]
   );
 
   const debouncedEmitTyping = useCallback(
@@ -188,6 +191,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
       {isTyping && (
         <div className="p-2 text-sm text-gray-500 italic">
           {connection?.user.name} is typing...
+        </div>
+      )}
+      {!isConnected && (
+        <div className="p-2 text-sm text-red-500">
+          Not connected to the server. Messages may not be sent or received.
         </div>
       )}
       <form

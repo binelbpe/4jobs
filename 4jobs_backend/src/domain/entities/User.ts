@@ -23,6 +23,29 @@ export interface User {
   isBlocked?: boolean;
 }
 
+export interface MUser {
+  id: string;
+  email: string;
+  password?: string;
+  phone?:number;
+  name: string;
+  role?: 'user' | 'recruiter' | 'admin';  
+  isAdmin?: boolean;
+  appliedJobs?: string[];
+  // Profile-related fields
+  bio?: string;
+  about?: string;
+  experiences?: Experience[];
+  projects?: Project[];
+  certificates?: Certificate[];
+  skills?: string[];
+  profileImage?: string;
+  dateOfBirth?: Date;
+  gender?: 'male' | 'female' | 'other';
+  resume?: string;
+  isBlocked?: boolean;
+}
+
 
 export interface IUserDocument extends Document {
   email: string;
