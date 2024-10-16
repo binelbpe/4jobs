@@ -53,6 +53,25 @@ export class MongoPostRepository implements IPostRepository {
     };
   }
 
+  async findAllAdmin(page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
+    const skip = (page - 1) * limit;
+    const totalCount = await PostModel.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const posts = await PostModel.find()
+      .populate('userId', 'name email profileImage bio')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      posts: posts.map(post => this.populateUserInfo(post)),
+      totalPages,
+      currentPage: page
+    };
+  }
+
+
   async findByUserId(userId: string, page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
     const skip = (page - 1) * limit;
     const totalCount = await PostModel.countDocuments({ userId });

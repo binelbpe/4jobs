@@ -4,6 +4,7 @@ export interface IPostRepository {
   create(postData: CreatePostDTO): Promise<IPost>;
   // findById(id: string): Promise<Post | null>;
   findAll(page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }>;
+  findAllAdmin(page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }>;
   findByUserId(userId: string, page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }>;
   // update(id: string, post: Partial<Post>): Promise<Post | null>;
   deletePost(id: string): Promise<boolean>;

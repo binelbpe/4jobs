@@ -72,6 +72,23 @@ let MongoPostRepository = class MongoPostRepository {
             };
         });
     }
+    findAllAdmin(page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const skip = (page - 1) * limit;
+            const totalCount = yield PostModel_1.default.countDocuments();
+            const totalPages = Math.ceil(totalCount / limit);
+            const posts = yield PostModel_1.default.find()
+                .populate('userId', 'name email profileImage bio')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            return {
+                posts: posts.map(post => this.populateUserInfo(post)),
+                totalPages,
+                currentPage: page
+            };
+        });
+    }
     findByUserId(userId, page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;

@@ -255,7 +255,7 @@ let AdminController = class AdminController {
             try {
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 10;
-                const result = yield this.postRepository.findAll(page, limit);
+                const result = yield this.postRepository.findAllAdmin(page, limit);
                 const userPosts = result.posts.map(post => {
                     var _a, _b;
                     return ({

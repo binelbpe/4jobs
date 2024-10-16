@@ -228,7 +228,7 @@ export class AdminController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const result = await this.postRepository.findAll(page, limit);
+      const result = await this.postRepository.findAllAdmin(page, limit);
       
       const userPosts = result.posts.map(post => ({
         id: post._id,

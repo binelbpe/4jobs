@@ -13,6 +13,7 @@ export interface Post {
   };
   createdAt: string;
   updatedAt: string;
+  status?: 'active' | 'blocked';
 }
 
 export interface Comment {
