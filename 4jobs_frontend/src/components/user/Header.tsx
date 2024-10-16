@@ -27,11 +27,13 @@ import {
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
 import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
 import { socketService } from "../../services/socketService";
+import { searchUsersAndJobs, clearSearch } from "../../redux/slices/userSearchSlice";
 
 const UserHeader: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -152,6 +154,18 @@ const UserHeader: React.FC = () => {
     setMenuOpen(false);
   }, []);
 
+  const handleSearch = useCallback(() => {
+    if (searchQuery.length >= 3 && user) {
+      dispatch(searchUsersAndJobs({ query: searchQuery, userId: user.id }));
+      navigate("/search-results");
+    }
+  }, [searchQuery, dispatch, navigate, user]);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+    dispatch(clearSearch());
+  }, [dispatch]);
+
   const renderNavItem = useCallback(
     (icon: any, text: string, onClick: () => void, badge?: number) => (
       <button
@@ -222,12 +236,25 @@ const UserHeader: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <FontAwesomeIcon
-                icon={faSearch}
-                className="absolute right-3 top-3 text-gray-500"
-              />
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-12 top-2 text-gray-500 hover:text-gray-700"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              )}
+              <button
+                onClick={handleSearch}
+                className="absolute right-3 top-2 text-purple-500 hover:text-purple-700"
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </button>
             </div>
           </div>
 

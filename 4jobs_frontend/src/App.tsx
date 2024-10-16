@@ -46,6 +46,7 @@ import RecruiterMessage from './components/recruiter/RecruiterMessaging';
 import UserMessaging from './components/user/UserMessaging';
 import AdminSubscriptionManagement from './components/admin/AdminSubscriptionManagement';
 import AdminUserPostManagement from './components/admin/AdminUserPostManagement';
+import SearchResults from './components/user/SearchResults';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -99,6 +100,7 @@ const App: React.FC = () => {
       <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
       <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
       <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
+      <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
     </Routes>
   );
 };

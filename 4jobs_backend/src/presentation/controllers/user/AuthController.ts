@@ -7,7 +7,8 @@ import { JwtAuthService } from "../../../infrastructure/services/JwtAuthService"
 import { OtpService } from "../../../infrastructure/services/OtpService";
 import { GoogleAuthService } from "../../../infrastructure/services/GoogleAuthService";
 import { IUserRepository } from "../../../domain/interfaces/repositories/user/IUserRepository";
-
+import { SearchUsersAndJobsUseCase } from "../../../application/usecases/user/SearchUsersAndJobsUseCase";
+import { AuthenticatedRequest } from "../../../types/index";
 
 const tempUserStore: {
   [email: string]: { email: string; password: string; name: string };
@@ -18,12 +19,11 @@ export class AuthController {
   constructor(
     @inject(TYPES.SignupUserUseCase) private signupUseCase: SignupUserUseCase,
     @inject(TYPES.LoginUseCase) private loginUseCase: LoginUseCase,
-
     @inject(TYPES.OtpService) private otpService: OtpService,
     @inject(TYPES.IUserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.GoogleAuthService)
-    private googleAuthService: GoogleAuthService,
-    @inject(TYPES.JwtAuthService) private jwtAuthService: JwtAuthService
+    @inject(TYPES.GoogleAuthService) private googleAuthService: GoogleAuthService,
+    @inject(TYPES.JwtAuthService) private jwtAuthService: JwtAuthService,
+    @inject(TYPES.SearchUsersAndJobsUseCase) private searchUsersAndJobsUseCase: SearchUsersAndJobsUseCase
   ) {}
 
   async sendOtp(req: Request, res: Response) {
@@ -172,6 +172,25 @@ export class AuthController {
       return res
         .status(500)
         .json({ error: "Failed to authenticate with Google" });
+    }
+  }
+
+  async searchUsersAndJobs(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { query } = req.query;
+      const {userId} = req.query;
+
+      console.log("query and userId",userId,query)
+
+      if (typeof query !== 'string' || query.length < 3 || !userId) {
+        return res.status(400).json({ error: 'Invalid query or user not authenticated' });
+      }
+
+      const results = await this.searchUsersAndJobsUseCase.execute(query, userId as string);
+      res.status(200).json(results);
+    } catch (error) {
+      console.error('Error searching users and jobs:', error);
+      res.status(500).json({ error: 'An error occurred while searching' });
     }
   }
 }

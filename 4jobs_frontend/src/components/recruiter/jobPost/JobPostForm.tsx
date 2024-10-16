@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BasicJobPostFormData } from '../../../types/jobPostTypes';
+import { BasicJobPost, BasicJobPostFormData } from '../../../types/jobPostTypes';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { Briefcase, Building, Globe, MapPin, IndianRupee, Users, Book, CheckSquare, Laptop } from 'lucide-react';

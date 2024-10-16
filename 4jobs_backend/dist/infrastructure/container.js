@@ -72,6 +72,8 @@ const MongoUserRecruiterMessageRepository_1 = require("./database/mongoose/repos
 const SubscriptionController_1 = require("../presentation/controllers/recruiter/SubscriptionController");
 const UpdateSubscriptionUseCase_1 = require("../application/usecases/recruiter/UpdateSubscriptionUseCase");
 const ToggleUserPostBlockUseCase_1 = require("../application/usecases/admin/ToggleUserPostBlockUseCase");
+const MongoSearchRepository_1 = require("./database/mongoose/repositories/MongoSearchRepository");
+const SearchUsersAndJobsUseCase_1 = require("../application/usecases/user/SearchUsersAndJobsUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -105,10 +107,18 @@ container.bind(types_1.default.UnblockUserUseCase).to(UnblockUserUseCase_1.Unblo
 container.bind(types_1.default.FetchRecruitersUseCase).to(FetchRecruitersUseCase_1.FetchRecruitersUseCase);
 container.bind(types_1.default.ApproveRecruiterUseCase).to(ApproveRecruiterUseCase_1.ApproveRecruiterUseCase);
 container.bind(types_1.default.AdminDashboardUseCase).to(AdminDashboardUseCase_1.AdminDashboardUseCase);
-container.bind(types_1.default.IJobPostAdminRepository).to(MongoJobPostAdminRepository_1.MongoJobPostAdminRepository);
-container.bind(types_1.default.FetchJobPostsUseCase).to(FetchJobPostsUseCase_1.FetchJobPostsUseCase);
-container.bind(types_1.default.BlockJobPostUseCase).to(BlockJobPostUseCase_1.BlockJobPostUseCase);
-container.bind(types_1.default.UnblockJobPostUseCase).to(UnblockJobPostUseCase_1.UnblockJobPostUseCase);
+container
+    .bind(types_1.default.IJobPostAdminRepository)
+    .to(MongoJobPostAdminRepository_1.MongoJobPostAdminRepository);
+container
+    .bind(types_1.default.FetchJobPostsUseCase)
+    .to(FetchJobPostsUseCase_1.FetchJobPostsUseCase);
+container
+    .bind(types_1.default.BlockJobPostUseCase)
+    .to(BlockJobPostUseCase_1.BlockJobPostUseCase);
+container
+    .bind(types_1.default.UnblockJobPostUseCase)
+    .to(UnblockJobPostUseCase_1.UnblockJobPostUseCase);
 container.bind(types_1.default.SignupUserUseCase).to(SignupUserUseCase_1.SignupUserUseCase);
 container.bind(types_1.default.LoginUseCase).to(LoginUseCase_1.LoginUseCase);
 container.bind(types_1.default.GetUserProfileUseCase).to(GetUserProfileUseCase_1.GetUserProfileUseCase);
@@ -135,31 +145,82 @@ container
     .to(JobPostControllerUser_1.JobPostControllerUser);
 container.bind(types_1.default.IPostRepository).to(MongoPostRepository_1.MongoPostRepository);
 container.bind(PostController_1.PostController).toSelf();
-container.bind(types_1.default.CreatePostUseCase).to(CreatePostUseCase_1.CreatePostUseCase);
-container.bind(types_1.default.GetAllPostsUseCase).to(GetAllPostsUseCase_1.GetAllPostsUseCase);
-container.bind(types_1.default.GetUserPostsUseCase).to(GetUserPostsUseCase_1.GetUserPostsUseCase);
-container.bind(types_1.default.DeletePostUseCase).to(DeletePostUseCase_1.DeletePostUseCase);
+container
+    .bind(types_1.default.CreatePostUseCase)
+    .to(CreatePostUseCase_1.CreatePostUseCase);
+container
+    .bind(types_1.default.GetAllPostsUseCase)
+    .to(GetAllPostsUseCase_1.GetAllPostsUseCase);
+container
+    .bind(types_1.default.GetUserPostsUseCase)
+    .to(GetUserPostsUseCase_1.GetUserPostsUseCase);
+container
+    .bind(types_1.default.DeletePostUseCase)
+    .to(DeletePostUseCase_1.DeletePostUseCase);
 container.bind(types_1.default.EditPostUseCase).to(EditPostUseCase_1.EditPostUseCase);
 container.bind(types_1.default.ReportJobUseCase).to(ReportJobUseCase_1.ReportJobUseCase);
 container.bind(types_1.default.S3Service).to(S3Service_1.S3Service);
-container.bind(types_1.default.IConnectionRepository).to(MongoConnectionRepository_1.MongoConnectionRepository);
-container.bind(types_1.default.ConnectionUseCase).to(ConnectionUseCase_1.ConnectionUseCase);
-container.bind(types_1.default.ConnectionController).to(ConnectionController_1.ConnectionController);
-container.bind(types_1.default.SocketIOServer).toConstantValue(new socket_io_1.Server());
-container.bind(types_1.default.UserManager).to(UserManager_1.UserManager).inSingletonScope();
-container.bind(types_1.default.NotificationEventEmitter).toDynamicValue(() => {
+container
+    .bind(types_1.default.IConnectionRepository)
+    .to(MongoConnectionRepository_1.MongoConnectionRepository);
+container
+    .bind(types_1.default.ConnectionUseCase)
+    .to(ConnectionUseCase_1.ConnectionUseCase);
+container
+    .bind(types_1.default.ConnectionController)
+    .to(ConnectionController_1.ConnectionController);
+container
+    .bind(types_1.default.SocketIOServer)
+    .toConstantValue(new socket_io_1.Server());
+container
+    .bind(types_1.default.UserManager)
+    .to(UserManager_1.UserManager)
+    .inSingletonScope();
+container
+    .bind(types_1.default.NotificationEventEmitter)
+    .toDynamicValue(() => {
     return new events_1.EventEmitter();
-}).inSingletonScope();
-container.bind(types_1.default.IMessageRepository).to(MongoMessageRepository_1.MessageRepository);
+})
+    .inSingletonScope();
+container
+    .bind(types_1.default.IMessageRepository)
+    .to(MongoMessageRepository_1.MessageRepository);
 container.bind(types_1.default.MessageUseCase).to(MessageUseCase_1.MessageUseCase);
-container.bind(types_1.default.MessageController).to(MessageController_1.MessageController).inSingletonScope();
-container.bind(types_1.default.IRecruiterMessageRepository).to(MongoRecruiterMessage_1.MongoRecruiterMessage);
-container.bind(types_1.default.RecruiterMessageUseCase).to(RecruiterMessageUseCase_1.RecruiterMessageUseCase);
-container.bind(types_1.default.RecruiterMessageController).to(RecruiterMessageController_1.RecruiterMessageController);
-container.bind(types_1.default.IUserRecruiterMessageRepository).to(MongoUserRecruiterMessageRepository_1.MongoUserRecruiterMessageRepository);
-container.bind(types_1.default.UserRecruiterMessageUseCase).to(UserRecruiterMessageUseCase_1.UserRecruiterMessageUseCase);
-container.bind(types_1.default.UserRecruiterMessageController).to(UserRecruiterMessageController_1.UserRecruiterMessageController);
-container.bind(types_1.default.SubscriptionController).to(SubscriptionController_1.SubscriptionController);
-container.bind(types_1.default.UpdateSubscriptionUseCase).to(UpdateSubscriptionUseCase_1.UpdateSubscriptionUseCase);
-container.bind(types_1.default.ToggleUserPostBlockUseCase).to(ToggleUserPostBlockUseCase_1.ToggleUserPostBlockUseCase);
+container
+    .bind(types_1.default.MessageController)
+    .to(MessageController_1.MessageController)
+    .inSingletonScope();
+container
+    .bind(types_1.default.IRecruiterMessageRepository)
+    .to(MongoRecruiterMessage_1.MongoRecruiterMessage);
+container
+    .bind(types_1.default.RecruiterMessageUseCase)
+    .to(RecruiterMessageUseCase_1.RecruiterMessageUseCase);
+container
+    .bind(types_1.default.RecruiterMessageController)
+    .to(RecruiterMessageController_1.RecruiterMessageController);
+container
+    .bind(types_1.default.IUserRecruiterMessageRepository)
+    .to(MongoUserRecruiterMessageRepository_1.MongoUserRecruiterMessageRepository);
+container
+    .bind(types_1.default.UserRecruiterMessageUseCase)
+    .to(UserRecruiterMessageUseCase_1.UserRecruiterMessageUseCase);
+container
+    .bind(types_1.default.UserRecruiterMessageController)
+    .to(UserRecruiterMessageController_1.UserRecruiterMessageController);
+container
+    .bind(types_1.default.SubscriptionController)
+    .to(SubscriptionController_1.SubscriptionController);
+container
+    .bind(types_1.default.UpdateSubscriptionUseCase)
+    .to(UpdateSubscriptionUseCase_1.UpdateSubscriptionUseCase);
+container
+    .bind(types_1.default.ToggleUserPostBlockUseCase)
+    .to(ToggleUserPostBlockUseCase_1.ToggleUserPostBlockUseCase);
+container
+    .bind(types_1.default.ISearchRepository)
+    .to(MongoSearchRepository_1.MongoSearchRepository);
+container
+    .bind(types_1.default.SearchUsersAndJobsUseCase)
+    .to(SearchUsersAndJobsUseCase_1.SearchUsersAndJobsUseCase);
 console.log(container);

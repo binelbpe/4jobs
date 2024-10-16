@@ -27,6 +27,7 @@ import recruiterMessageReducer from "./slices/recruiterMessageSlice";
 import userRecruiterMessageReducer from "./slices/userRecruiterMessageSlice";
 import subscriptionReducer from "./slices/adminSubscriptionSlice";
 import userPostReducer from "./slices/adminUserPostSlice";
+import userSearchReducer from './slices/userSearchSlice';
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "fallback-key";
 
@@ -212,6 +213,7 @@ const rootReducer = combineReducers({
   ),
   subscriptions: subscriptionReducer,
   userPosts: userPostReducer,
+  userSearch: userSearchReducer,
 });
 
 const store = configureStore({

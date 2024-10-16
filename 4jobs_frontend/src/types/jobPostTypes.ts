@@ -13,12 +13,9 @@ export interface SalaryRange {
 export interface BasicJobPost {
   _id: string;
   title: string;
+  company?: CompanyDetails;
   description: string;
-  company?: {
-    name: string;
-    website?: string;
-    logo?: string;
-  };
+  isApplied?: boolean;
   location: string;
   salaryRange: SalaryRange;
   wayOfWork: string;
@@ -39,10 +36,6 @@ export interface BasicJobPost {
     name: string;
     email: string;
   }>;
-  isApplied?: boolean;
-  createdAt: string; 
-  updatedAt: string;
-  isBlock?: boolean;
   reports?: Array<{
     user: {
       _id: string;
@@ -52,9 +45,10 @@ export interface BasicJobPost {
     reason: string;
     createdAt: string;
   }>;
+  createdAt: string; 
+  updatedAt: string;
+  isBlock?: boolean;
 }
-
-
 
 export interface BasicJobPostAdmin {
   _id: string;

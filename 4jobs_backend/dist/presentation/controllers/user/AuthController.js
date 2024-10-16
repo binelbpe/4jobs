@@ -32,15 +32,17 @@ const LoginUseCase_1 = require("../../../application/usecases/user/LoginUseCase"
 const JwtAuthService_1 = require("../../../infrastructure/services/JwtAuthService");
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const GoogleAuthService_1 = require("../../../infrastructure/services/GoogleAuthService");
+const SearchUsersAndJobsUseCase_1 = require("../../../application/usecases/user/SearchUsersAndJobsUseCase");
 const tempUserStore = {};
 let AuthController = class AuthController {
-    constructor(signupUseCase, loginUseCase, otpService, userRepository, googleAuthService, jwtAuthService) {
+    constructor(signupUseCase, loginUseCase, otpService, userRepository, googleAuthService, jwtAuthService, searchUsersAndJobsUseCase) {
         this.signupUseCase = signupUseCase;
         this.loginUseCase = loginUseCase;
         this.otpService = otpService;
         this.userRepository = userRepository;
         this.googleAuthService = googleAuthService;
         this.jwtAuthService = jwtAuthService;
+        this.searchUsersAndJobsUseCase = searchUsersAndJobsUseCase;
     }
     sendOtp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -180,6 +182,24 @@ let AuthController = class AuthController {
             }
         });
     }
+    searchUsersAndJobs(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { query } = req.query;
+                const { userId } = req.query;
+                console.log("query and userId", userId, query);
+                if (typeof query !== 'string' || query.length < 3 || !userId) {
+                    return res.status(400).json({ error: 'Invalid query or user not authenticated' });
+                }
+                const results = yield this.searchUsersAndJobsUseCase.execute(query, userId);
+                res.status(200).json(results);
+            }
+            catch (error) {
+                console.error('Error searching users and jobs:', error);
+                res.status(500).json({ error: 'An error occurred while searching' });
+            }
+        });
+    }
 };
 exports.AuthController = AuthController;
 exports.AuthController = AuthController = __decorate([
@@ -190,8 +210,10 @@ exports.AuthController = AuthController = __decorate([
     __param(3, (0, inversify_1.inject)(types_1.default.IUserRepository)),
     __param(4, (0, inversify_1.inject)(types_1.default.GoogleAuthService)),
     __param(5, (0, inversify_1.inject)(types_1.default.JwtAuthService)),
+    __param(6, (0, inversify_1.inject)(types_1.default.SearchUsersAndJobsUseCase)),
     __metadata("design:paramtypes", [SignupUserUseCase_1.SignupUserUseCase,
         LoginUseCase_1.LoginUseCase,
         OtpService_1.OtpService, Object, GoogleAuthService_1.GoogleAuthService,
-        JwtAuthService_1.JwtAuthService])
+        JwtAuthService_1.JwtAuthService,
+        SearchUsersAndJobsUseCase_1.SearchUsersAndJobsUseCase])
 ], AuthController);

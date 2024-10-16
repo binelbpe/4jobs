@@ -55,6 +55,7 @@ export interface User {
   certificates?: Certificate[];
   resume?: string;
   isBlocked?: boolean;
+  isConnected?: boolean; // Add this line
 }
 
 

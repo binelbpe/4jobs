@@ -28,9 +28,15 @@ const JobDetail: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const jobPost = useSelector((state: RootState) =>
-    state.auth.jobPosts.posts.find((job: BasicJobPost) => job._id === jobId)
-  );
+  const jobPost = useSelector((state: RootState) => {
+    // First, check in the auth slice
+    const authJobPost = state.auth.jobPosts.posts.find((job: BasicJobPost) => job._id === jobId);
+    if (authJobPost) return authJobPost;
+
+    // If not found, check in the userSearch slice
+    return state.userSearch.jobPosts.find((job: BasicJobPost) => job._id === jobId);
+  });
+
   const userId = useSelector((state: RootState) => state.auth.user?.id);
   const error = useSelector((state: RootState) => state.auth.error);
 

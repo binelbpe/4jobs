@@ -339,3 +339,8 @@ export const sendUserMessageApi = async (conversationId: string, content: string
   return apiRequest('POST', `/user-messages/${conversationId}`, { content, senderId });
 };
 
+
+export const searchUsersAndJobsApi = async (query: string, userId: string) => {
+  console.log("search ",userId)
+  return apiRequest('GET', `/search?query=${encodeURIComponent(query)}&userId=${userId}`);
+};

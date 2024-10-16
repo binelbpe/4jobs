@@ -73,5 +73,7 @@ const TYPES = {
     SubscriptionController: Symbol.for('SubscriptionController'),
     UpdateSubscriptionUseCase: Symbol.for('UpdateSubscriptionUseCase'),
     ToggleUserPostBlockUseCase: Symbol.for("ToggleUserPostBlockUseCase"),
+    ISearchRepository: Symbol.for('ISearchRepository'),
+    SearchUsersAndJobsUseCase: Symbol.for('SearchUsersAndJobsUseCase'),
 };
 exports.default = TYPES;
