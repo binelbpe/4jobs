@@ -92,6 +92,9 @@ import { IVideoCallRepository } from '../domain/interfaces/repositories/IVideoCa
 import { MongoVideoCallRepository } from './database/mongoose/repositories/MongoVideoCallRepository';
 import { InitiateVideoCallUseCase } from '../application/usecases/recruiter/InitiateVideoCallUseCase';
 import { RespondToVideoCallUseCase } from '../application/usecases/user/RespondToVideoCallUseCase';
+import { IUserVideoCallRepository } from '../domain/interfaces/repositories/user/IUserVideoCallRepository';
+import { MongoUserVideoCallRepository } from './database/mongoose/repositories/MongoUserVideoCallRepository';
+import { UserVideoCallUseCase } from '../application/usecases/user/UserVideoCallUseCase';
 
 const container = new Container();
 
@@ -264,6 +267,8 @@ container.bind<SearchUsersUseCase>(TYPES.SearchUsersUseCase).to(SearchUsersUseCa
 container.bind<IVideoCallRepository>(TYPES.IVideoCallRepository).to(MongoVideoCallRepository);
 container.bind<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase).to(InitiateVideoCallUseCase);
 container.bind<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase).to(RespondToVideoCallUseCase);
+container.bind<IUserVideoCallRepository>(TYPES.IUserVideoCallRepository).to(MongoUserVideoCallRepository);
+container.bind<UserVideoCallUseCase>(TYPES.UserVideoCallUseCase).to(UserVideoCallUseCase);
 
 console.log(container);
 export { container };

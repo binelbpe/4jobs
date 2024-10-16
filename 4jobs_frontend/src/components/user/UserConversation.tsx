@@ -6,10 +6,10 @@ import { URMessage } from "../../types/userRecruiterMessage";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid, parseISO } from "date-fns";
 import ConversationHeader from "../shared/ConversationHeader";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
-import VideoCall from '../shared/VideoCall';
-import { videoCallService } from '../../services/videoCallService';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faVideo, faPhone } from "@fortawesome/free-solid-svg-icons";
+import VideoCall from "../shared/VideoCall";
+import { videoCallService } from "../../services/RecruiterUservideoCallService";
 
 interface ConversationProps {
   conversationId: string;
@@ -40,7 +40,9 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [incomingCall, setIncomingCall] = useState(false);
-  const [incomingCallOffer, setIncomingCallOffer] = useState<string | null>(null);
+  const [incomingCallOffer, setIncomingCallOffer] = useState<string | null>(
+    null
+  );
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -138,15 +140,22 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
     if (incomingCallOffer) {
       setIncomingCall(false);
       setIsVideoCallActive(true);
-      const answer = await videoCallService.handleIncomingCall(incomingCallOffer);
-      userRecruiterSocketService.emitCallAnswer(conversation?.participant.id || "", answer);
+      const answer = await videoCallService.handleIncomingCall(
+        incomingCallOffer
+      );
+      userRecruiterSocketService.emitCallAnswer(
+        conversation?.participant.id || "",
+        answer
+      );
       setIncomingCallOffer(null);
     }
   };
 
   const handleRejectCall = () => {
     setIncomingCall(false);
-    userRecruiterSocketService.emitCallRejected(conversation?.participant.id || "");
+    userRecruiterSocketService.emitCallRejected(
+      conversation?.participant.id || ""
+    );
   };
 
   const handleEndVideoCall = () => {
@@ -155,7 +164,11 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   };
 
   // Add this before the return statement
-  console.log("UserConversation render state:", { incomingCall, isVideoCallActive, incomingCallOffer });
+  console.log("UserConversation render state:", {
+    incomingCall,
+    isVideoCallActive,
+    incomingCallOffer,
+  });
 
   useEffect(() => {
     userRecruiterSocketService.onCallEnded(() => {
@@ -245,17 +258,20 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
             <h2 className="text-2xl font-bold mb-4">Incoming Video Call</h2>
             <p className="mb-6">from {conversation?.participant.name}</p>
             <div className="flex justify-center space-x-4">
-            <button
-  onClick={handleAcceptCall}
-  className="p-3 rounded-full bg-green-500 text-white"
->
-  <FontAwesomeIcon icon={faVideo} className="text-xl" />
-</button>
+              <button
+                onClick={handleAcceptCall}
+                className="p-3 rounded-full bg-green-500 text-white"
+              >
+                <FontAwesomeIcon icon={faVideo} className="text-xl" />
+              </button>
               <button
                 onClick={handleRejectCall}
                 className="p-3 rounded-full bg-red-500 text-white"
               >
-                <FontAwesomeIcon icon={faPhone} className="text-xl transform rotate-135" />
+                <FontAwesomeIcon
+                  icon={faPhone}
+                  className="text-xl transform rotate-135"
+                />
               </button>
             </div>
           </div>

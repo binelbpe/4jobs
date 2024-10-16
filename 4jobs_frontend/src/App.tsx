@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import store, { persistor, AppDispatch } from './redux/store';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { initializeAdminState } from './redux/slices/adminSlice';
+import { CallProvider, useCall } from './contexts/CallContext';
+import { socketService } from './services/socketService';
+import { RootState } from './redux/store';
 
 // Import components
 import Login from './components/user/Login';
@@ -47,61 +50,122 @@ import UserMessaging from './components/user/UserMessaging';
 import AdminSubscriptionManagement from './components/admin/AdminSubscriptionManagement';
 import AdminUserPostManagement from './components/admin/AdminUserPostManagement';
 import SearchResults from './components/user/SearchResults';
+import UserVideoCall from './components/user/UserVideoCall';
 
-const App: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+const AppContent: React.FC = () => {
+  const { handleIncomingCall, isCallActive, incomingCallData, endCall } = useCall();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
-    dispatch(initializeAdminState());
-  }, [dispatch]);
+    if (user) {
+      socketService.connect(user.id);
+      const removeIncomingCallListener = socketService.onIncomingCall(handleIncomingCall);
+
+      return () => {
+        removeIncomingCallListener();
+        socketService.disconnect();
+      };
+    }
+  }, [user, handleIncomingCall]);
+
+  const handleEndCall = useCallback(() => {
+    endCall();
+  }, [endCall]);
 
   return (
-    <Routes>
-      {/* User Routes */}
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/profile/:userId" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
-      <Route path="/profile/update/:userId" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
-      <Route path="/jobs" element={<PrivateRoute><JobList /></PrivateRoute>} />
-      <Route path="/jobs/:jobId" element={<PrivateRoute><JobDetail /></PrivateRoute>} />
-      <Route path="/posts/:userId" element={<PrivateRoute><PostList /></PrivateRoute>} />
-      <Route path="/posts/create" element={<PrivateRoute><CreatePost /></PrivateRoute>}/>
-      <Route path="/posts/user/:userId" element={<PrivateRoute><PostsList /></PrivateRoute>}/>
-      <Route path="/edit-post/:postId" element={<PrivateRoute><EditPost /></PrivateRoute>}/>
-      <Route path="/connection/profile/:userId" element={<PrivateRoute><ConnectionProfile /></PrivateRoute>} />
-      <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
-      <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
-      <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />
-      <Route path="/admin/recruiters" element={<AdminPrivateRoute><AdminRecruiterList /></AdminPrivateRoute>} />
-      <Route path="/admin/profile" element={<AdminPrivateRoute><AdminProfile /></AdminPrivateRoute>} />
-      <Route path="/admin/user" element={<AdminPrivateRoute><UserList /></AdminPrivateRoute>} />
-      <Route path="/admin/jobpost" element={<AdminPrivateRoute><AdminJobPost /></AdminPrivateRoute>} />
-      <Route path="/admin/subscription" element={<AdminPrivateRoute><AdminSubscriptionManagement /></AdminPrivateRoute>} />
-      <Route path="/admin/userposts" element={<AdminPrivateRoute><AdminUserPostManagement /></AdminPrivateRoute>} />
+    <>
+      <Routes>
+        {/* User Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/profile/:userId" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+        <Route path="/profile/update/:userId" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
+        <Route path="/jobs" element={<PrivateRoute><JobList /></PrivateRoute>} />
+        <Route path="/jobs/:jobId" element={<PrivateRoute><JobDetail /></PrivateRoute>} />
+        <Route path="/posts/:userId" element={<PrivateRoute><PostList /></PrivateRoute>} />
+        <Route path="/posts/create" element={<PrivateRoute><CreatePost /></PrivateRoute>}/>
+        <Route path="/posts/user/:userId" element={<PrivateRoute><PostsList /></PrivateRoute>}/>
+        <Route path="/edit-post/:postId" element={<PrivateRoute><EditPost /></PrivateRoute>}/>
+        <Route path="/connection/profile/:userId" element={<PrivateRoute><ConnectionProfile /></PrivateRoute>} />
+        <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
+        <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+        <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />
+        <Route path="/admin/recruiters" element={<AdminPrivateRoute><AdminRecruiterList /></AdminPrivateRoute>} />
+        <Route path="/admin/profile" element={<AdminPrivateRoute><AdminProfile /></AdminPrivateRoute>} />
+        <Route path="/admin/user" element={<AdminPrivateRoute><UserList /></AdminPrivateRoute>} />
+        <Route path="/admin/jobpost" element={<AdminPrivateRoute><AdminJobPost /></AdminPrivateRoute>} />
+        <Route path="/admin/subscription" element={<AdminPrivateRoute><AdminSubscriptionManagement /></AdminPrivateRoute>} />
+        <Route path="/admin/userposts" element={<AdminPrivateRoute><AdminUserPostManagement /></AdminPrivateRoute>} />
 
-      {/* Recruiter Routes */}
-      <Route path="/recruiter" element={<RecruiterLogin />} />
-      <Route path="/recruiter/login" element={<RecruiterLogin />} />
-      <Route path="/recruiter/signup" element={<RecruiterSignup />} />
-      <Route path="/recruiter/verify-otp" element={<VerifyOtp />} />
-      <Route path="/recruiter/dashboard/*" element={<RecruiterPrivateRoute><RecruiterDashboard /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/profile" element={<RecruiterPrivateRoute><RecruiterProfile /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/update-profile" element={<RecruiterPrivateRoute><RecruiterProfileUpdate /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/jobs" element={<RecruiterPrivateRoute><JobPostWrapper /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/jobs/create" element={<RecruiterPrivateRoute><CreateJobPost /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/jobs/edit/:id" element={<RecruiterPrivateRoute><EditJobPost /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
-      <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
-      <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
-    </Routes>
+        {/* Recruiter Routes */}
+        <Route path="/recruiter" element={<RecruiterLogin />} />
+        <Route path="/recruiter/login" element={<RecruiterLogin />} />
+        <Route path="/recruiter/signup" element={<RecruiterSignup />} />
+        <Route path="/recruiter/verify-otp" element={<VerifyOtp />} />
+        <Route path="/recruiter/dashboard/*" element={<RecruiterPrivateRoute><RecruiterDashboard /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/profile" element={<RecruiterPrivateRoute><RecruiterProfile /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/update-profile" element={<RecruiterPrivateRoute><RecruiterProfileUpdate /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/jobs" element={<RecruiterPrivateRoute><JobPostWrapper /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/jobs/create" element={<RecruiterPrivateRoute><CreateJobPost /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/jobs/edit/:id" element={<RecruiterPrivateRoute><EditJobPost /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
+        <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
+      </Routes>
+      <IncomingCallDialog />
+      {isCallActive && incomingCallData && (
+        <UserVideoCall
+          recipientId={incomingCallData.callerId}
+          onEndCall={handleEndCall}
+          incomingCallData={incomingCallData}
+        />
+      )}
+    </>
+  );
+};
+
+const IncomingCallDialog: React.FC = () => {
+  const { isIncomingCall, incomingCallData, acceptCall, rejectCall } = useCall();
+
+  if (!isIncomingCall) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-6 text-center">
+        <h2 className="text-2xl font-bold mb-4">Incoming Call</h2>
+        <p className="mb-6">You have an incoming call from {incomingCallData?.callerId}</p>
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={acceptCall}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg"
+          >
+            Accept
+          </button>
+          <button
+            onClick={rejectCall}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg"
+          >
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <CallProvider>
+      <AppContent />
+    </CallProvider>
   );
 };
 

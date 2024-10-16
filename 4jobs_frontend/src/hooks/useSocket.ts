@@ -4,6 +4,7 @@ import { socketService } from "../services/socketService";
 import { RootState } from "../redux/store";
 import { addMessage, setTypingStatus, updateUnreadCount } from "../redux/slices/userMessageSlice";
 import { addUserRecruiterMessage, updateTotalUnreadCount } from "../redux/slices/userRecruiterMessageSlice";
+import { createSocketListener } from '../utils/socketUtils';
 
 export const useSocket = (recipientId: string) => {
   const dispatch = useDispatch();
@@ -25,9 +26,6 @@ export const useSocket = (recipientId: string) => {
         setIsConnected(false);
       };
 
-      socketService.on("connect", handleConnect);
-      socketService.on("disconnect", handleDisconnect);
-
       const handleNewMessage = (message: any) => {
         console.log("Received new message:", message);
         if (message.isRecruiterMessage) {
@@ -47,15 +45,17 @@ export const useSocket = (recipientId: string) => {
         dispatch(setTypingStatus(data));
       };
 
-      socketService.on("newMessage", handleNewMessage);
-      socketService.on("userTyping", handleUserTyping);
+      const removeConnectListener = createSocketListener("connect", handleConnect);
+      const removeDisconnectListener = createSocketListener("disconnect", handleDisconnect);
+      const removeNewMessageListener = createSocketListener("newMessage", handleNewMessage);
+      const removeUserTypingListener = createSocketListener("userTyping", handleUserTyping);
 
       return () => {
         console.log("Cleaning up socket connection");
-        socketService.off("connect", handleConnect);
-        socketService.off("disconnect", handleDisconnect);
-        socketService.off("newMessage", handleNewMessage);
-        socketService.off("userTyping", handleUserTyping);
+        removeConnectListener();
+        removeDisconnectListener();
+        removeNewMessageListener();
+        removeUserTypingListener();
         socketService.disconnect();
       };
     }
@@ -88,5 +88,4 @@ export const useSocket = (recipientId: string) => {
 
 export default useSocket;
 
-// Add this line at the end of the file to make it a module
 export {};

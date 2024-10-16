@@ -10,6 +10,11 @@ import { updateTotalUnreadCount } from "../../redux/slices/userRecruiterMessageS
 import { Message } from "../../types/messageType";
 import useSocket from "../../hooks/useSocket";
 import debounce from "lodash/debounce";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faVideo } from '@fortawesome/free-solid-svg-icons';
+import UserVideoCall from './UserVideoCall';
+import { socketService } from "../../services/socketService";
+import { useCall } from '../../contexts/CallContext';
 
 interface ConversationProps {
   userId: string;
@@ -47,6 +52,16 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
   } = useSocket(userId);
   const [hasFetchedConversation, setHasFetchedConversation] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const { 
+    isIncomingCall, 
+    incomingCallData, 
+    isCallActive,
+    acceptCall, 
+    rejectCall, 
+    setupVideoCall,
+    endCall
+  } = useCall();
 
   const fetchConversationData = useCallback(() => {
     if (
@@ -161,22 +176,42 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     };
   }, []);
 
+  const handleAcceptCall = useCallback(() => {
+    console.log("Accepting call");
+    acceptCall();
+    // You might want to add any additional logic here
+  }, [acceptCall]);
+
+  const handleStartVideoCall = useCallback(() => {
+    console.log("Starting video call");
+    setupVideoCall(userId);
+  }, [userId, setupVideoCall]);
+
+  const handleEndVideoCall = useCallback(() => {
+    console.log("Ending video call");
+    endCall();
+  }, [endCall]);
+
+  useEffect(() => {
+    console.log("isCallActive changed:", isCallActive);
+  }, [isCallActive]);
+
   if (!currentUser) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-gray-300">
+      <div className="p-4 border-b border-gray-300 flex justify-between items-center">
         <h2 className="text-xl font-semibold text-purple-700">
           {connection?.user.name || "Chat"}
         </h2>
-        <div className="flex items-center text-sm text-gray-500">
-          {isOnline && (
-            <span className="mr-2 w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-          )}
-          <span>{isOnline ? "Online" : "Offline"}</span>
-        </div>
+        <button
+          onClick={handleStartVideoCall}
+          className="bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition duration-300"
+        >
+          <FontAwesomeIcon icon={faVideo} />
+        </button>
       </div>
       <div className="flex-grow overflow-y-auto p-4">
         {messages.map((message: Message, index: number) => (
@@ -235,6 +270,36 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
           </button>
         </div>
       </form>
+      {isIncomingCall && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Incoming Call</h2>
+            <p className="mb-6">You have an incoming call from {incomingCallData?.callerId}</p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={handleAcceptCall}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg"
+              >
+                Accept
+              </button>
+              <button
+                onClick={rejectCall}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {isCallActive && (
+        <UserVideoCall
+          recipientId={userId}
+          onEndCall={handleEndVideoCall}
+          incomingCallData={incomingCallData}
+        />
+      )}
     </div>
   );
 };

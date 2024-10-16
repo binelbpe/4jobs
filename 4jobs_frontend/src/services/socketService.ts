@@ -95,16 +95,20 @@ class SocketService {
     }
   }
 
-  on(event: string, callback: (...args: any[]) => void) {
-    if (this.socket) {
-      this.socket.on(event, callback);
+  emit(event: string, data: any) {
+    if (this.socket && this.connected) {
+      this.socket.emit(event, data);
+    } else {
+      console.warn(`SocketService: Cannot emit ${event}. Socket is not connected.`);
     }
   }
 
-  off(event: string, callback: (...args: any[]) => void) {
+  on(event: string, callback: (...args: any[]) => void): () => void {
     if (this.socket) {
-      this.socket.off(event, callback);
+      this.socket.on(event, callback);
+      return () => this.socket?.off(event, callback);
     }
+    return () => {};
   }
 
   getConnectionStatus(): boolean {
@@ -126,6 +130,47 @@ class SocketService {
     } else {
       console.warn("SocketService: Socket is not connected. Unable to mark notification as read.");
     }
+  }
+
+  emitUserCallOffer(recipientId: string, offer: string) {
+    if (this.socket && this.connected) {
+      this.socket.emit("userCallOffer", { recipientId, offer });
+    }
+  }
+
+  emitUserCallAnswer(callerId: string, answer: string) {
+    if (this.socket && this.connected) {
+      this.socket.emit("userCallAnswer", { callerId, answer });
+    }
+  }
+
+  emitUserEndCall(recipientId: string) {
+    if (this.socket && this.connected) {
+      this.socket.emit("userEndCall", { recipientId });
+    }
+  }
+
+  onIncomingCall(callback: (data: { callerId: string, offer: string }) => void): () => void {
+    if (this.socket) {
+      this.socket.on("incomingCall", callback);
+      return () => this.socket?.off("incomingCall", callback);
+    }
+    return () => {};
+  }
+
+  emitCallAnswer(callerId: string, answer: string) {
+    if (this.socket && this.connected) {
+      this.socket.emit("callAnswer", { callerId, answer });
+    }
+  }
+
+  // Add this method to the SocketService class
+  onCallRejected(callback: () => void): () => void {
+    if (this.socket) {
+      this.socket.on("callRejected", callback);
+      return () => this.socket?.off("callRejected", callback);
+    }
+    return () => {};
   }
 }
 

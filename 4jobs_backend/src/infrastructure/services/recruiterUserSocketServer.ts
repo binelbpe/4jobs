@@ -106,10 +106,9 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
       }
     });
 
-    // Existing disconnect handling...
+
   });
 
-  // Existing event listeners...
 
   return { io, userManager, eventEmitter };
 }

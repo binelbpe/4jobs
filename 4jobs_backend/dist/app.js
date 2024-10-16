@@ -13,7 +13,7 @@ const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
 const container_1 = require("./infrastructure/container");
 const userSocketServer_1 = require("./infrastructure/services/userSocketServer");
-const socketServer_1 = require("./infrastructure/services/socketServer");
+const recruiterUserSocketServer_1 = require("./infrastructure/services/recruiterUserSocketServer");
 const authRoutes_1 = require("./presentation/routes/authRoutes");
 const adminRoutes_1 = require("./presentation/routes/adminRoutes");
 const RecruiterRoutes_1 = require("./presentation/routes/RecruiterRoutes");
@@ -26,7 +26,7 @@ const { io: userIo, userManager: userSocketManager, eventEmitter: userEventEmitt
 exports.userIo = userIo;
 exports.userSocketManager = userSocketManager;
 exports.userEventEmitter = userEventEmitter;
-const { io: recruiterIo, userManager: recruiterSocketManager, eventEmitter: recruiterEventEmitter } = (0, socketServer_1.setupSocketServer)(server, container_1.container);
+const { io: recruiterIo, userManager: recruiterSocketManager, eventEmitter: recruiterEventEmitter } = (0, recruiterUserSocketServer_1.setupSocketServer)(server, container_1.container);
 exports.recruiterIo = recruiterIo;
 exports.recruiterSocketManager = recruiterSocketManager;
 exports.recruiterEventEmitter = recruiterEventEmitter;

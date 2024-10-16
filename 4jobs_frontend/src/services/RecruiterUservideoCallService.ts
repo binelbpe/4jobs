@@ -125,7 +125,7 @@ class VideoCallService {
   disconnectCall(): void {
     if (this.localStream) {
       this.localStream.getTracks().forEach(track => {
-        track.stop();  // This will stop the camera and microphone
+        track.stop(); 
       });
     }
     if (this.peerConnection) {

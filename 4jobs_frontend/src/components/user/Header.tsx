@@ -28,6 +28,7 @@ import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
 import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
 import { socketService } from "../../services/socketService";
 import { searchUsersAndJobs, clearSearch } from "../../redux/slices/userSearchSlice";
+import { createSocketListener } from '../../utils/socketUtils';
 
 const UserHeader: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,10 +97,10 @@ const UserHeader: React.FC = () => {
       dispatch(addNotification(notification));
     };
 
-    socketService?.on("newNotification", handleNewNotification);
+    const removeNewNotificationListener = createSocketListener("newNotification", handleNewNotification);
 
     return () => {
-      socketService?.off("newNotification", handleNewNotification);
+      removeNewNotificationListener();
     };
   }, [dispatch]);
 

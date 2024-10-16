@@ -80,5 +80,7 @@ const TYPES = {
     IVideoCallRepository: Symbol.for('IVideoCallRepository'),
     InitiateVideoCallUseCase: Symbol.for('InitiateVideoCallUseCase'),
     RespondToVideoCallUseCase: Symbol.for('RespondToVideoCallUseCase'),
+    IUserVideoCallRepository: Symbol.for('IUserVideoCallRepository'),
+    UserVideoCallUseCase: Symbol.for('UserVideoCallUseCase'),
 };
 exports.default = TYPES;

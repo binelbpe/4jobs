@@ -8,7 +8,7 @@ import http from 'http';
 import { container } from './infrastructure/container';
 import TYPES from './types';
 import { setupUserSocketServer } from './infrastructure/services/userSocketServer';
-import { setupSocketServer } from './infrastructure/services/socketServer';
+import { setupSocketServer } from './infrastructure/services/recruiterUserSocketServer';
 
 import { authRouter } from './presentation/routes/authRoutes';
 import { adminRouter } from './presentation/routes/adminRoutes';

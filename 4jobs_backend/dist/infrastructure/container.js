@@ -79,6 +79,8 @@ const SearchUsersUseCase_1 = require("../application/usecases/recruiter/SearchUs
 const MongoVideoCallRepository_1 = require("./database/mongoose/repositories/MongoVideoCallRepository");
 const InitiateVideoCallUseCase_1 = require("../application/usecases/recruiter/InitiateVideoCallUseCase");
 const RespondToVideoCallUseCase_1 = require("../application/usecases/user/RespondToVideoCallUseCase");
+const MongoUserVideoCallRepository_1 = require("./database/mongoose/repositories/MongoUserVideoCallRepository");
+const UserVideoCallUseCase_1 = require("../application/usecases/user/UserVideoCallUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -233,4 +235,6 @@ container.bind(types_1.default.SearchUsersUseCase).to(SearchUsersUseCase_1.Searc
 container.bind(types_1.default.IVideoCallRepository).to(MongoVideoCallRepository_1.MongoVideoCallRepository);
 container.bind(types_1.default.InitiateVideoCallUseCase).to(InitiateVideoCallUseCase_1.InitiateVideoCallUseCase);
 container.bind(types_1.default.RespondToVideoCallUseCase).to(RespondToVideoCallUseCase_1.RespondToVideoCallUseCase);
+container.bind(types_1.default.IUserVideoCallRepository).to(MongoUserVideoCallRepository_1.MongoUserVideoCallRepository);
+container.bind(types_1.default.UserVideoCallUseCase).to(UserVideoCallUseCase_1.UserVideoCallUseCase);
 console.log(container);
