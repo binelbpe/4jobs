@@ -8,6 +8,7 @@ import {
 import Sidebar from "./AdminSidebar";
 import Header from "./AdminHeader";
 import ConfirmationModal from "../common/ConfirmationModal";
+import { FaEye, FaBan, FaUnlock, FaImage, FaVideo, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -71,77 +72,73 @@ const AdminUserPostManagement: React.FC = () => {
       <div className="flex-1">
         <Header />
         <main className="p-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+          <h1 className="text-2xl font-semibold text-purple-800 mb-6">
             User Post Management
           </h1>
           <div className="overflow-x-auto bg-white shadow-md rounded-lg">
             <table className="min-w-full leading-normal">
               <thead>
-                <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Post ID
+                <tr className="bg-purple-100">
+                  <th className="px-5 py-3 border-b-2 border-purple-200 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">
+                    User
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    User Name
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    User Email
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-purple-200 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">
                     Content
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-purple-200 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">
                     Media
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-purple-200 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {userPosts.map((post: UserPost) => (
-                  <tr key={post.id}>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      {post.id}
+                  <tr key={post.id} className="hover:bg-purple-50">
+                    <td className="px-5 py-5 border-b border-purple-200 text-sm">
+                      <div className="flex items-center">
+                        <div className="ml-3">
+                          <p className="text-purple-900 whitespace-no-wrap font-semibold">
+                            {post.userName}
+                          </p>
+                          <p className="text-purple-600 whitespace-no-wrap">
+                            {post.userEmail}
+                          </p>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      {post.userName}
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      {post.userEmail}
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 border-b border-purple-200 text-sm">
                       <button
                         onClick={() => toggleContent(post.id)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-purple-600 hover:text-purple-900"
                       >
-                        {showContent === post.id
-                          ? "Hide Content"
-                          : "Show Content"}
+                        <FaEye className="inline mr-2" />
+                        {showContent === post.id ? "Hide Content" : "Show Content"}
                       </button>
                       {showContent === post.id && (
-                        <div className="mt-2">{post.content}</div>
+                        <div className="mt-2 text-purple-800">{post.content}</div>
                       )}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 border-b border-purple-200 text-sm">
                       {post.imageUrl && (
                         <button
                           onClick={() => window.open(post.imageUrl, "_blank")}
-                          className="text-green-600 hover:text-green-900 mr-2"
+                          className="text-purple-600 hover:text-purple-900 mr-2"
                         >
-                          View Image
+                          <FaImage className="inline mr-1" /> View Image
                         </button>
                       )}
                       {post.videoUrl && (
                         <button
                           onClick={() => window.open(post.videoUrl, "_blank")}
-                          className="text-green-600 hover:text-green-900"
+                          className="text-purple-600 hover:text-purple-900"
                         >
-                          View Video
+                          <FaVideo className="inline mr-1" /> View Video
                         </button>
                       )}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 border-b border-purple-200 text-sm">
                       <button
                         onClick={() => handleBlockPost(post)}
                         className={`${
@@ -150,6 +147,7 @@ const AdminUserPostManagement: React.FC = () => {
                             : "bg-red-500 hover:bg-red-600"
                         } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
                       >
+                        {post.isBlocked ? <FaUnlock className="inline mr-2" /> : <FaBan className="inline mr-2" />}
                         {post.isBlocked ? "Unblock" : "Block"}
                       </button>
                     </td>
@@ -160,7 +158,7 @@ const AdminUserPostManagement: React.FC = () => {
           </div>
           <div className="mt-4 flex justify-between items-center">
             <div>
-              <span>
+              <span className="text-purple-700">
                 Page {currentPage} of {totalPages}
               </span>
             </div>
@@ -168,16 +166,16 @@ const AdminUserPostManagement: React.FC = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-4 py-2 mr-2 bg-purple-500 text-white rounded disabled:bg-gray-300"
+                className="px-4 py-2 mr-2 bg-purple-500 text-white rounded disabled:bg-purple-300"
               >
-                Previous
+                <FaChevronLeft className="inline mr-1" /> Previous
               </button>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-purple-500 text-white rounded disabled:bg-gray-300"
+                className="px-4 py-2 bg-purple-500 text-white rounded disabled:bg-purple-300"
               >
-                Next
+                Next <FaChevronRight className="inline ml-1" />
               </button>
             </div>
           </div>

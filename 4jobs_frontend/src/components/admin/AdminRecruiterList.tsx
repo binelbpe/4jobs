@@ -8,6 +8,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { Navigate } from "react-router-dom";
 import Header from "./AdminHeader";
 import Sidebar from "./AdminSidebar";
+import { FaCheck, FaDownload, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "../../styles/admin/RecruiterList.css";
 
 const AdminRecruiterList: React.FC = () => {
@@ -63,73 +64,54 @@ const AdminRecruiterList: React.FC = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="p-4 flex-grow overflow-auto">
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Recruiter List</h2>
-            {loading && <p>Loading...</p>}
+        <main className="p-6 flex-grow overflow-auto">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6 text-purple-800">Recruiter List</h2>
+            {loading && <p className="text-purple-600">Loading...</p>}
             {error && <p className="text-red-500">{error}</p>}
 
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border-collapse">
-                <thead>
+              <table className="min-w-full bg-white">
+                <thead className="bg-purple-100">
                   <tr>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Name
-                    </th>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Email
-                    </th>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Phone
-                    </th>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Status
-                    </th>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Actions
-                    </th>
-                    <th className="border-b py-3 px-5 text-left text-sm font-semibold">
-                      Government ID
-                    </th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Name</th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Email</th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Phone</th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Status</th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Actions</th>
+                    <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Government ID</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-purple-200">
                   {currentRecruiters.map((recruiter) => (
-                    <tr key={recruiter._id} className="hover:bg-gray-50">
-                      <td className="border-b py-3 px-5 text-sm">
-                        {recruiter.name}
+                    <tr key={recruiter._id} className="hover:bg-purple-50">
+                      <td className="py-4 px-6 text-sm">{recruiter.name}</td>
+                      <td className="py-4 px-6 text-sm">{recruiter.email}</td>
+                      <td className="py-4 px-6 text-sm">{recruiter.phone}</td>
+                      <td className="py-4 px-6 text-sm">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          recruiter.isApproved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                        }`}>
+                          {recruiter.isApproved ? "Approved" : "Pending"}
+                        </span>
                       </td>
-                      <td className="border-b py-3 px-5 text-sm">
-                        {recruiter.email}
-                      </td>
-                      <td className="border-b py-3 px-5 text-sm">
-                        {recruiter.phone}
-                      </td>
-                      <td className="border-b py-3 px-5 text-sm">
-                        {recruiter.isApproved ? "Approved" : "Pending"}
-                      </td>
-                      <td className="border-b py-3 px-5 text-sm">
+                      <td className="py-4 px-6 text-sm">
                         {!recruiter.isApproved && (
                           <button
                             onClick={() => handleApprove(recruiter.id)}
-                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                            className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                           >
-                            Approve
+                            <FaCheck className="mr-2" /> Approve
                           </button>
                         )}
                       </td>
-                      <td className="border-b py-3 px-5 text-sm">
+                      <td className="py-4 px-6 text-sm">
                         {recruiter.governmentId ? (
                           <button
-                            onClick={() =>
-                              handleDownloadGovernmentId(
-                                recruiter.governmentId,
-                                recruiter.name
-                              )
-                            }
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                            onClick={() => handleDownloadGovernmentId(recruiter.governmentId, recruiter.name)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                           >
-                            Download ID
+                            <FaDownload className="mr-2" /> Download ID
                           </button>
                         ) : (
                           <span className="text-gray-500">No ID uploaded</span>
@@ -142,28 +124,24 @@ const AdminRecruiterList: React.FC = () => {
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-2 sm:space-y-0">
+            <div className="flex justify-between items-center mt-6">
               <div className="flex space-x-2">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 disabled:opacity-50"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50 flex items-center"
                   disabled={currentPage === 1}
                 >
-                  Previous
+                  <FaChevronLeft className="mr-2" /> Previous
                 </button>
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 disabled:opacity-50"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50 flex items-center"
                   disabled={currentPage === totalPages}
                 >
-                  Next
+                  Next <FaChevronRight className="ml-2" />
                 </button>
               </div>
-              <span className="text-sm">
+              <span className="text-sm text-purple-600">
                 Page {currentPage} of {totalPages}
               </span>
             </div>

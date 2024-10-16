@@ -9,6 +9,7 @@ import Sidebar from "./AdminSidebar";
 import Header from "./AdminHeader";
 import { Subscription } from "../../types/subscription";
 import ConfirmationModal from "../common/ConfirmationModal";
+import { FaChevronLeft, FaChevronRight, FaBan } from "react-icons/fa";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -44,116 +45,90 @@ const AdminSubscriptionManagement: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         <Header />
-        <main className="p-6">
+        <main className="p-6 flex-grow overflow-auto">
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
               <strong className="font-bold">Error:</strong>
               <span className="block sm:inline"> {error}</span>
             </div>
           )}
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-            Subscription Management
-          </h1>
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-            </div>
-          ) : !subscriptions || subscriptions.length === 0 ? (
-            <div className="text-center py-4">No subscriptions found.</div>
-          ) : (
-            <>
-              <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-                <table className="min-w-full leading-normal">
-                  <thead>
-                    <tr>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Recruiter
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Company
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Plan
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Start Date
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        End Date
-                      </th>
-                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {subscriptions.map((subscription: Subscription) => (
-                      <tr key={subscription.id}>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          {subscription.name}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          {subscription.companyName}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          {subscription.planDuration}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          ₹{subscription.subscriptionAmount}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          {new Date(
-                            subscription.subscriptionStartDate
-                          ).toLocaleDateString()}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          {new Date(subscription.expiryDate).toLocaleDateString()}
-                        </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          <button
-                            onClick={() => handleCancelSubscription(subscription)}
-                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                          >
-                            Cancel subscription
-                          </button>
-                        </td>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h1 className="text-2xl font-semibold text-purple-800 mb-6">
+              Subscription Management
+            </h1>
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            ) : !subscriptions || subscriptions.length === 0 ? (
+              <div className="text-center py-4 text-purple-600">No subscriptions found.</div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white">
+                    <thead className="bg-purple-100">
+                      <tr>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Recruiter</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Company</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Plan</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Amount</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Start Date</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">End Date</th>
+                        <th className="py-3 px-6 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 flex justify-between items-center">
-                <div>
-                  <span>
-                    Page {currentPage} of {totalPages}
-                  </span>
+                    </thead>
+                    <tbody className="divide-y divide-purple-200">
+                      {subscriptions.map((subscription: Subscription) => (
+                        <tr key={subscription.id} className="hover:bg-purple-50">
+                          <td className="py-4 px-6 text-sm">{subscription.name}</td>
+                          <td className="py-4 px-6 text-sm">{subscription.companyName}</td>
+                          <td className="py-4 px-6 text-sm">{subscription.planDuration}</td>
+                          <td className="py-4 px-6 text-sm">₹{subscription.subscriptionAmount}</td>
+                          <td className="py-4 px-6 text-sm">{new Date(subscription.subscriptionStartDate).toLocaleDateString()}</td>
+                          <td className="py-4 px-6 text-sm">{new Date(subscription.expiryDate).toLocaleDateString()}</td>
+                          <td className="py-4 px-6 text-sm">
+                            <button
+                              onClick={() => handleCancelSubscription(subscription)}
+                              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                            >
+                              <FaBan className="mr-2" /> Cancel subscription
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div>
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 mr-2 bg-purple-500 text-white rounded disabled:bg-gray-300"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-purple-500 text-white rounded disabled:bg-gray-300"
-                  >
-                    Next
-                  </button>
+                <div className="mt-6 flex flex-col sm:flex-row justify-between items-center">
+                  <div className="mb-4 sm:mb-0">
+                    <span className="text-sm text-purple-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 bg-purple-500 text-white rounded disabled:bg-purple-300 hover:bg-purple-600 transition-colors duration-200 flex items-center"
+                    >
+                      <FaChevronLeft className="mr-2" /> Previous
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 bg-purple-500 text-white rounded disabled:bg-purple-300 hover:bg-purple-600 transition-colors duration-200 flex items-center"
+                    >
+                      Next <FaChevronRight className="ml-2" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </main>
       </div>
       <ConfirmationModal

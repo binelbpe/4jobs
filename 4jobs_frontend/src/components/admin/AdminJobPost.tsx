@@ -18,6 +18,8 @@ import {
   FaChevronRight,
   FaCalendarAlt,
   FaMapMarkerAlt,
+  FaSortAmountDown,
+  FaBuilding,
 } from "react-icons/fa";
 import Header from "../admin/AdminHeader";
 import Sidebar from "../admin/AdminSidebar";
@@ -138,7 +140,7 @@ const AdminJobPost: React.FC = () => {
               <FaSearch className="absolute left-3 top-3 text-purple-400" />
             </div>
             <div className="flex items-center">
-              <span className="mr-2 text-sm text-gray-600">Sort by:</span>
+              <span className="mr-2 text-sm text-purple-600">Sort by:</span>
               <select
                 value={sortCriteria}
                 onChange={(e) =>
@@ -156,7 +158,7 @@ const AdminJobPost: React.FC = () => {
               <thead className="bg-purple-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
-                    Title
+                    Job Details
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden md:table-cell">
                     Company
@@ -167,11 +169,8 @@ const AdminJobPost: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden xl:table-cell">
                     Posted Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider hidden sm:table-cell">
-                    Reports
-                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
-                    Status
+                    Reports
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">
                     Actions
@@ -185,31 +184,32 @@ const AdminJobPost: React.FC = () => {
                     className="hover:bg-purple-50 transition-colors duration-200"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-purple-900">
                         {post.title}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-purple-500">
                         {post.company?.name || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                      <div className="text-sm text-gray-900">
+                      <div className="flex items-center text-sm text-purple-600">
+                        <FaBuilding className="mr-2" />
                         {post.company?.name || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FaMapMarkerAlt className="mr-1 text-purple-500" />
+                      <div className="flex items-center text-sm text-purple-600">
+                        <FaMapMarkerAlt className="mr-2" />
                         {post.location || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap hidden xl:table-cell">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FaCalendarAlt className="mr-1 text-purple-500" />
+                      <div className="flex items-center text-sm text-purple-600">
+                        <FaCalendarAlt className="mr-2" />
                         {new Date(post.createdAt).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 hidden sm:table-cell">
+                    <td className="px-6 py-4">
                       {post.reports && post.reports.length > 0 ? (
                         <div className="flex items-center text-red-500">
                           <FaExclamationTriangle className="mr-2" />
@@ -218,17 +218,6 @@ const AdminJobPost: React.FC = () => {
                       ) : (
                         <span className="text-green-500">No reports</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          post.status === "Open"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {post.status}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -265,7 +254,7 @@ const AdminJobPost: React.FC = () => {
           </div>
           {/* Pagination */}
           <div className="mt-4 flex flex-col sm:flex-row justify-between items-center">
-            <div className="mb-2 sm:mb-0 text-sm text-gray-600">
+            <div className="mb-2 sm:mb-0 text-sm text-purple-600">
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
               {Math.min(currentPage * ITEMS_PER_PAGE, filteredPosts.length)} of{" "}
               {filteredPosts.length} entries

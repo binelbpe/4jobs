@@ -4,6 +4,8 @@ import { createPost } from '../../../redux/slices/postSlice';
 import { RootState, AppDispatch } from "../../../redux/store";
 import { ImageIcon, VideoIcon, XIcon } from 'lucide-react';
 import Header from '../Header';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreatePost: React.FC = () => {
   const [content, setContent] = useState('');
@@ -11,28 +13,41 @@ const CreatePost: React.FC = () => {
   const [video, setVideo] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (content.trim() || image || video) {
+      setShowConfirmModal(true);
+    }
+  };
+
+  const confirmPost = () => {
     if (!user?.id) {
       console.error('User ID is missing.');
       return;
     }
-    if (content.trim() || image || video) {
-      const postData = {
-        content: content.trim() ? content : undefined,
-        image: image || undefined,
-        video: video || undefined,
-      };
-      dispatch(createPost({ postData, userId: user.id }));
-      setContent('');
-      setImage(null);
-      setVideo(null);
-      setPreviewImage(null);
-      setPreviewVideo(null);
-    }
+    const postData = {
+      content: content.trim() ? content : undefined,
+      image: image || undefined,
+      video: video || undefined,
+    };
+    dispatch(createPost({ postData, userId: user.id }))
+      .unwrap()
+      .then(() => {
+        toast.success('Post created successfully!');
+        setContent('');
+        setImage(null);
+        setVideo(null);
+        setPreviewImage(null);
+        setPreviewVideo(null);
+      })
+      .catch((error) => {
+        toast.error(`Error creating post: ${error.message}`);
+      });
+    setShowConfirmModal(false);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +79,7 @@ const CreatePost: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white-100 to-white-200">
       <Header />
+      <ToastContainer position="top-right" autoClose={5000} />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
@@ -127,6 +143,40 @@ const CreatePost: React.FC = () => {
               </div>
             </form>
           </div>
+        </div>
+      </div>
+      {showConfirmModal && (
+        <ConfirmModal
+          onConfirm={confirmPost}
+          onCancel={() => setShowConfirmModal(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+const ConfirmModal: React.FC<{ onConfirm: () => void; onCancel: () => void }> = ({
+  onConfirm,
+  onCancel,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+        <h3 className="text-xl font-semibold mb-4">Confirm Post</h3>
+        <p className="mb-6">Are you sure you want to publish this post?</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-300"
+          >
+            Confirm
+          </button>
         </div>
       </div>
     </div>

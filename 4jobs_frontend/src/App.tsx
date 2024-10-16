@@ -33,7 +33,7 @@ import JobList from './components/user/JobList';
 import JobDetail from './components/user/JobDetail';
 import JobContestantsList from './components/recruiter/jobPost/JobContestantsList';
 import ContestantDetails from './components/recruiter/jobPost/ContestantDetails';
-import UserList from './components/admin/UserList';
+import UserList from './components/admin/AdminUserList';
 import PostList from './components/user/posts/PostList';
 import CreatePost from './components/user/posts/CreatePost';
 import PostsList from './components/user/posts/PostList'
