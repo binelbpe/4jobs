@@ -156,3 +156,10 @@ export const updateSubscriptionApi = async (recruiterId: string, subscriptionDat
   console.log(`Updating subscription for recruiter ID: ${recruiterId}`);
   return apiRequest('PUT', `/update-subscription/${recruiterId}`, subscriptionData);
 };
+
+export const searchUsers = async (query: string) => {
+  console.log('Searching users with query:', query); // Debugging log
+  const response = await apiRequest('GET', `/search-users?query=${query}`);
+  console.log('Search API response:', response); // Debugging log
+  return response;
+};

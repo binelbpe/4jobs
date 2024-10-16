@@ -52,3 +52,5 @@ recruiterRouter.post("/create-order", subscriptionController.createOrder.bind(su
 recruiterRouter.post("/verify-payment", subscriptionController.verifyPayment.bind(subscriptionController));
 // Add this new route for updating subscription
 recruiterRouter.put('/update-subscription/:recruiterId', subscriptionController.updateSubscription.bind(subscriptionController));
+// Add this route
+recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recruiterController));

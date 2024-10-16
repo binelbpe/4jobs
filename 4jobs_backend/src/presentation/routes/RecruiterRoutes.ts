@@ -125,4 +125,7 @@ recruiterRouter.post(
 // Add this new route for updating subscription
 recruiterRouter.put('/update-subscription/:recruiterId', subscriptionController.updateSubscription.bind(subscriptionController));
 
+// Add this route
+recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recruiterController));
+
 export { recruiterRouter };

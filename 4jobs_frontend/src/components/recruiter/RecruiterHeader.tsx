@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/recruiterSlice';
 import { fetchJobPosts } from '../../redux/slices/jobPostSlice';
 import { useNavigate } from 'react-router-dom';
-import { RootState } from '../../redux/store';
+import { RootState, AppDispatch } from '../../redux/store';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBriefcase,
@@ -12,13 +12,69 @@ import {
   faUser,
   faSearch,
   faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
+import { searchUsersAndJobs, clearSearch } from '../../redux/slices/recruiterSearchSlice';
+import { debounce } from 'lodash';
+import SearchResults from './RecruiterSearchResults';
 
 const RecruiterHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const recruiterId = useSelector((state: RootState) => state.recruiter?.recruiter.id);
+  const searchResults = useSelector((state: RootState) => state.recruiterSearch.users);
+  const isLoading = useSelector((state: RootState) => state.recruiterSearch.loading);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  console.log('Current search results:', searchResults); // Debugging log
+
+  const debouncedSearch = debounce((query: string) => {
+    if (query.length >= 3 && recruiterId) {
+      console.log('Dispatching search:', query, recruiterId); // Debugging log
+      dispatch(searchUsersAndJobs({ query, userId: recruiterId }));
+    } else {
+      dispatch(clearSearch());
+    }
+  }, 300);
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch,searchQuery, recruiterId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowSearchResults(true);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    dispatch(clearSearch());
+    setShowSearchResults(false);
+  };
+
+  const handleViewContestant = (contestantId: string) => {
+    navigate(`/recruiter/contestant/${contestantId}`);
+    setShowSearchResults(false);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -56,18 +112,43 @@ const RecruiterHeader = () => {
       </div>
 
       {/* Search Bar Section */}
-      <div className="flex-grow mx-10">
+      <div className="flex-grow mx-10 relative" ref={searchRef}>
         <div className="relative w-full max-w-lg mx-auto">
           <input
             type="text"
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="Search"
+            placeholder="Search users (min. 3 characters)"
+            value={searchQuery}
+            onChange={handleSearchChange}
           />
+          {searchQuery && (
+            <button
+              className="absolute right-12 top-2 text-gray-500 hover:text-gray-700"
+              onClick={handleClearSearch}
+            >
+              <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+            </button>
+          )}
           <FontAwesomeIcon
             icon={faSearch}
             className="absolute right-3 top-3 text-gray-500"
           />
         </div>
+        {showSearchResults && searchResults && searchResults.length > 0 && (
+          <div className="absolute z-10 w-full max-w-lg mx-auto mt-2">
+            <SearchResults results={searchResults} onSelectUser={handleViewContestant} />
+          </div>
+        )}
+        {isLoading && (
+          <div className="absolute z-10 w-full max-w-lg mx-auto mt-2 bg-white p-2 text-center">
+            Loading...
+          </div>
+        )}
+        {!isLoading && showSearchResults && searchResults && searchResults.length === 0 && (
+          <div className="absolute z-10 w-full max-w-lg mx-auto mt-2 bg-white p-2 text-center">
+            No results found
+          </div>
+        )}
       </div>
 
       {/* Mobile Menu Button */}

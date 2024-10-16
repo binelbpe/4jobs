@@ -48,6 +48,7 @@ export interface MUser {
 
 
 export interface IUserDocument extends Document {
+  _id:string;
   email: string;
   password: string;
   phone: number;

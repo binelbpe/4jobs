@@ -33,9 +33,10 @@ const UpdateRecruiterUseCase_1 = require("../../../application/usecases/recruite
 const GetRecruiterProfileUseCase_1 = require("../../../application/usecases/recruiter/GetRecruiterProfileUseCase");
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const S3Service_1 = require("../../../infrastructure/services/S3Service");
+const SearchUsersUseCase_1 = require("../../../application/usecases/recruiter/SearchUsersUseCase");
 const tempRecruiterStore = {};
 let RecruiterController = class RecruiterController {
-    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository, s3Service) {
+    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository, s3Service, searchUsersUseCase) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
         this.updateRecruiterUseCase = updateRecruiterUseCase;
@@ -43,6 +44,7 @@ let RecruiterController = class RecruiterController {
         this.otpService = otpService;
         this.recruiterRepository = recruiterRepository;
         this.s3Service = s3Service;
+        this.searchUsersUseCase = searchUsersUseCase;
     }
     registerRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -185,6 +187,22 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
+    searchUsers(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { query } = req.query;
+                if (typeof query !== 'string') {
+                    return res.status(400).json({ error: 'Invalid query parameter' });
+                }
+                const users = yield this.searchUsersUseCase.execute(query);
+                res.status(200).json(users);
+            }
+            catch (error) {
+                console.error('Error searching users:', error);
+                res.status(500).json({ error: 'Failed to search users' });
+            }
+        });
+    }
 };
 exports.RecruiterController = RecruiterController;
 exports.RecruiterController = RecruiterController = __decorate([
@@ -196,9 +214,11 @@ exports.RecruiterController = RecruiterController = __decorate([
     __param(4, (0, inversify_1.inject)(types_1.default.OtpService)),
     __param(5, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
     __param(6, (0, inversify_1.inject)(types_1.default.S3Service)),
+    __param(7, (0, inversify_1.inject)(types_1.default.SearchUsersUseCase)),
     __metadata("design:paramtypes", [RegisterRecruiterUsecase_1.RegisterRecruiterUseCase,
         LoginRecruiterUseCase_1.LoginRecruiterUseCase,
         UpdateRecruiterUseCase_1.UpdateRecruiterUseCase,
         GetRecruiterProfileUseCase_1.GetRecruiterProfileUseCase,
-        OtpService_1.OtpService, Object, S3Service_1.S3Service])
+        OtpService_1.OtpService, Object, S3Service_1.S3Service,
+        SearchUsersUseCase_1.SearchUsersUseCase])
 ], RecruiterController);

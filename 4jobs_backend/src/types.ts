@@ -74,6 +74,8 @@ const TYPES = {
   ToggleUserPostBlockUseCase: Symbol.for("ToggleUserPostBlockUseCase"),
   ISearchRepository: Symbol.for('ISearchRepository'),
   SearchUsersAndJobsUseCase: Symbol.for('SearchUsersAndJobsUseCase'),
+  IRecruiterSearchRepository: Symbol.for('IRecruiterSearchRepository'),
+  SearchUsersUseCase: Symbol.for('SearchUsersUseCase'),
 };
 
 export default TYPES;

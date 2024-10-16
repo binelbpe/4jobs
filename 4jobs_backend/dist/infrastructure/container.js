@@ -74,6 +74,8 @@ const UpdateSubscriptionUseCase_1 = require("../application/usecases/recruiter/U
 const ToggleUserPostBlockUseCase_1 = require("../application/usecases/admin/ToggleUserPostBlockUseCase");
 const MongoSearchRepository_1 = require("./database/mongoose/repositories/MongoSearchRepository");
 const SearchUsersAndJobsUseCase_1 = require("../application/usecases/user/SearchUsersAndJobsUseCase");
+const MongoRecruiterSearchRepository_1 = require("./database/mongoose/repositories/MongoRecruiterSearchRepository");
+const SearchUsersUseCase_1 = require("../application/usecases/recruiter/SearchUsersUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -223,4 +225,6 @@ container
 container
     .bind(types_1.default.SearchUsersAndJobsUseCase)
     .to(SearchUsersAndJobsUseCase_1.SearchUsersAndJobsUseCase);
+container.bind(types_1.default.IRecruiterSearchRepository).to(MongoRecruiterSearchRepository_1.MongoRecruiterSearchRepository);
+container.bind(types_1.default.SearchUsersUseCase).to(SearchUsersUseCase_1.SearchUsersUseCase);
 console.log(container);

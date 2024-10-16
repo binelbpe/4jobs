@@ -28,6 +28,7 @@ import userRecruiterMessageReducer from "./slices/userRecruiterMessageSlice";
 import subscriptionReducer from "./slices/adminSubscriptionSlice";
 import userPostReducer from "./slices/adminUserPostSlice";
 import userSearchReducer from './slices/userSearchSlice';
+import recruiterSearchReducer from './slices/recruiterSearchSlice';
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "fallback-key";
 
@@ -202,7 +203,6 @@ const rootReducer = combineReducers({
   notifications: persistedNotificationReducer,
   messages: persistedUserMessageReducer,
   recruiterMessages: persistedRecruiterMessageReducer,
-  // Add the new userRecruiterMessages reducer
   userRecruiterMessages: persistReducer(
     {
       key: "userRecruiterMessages",
@@ -214,6 +214,7 @@ const rootReducer = combineReducers({
   subscriptions: subscriptionReducer,
   userPosts: userPostReducer,
   userSearch: userSearchReducer,
+  recruiterSearch: recruiterSearchReducer,
 });
 
 const store = configureStore({

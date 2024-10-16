@@ -85,6 +85,9 @@ import { ToggleUserPostBlockUseCase } from "../application/usecases/admin/Toggle
 import { ISearchRepository } from "../domain/interfaces/repositories/user/ISearchRepository";
 import { MongoSearchRepository } from "./database/mongoose/repositories/MongoSearchRepository";
 import { SearchUsersAndJobsUseCase } from "../application/usecases/user/SearchUsersAndJobsUseCase";
+import { IRecruiterSearchRepository } from '../domain/interfaces/repositories/recruiter/IRecruiterSearchRepository';
+import { MongoRecruiterSearchRepository } from './database/mongoose/repositories/MongoRecruiterSearchRepository';
+import { SearchUsersUseCase } from '../application/usecases/recruiter/SearchUsersUseCase';
 
 const container = new Container();
 
@@ -251,6 +254,9 @@ container
 container
   .bind<SearchUsersAndJobsUseCase>(TYPES.SearchUsersAndJobsUseCase)
   .to(SearchUsersAndJobsUseCase);
+
+container.bind<IRecruiterSearchRepository>(TYPES.IRecruiterSearchRepository).to(MongoRecruiterSearchRepository);
+container.bind<SearchUsersUseCase>(TYPES.SearchUsersUseCase).to(SearchUsersUseCase);
 
 console.log(container);
 export { container };

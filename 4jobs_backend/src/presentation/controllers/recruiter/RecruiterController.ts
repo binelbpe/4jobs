@@ -9,6 +9,8 @@ import { IRecruiterRepository } from "../../../domain/interfaces/repositories/re
 import { OtpService } from "../../../infrastructure/services/OtpService";
 import { S3Service } from "../../../infrastructure/services/S3Service";
 import { IRecruiter } from "../../../domain/entities/Recruiter";
+import { SearchUsersUseCase } from '../../../application/usecases/recruiter/SearchUsersUseCase';
+import { UserSearchResult } from '../../../domain/entities/UserSearchResult';
 
 const tempRecruiterStore: {
   [email: string]: {
@@ -35,7 +37,8 @@ export class RecruiterController {
     @inject(TYPES.OtpService) private otpService: OtpService,
     @inject(TYPES.IRecruiterRepository)
     private recruiterRepository: IRecruiterRepository,
-    @inject(TYPES.S3Service) private s3Service: S3Service
+    @inject(TYPES.S3Service) private s3Service: S3Service,
+    @inject(TYPES.SearchUsersUseCase) private searchUsersUseCase: SearchUsersUseCase
   ) {}
 
   async registerRecruiter(req: Request, res: Response) {
@@ -193,6 +196,20 @@ console.log("governmentId",req.file)
     } catch (error) {
       console.error("Error updating recruiter profile:", error);
       res.status(500).json({ error: "Failed to update profile" });
+    }
+  }
+
+  async searchUsers(req: Request, res: Response) {
+    try {
+      const { query } = req.query;
+      if (typeof query !== 'string') {
+        return res.status(400).json({ error: 'Invalid query parameter' });
+      }
+      const users: UserSearchResult[] = await this.searchUsersUseCase.execute(query);
+      res.status(200).json(users);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      res.status(500).json({ error: 'Failed to search users' });
     }
   }
 }
