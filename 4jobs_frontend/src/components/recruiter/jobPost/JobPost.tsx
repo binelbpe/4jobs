@@ -56,7 +56,6 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onEdit(post)} 
               className="flex items-center bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition-colors duration-300"
-              disabled={post.isBlock}
             >
               <Edit size={16} className="mr-1" />
               Edit
@@ -64,7 +63,6 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onDelete(post._id)} 
               className="flex items-center bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition-colors duration-300"
-              disabled={post.isBlock}
             >
               <Trash2 size={16} className="mr-1" />
               Delete
@@ -74,7 +72,6 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
               className={`flex items-center px-3 py-1 rounded transition-colors duration-300 ${
                 post.status === 'Open' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
-              disabled={post.isBlock}
             >
               {post.status === 'Open' ? <ToggleLeft size={16} className="mr-1" /> : <ToggleRight size={16} className="mr-1" />}
               {post.status === 'Open' ? 'Close' : 'Reopen'}
@@ -82,7 +79,6 @@ const JobPost: React.FC<JobPostProps> = ({ jobPosts, onDelete, onEdit, onToggleS
             <button 
               onClick={() => onViewContestants(post._id)} 
               className="flex items-center bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition-colors duration-300"
-              disabled={post.isBlock}
             >
               <Eye size={16} className="mr-1" />
               View Applicants

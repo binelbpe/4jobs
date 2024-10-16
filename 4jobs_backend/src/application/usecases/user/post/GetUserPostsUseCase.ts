@@ -9,7 +9,7 @@ export class GetUserPostsUseCase {
     @inject(TYPES.IPostRepository) private postRepository: IPostRepository
   ) {}
 
-  async findByUserIdPosts(userId: string,page:number,limit:number): Promise<IPost[]> {
-    return this.postRepository.findByUserId(userId,page,limit);
+  async findByUserIdPosts(userId: string, page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
+    return this.postRepository.findByUserId(userId, page, limit);
   }
 }

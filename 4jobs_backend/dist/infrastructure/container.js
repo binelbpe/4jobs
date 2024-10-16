@@ -71,6 +71,7 @@ const UserRecruiterMessageController_1 = require("../presentation/controllers/us
 const MongoUserRecruiterMessageRepository_1 = require("./database/mongoose/repositories/MongoUserRecruiterMessageRepository");
 const SubscriptionController_1 = require("../presentation/controllers/recruiter/SubscriptionController");
 const UpdateSubscriptionUseCase_1 = require("../application/usecases/recruiter/UpdateSubscriptionUseCase");
+const ToggleUserPostBlockUseCase_1 = require("../application/usecases/admin/ToggleUserPostBlockUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -160,4 +161,5 @@ container.bind(types_1.default.UserRecruiterMessageUseCase).to(UserRecruiterMess
 container.bind(types_1.default.UserRecruiterMessageController).to(UserRecruiterMessageController_1.UserRecruiterMessageController);
 container.bind(types_1.default.SubscriptionController).to(SubscriptionController_1.SubscriptionController);
 container.bind(types_1.default.UpdateSubscriptionUseCase).to(UpdateSubscriptionUseCase_1.UpdateSubscriptionUseCase);
+container.bind(types_1.default.ToggleUserPostBlockUseCase).to(ToggleUserPostBlockUseCase_1.ToggleUserPostBlockUseCase);
 console.log(container);

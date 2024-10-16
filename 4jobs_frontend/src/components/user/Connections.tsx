@@ -10,7 +10,21 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUserCheck, faUserTimes, faEnvelope, faPhone, faBriefcase, faCalendarAlt, faVenusMars } from '@fortawesome/free-solid-svg-icons';
 import UserHeader from './Header';
-import { User, RecommendationUser } from '../../types/auth';
+import { User } from '../../types/auth';
+
+
+interface ConnectionRequest {
+  _id: string;
+  requester: {
+    _id: string;
+    name: string;
+    profileImage: string;
+    bio?: string;
+  };
+  recipient: string;
+  status: string;
+  createdAt: string;
+}
 
 const Connections: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,6 +32,7 @@ const Connections: React.FC = () => {
     user: state.auth.user,
     ...state.connections
   }));
+  console.log("zzzzzzzzzz",connectionRequests)
   const [searchQuery, setSearchQuery] = useState('');
   const [localLoading, setLocalLoading] = useState<{ [key: string]: boolean }>({});
 
@@ -31,6 +46,11 @@ const Connections: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    console.log("Connection Requests:", connectionRequests);
+    console.log("Connections:", connections);
+  }, [connectionRequests, connections]);
+
   const handleSearch = useCallback(() => {
     if (user) {
       dispatch(searchConnections({ userId: user.id, query: searchQuery }));
@@ -38,15 +58,19 @@ const Connections: React.FC = () => {
   }, [dispatch, user, searchQuery]);
 
   const handleAccept = async (requestId: string) => {
-    if (user) {
+    if (user && requestId) {
       setLocalLoading(prev => ({ ...prev, [requestId]: true }));
       try {
+        console.log("Accepting request with ID:", requestId);
         await dispatch(acceptConnectionRequest({ requestId, userId: user.id })).unwrap();
+        fetchData();
       } catch (error) {
         console.error("Error accepting request:", error);
       } finally {
         setLocalLoading(prev => ({ ...prev, [requestId]: false }));
       }
+    } else {
+      console.error("User or requestId is undefined", { user, requestId });
     }
   };
 
@@ -54,13 +78,24 @@ const Connections: React.FC = () => {
     if (user) {
       setLocalLoading(prev => ({ ...prev, [requestId]: true }));
       try {
+        console.log("Rejecting request with ID:", requestId);
         await dispatch(rejectConnectionRequest({ requestId, userId: user.id })).unwrap();
+        fetchData();
       } catch (error) {
         console.error("Error rejecting request:", error);
       } finally {
         setLocalLoading(prev => ({ ...prev, [requestId]: false }));
       }
     }
+  };
+
+  const truncateBio = (bio: string | undefined, wordLimit: number = 10) => {
+    if (!bio) return 'No bio available';
+    const words = bio.split(' ');
+    if (words.length > wordLimit) {
+      return words.slice(0, wordLimit).join(' ') + '...';
+    }
+    return bio;
   };
 
   if (error) return <div className="text-red-600 text-center mt-8">Error: {error}</div>;
@@ -102,31 +137,31 @@ const Connections: React.FC = () => {
                 <p className="text-gray-600">No pending connection requests.</p>
               ) : (
                 <ul className="divide-y divide-gray-200">
-                  {connectionRequests.map((request: RecommendationUser) => (
-                    <li key={request.id} className="py-4 flex items-center justify-between">
+                  {connectionRequests.map((request: ConnectionRequest) => (
+                    <li key={request._id} className="py-4 flex items-center justify-between">
                       <div className="flex items-center">
-                        <img src={request.profileImage || '/default-avatar.png'} alt={request.name} className="w-12 h-12 rounded-full object-cover" />
+                        <img src={request.requester.profileImage || '/default-avatar.png'} alt={request.requester.name} className="w-12 h-12 rounded-full object-cover" />
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold text-purple-800">{request.name}</h3>
-                          <p className="text-sm text-gray-600">{request.bio || 'No bio available'}</p>
+                          <h3 className="text-lg font-semibold text-purple-800">{request.requester.name}</h3>
+                          <p className="text-sm text-gray-600">{truncateBio(request.requester.bio)}</p>
                         </div>
                       </div>
                       <div className="flex space-x-2">
                         <button 
                           className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition duration-300 flex items-center"
-                          onClick={() => handleAccept(request.id)}
-                          disabled={localLoading[request.id]}
+                          onClick={() => handleAccept(request._id)}
+                          disabled={localLoading[request._id]}
                         >
                           <FontAwesomeIcon icon={faUserCheck} className="mr-1" /> 
-                          {localLoading[request.id] ? 'Processing...' : 'Accept'}
+                          {localLoading[request._id] ? 'Processing...' : 'Accept'}
                         </button>
                         <button 
                           className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition duration-300 flex items-center"
-                          onClick={() => handleReject(request.id)}
-                          disabled={localLoading[request.id]}
+                          onClick={() => handleReject(request._id)}
+                          disabled={localLoading[request._id]}
                         >
                           <FontAwesomeIcon icon={faUserTimes} className="mr-1" /> 
-                          {localLoading[request.id] ? 'Processing...' : 'Decline'}
+                          {localLoading[request._id] ? 'Processing...' : 'Decline'}
                         </button>
                       </div>
                     </li>
@@ -142,11 +177,11 @@ const Connections: React.FC = () => {
               ) : (
                 <ul className="divide-y divide-gray-200">
                   {connections?.map((connection: User) => (
-                    <li key={connection.id} className="py-6 flex flex-col sm:flex-row items-start sm:items-center">
-                      <img src={`${connection.profileImage}`} alt={connection.name} className="w-20 h-20 rounded-full object-cover mb-4 sm:mb-0 sm:mr-6" />
+                    <li key={connection._id} className="py-6 flex flex-col sm:flex-row items-start sm:items-center">
+                      <img src={connection.profileImage || '/default-avatar.png'} alt={connection.name} className="w-20 h-20 rounded-full object-cover mb-4 sm:mb-0 sm:mr-6" />
                       <div className="flex-grow">
                         <h3 className="text-xl font-semibold text-purple-800">{connection.name}</h3>
-                        <p className="text-gray-600 mb-2">{connection.bio || 'No bio available'}</p>
+                        <p className="text-gray-600 mb-2">{truncateBio(connection.bio)}</p>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                           {connection.email && (
                             <span className="flex items-center">
@@ -184,7 +219,7 @@ const Connections: React.FC = () => {
                             <h4 className="text-sm font-semibold text-gray-700">Skills:</h4>
                             <div className="flex flex-wrap gap-2 mt-1">
                               {connection.skills.map((skill, index) => (
-                                <span key={index} className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                <span key={`${connection._id}-skill-${index}`} className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
                                   {skill}
                                 </span>
                               ))}

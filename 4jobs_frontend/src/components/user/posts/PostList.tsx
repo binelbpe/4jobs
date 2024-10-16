@@ -8,7 +8,7 @@ import {
 import { RootState, AppDispatch } from "../../../redux/store";
 import { Post as PostType } from "../../../types/postTypes";
 import { Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
-import Header from '../Header';
+import Header from "../Header";
 
 const Modal: React.FC<{
   isOpen: boolean;
@@ -43,7 +43,6 @@ const Modal: React.FC<{
   );
 };
 
-
 const Toast: React.FC<{
   message: string;
   type: "success" | "error";
@@ -72,11 +71,13 @@ const UserPostsList: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const posts = useSelector((state: RootState) => state.posts.userPosts);
-  const status = useSelector((state: RootState) => state.posts.status);
-  const error = useSelector((state: RootState) => state.posts.error);
+  const {
+    userPosts = [],
+    status,
+    error,
+    totalPages,
+  } = useSelector((state: RootState) => state.posts);
   const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage] = useState(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [toast, setToast] = useState<{
@@ -86,11 +87,9 @@ const UserPostsList: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      dispatch(
-        fetchPostsByUserId({ userId, page: currentPage, limit: postsPerPage })
-      );
+      dispatch(fetchPostsByUserId({ userId, page: currentPage, limit: 10 }));
     }
-  }, [userId, dispatch, currentPage, postsPerPage]);
+  }, [userId, dispatch, currentPage]);
 
   const handleDeleteClick = (postId: string) => {
     setPostToDelete(postId);
@@ -104,7 +103,7 @@ const UserPostsList: React.FC = () => {
         setToast({ message: "Post deleted successfully", type: "success" });
         if (userId) {
           dispatch(
-            fetchPostsByUserId({ userId, page: currentPage, limit: postsPerPage })
+            fetchPostsByUserId({ userId, page: currentPage, limit: 10 })
           );
         }
       } catch (error) {
@@ -123,30 +122,30 @@ const UserPostsList: React.FC = () => {
     navigate(`/edit-post/${postId}`);
   };
 
-
-  if (status === "loading") {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
-  if (status === "failed") {
-    return <div className="text-red-500 text-center py-4">Error: {error}</div>;
-  }
-
-
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <>
-      <div className="min-h-screen bg-purple-100">
-        <Header />
+    <div className="min-h-screen bg-purple-100">
+      <Header />
+      {status === "loading" ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      ) : status === "failed" ? (
+        <div className="text-red-500 text-center py-4 bg-red-100 border border-red-300 mx-4 mt-4">
+          Error: {error}
+        </div>
+      ) : userPosts.length === 0 ? (
+        <div className="text-center py-4 bg-yellow-100 border border-yellow-300 text-yellow-800 mx-4 mt-4">
+          No posts found for this user.
+        </div>
+      ) : (
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-3xl font-bold text-purple-700 mb-6">User Posts</h2>
+          <h2 className="text-3xl font-bold text-purple-700 mb-6">
+            User Posts
+          </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post: PostType) => (
+            {userPosts.map((post: PostType) => (
               <PostCard
                 key={post._id}
                 post={post}
@@ -155,13 +154,14 @@ const UserPostsList: React.FC = () => {
               />
             ))}
           </div>
-        <Pagination
-          postsPerPage={postsPerPage}
-          totalPosts={posts.length}
-          paginate={setCurrentPage}
-          currentPage={currentPage}
-        />
-      </div>
+          <Pagination
+            postsPerPage={10}
+            totalPages={totalPages}
+            paginate={paginate}
+            currentPage={currentPage}
+          />
+        </div>
+      )}
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -182,8 +182,7 @@ const UserPostsList: React.FC = () => {
           onClose={() => setToast(null)}
         />
       )}
-      </div>
-    </>
+    </div>
   );
 };
 
@@ -233,13 +232,13 @@ const PostCard: React.FC<{
 
 const Pagination: React.FC<{
   postsPerPage: number;
-  totalPosts: number;
+  totalPages: number;
   paginate: (number: number) => void;
   currentPage: number;
-}> = ({ postsPerPage, totalPosts, paginate, currentPage }) => {
+}> = ({ totalPages, paginate, currentPage }) => {
   const pageNumbers = [];
 
-  for (let i = 1; i <= Math.ceil(totalPosts / postsPerPage); i++) {
+  for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
@@ -272,7 +271,7 @@ const Pagination: React.FC<{
         <li>
           <button
             onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === Math.ceil(totalPosts / postsPerPage)}
+            disabled={currentPage === totalPages}
             className="px-3 py-2 rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronRight size={20} />

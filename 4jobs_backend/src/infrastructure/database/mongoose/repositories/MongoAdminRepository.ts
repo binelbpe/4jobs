@@ -4,13 +4,14 @@ import { injectable } from "inversify";
 import { UserModel } from "../../mongoose/models/UserModel";
 import { IRecruiter } from "../../../../domain/entities/Recruiter";
 import Recruiter from "../models/RecruiterModel";
-
+import JobPost from "../models/jobPostModel";
+import Post from "../models/PostModel";
 
 @injectable()
 export class MongoAdminRepository implements IAdminRepository {
   async findAllUsers(): Promise<User[]> {
     const usersList = await UserModel.find({ isAdmin: false }).exec();
-   
+
     const mappedUsers = usersList.map(this.mapToUser);
     return mappedUsers;
   }
@@ -114,15 +115,15 @@ export class MongoAdminRepository implements IAdminRepository {
       {
         $group: {
           _id: "$companyName",
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
         $group: {
           _id: null,
-          totalUniqueCompanies: { $sum: 1 }
-        }
-      }
+          totalUniqueCompanies: { $sum: 1 },
+        },
+      },
     ]);
 
     return uniqueCompanies[0]?.totalUniqueCompanies || 0;
@@ -131,14 +132,14 @@ export class MongoAdminRepository implements IAdminRepository {
   async getTotalRevenue(): Promise<number> {
     const result = await Recruiter.aggregate([
       {
-        $match: { subscribed: true }
+        $match: { subscribed: true },
       },
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$subscriptionAmount" }
-        }
-      }
+          totalRevenue: { $sum: "$subscriptionAmount" },
+        },
+      },
     ]);
     return result[0]?.totalRevenue || 0;
   }
@@ -146,25 +147,74 @@ export class MongoAdminRepository implements IAdminRepository {
   async getMonthlyRevenue(): Promise<{ month: string; amount: number }[]> {
     const result = await Recruiter.aggregate([
       {
-        $match: { subscribed: true }
+        $match: { subscribed: true },
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" } },
-          amount: { $sum: "$subscriptionAmount" }
-        }
+          _id: {
+            $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" },
+          },
+          amount: { $sum: "$subscriptionAmount" },
+        },
       },
       {
-        $sort: { _id: 1 }
+        $sort: { _id: 1 },
       },
       {
         $project: {
           _id: 0,
           month: "$_id",
-          amount: 1
-        }
-      }
+          amount: 1,
+        },
+      },
     ]);
     return result;
+  }
+
+  async getJobPostCount(): Promise<number> {
+    return await JobPost.countDocuments();
+  }
+
+  async getUserPostCount(): Promise<number> {
+    return await Post.countDocuments();
+  }
+
+  async getSubscriptions(
+    page: number,
+    limit: number
+  ): Promise<{
+    subscriptions: IRecruiter[];
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const totalCount = await Recruiter.countDocuments({ subscribed: true });
+    const totalPages = Math.ceil(totalCount / limit);
+    const skip = (page - 1) * limit;
+
+    const recruiters = await Recruiter.find({ subscribed: true })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return {
+      subscriptions: recruiters.map(this.mapToIRecruiter),
+      totalPages,
+      currentPage: page,
+    };
+  }
+
+  async cancelSubscription(recruiterId: string): Promise<IRecruiter | null> {
+    const updatedRecruiter = await Recruiter.findByIdAndUpdate(
+      recruiterId,
+      {
+        subscribed: false,
+        planDuration: null,
+        expiryDate: null,
+        subscriptionAmount: 0,
+        subscriptionStartDate: null,
+      },
+      { new: true }
+    ).exec();
+    return updatedRecruiter ? this.mapToIRecruiter(updatedRecruiter) : null;
   }
 }

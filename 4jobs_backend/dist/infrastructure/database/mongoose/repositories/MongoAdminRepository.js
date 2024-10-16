@@ -22,6 +22,8 @@ exports.MongoAdminRepository = void 0;
 const inversify_1 = require("inversify");
 const UserModel_1 = require("../../mongoose/models/UserModel");
 const RecruiterModel_1 = __importDefault(require("../models/RecruiterModel"));
+const jobPostModel_1 = __importDefault(require("../models/jobPostModel"));
+const PostModel_1 = __importDefault(require("../models/PostModel"));
 let MongoAdminRepository = class MongoAdminRepository {
     findAllUsers() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -122,15 +124,15 @@ let MongoAdminRepository = class MongoAdminRepository {
                 {
                     $group: {
                         _id: "$companyName",
-                        count: { $sum: 1 }
-                    }
+                        count: { $sum: 1 },
+                    },
                 },
                 {
                     $group: {
                         _id: null,
-                        totalUniqueCompanies: { $sum: 1 }
-                    }
-                }
+                        totalUniqueCompanies: { $sum: 1 },
+                    },
+                },
             ]);
             return ((_a = uniqueCompanies[0]) === null || _a === void 0 ? void 0 : _a.totalUniqueCompanies) || 0;
         });
@@ -140,14 +142,14 @@ let MongoAdminRepository = class MongoAdminRepository {
             var _a;
             const result = yield RecruiterModel_1.default.aggregate([
                 {
-                    $match: { subscribed: true }
+                    $match: { subscribed: true },
                 },
                 {
                     $group: {
                         _id: null,
-                        totalRevenue: { $sum: "$subscriptionAmount" }
-                    }
-                }
+                        totalRevenue: { $sum: "$subscriptionAmount" },
+                    },
+                },
             ]);
             return ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.totalRevenue) || 0;
         });
@@ -156,26 +158,66 @@ let MongoAdminRepository = class MongoAdminRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield RecruiterModel_1.default.aggregate([
                 {
-                    $match: { subscribed: true }
+                    $match: { subscribed: true },
                 },
                 {
                     $group: {
-                        _id: { $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" } },
-                        amount: { $sum: "$subscriptionAmount" }
-                    }
+                        _id: {
+                            $dateToString: { format: "%Y-%m", date: "$subscriptionStartDate" },
+                        },
+                        amount: { $sum: "$subscriptionAmount" },
+                    },
                 },
                 {
-                    $sort: { _id: 1 }
+                    $sort: { _id: 1 },
                 },
                 {
                     $project: {
                         _id: 0,
                         month: "$_id",
-                        amount: 1
-                    }
-                }
+                        amount: 1,
+                    },
+                },
             ]);
             return result;
+        });
+    }
+    getJobPostCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield jobPostModel_1.default.countDocuments();
+        });
+    }
+    getUserPostCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield PostModel_1.default.countDocuments();
+        });
+    }
+    getSubscriptions(page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const totalCount = yield RecruiterModel_1.default.countDocuments({ subscribed: true });
+            const totalPages = Math.ceil(totalCount / limit);
+            const skip = (page - 1) * limit;
+            const recruiters = yield RecruiterModel_1.default.find({ subscribed: true })
+                .skip(skip)
+                .limit(limit)
+                .exec();
+            return {
+                subscriptions: recruiters.map(this.mapToIRecruiter),
+                totalPages,
+                currentPage: page,
+            };
+        });
+    }
+    cancelSubscription(recruiterId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedRecruiter = yield RecruiterModel_1.default.findByIdAndUpdate(recruiterId, {
+                subscribed: false,
+                planDuration: null,
+                expiryDate: null,
+                subscriptionAmount: 0,
+                subscriptionStartDate: null,
+            }, { new: true }).exec();
+            return updatedRecruiter ? this.mapToIRecruiter(updatedRecruiter) : null;
         });
     }
 };

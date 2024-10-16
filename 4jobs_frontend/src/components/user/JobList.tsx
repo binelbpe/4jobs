@@ -37,6 +37,29 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { Business, LocationOn, CalendarToday, Flag } from "@mui/icons-material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+// Create a custom light purple theme
+const lightPurpleTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#9575cd', // Light purple
+      light: '#c7a4ff',
+      dark: '#65499c',
+    },
+    secondary: {
+      main: '#b39ddb', // Lighter purple
+    },
+    background: {
+      default: '#f5f0fa', // Very light purple background
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#4a148c', // Dark purple for primary text
+      secondary: '#7e57c2', // Medium purple for secondary text
+    },
+  },
+});
 
 const JobList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -145,144 +168,165 @@ const JobList: React.FC = () => {
   if (error) return <Typography color="error" align="center" p={4}>{error}</Typography>;
 
   return (
-    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-      <Header />
-      <ToastContainer />
+    <ThemeProvider theme={lightPurpleTheme}>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+        <Header />
+        <ToastContainer />
 
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Job Listings
-        </Typography>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'primary.dark', fontWeight: 'bold' }}>
+            Job Listings
+          </Typography>
 
-        <Grid container spacing={2} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth>
-              <InputLabel id="sort-by-label">Sort By</InputLabel>
-              <Select
-                labelId="sort-by-label"
-                value={sortBy}
-                label="Sort By"
-                onChange={handleSortChange}
-              >
-                <MenuItem value="createdAt">Date Posted</MenuItem>
-                <MenuItem value="title">Job Title</MenuItem>
-                <MenuItem value="company.name">Company Name</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth>
-              <InputLabel id="limit-label">Per Page</InputLabel>
-              <Select
-                labelId="limit-label"
-                value={limit}
-                label="Per Page"
-                onChange={handleLimitChange}
-              >
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-                <MenuItem value={50}>50</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={handleFilterChange}
-              sx={{ height: '100%' }}
-            >
-              Clear Filters
-            </Button>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={3}>
-          {posts.map((job: BasicJobPost) => (
-            <Grid item xs={12} key={job._id}>
-              <Card>
-                <CardContent>
-                  <Grid container justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                    <Grid item xs={12} sm>
-                      <Typography variant="h6" component="h2">
-                        {job.title}
-                      </Typography>
-                    </Grid>
-                    <Grid item>
-                      <Chip label={job.wayOfWork} color="primary" />
-                    </Grid>
-                  </Grid>
-                  <Typography color="textSecondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Business sx={{ mr: 1 }} /> {job.company?.name}
-                  </Typography>
-                  <Typography color="textSecondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                    <LocationOn sx={{ mr: 1 }} /> {job.location}
-                  </Typography>
-                  <Typography color="textSecondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CalendarToday sx={{ mr: 1 }} /> Posted on {new Date(job.createdAt).toLocaleDateString()}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary" onClick={() => handleViewDetails(job._id)}>
-                    View Details
-                  </Button>
-                  <Button
-                    size="small"
-                    color="secondary"
-                    onClick={() => handleApply(job._id)}
-                    disabled={appliedJobs?.includes(job._id)}
-                  >
-                    {appliedJobs?.includes(job._id) ? "Applied" : "Apply Now"}
-                  </Button>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleReportClick(job._id)}
-                    title="Report Job"
-                  >
-                    <Flag />
-                  </IconButton>
-                </CardActions>
-              </Card>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
+                <InputLabel id="sort-by-label">Sort By</InputLabel>
+                <Select
+                  labelId="sort-by-label"
+                  value={sortBy}
+                  label="Sort By"
+                  onChange={handleSortChange}
+                >
+                  <MenuItem value="createdAt">Date Posted</MenuItem>
+                  <MenuItem value="title">Job Title</MenuItem>
+                  <MenuItem value="company.name">Company Name</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-          ))}
-        </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
+                <InputLabel id="limit-label">Per Page</InputLabel>
+                <Select
+                  labelId="limit-label"
+                  value={limit}
+                  label="Per Page"
+                  onChange={handleLimitChange}
+                >
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleFilterChange}
+                sx={{ height: '100%' }}
+              >
+                Clear Filters
+              </Button>
+            </Grid>
+          </Grid>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-          />
-        </Box>
+          <Grid container spacing={3}>
+            {posts.map((job: BasicJobPost) => (
+              <Grid item xs={12} key={job._id}>
+                <Card sx={{ 
+                  boxShadow: 2, 
+                  '&:hover': { boxShadow: 4 },
+                  border: '1px solid',
+                  borderColor: 'primary.light',
+                  borderRadius: 2,
+                }}>
+                  <CardContent>
+                    <Grid container justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                      <Grid item xs={12} sm>
+                        <Typography variant="h6" component="h2" sx={{ color: 'primary.dark' }}>
+                          {job.title}
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Chip label={job.wayOfWork} color="secondary" />
+                      </Grid>
+                    </Grid>
+                    <Typography color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Business sx={{ mr: 1, color: 'primary.main' }} /> {job.company?.name}
+                    </Typography>
+                    <Typography color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                      <LocationOn sx={{ mr: 1, color: 'primary.main' }} /> {job.location}
+                    </Typography>
+                    <Typography color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CalendarToday sx={{ mr: 1, color: 'primary.main' }} /> Posted on {new Date(job.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </CardContent>
+                  <CardActions sx={{ bgcolor: 'primary.light', justifyContent: 'flex-end' }}>
+                    <Button 
+                      size="small" 
+                      color="secondary" 
+                      variant="contained" 
+                      onClick={() => handleViewDetails(job._id)}
+                      sx={{ 
+                        fontWeight: 'bold',
+                        '&:hover': {
+                          backgroundColor: 'secondary.light',
+                        }
+                      }}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      size="small"
+                      color="primary"
+                      variant="contained"
+                      onClick={() => handleApply(job._id)}
+                      disabled={appliedJobs?.includes(job._id)}
+                      sx={{ ml: 1 }}
+                    >
+                      {appliedJobs?.includes(job._id) ? "Applied" : "Apply Now"}
+                    </Button>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleReportClick(job._id)}
+                      title="Report Job"
+                    >
+                      <Flag />
+                    </IconButton>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
 
-        <Typography align="center" color="textSecondary" sx={{ mt: 2 }}>
-          Total Jobs: {totalCount}
-        </Typography>
-      </Container>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Box>
 
-      <Dialog open={reportDialog} onClose={() => setReportDialog(false)}>
-        <DialogTitle>Report Job</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="reason"
-            label="Reason"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setReportDialog(false)}>Cancel</Button>
-          <Button onClick={handleReport} color="primary">Submit Report</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          <Typography align="center" color="textSecondary" sx={{ mt: 2 }}>
+            Total Jobs: {totalCount}
+          </Typography>
+        </Container>
+
+        <Dialog open={reportDialog} onClose={() => setReportDialog(false)}>
+          <DialogTitle>Report Job</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="reason"
+              label="Reason"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setReportDialog(false)}>Cancel</Button>
+            <Button onClick={handleReport} color="primary">Submit Report</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </ThemeProvider>
   );
 };
 

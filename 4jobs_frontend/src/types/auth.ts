@@ -35,14 +35,16 @@ export interface OtpVerificationCredentials {
   otp: string; 
 }
 
+
 export interface User {
+  _id?: string;
   id: string;
   name: string;
   email: string;
   profileImage?: string;
+  bio?: string;
   role?: string;
   phone?: string;
-  bio?: string;
   about?: string;
   dateOfBirth?: string;
   gender?: 'male' | 'female' | 'other';
@@ -54,6 +56,7 @@ export interface User {
   resume?: string;
   isBlocked?: boolean;
 }
+
 
 export interface UpdateProfileFormData {
   name: string;
@@ -155,4 +158,16 @@ export interface UserConnection {
   lastMessage: string;
   lastMessageDate: string;
   isOnline: boolean;
+}
+
+export interface ConnectionRequest {
+  _id: string;
+  requester: {
+    id: string;
+    name: string;
+    bio: string;
+    profileImage: string;
+    headline: string;
+  };
+  status: string;
 }

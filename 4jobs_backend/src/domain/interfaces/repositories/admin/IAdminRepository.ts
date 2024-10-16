@@ -14,4 +14,15 @@ export interface IAdminRepository {
   getCompanyCount(): Promise<number>;
   getTotalRevenue(): Promise<number>;
   getMonthlyRevenue(): Promise<{ month: string; amount: number }[]>;
+  getJobPostCount(): Promise<number>;
+  getUserPostCount(): Promise<number>;
+  getSubscriptions(
+    page: number,
+    limit: number
+  ): Promise<{
+    subscriptions: IRecruiter[];
+    totalPages: number;
+    currentPage: number;
+  }>;
+  cancelSubscription(recruiterId: string): Promise<IRecruiter | null>;
 }

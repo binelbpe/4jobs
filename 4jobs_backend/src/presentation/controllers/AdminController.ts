@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
 import TYPES from "../../types";
+import { IAdminRepository } from "../../domain/interfaces/repositories/admin/IAdminRepository";
+import { IPostRepository } from "../../domain/interfaces/repositories/user/IPostRepository";
 
 // Import Use Cases
 import { LoginAdminUseCase } from "../../application/usecases/admin/LoginAdminUseCase";
@@ -14,6 +16,8 @@ import { AdminDashboardUseCase } from "../../application/usecases/admin/AdminDas
 import { FetchJobPostsUseCase } from "../../application/usecases/admin/FetchJobPostsUseCase";
 import { BlockJobPostUseCase } from "../../application/usecases/admin/BlockJobPostUseCase";
 import { UnblockJobPostUseCase } from "../../application/usecases/admin/UnblockJobPostUseCase";
+import { ToggleUserPostBlockUseCase } from "../../application/usecases/admin/ToggleUserPostBlockUseCase"
+
 @injectable()
 export class AdminController {
   constructor(
@@ -36,7 +40,13 @@ export class AdminController {
     @inject(TYPES.BlockJobPostUseCase)
     private blockJobPostUseCase: BlockJobPostUseCase,
     @inject(TYPES.UnblockJobPostUseCase)
-    private unblockJobPostUseCase: UnblockJobPostUseCase
+    private unblockJobPostUseCase: UnblockJobPostUseCase,
+    @inject(TYPES.IAdminRepository)
+    private adminRepository: IAdminRepository,
+    @inject(TYPES.ToggleUserPostBlockUseCase)
+    private toggleUserPostBlockUseCase: ToggleUserPostBlockUseCase,
+    @inject(TYPES.IPostRepository)
+    private postRepository: IPostRepository
   ) {}
 
   // Admin login
@@ -45,7 +55,9 @@ export class AdminController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+        return res
+          .status(400)
+          .json({ error: "Email and password are required" });
       }
 
       const result = await this.loginAdminUseCase.execute(email, password);
@@ -55,8 +67,6 @@ export class AdminController {
       res.status(400).json({ error: (error as Error).message });
     }
   }
-
-
 
   // Fetch all users
   async fetchUsers(req: Request, res: Response) {
@@ -114,7 +124,7 @@ export class AdminController {
   async approveRecruiter(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      console.log("idd admin approve",id)
+      console.log("idd admin approve", id);
       const recruiter = await this.approveRecruiterUseCase.execute(id);
 
       if (!recruiter) {
@@ -138,11 +148,11 @@ export class AdminController {
     }
   }
 
-   // Fetch all job posts
-   async fetchJobPosts(req: Request, res: Response) {
+  // Fetch all job posts
+  async fetchJobPosts(req: Request, res: Response) {
     try {
       const jobPosts = await this.fetchJobPostsUseCase.execute();
-      console.log("admin jobposts:",jobPosts)
+      console.log("admin jobposts:", jobPosts);
       res.status(200).json(jobPosts);
     } catch (error) {
       console.error("Error fetching job posts:", error);
@@ -177,6 +187,81 @@ export class AdminController {
     } catch (error) {
       console.error("Error unblocking job post:", error);
       res.status(500).json({ error: "Failed to unblock job post" });
+    }
+  }
+
+  async getSubscriptions(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const result = await this.adminRepository.getSubscriptions(page, limit);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      res.status(500).json({ error: "Failed to fetch subscriptions" });
+    }
+  }
+
+  async cancelSubscription(req: Request, res: Response) {
+    try {
+      const { recruiterId } = req.params;
+      const updatedRecruiter = await this.adminRepository.cancelSubscription(
+        recruiterId
+      );
+      if (updatedRecruiter) {
+        res
+          .status(200)
+          .json({
+            message: "Subscription cancelled successfully",
+            recruiter: updatedRecruiter,
+          });
+      } else {
+        res.status(404).json({ error: "Recruiter not found" });
+      }
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ error: "Failed to cancel subscription" });
+    }
+  }
+
+  async getUserPosts(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const result = await this.postRepository.findAll(page, limit);
+      
+      const userPosts = result.posts.map(post => ({
+        id: post._id,
+        userName: post.user?.name || 'Unknown',
+        userEmail: post.user?.email || 'Unknown',
+        content: post.content,
+        imageUrl: post.imageUrl,
+        videoUrl: post.videoUrl,
+        isBlocked: post.status === 'blocked'
+      }));
+
+      res.status(200).json({
+        userPosts,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage
+      });
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      res.status(500).json({ error: "Failed to fetch user posts" });
+    }
+  }
+
+  async toggleUserPostBlock(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+      const updatedPost = await this.toggleUserPostBlockUseCase.execute(postId);
+      res.status(200).json({
+        id: updatedPost._id,
+        isBlocked: updatedPost.status === 'blocked'
+      });
+    } catch (error) {
+      console.error("Error toggling user post block status:", error);
+      res.status(500).json({ error: "Failed to toggle user post block status" });
     }
   }
 }

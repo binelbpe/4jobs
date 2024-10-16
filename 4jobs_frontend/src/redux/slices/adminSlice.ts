@@ -13,7 +13,15 @@ interface AdminState {
   isAuthenticatedAdmin: boolean;
   loading: boolean;
   error: string | null;
-  dashboardData: any;
+  dashboardData: {
+    userCount: number;
+    recruiterCount: number;
+    companyCount: number;
+    totalRevenue: number;
+    jobPostCount: number;
+    userPostCount: number;
+    revenueData: { month: string; amount: number }[];
+  } | null;
   recruiters: any[];
   users: User[];
   token: string | null; 

@@ -39,3 +39,9 @@ export interface CommentPostData {
   userId: string;
   content: string;
 }
+
+export interface PostsApiResponse {
+  posts: Post[];
+  totalPages: number;
+  currentPage: number;
+}

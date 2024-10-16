@@ -58,23 +58,35 @@ let MongoPostRepository = class MongoPostRepository {
     findAll(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;
-            const posts = yield PostModel_1.default.find()
-                .populate('userId', 'name profileImage bio')
+            const totalCount = yield PostModel_1.default.countDocuments({ status: 'active' });
+            const totalPages = Math.ceil(totalCount / limit);
+            const posts = yield PostModel_1.default.find({ status: 'active' })
+                .populate('userId', 'name email profileImage bio')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-            return posts.map(post => this.populateUserInfo(post));
+            return {
+                posts: posts.map(post => this.populateUserInfo(post)),
+                totalPages,
+                currentPage: page
+            };
         });
     }
     findByUserId(userId, page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;
+            const totalCount = yield PostModel_1.default.countDocuments({ userId });
+            const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find({ userId })
                 .populate('userId', 'name profileImage bio')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-            return posts.map(post => this.populateUserInfo(post));
+            return {
+                posts: posts.map(post => this.populateUserInfo(post)),
+                totalPages,
+                currentPage: page
+            };
         });
     }
     deletePost(id) {
@@ -95,13 +107,42 @@ let MongoPostRepository = class MongoPostRepository {
             return this.populateUserInfo(post);
         });
     }
+    toggleBlockStatus(postId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findById(postId).populate('userId', 'name email profileImage bio');
+            if (!post) {
+                throw new Error('Post not found');
+            }
+            post.status = post.status === 'active' ? 'blocked' : 'active';
+            yield post.save();
+            return this.populateUserInfo(post);
+        });
+    }
     populateUserInfo(post) {
         const postObj = post.toObject();
         return Object.assign(Object.assign({}, postObj), { user: post.userId ? {
                 name: post.userId.name,
+                email: post.userId.email,
                 profileImage: post.userId.profileImage,
                 bio: post.userId.bio,
             } : undefined });
+    }
+    findAllForAdmin(page, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const skip = (page - 1) * limit;
+            const totalCount = yield PostModel_1.default.countDocuments();
+            const totalPages = Math.ceil(totalCount / limit);
+            const posts = yield PostModel_1.default.find()
+                .populate('userId', 'name email profileImage bio')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            return {
+                posts: posts.map(post => this.populateUserInfo(post)),
+                totalPages,
+                currentPage: page
+            };
+        });
     }
 };
 exports.MongoPostRepository = MongoPostRepository;

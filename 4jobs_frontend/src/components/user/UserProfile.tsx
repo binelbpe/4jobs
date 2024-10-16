@@ -16,7 +16,11 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-const UserProfile: React.FC = () => {
+interface UserProfileProps {
+  children?: React.ReactNode;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ children }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
@@ -153,6 +157,11 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
       </div>
+      {children && (
+        <div className="mt-8">
+          {children}
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,8 @@ export class AdminDashboardUseCase {
     const companyCount = await this.adminRepository.getCompanyCount();
     const totalRevenue = await this.adminRepository.getTotalRevenue();
     const revenueData = await this.adminRepository.getMonthlyRevenue();
+    const jobPostCount = await this.adminRepository.getJobPostCount();
+    const userPostCount = await this.adminRepository.getUserPostCount();
 
     return {
       userCount,
@@ -21,6 +23,8 @@ export class AdminDashboardUseCase {
       companyCount,
       totalRevenue,
       revenueData,
+      jobPostCount,
+      userPostCount,
     };
   }
 }

@@ -33,6 +33,10 @@ const MainFeed: React.FC = () => {
     };
   }, [dispatch]);
 
+  if (status === 'loading' && (!posts || posts.length === 0)) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!Array.isArray(posts) || posts.length === 0) return <div>No posts available.</div>;
+
   return (
     <div className="w-full">
       <CreatePostButton />
@@ -43,7 +47,6 @@ const MainFeed: React.FC = () => {
           </div>
         ))}
         {status === 'loading' && <div className="text-center py-4">Loading more posts...</div>}
-        {status === 'failed' && <div className="text-center text-red-500 py-4">Error: {error}</div>}
         {!hasMore && status !== 'loading' && (
           <div className="text-center text-gray-500 py-4">All posts for you finished</div>
         )}

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { LoginCredentials, SignupCredentials, OtpVerificationCredentials, Certificate } from '../types/auth';
 import { BasicJobPost } from '../types/jobPostTypes';
-import { CreatePostData, LikePostData, CommentPostData, Post } from '../types/postTypes';
+import { CreatePostData, LikePostData, CommentPostData, Post, PostsApiResponse } from '../types/postTypes';
 import { Message} from '../types/messageType';
 import { User,UserConnection } from '../types/auth';
 import { URMessage, URConversation } from '../types/userRecruiterMessage';
@@ -200,8 +200,13 @@ export const fetchPostsAPI = async (page: number, limit: number = 10): Promise<P
   return apiRequest('GET', `/posts?page=${page}&limit=${limit}`);
 };
 
-export const fetchPostsByUserIdAPI = async (userId: string, page: number, limit: number): Promise<Post[]> => {
-  return apiRequest('GET', `/posts/user/${userId}?page=${page}&limit=${limit}`);
+export const fetchPostsByUserIdAPI = async (userId: string, page: number, limit: number): Promise<PostsApiResponse> => {
+  const response = await apiRequest('GET', `/posts/user/${userId}?page=${page}&limit=${limit}`);
+  return {
+    posts: Array.isArray(response.posts) ? response.posts : [],
+    totalPages: response.totalPages || 1,
+    currentPage: response.currentPage || page
+  };
 };
 
 export const createPostAPI = async (postData: CreatePostData, userId: string): Promise<Post> => {
@@ -280,10 +285,12 @@ export const fetchConnectionProfileApi = async (userId: string) => {
   return apiRequest('GET', `/connections/profile/${userId}`);
 };
 export const fetchConnectionRequestsApi = async (userId: string) => {
-  return apiRequest('GET', `/connections/requests/${userId}`);
+  const response = await apiRequest('GET', `/connections/requests/${userId}`);
+  return response; // Ensure this matches the ConnectionRequest interface
 };
 
 export const acceptConnectionRequestApi = async (requestId: string, userId: string) => {
+  console.log("Accepting connection request:", { requestId, userId });
   return apiRequest('POST', `/connections/accept/${requestId}`, { userId });
 };
 
@@ -331,3 +338,4 @@ export const fetchUserMessagesApi = async (conversationId: string): Promise<URMe
 export const sendUserMessageApi = async (conversationId: string, content: string, senderId: string): Promise<URMessage> => {
   return apiRequest('POST', `/user-messages/${conversationId}`, { content, senderId });
 };
+

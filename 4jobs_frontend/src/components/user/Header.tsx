@@ -22,6 +22,7 @@ import {
   addNotification,
   markAsRead,
   markAllAsRead,
+  markAsSeen,
 } from "../../redux/slices/notificationSlice";
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
 import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
@@ -123,14 +124,16 @@ const UserHeader: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (showNotifications) {
-      dispatch(markAllAsRead());
-      notifications.forEach((notification) => {
-        if (notification._id) {
-          socketService.markNotificationAsRead(notification._id);
-          dispatch(markAsRead(notification._id));
-        }
-      });
+    if (showNotifications && notifications.length > 0) {
+      const unreadNotifications = notifications.filter(notification => !notification.isRead);
+      if (unreadNotifications.length > 0) {
+        dispatch(markAllAsRead());
+        unreadNotifications.forEach((notification) => {
+          if (notification._id) {
+            socketService.markNotificationAsRead(notification._id);
+          }
+        });
+      }
     }
   }, [showNotifications, dispatch, notifications]);
 

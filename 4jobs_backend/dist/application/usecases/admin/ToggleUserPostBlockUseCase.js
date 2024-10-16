@@ -24,37 +24,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminDashboardUseCase = void 0;
+exports.ToggleUserPostBlockUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../types"));
-let AdminDashboardUseCase = class AdminDashboardUseCase {
-    constructor(adminRepository) {
-        this.adminRepository = adminRepository;
+let ToggleUserPostBlockUseCase = class ToggleUserPostBlockUseCase {
+    constructor(postRepository) {
+        this.postRepository = postRepository;
     }
-    execute() {
+    execute(postId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userCount = yield this.adminRepository.getUserCount();
-            const recruiterCount = yield this.adminRepository.getRecruiterCount();
-            const companyCount = yield this.adminRepository.getCompanyCount();
-            const totalRevenue = yield this.adminRepository.getTotalRevenue();
-            const revenueData = yield this.adminRepository.getMonthlyRevenue();
-            const jobPostCount = yield this.adminRepository.getJobPostCount();
-            const userPostCount = yield this.adminRepository.getUserPostCount();
-            return {
-                userCount,
-                recruiterCount,
-                companyCount,
-                totalRevenue,
-                revenueData,
-                jobPostCount,
-                userPostCount,
-            };
+            return this.postRepository.toggleBlockStatus(postId);
         });
     }
 };
-exports.AdminDashboardUseCase = AdminDashboardUseCase;
-exports.AdminDashboardUseCase = AdminDashboardUseCase = __decorate([
+exports.ToggleUserPostBlockUseCase = ToggleUserPostBlockUseCase;
+exports.ToggleUserPostBlockUseCase = ToggleUserPostBlockUseCase = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_1.default.IAdminRepository)),
+    __param(0, (0, inversify_1.inject)(types_1.default.IPostRepository)),
     __metadata("design:paramtypes", [Object])
-], AdminDashboardUseCase);
+], ToggleUserPostBlockUseCase);

@@ -83,6 +83,7 @@ import { IUserRecruiterMessageRepository } from '../domain/interfaces/repositori
 import { SubscriptionController } from "../presentation/controllers/recruiter/SubscriptionController";
 
 import { UpdateSubscriptionUseCase } from '../application/usecases/recruiter/UpdateSubscriptionUseCase';
+import { ToggleUserPostBlockUseCase } from "../application/usecases/admin/ToggleUserPostBlockUseCase";
 
 const container = new Container();
 
@@ -193,6 +194,7 @@ container.bind<UserRecruiterMessageController>(TYPES.UserRecruiterMessageControl
 container.bind<SubscriptionController>(TYPES.SubscriptionController).to(SubscriptionController);
 
 container.bind<UpdateSubscriptionUseCase>(TYPES.UpdateSubscriptionUseCase).to(UpdateSubscriptionUseCase);
+container.bind<ToggleUserPostBlockUseCase>(TYPES.ToggleUserPostBlockUseCase).to(ToggleUserPostBlockUseCase);
 
 console.log(container);
 export { container };

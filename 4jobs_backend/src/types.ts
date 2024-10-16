@@ -71,6 +71,7 @@ const TYPES = {
   UserRecruiterMessageController: Symbol.for('UserRecruiterMessageController'),
   SubscriptionController: Symbol.for('SubscriptionController'),
   UpdateSubscriptionUseCase: Symbol.for('UpdateSubscriptionUseCase'),
+  ToggleUserPostBlockUseCase: Symbol.for("ToggleUserPostBlockUseCase"),
 };
 
 export default TYPES;

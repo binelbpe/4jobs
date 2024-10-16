@@ -90,3 +90,32 @@ export const unblockJobPostApi = async (postId: string) => {
 export const fetchDashboardDataApi = async () => {
   return apiRequest('GET', '/dashboard');
 };
+
+
+// Add this new function to fetch subscription data
+export const fetchSubscriptionsApi = async (page: number, limit: number) => {
+  const response = await apiRequest('GET', `/subscriptions?page=${page}&limit=${limit}`);
+  return {
+    subscriptions: response.subscriptions,
+    totalPages: response.totalPages,
+    currentPage: response.currentPage
+  };
+};
+
+// Add this function to cancel a subscription
+export const cancelSubscriptionApi = async (subscriptionId: string) => {
+  return apiRequest('POST', `/subscriptions/${subscriptionId}/cancel`);
+};
+
+export const fetchUserPostsApi = async (page: number, limit: number) => {
+  const response = await apiRequest('GET', `/user-posts?page=${page}&limit=${limit}`);
+  return {
+    userPosts: response.userPosts,
+    totalPages: response.totalPages,
+    currentPage: response.currentPage
+  };
+};
+
+export const blockUserPostApi = async (postId: string) => {
+  return apiRequest('POST', `/user-posts/${postId}/toggle-block`);
+};

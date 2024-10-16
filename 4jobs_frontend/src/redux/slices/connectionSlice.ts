@@ -94,16 +94,9 @@ export const sendConnectionRequest = createAsyncThunk(
 export const fetchConnectionRequests = createAsyncThunk(
   'connections/fetchRequests',
   async (userId: string, { getState, rejectWithValue }) => {
-    const state = getState() as { connections: ConnectionState };
-    const lastFetchedAt = state.connections.lastFetchedAt;
-    const currentTime = Date.now();
-
-    if (lastFetchedAt && currentTime - lastFetchedAt < 5 * 60 * 1000) {
-      return null;
-    }
-
     try {
       const response = await fetchConnectionRequestsApi(userId);
+      console.log("Connection requests response:", response);
       return response;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -119,6 +112,7 @@ export const acceptConnectionRequest = createAsyncThunk(
   async ({ requestId, userId }: { requestId: string; userId: string }, { rejectWithValue }) => {
     try {
       const response = await acceptConnectionRequestApi(requestId, userId);
+      console.log("accept response",response)
       return response;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -257,6 +251,7 @@ const connectionSlice = createSlice({
         state.loading = false;
         if (action.payload !== null) {
           state.connectionRequests = action.payload;
+          console.log("state.connectionRequests",state.connectionRequests)
           state.lastFetchedAt = Date.now();
         }
       })
@@ -268,10 +263,10 @@ const connectionSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(acceptConnectionRequest.fulfilled, (state, action: PayloadAction<{ requestId: string }>) => {
+      .addCase(acceptConnectionRequest.fulfilled, (state, action: PayloadAction<{_id: string}>) => {
         state.loading = false;
         state.connectionRequests = state.connectionRequests.filter(
-          request => request.id !== action.payload.requestId
+          request => request._id !== action.payload._id
         );
       })
       .addCase(acceptConnectionRequest.rejected, (state, action) => {

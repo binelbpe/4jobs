@@ -35,26 +35,40 @@ export class MongoPostRepository implements IPostRepository {
     return this.populateUserInfo(post);
   }
 
-  async findAll(page: number, limit: number): Promise<IPost[]> {
+  async findAll(page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
     const skip = (page - 1) * limit;
-    const posts = await PostModel.find()
-      .populate('userId', 'name profileImage bio')
+    const totalCount = await PostModel.countDocuments({ status: 'active' });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const posts = await PostModel.find({ status: 'active' })
+      .populate('userId', 'name email profileImage bio')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    return posts.map(post => this.populateUserInfo(post));
+    return {
+      posts: posts.map(post => this.populateUserInfo(post)),
+      totalPages,
+      currentPage: page
+    };
   }
 
-  async findByUserId(userId: string, page: number, limit: number): Promise<IPost[]> {
+  async findByUserId(userId: string, page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
     const skip = (page - 1) * limit;
-    const posts = await PostModel.find({ userId })
+    const totalCount = await PostModel.countDocuments({ userId });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const posts = await PostModel.find({ userId})
       .populate('userId', 'name profileImage bio')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    return posts.map(post => this.populateUserInfo(post));
+    return {
+      posts: posts.map(post => this.populateUserInfo(post)),
+      totalPages,
+      currentPage: page
+    };
   }
 
   async deletePost(id: string): Promise<boolean> {
@@ -76,15 +90,46 @@ export class MongoPostRepository implements IPostRepository {
     return this.populateUserInfo(post);
   }
 
+  async toggleBlockStatus(postId: string): Promise<IPost> {
+    const post = await PostModel.findById(postId).populate('userId', 'name email profileImage bio');
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    post.status = post.status === 'active' ? 'blocked' : 'active';
+    await post.save();
+
+    return this.populateUserInfo(post);
+  }
+
   private populateUserInfo(post: any): IPost {
     const postObj = post.toObject();
     return {
       ...postObj,
       user: post.userId ? {
         name: post.userId.name,
+        email: post.userId.email,
         profileImage: post.userId.profileImage,
         bio: post.userId.bio,
       } : undefined,
+    };
+  }
+
+  async findAllForAdmin(page: number, limit: number): Promise<{ posts: IPost[], totalPages: number, currentPage: number }> {
+    const skip = (page - 1) * limit;
+    const totalCount = await PostModel.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const posts = await PostModel.find()
+      .populate('userId', 'name email profileImage bio')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      posts: posts.map(post => this.populateUserInfo(post)),
+      totalPages,
+      currentPage: page
     };
   }
 }

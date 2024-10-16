@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBars, FaTimes, FaTachometerAlt, FaUserAlt, FaUsers, FaBriefcase, FaClipboard } from 'react-icons/fa';
+import { FaBars, FaTimes, FaTachometerAlt, FaUserAlt, FaUsers, FaBriefcase, FaClipboard, FaNewspaper } from 'react-icons/fa';
 import '../../styles/admin/Sidebar.css';
 
 const Sidebar: React.FC = () => {
@@ -56,6 +56,12 @@ const Sidebar: React.FC = () => {
               <Link to="/admin/jobpost" className="flex items-center space-x-4 px-4 py-2 hover:bg-purple-600 transition-colors duration-200">
                 <FaBriefcase />
                 <span>Job Post</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin/userposts" className="flex items-center space-x-4 px-4 py-2 hover:bg-purple-600 transition-colors duration-200">
+                <FaNewspaper />
+                <span>User Posts</span>
               </Link>
             </li>
           </ul>

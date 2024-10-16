@@ -25,6 +25,8 @@ import notificationReducer from "./slices/notificationSlice";
 import userMessageReducer from "./slices/userMessageSlice";
 import recruiterMessageReducer from "./slices/recruiterMessageSlice";
 import userRecruiterMessageReducer from "./slices/userRecruiterMessageSlice";
+import subscriptionReducer from "./slices/adminSubscriptionSlice";
+import userPostReducer from "./slices/adminUserPostSlice";
 
 const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "fallback-key";
 
@@ -136,7 +138,7 @@ const connectionPersistConfig = {
 const notificationPersistConfig = {
   key: "notifications",
   storage,
-  whitelist: ["items", "unreadCount"],
+  whitelist: ["items", "unreadCount", "seenNotifications"],
 };
 
 const messagePersistConfig = {
@@ -202,12 +204,14 @@ const rootReducer = combineReducers({
   // Add the new userRecruiterMessages reducer
   userRecruiterMessages: persistReducer(
     {
-      key: 'userRecruiterMessages',
+      key: "userRecruiterMessages",
       storage,
-      whitelist: ['conversations', 'messages'],
+      whitelist: ["conversations", "messages"],
     },
     userRecruiterMessageReducer
   ),
+  subscriptions: subscriptionReducer,
+  userPosts: userPostReducer,
 });
 
 const store = configureStore({
@@ -222,7 +226,7 @@ const store = configureStore({
 
 export const persistor = persistStore(store);
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 export default store;

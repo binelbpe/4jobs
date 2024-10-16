@@ -27,6 +27,7 @@ interface NotificationState {
   loading: boolean;
   error: string | null;
   lastFetchedAt: number | null;
+  seenNotifications: string[];
 }
 
 const initialState: NotificationState = {
@@ -35,6 +36,7 @@ const initialState: NotificationState = {
   loading: false,
   error: null,
   lastFetchedAt: null,
+  seenNotifications: [],
 };
 
 const notificationSlice = createSlice({
@@ -52,10 +54,20 @@ const notificationSlice = createSlice({
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
+    markAsSeen: (state, action: PayloadAction<string>) => {
+      if (!state.seenNotifications.includes(action.payload)) {
+        state.seenNotifications.push(action.payload);
+        state.items = state.items.filter(item => item._id !== action.payload);
+        state.unreadCount = state.items.filter(item => !item.isRead).length;
+      }
+    },
     markAllAsRead: (state) => {
       state.items.forEach(item => {
         if (!item.isRead) {
           item.isRead = true;
+          if (!state.seenNotifications.includes(item._id)) {
+            state.seenNotifications.push(item._id);
+          }
         }
       });
       state.unreadCount = 0;
@@ -73,13 +85,13 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        // Only update if there are new notifications
-        if (JSON.stringify(state.items) !== JSON.stringify(action.payload)) {
-          state.items = action.payload;
-          state.unreadCount = action.payload.filter(
-            (notification) => !notification.isRead
-          ).length;
-        }
+        const newNotifications = action.payload.filter(
+          notification => !state.seenNotifications.includes(notification._id)
+        );
+        state.items = newNotifications;
+        state.unreadCount = newNotifications.filter(
+          notification => !notification.isRead
+        ).length;
         state.lastFetchedAt = Date.now();
         state.error = null;
       })
@@ -90,5 +102,5 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { addNotification, markAsRead, markAllAsRead, clearError } = notificationSlice.actions;
+export const { addNotification, markAsRead, markAllAsRead, clearError, markAsSeen } = notificationSlice.actions;
 export default notificationSlice.reducer;

@@ -11,6 +11,7 @@ const PostSchema: Schema = new Schema({
     content: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
   }],
+  status: { type: String, enum: ['active', 'blocked'], default: 'active' },
 }, { 
   timestamps: true,
   toObject: { virtuals: true },

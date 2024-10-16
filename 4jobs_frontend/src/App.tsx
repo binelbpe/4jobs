@@ -36,7 +36,7 @@ import ContestantDetails from './components/recruiter/jobPost/ContestantDetails'
 import UserList from './components/admin/UserList';
 import PostList from './components/user/posts/PostList';
 import CreatePost from './components/user/posts/CreatePost';
-import UserPostsList from './components/user/posts/PostList'
+import PostsList from './components/user/posts/PostList'
 import EditPost from './components/user/posts/EditPost'
 import AdminJobPost from './components/admin/AdminJobPost'
 import ConnectionProfile from './components/user/ConnectionProfile';
@@ -44,6 +44,8 @@ import Connections from './components/user/Connections';
 import Messages from './components/user/Messages';
 import RecruiterMessage from './components/recruiter/RecruiterMessaging';
 import UserMessaging from './components/user/UserMessaging';
+import AdminSubscriptionManagement from './components/admin/AdminSubscriptionManagement';
+import AdminUserPostManagement from './components/admin/AdminUserPostManagement';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -65,7 +67,7 @@ const App: React.FC = () => {
       <Route path="/jobs/:jobId" element={<PrivateRoute><JobDetail /></PrivateRoute>} />
       <Route path="/posts/:userId" element={<PrivateRoute><PostList /></PrivateRoute>} />
       <Route path="/posts/create" element={<PrivateRoute><CreatePost /></PrivateRoute>}/>
-      <Route path="/posts/user/:userId" element={<PrivateRoute><UserPostsList /></PrivateRoute>}/>
+      <Route path="/posts/user/:userId" element={<PrivateRoute><PostsList /></PrivateRoute>}/>
       <Route path="/edit-post/:postId" element={<PrivateRoute><EditPost /></PrivateRoute>}/>
       <Route path="/connection/profile/:userId" element={<PrivateRoute><ConnectionProfile /></PrivateRoute>} />
       <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
@@ -80,6 +82,8 @@ const App: React.FC = () => {
       <Route path="/admin/profile" element={<AdminPrivateRoute><AdminProfile /></AdminPrivateRoute>} />
       <Route path="/admin/user" element={<AdminPrivateRoute><UserList /></AdminPrivateRoute>} />
       <Route path="/admin/jobpost" element={<AdminPrivateRoute><AdminJobPost /></AdminPrivateRoute>} />
+      <Route path="/admin/subscription" element={<AdminPrivateRoute><AdminSubscriptionManagement /></AdminPrivateRoute>} />
+      <Route path="/admin/userposts" element={<AdminPrivateRoute><AdminUserPostManagement /></AdminPrivateRoute>} />
 
       {/* Recruiter Routes */}
       <Route path="/recruiter" element={<RecruiterLogin />} />

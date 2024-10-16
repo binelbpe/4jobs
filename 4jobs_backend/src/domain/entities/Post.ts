@@ -8,10 +8,12 @@ export interface IPost {
   comments: IComment[];
   createdAt: Date;
   updatedAt: Date;
+  status: 'active' | 'blocked';
   user?: {
     name: string;
     profileImage?: string;
     bio?: string;
+    email: string;
   };
 }
 
