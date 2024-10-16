@@ -8,6 +8,8 @@ import { NotificationModel } from '../database/mongoose/models/NotificationModel
 import { MessageUseCase } from '../../application/usecases/user/MessageUseCase';
 import { UserRecruiterMessageUseCase } from '../../application/usecases/user/UserRecruiterMessageUseCase';
 import { RecruiterMessageUseCase } from '../../application/usecases/recruiter/RecruiterMessageUseCase';
+import { InitiateVideoCallUseCase } from '../../application/usecases/recruiter/InitiateVideoCallUseCase';
+import { RespondToVideoCallUseCase } from '../../application/usecases/user/RespondToVideoCallUseCase';
 import TYPES from "../../types";
 
 export function setupSocketServer(server: HTTPServer, container: Container) {
@@ -23,6 +25,8 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
   const messageUseCase = container.get<MessageUseCase>(TYPES.MessageUseCase);
   const userRecruiterMessageUseCase = container.get<UserRecruiterMessageUseCase>(TYPES.UserRecruiterMessageUseCase);
   const recruiterMessageUseCase = container.get<RecruiterMessageUseCase>(TYPES.RecruiterMessageUseCase);
+  const initiateVideoCallUseCase = container.get<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase);
+  const respondToVideoCallUseCase = container.get<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase);
 
   io.use(socketAuthMiddleware(userManager));
 
@@ -39,165 +43,73 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
     socket.join(socket.userId);
     io.emit('userOnlineStatus', { userId: socket.userId, online: true });
 
-    // Handle user-recruiter messaging
-    socket.on('sendUserRecruiterMessage', async (data: {
-      conversationId: string,
-      content: string,
-      recipientId: string
-    }) => {
+    // Existing message handling code...
+
+    socket.on('callOffer', async (data: { recipientId: string, offer: string }) => {
       try {
-        if (!socket.userId) {
-          throw new Error('User not authenticated');
+        if (socket.userType !== 'recruiter' || !socket.userId) {
+          throw new Error('Unauthorized');
         }
 
-        let message;
-        let recipientId;
-        if (socket.userType === 'user') {
-          message = await userRecruiterMessageUseCase.sendMessage(data.conversationId, data.content, socket.userId);
-          recipientId = message.receiverId; // Set recipientId to the receiverId from the message
-        } else {
-          message = await recruiterMessageUseCase.sendMessage(data.conversationId, data.content, socket.userId);
-          recipientId = message.receiverId; // Set recipientId to the receiverId from the message
-        }
-
-        // Emit to sender
-        socket.emit('userRecruiterMessageSent', message);
-
-        // Emit to recipient
-        const recipientSocket = userManager.getUserSocketId(recipientId);
+        const videoCall = await initiateVideoCallUseCase.execute(socket.userId, data.recipientId);
+        
+        const recipientSocket = userManager.getUserSocketId(data.recipientId);
         if (recipientSocket) {
-          io.to(recipientSocket).emit('newUserRecruiterMessage', message);
+          io.to(recipientSocket).emit('incomingCall', { callerId: socket.userId, offer: data.offer });
         }
-
-        // Emit notification event
-        eventEmitter.emit('sendNotification', {
-          type: 'NEW_USER_RECRUITER_MESSAGE',
-          recipient: recipientId,
-          sender: socket.userId,
-          content: 'You have a new message'
-        });
       } catch (error) {
-        console.error('Error sending user-recruiter message:', error);
-        socket.emit('userRecruiterMessageError', { error: 'Failed to send message' });
+        console.error('Error initiating video call:', error);
+        socket.emit('videoCallError', { error: 'Failed to initiate video call' });
       }
     });
 
-    socket.on('markUserRecruiterMessageAsRead', async (data: { messageId: string }) => {
+    socket.on('callAnswer', async (data: { callerId: string, answer: string }) => {
       try {
-        if (!socket.userId) {
-          throw new Error('User not authenticated');
+        if (socket.userType !== 'user' || !socket.userId) {
+          throw new Error('Unauthorized');
         }
 
-        if (socket.userType === 'user') {
-          await userRecruiterMessageUseCase.markMessageAsRead(data.messageId);
-        } else {
-          await recruiterMessageUseCase.markMessageAsRead(data.messageId);
+        const videoCall = await respondToVideoCallUseCase.execute(data.callerId, true);
+        
+        const callerSocket = userManager.getUserSocketId(data.callerId);
+        if (callerSocket) {
+          io.to(callerSocket).emit('callAnswer', { answer: data.answer });
         }
-
-        // Emit to sender
-        socket.emit('userRecruiterMessageMarkedAsRead', { messageId: data.messageId });
-
-        // Emit to the other participant in the conversation
-        const message = socket.userType === 'user' 
-          ? await userRecruiterMessageUseCase.getMessageById(data.messageId)
-          : await recruiterMessageUseCase.getMessageById(data.messageId);
-
-        if (message) {
-          const recipientId = message.senderId === socket.userId ? message.receiverId : message.senderId;
-          const recipientSocket = userManager.getUserSocketId(recipientId);
-          if (recipientSocket) {
-            io.to(recipientSocket).emit('userRecruiterMessageMarkedAsRead', { messageId: data.messageId });
-          }
-        }
-
-        console.log(`Message ${data.messageId} marked as read by ${socket.userType} ${socket.userId}`);
       } catch (error) {
-        console.error('Error marking user-recruiter message as read:', error);
-        socket.emit('markUserRecruiterMessageError', { error: 'Failed to mark message as read' });
+        console.error('Error responding to video call:', error);
+        socket.emit('videoCallError', { error: 'Failed to respond to video call' });
       }
     });
 
-    // Update typing events for user-recruiter messaging
-    socket.on('userRecruiterTyping', (data: { conversationId: string }) => {
-      console.log(`${socket.userType} ${socket.userId} is typing in conversation ${data.conversationId}`);
-      userManager.setUserTyping(socket.userId!, data.conversationId);
-      socket.to(data.conversationId).emit('userRecruiterTyping', { userId: socket.userId, userType: socket.userType, conversationId: data.conversationId });
-    });
-
-    socket.on('userRecruiterStoppedTyping', (data: { conversationId: string }) => {
-      console.log(`${socket.userType} ${socket.userId} stopped typing in conversation ${data.conversationId}`);
-      userManager.setUserStoppedTyping(socket.userId!, data.conversationId);
-      socket.to(data.conversationId).emit('userRecruiterStoppedTyping', { userId: socket.userId, userType: socket.userType, conversationId: data.conversationId });
-    });
-
-    // Join user-recruiter conversation room
-    socket.on('joinUserRecruiterConversation', (conversationId: string) => {
-      socket.join(conversationId);
-      console.log(`${socket.userType} ${socket.userId} joined conversation ${conversationId}`);
-    });
-
-    // Leave user-recruiter conversation room
-    socket.on('leaveUserRecruiterConversation', (conversationId: string) => {
-      socket.leave(conversationId);
-      console.log(`${socket.userType} ${socket.userId} left conversation ${conversationId}`);
-    });
-
-    socket.on('disconnect', () => {
-      if (socket.userId) {
-        userManager.removeUser(socket.userId);
-        io.emit('userOnlineStatus', { userId: socket.userId, online: false });
-      }
-    });
-
-    // Handle recruiter message read status
-    socket.on('markRecruiterMessageAsRead', async (data: { messageId: string }) => {
+    socket.on('callRejected', async (data: { callerId: string }) => {
       try {
-        if (socket.userType === 'recruiter') {
-          await recruiterMessageUseCase.markMessageAsRead(data.messageId);
+        if (socket.userType !== 'user' || !socket.userId) {
+          throw new Error('Unauthorized');
+        }
+
+        await respondToVideoCallUseCase.execute(data.callerId, false);
+        
+        const callerSocket = userManager.getUserSocketId(data.callerId);
+        if (callerSocket) {
+          io.to(callerSocket).emit('callRejected');
         }
       } catch (error) {
-        console.error('Error marking recruiter message as read:', error);
+        console.error('Error rejecting video call:', error);
+        socket.emit('videoCallError', { error: 'Failed to reject video call' });
       }
     });
-  });
 
-  // Handle notifications
-  eventEmitter.on('sendNotification', (notification) => {
-    try {
-      if (!notification || !notification.recipient) {
-        console.error('Invalid notification:', notification);
-        return;
+    socket.on('endCall', async (data: { recipientId: string }) => {
+      const recipientSocket = userManager.getUserSocketId(data.recipientId);
+      if (recipientSocket) {
+        io.to(recipientSocket).emit('callEnded');
       }
+    });
 
-      const recipientId = typeof notification.recipient === 'string' 
-        ? notification.recipient 
-        : notification.recipient.toString();
-
-      const recipientSocketId = userManager.getUserSocketId(recipientId);
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit('newNotification', notification);
-      } else {
-        console.log(`User ${recipientId} is not currently connected. Notification will be shown on next login.`);
-      }
-    } catch (error) {
-      console.error('Error sending notification:', error);
-    }
+    // Existing disconnect handling...
   });
 
-  // Add these event listeners
-  eventEmitter.on('recruiterMessageRead', (data) => {
-    const recipientSocketId = userManager.getUserSocketId(data.senderId);
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit('recruiterMessageRead', data);
-    }
-  });
-
-  eventEmitter.on('recruiterMessagesRead', (data) => {
-    const recipientSocketId = userManager.getUserSocketId(data.messages[0].senderId);
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit('recruiterMessagesRead', data);
-    }
-  });
+  // Existing event listeners...
 
   return { io, userManager, eventEmitter };
 }

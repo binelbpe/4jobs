@@ -77,5 +77,8 @@ const TYPES = {
     SearchUsersAndJobsUseCase: Symbol.for('SearchUsersAndJobsUseCase'),
     IRecruiterSearchRepository: Symbol.for('IRecruiterSearchRepository'),
     SearchUsersUseCase: Symbol.for('SearchUsersUseCase'),
+    IVideoCallRepository: Symbol.for('IVideoCallRepository'),
+    InitiateVideoCallUseCase: Symbol.for('InitiateVideoCallUseCase'),
+    RespondToVideoCallUseCase: Symbol.for('RespondToVideoCallUseCase'),
 };
 exports.default = TYPES;

@@ -6,6 +6,9 @@ import { Message } from "../../types/recruiterMessageType";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid } from "date-fns";
 import ConversationHeader from "../shared/ConversationHeader";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faVideo } from '@fortawesome/free-solid-svg-icons';
+import VideoCall from '../shared/VideoCall';
 
 interface ConversationProps {
   conversationId: string;
@@ -38,6 +41,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   const onlineStatus = useSelector(
     (state: RootState) => state.recruiterMessages.onlineStatus
   );
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -102,12 +106,39 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     (status) => status
   );
 
+  const handleStartVideoCall = () => {
+    console.log("Starting video call to:", conversation?.participant.id);
+    setIsVideoCallActive(true);
+  };
+
+  const handleEndVideoCall = () => {
+    setIsVideoCallActive(false);
+    userRecruiterSocketService.emitEndCall(conversation?.participant.id || "");
+  };
+
+  useEffect(() => {
+    userRecruiterSocketService.onCallEnded(() => {
+      setIsVideoCallActive(false);
+    });
+
+    return () => {
+      // Clean up any listeners if necessary
+    };
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col">
       <ConversationHeader
         participantName={conversation?.participant.name || "Unknown"}
         isOnline={onlineStatus[conversation?.participant.id || ""] || false}
-      />
+      >
+        <button
+          onClick={handleStartVideoCall}
+          className="ml-2 p-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+        >
+          <FontAwesomeIcon icon={faVideo} />
+        </button>
+      </ConversationHeader>
       <div ref={messageListRef} className="flex-1 overflow-y-auto p-4">
         {messages.map((message: Message) => (
           <div
@@ -177,6 +208,13 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
           </button>
         </form>
       </div>
+      {isVideoCallActive && (
+        <VideoCall
+          isRecruiter={true}
+          recipientId={conversation?.participant.id || ""}
+          onEndCall={handleEndVideoCall}
+        />
+      )}
     </div>
   );
 };

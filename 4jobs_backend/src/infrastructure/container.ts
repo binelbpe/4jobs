@@ -88,6 +88,10 @@ import { SearchUsersAndJobsUseCase } from "../application/usecases/user/SearchUs
 import { IRecruiterSearchRepository } from '../domain/interfaces/repositories/recruiter/IRecruiterSearchRepository';
 import { MongoRecruiterSearchRepository } from './database/mongoose/repositories/MongoRecruiterSearchRepository';
 import { SearchUsersUseCase } from '../application/usecases/recruiter/SearchUsersUseCase';
+import { IVideoCallRepository } from '../domain/interfaces/repositories/IVideoCallRepository';
+import { MongoVideoCallRepository } from './database/mongoose/repositories/MongoVideoCallRepository';
+import { InitiateVideoCallUseCase } from '../application/usecases/recruiter/InitiateVideoCallUseCase';
+import { RespondToVideoCallUseCase } from '../application/usecases/user/RespondToVideoCallUseCase';
 
 const container = new Container();
 
@@ -257,6 +261,9 @@ container
 
 container.bind<IRecruiterSearchRepository>(TYPES.IRecruiterSearchRepository).to(MongoRecruiterSearchRepository);
 container.bind<SearchUsersUseCase>(TYPES.SearchUsersUseCase).to(SearchUsersUseCase);
+container.bind<IVideoCallRepository>(TYPES.IVideoCallRepository).to(MongoVideoCallRepository);
+container.bind<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase).to(InitiateVideoCallUseCase);
+container.bind<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase).to(RespondToVideoCallUseCase);
 
 console.log(container);
 export { container };

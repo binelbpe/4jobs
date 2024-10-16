@@ -29,11 +29,10 @@ const RecruiterHeader = () => {
   const isLoading = useSelector((state: RootState) => state.recruiterSearch.loading);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  console.log('Current search results:', searchResults); // Debugging log
+ 
 
   const debouncedSearch = debounce((query: string) => {
     if (query.length >= 3 && recruiterId) {
-      console.log('Dispatching search:', query, recruiterId); // Debugging log
       dispatch(searchUsersAndJobs({ query, userId: recruiterId }));
     } else {
       dispatch(clearSearch());

@@ -25,6 +25,8 @@ class UserRecruiterSocketService {
   private userId: string | null = null;
   private userType: 'user' | 'recruiter' | null = null;
   private connected: boolean = false;
+  private onIncomingCallCallback: ((callerId: string, offer: string) => void) | null = null;
+  private onCallEndedCallback: (() => void) | null = null;
 
   connect(userId: string, userType: 'user' | 'recruiter') {
     console.log(`Attempting to connect to socket server for ${userType}: ${userId}`);
@@ -146,6 +148,20 @@ class UserRecruiterSocketService {
         });
       }
     });
+
+    this.socket.on("incomingCall", (data: { callerId: string, offer: string }) => {
+      console.log("Received incoming call:", data);
+      if (this.onIncomingCallCallback) {
+        this.onIncomingCallCallback(data.callerId, data.offer);
+      }
+    });
+
+    this.socket.on("callEnded", () => {
+      console.log("Call ended by the other party");
+      if (this.onCallEndedCallback) {
+        this.onCallEndedCallback();
+      }
+    });
   }
 
   joinConversation(conversationId: string) {
@@ -221,6 +237,44 @@ class UserRecruiterSocketService {
       this.socket = null;
     }
     this.connected = false;
+  }
+
+  onIncomingCall(callback: (callerId: string, offer: string) => void) {
+    this.onIncomingCallCallback = callback;
+  }
+
+  offIncomingCall(callback: (callerId: string, offer: string) => void) {
+    this.socket?.off('incomingCall', callback);
+  }
+
+  emitCallOffer(recipientId: string, offerBase64: string) {
+    console.log("Emitting call offer:", { recipientId, offerBase64 });
+    this.socket?.emit('callOffer', { recipientId, offer: offerBase64 });
+  }
+
+  emitCallAnswer(callerId: string, answerBase64: string) {
+    this.socket?.emit('callAnswer', { callerId, answer: answerBase64 });
+  }
+
+  emitCallRejected(callerId: string) {
+    this.socket?.emit('callRejected', { callerId });
+  }
+
+  onCallAnswer(callback: (answerBase64: string) => void) {
+    this.socket?.on('callAnswer', callback);
+  }
+
+  onCallRejected(callback: () => void) {
+    this.socket?.on('callRejected', callback);
+  }
+
+  emitEndCall(recipientId: string) {
+    console.log("Emitting end call:", recipientId);
+    this.socket?.emit('endCall', { recipientId });
+  }
+
+  onCallEnded(callback: () => void) {
+    this.onCallEndedCallback = callback;
   }
 }
 
