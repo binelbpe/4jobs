@@ -12,7 +12,6 @@ export class LoginRecruiterUseCase {
   ) {}
 
   async execute(email: string, password: string) {
-
     const recruiter = await this.recruiterRepository.findRecruiterByEmail(
       email
     );
@@ -33,27 +32,32 @@ export class LoginRecruiterUseCase {
     const token = this.authService.generateToken({
       id: recruiter.id,
       email: recruiter.email,
-      password: recruiter.password,
       role: "recruiter",
-      name: recruiter.name,
-      isAdmin: false,
-      experiences: [],
-      projects: [],
-      certificates: [],
-      skills: [],
+      password: recruiter.password, // Include password in the token payload
+      name: recruiter.name, // Include name in the token payload
     });
+
     return {
-      isApproved: recruiter.isApproved,
       token,
       recruiter: {
         id: recruiter.id,
         email: recruiter.email,
-        name: recruiter.name,
         companyName: recruiter.companyName,
         phone: recruiter.phone,
+        name: recruiter.name,
+        role: recruiter.role,
+        isApproved: recruiter.isApproved,
         createdAt: recruiter.createdAt,
         updatedAt: recruiter.updatedAt,
-        isApproved: recruiter.isApproved,
+        governmentId: recruiter.governmentId,
+        employeeId: recruiter.employeeId,
+        location: recruiter.location,
+        employeeIdImage: recruiter.employeeIdImage,
+        subscribed: recruiter.subscribed,
+        planDuration: recruiter.planDuration,
+        expiryDate: recruiter.expiryDate,
+        subscriptionAmount: recruiter.subscriptionAmount,
+        subscriptionStartDate: recruiter.subscriptionStartDate,
       },
     };
   }

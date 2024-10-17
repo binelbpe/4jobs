@@ -52,7 +52,9 @@ export const login = createAsyncThunk(
   "recruiter/login",
   async (loginData: any, { rejectWithValue }) => {
     try {
-      return await loginRecruiterApi(loginData);
+       const response =await loginRecruiterApi(loginData);
+       console.log("login data rec ",response)
+       return response
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
@@ -107,8 +109,7 @@ export const updateSubscription = createAsyncThunk(
   "recruiter/updateSubscription",
   async (subscriptionData: { subscribed: boolean; planDuration: string; expiryDate: string }, { rejectWithValue }) => {
     try {
-      // Implement API call to update subscription on the server
-      // For now, we'll just return the data
+      
       return subscriptionData;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
@@ -144,7 +145,7 @@ const recruiterSlice = createSlice({
         }
         return state;
       })
-      // Register
+   
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -158,7 +159,7 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Login
+  
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -167,13 +168,13 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.isAuthenticatedRecruiter = true;
         state.recruiter = action.payload.recruiter;
-        state.isApproved = action.payload.isApproved;
+        state.isApproved = action.payload.recruiter.isApproved;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Verify OTP
+     
       .addCase(verifyOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -188,7 +189,7 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Send OTP
+  
       .addCase(sendOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -200,7 +201,7 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Fetch Profile
+    
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -213,7 +214,7 @@ const recruiterSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Update Profile
+     
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -229,8 +230,8 @@ const recruiterSlice = createSlice({
       .addCase(updateSubscription.fulfilled, (state, action) => {
         state.subscribed = action.payload.subscribed;
         state.planDuration = action.payload.planDuration;
-        state.expiryDate = action.payload.expiryDate; // This is now a string
-        // Update the recruiter object as well
+        state.expiryDate = action.payload.expiryDate; 
+      
         if (state.recruiter) {
           state.recruiter = {
             ...state.recruiter,
