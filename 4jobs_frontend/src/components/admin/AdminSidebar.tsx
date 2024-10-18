@@ -21,17 +21,23 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <div className="md:hidden flex justify-between items-start bg-white-700 text-white p-4 absolute top-1">
-        <button onClick={toggleSidebar} style={{ borderRadius: 10 }}>
+      {/* Toggle button for small screens */}
+      <div className="md:hidden fixed top-0 left-0 z-50 p-4">
+        <button
+          onClick={toggleSidebar}
+          className="bg-purple-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+        >
           {isOpen ? (
             <FaTimes className="text-2xl" />
           ) : (
-            <FaBars className="text-black text-3xl" />
+            <FaBars className="text-2xl" />
           )}
         </button>
       </div>
+
+      {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-purple-700 text-white transform transition-transform duration-300 overflow-y-auto
+        className={`fixed top-0 left-0 h-screen w-64 bg-purple-700 text-white transform transition-transform duration-300 ease-in-out overflow-y-auto z-40
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:sticky md:top-0 md:z-0 shadow-lg`}
       >
@@ -101,8 +107,8 @@ const Sidebar: React.FC = () => {
       {/* Overlay to close sidebar when clicking outside */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-40" // Overlay when sidebar is open
-          onClick={toggleSidebar} // Closes sidebar when overlay is clicked
+          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30"
+          onClick={toggleSidebar}
         ></div>
       )}
     </>

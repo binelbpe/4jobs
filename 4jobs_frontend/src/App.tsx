@@ -2,9 +2,8 @@ import React, { useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import store, { persistor, AppDispatch } from './redux/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { initializeAdminState } from './redux/slices/adminSlice';
+import store, { persistor} from './redux/store';
+import {  useSelector } from 'react-redux';
 import { CallProvider, useCall } from './contexts/CallContext';
 import { socketService } from './services/socketService';
 import { RootState } from './redux/store';
@@ -52,7 +51,6 @@ import AdminUserPostManagement from './components/admin/AdminUserPostManagement'
 import SearchResults from './components/user/SearchResults';
 import UserVideoCall from './components/user/UserVideoCall';
  import JobDetails from './components/recruiter/RecruiterJobDetails';
-import { Component } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { handleIncomingCall, isCallActive, incomingCallData, endCall } = useCall();

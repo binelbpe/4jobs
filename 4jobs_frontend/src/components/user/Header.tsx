@@ -20,9 +20,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import {
   fetchNotifications,
   addNotification,
-  markAsRead,
   markAllAsRead,
-  markAsSeen,
 } from "../../redux/slices/notificationSlice";
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
 import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
@@ -215,24 +213,42 @@ const UserHeader: React.FC = () => {
   ];
 
   return (
-    <header className="bg-white shadow-md p-4">
+    <header className="bg-white shadow-md p-2 sm:p-4">
       <div className="container mx-auto">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center">
           {/* Logo Section */}
-          <div className="flex items-center">
+          <div className="flex items-center w-full sm:w-auto justify-between sm:justify-start mb-2 sm:mb-0">
             <button
               onClick={() => navigateTo("/dashboard")}
               className="flex items-center"
             >
-              <img src="/logo.png" alt="Logo" className="h-10 w-10 mr-2" />
-              <span className="text-purple-700 font-semibold text-lg hidden sm:inline">
+              <img src="/logo.png" alt="Logo" className="h-8 w-8 sm:h-10 sm:w-10 mr-2" />
+              <span className="text-purple-700 font-semibold text-lg">
                 4 Jobs
               </span>
             </button>
+            <div className="flex sm:hidden">
+              <button
+                onClick={toggleSearch}
+                className="text-purple-600 mr-4"
+                aria-label="Search"
+              >
+                <FontAwesomeIcon icon={faSearch} className="h-6 w-6" />
+              </button>
+              <button
+                className="text-purple-600 focus:outline-none"
+                onClick={toggleMenu}
+              >
+                <FontAwesomeIcon
+                  icon={menuOpen ? faTimes : faBars}
+                  className="h-6 w-6"
+                />
+              </button>
+            </div>
           </div>
 
           {/* Search Bar Section */}
-          <div className="flex-grow mx-4 hidden lg:block">
+          <div className="w-full sm:w-auto sm:flex-grow mx-0 sm:mx-4 mb-2 sm:mb-0 order-3 sm:order-2">
             <div className="relative w-full max-w-lg mx-auto">
               <input
                 type="text"
@@ -259,37 +275,17 @@ const UserHeader: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Items for larger screens */}
-          <nav className="hidden lg:flex space-x-4 items-center">
+          {/* Navigation Items */}
+          <nav className="hidden sm:flex space-x-2 md:space-x-4 items-center order-2 sm:order-3">
             {navItems.map((item) =>
               renderNavItem(item.icon, item.text, item.onClick, item.badge)
             )}
           </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center">
-            <button
-              onClick={toggleSearch}
-              className="text-purple-600 mr-4"
-              aria-label="Search"
-            >
-              <FontAwesomeIcon icon={faSearch} className="h-6 w-6" />
-            </button>
-            <button
-              className="text-purple-600 focus:outline-none"
-              onClick={toggleMenu}
-            >
-              <FontAwesomeIcon
-                icon={menuOpen ? faTimes : faBars}
-                className="h-6 w-6"
-              />
-            </button>
-          </div>
         </div>
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-200 py-4 mt-4">
+          <div className="sm:hidden bg-white border-t border-gray-200 py-4 mt-4">
             <div className="space-y-4">
               {navItems.map((item) =>
                 renderNavItem(item.icon, item.text, item.onClick, item.badge)
@@ -298,26 +294,9 @@ const UserHeader: React.FC = () => {
           </div>
         )}
 
-        {/* Search Bar (Mobile) */}
-        {showSearch && (
-          <div className="lg:hidden py-4 mt-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-              <FontAwesomeIcon
-                icon={faSearch}
-                className="absolute right-3 top-3 text-gray-500"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Notifications Dropdown */}
         {showNotifications && (
-          <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+          <div className="absolute right-0 sm:right-4 mt-2 w-full sm:w-80 bg-white border border-gray-200 rounded-md shadow-lg z-20">
             <div className="p-4 border-b border-gray-200 font-bold text-purple-700">
               Notifications
             </div>

@@ -11,7 +11,7 @@ import {
   Briefcase, 
   MapPin, 
   Clock, 
-  DollarSign, 
+  IndianRupee, 
   Calendar, 
   Award, 
   BookOpen,
@@ -101,7 +101,7 @@ const JobDetail: React.FC = () => {
                   <span className="font-semibold mr-2">Work Type:</span> {jobPost.wayOfWork}
                 </p>
                 <p className="flex items-center">
-                  <DollarSign className="mr-2 text-gray-600" size={20} />
+                  <IndianRupee className="mr-2 text-gray-600" size={20} />
                   <span className="font-semibold mr-2">Salary Range:</span> ₹{jobPost.salaryRange.min} - ₹{jobPost.salaryRange.max}
                 </p>
                 <p className="flex items-center">

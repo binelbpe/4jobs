@@ -57,9 +57,9 @@ export const loginAdmin = createAsyncThunk(
   }
 );
 
-export const logoutAdmin = createAsyncThunk('admin/logout', async () => {
+export const logoutAdmin = createAsyncThunk('admin/logout', async (_, { dispatch }) => {
   localStorage.removeItem('adminToken');
-  return;
+  // Add any other cleanup actions here
 });
 
 export const fetchRecruiters = createAsyncThunk(
@@ -144,6 +144,11 @@ const adminSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    setLogoutAdmin: (state) => {
+      state.isAuthenticatedAdmin = false;
+      state.token = null;
+      state.dashboardData = null;
     },
   },
   extraReducers: (builder) => {
@@ -234,5 +239,5 @@ const adminSlice = createSlice({
   },
 });
 
-export const { clearError } = adminSlice.actions;
+export const { clearError, setLogoutAdmin } = adminSlice.actions;
 export default adminSlice.reducer;
