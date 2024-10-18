@@ -37,6 +37,7 @@ const JobDetail: React.FC = () => {
     return state.userSearch.jobPosts.find((job: BasicJobPost) => job._id === jobId);
   });
 
+  const user = useSelector((state: RootState) => state.auth.user);
   const userId = useSelector((state: RootState) => state.auth.user?.id);
   const error = useSelector((state: RootState) => state.auth.error);
 
@@ -68,7 +69,8 @@ const JobDetail: React.FC = () => {
 
   if (!jobPost) return <LoadingSpinner />;
 
-  const hasApplied = jobPost.applicants?.some(applicant => applicant._id === userId);
+  // Update this line to correctly check if the user has applied
+  const hasApplied = user?.appliedJobs?.includes(jobPost._id)
 
   return (
     <div className="bg-gray-100 min-h-screen">

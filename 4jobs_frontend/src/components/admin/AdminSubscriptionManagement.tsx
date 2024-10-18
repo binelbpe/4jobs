@@ -9,7 +9,7 @@ import Sidebar from "./AdminSidebar";
 import Header from "./AdminHeader";
 import { Subscription } from "../../types/subscription";
 import ConfirmationModal from "../common/ConfirmationModal";
-import { FaChevronLeft, FaChevronRight, FaBan } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaBan, FaSearch, FaTimes } from "react-icons/fa";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -20,6 +20,7 @@ const AdminSubscriptionManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSubscription, setSelectedSubscription] =
     useState<Subscription | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     dispatch(fetchSubscriptions({ page: currentPage, limit: ITEMS_PER_PAGE }));
@@ -42,6 +43,15 @@ const AdminSubscriptionManagement: React.FC = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       dispatch(fetchSubscriptions({ page: newPage, limit: ITEMS_PER_PAGE }));
     }
+  };
+
+  const filteredSubscriptions = subscriptions.filter((subscription: Subscription) =>
+    subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    subscription.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
   };
 
   return (
@@ -68,6 +78,28 @@ const AdminSubscriptionManagement: React.FC = () => {
               <div className="text-center py-4 text-purple-600">No subscriptions found.</div>
             ) : (
               <>
+                <div className="mb-4 flex">
+                  <div className="relative flex-grow">
+                    <input
+                      type="text"
+                      placeholder="Search subscriptions..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-500"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={handleClearSearch}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                      >
+                        <FaTimes />
+                      </button>
+                    )}
+                  </div>
+                  <button className="ml-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+                    <FaSearch />
+                  </button>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full bg-white">
                     <thead className="bg-purple-100">
@@ -82,7 +114,7 @@ const AdminSubscriptionManagement: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-purple-200">
-                      {subscriptions.map((subscription: Subscription) => (
+                      {filteredSubscriptions.map((subscription: Subscription) => (
                         <tr key={subscription.id} className="hover:bg-purple-50">
                           <td className="py-4 px-6 text-sm">{subscription.name}</td>
                           <td className="py-4 px-6 text-sm">{subscription.companyName}</td>

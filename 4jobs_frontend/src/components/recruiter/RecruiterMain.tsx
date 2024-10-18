@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { fetchAllJobPosts } from '../../redux/slices/jobPostSlice';
-import JobList from './RecruiterJobList';
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import { fetchAllJobPosts } from "../../redux/slices/jobPostSlice";
+import JobList from "./RecruiterJobList";
 
 const MainContent: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { posts, loading, error } = useSelector((state: RootState) => state.jobPosts);
+  const { posts, loading, error } = useSelector(
+    (state: RootState) => state.jobPosts
+  );
 
   useEffect(() => {
     dispatch(fetchAllJobPosts());
@@ -27,7 +29,9 @@ const MainContent: React.FC = () => {
         {posts.length > 0 ? (
           <JobList jobs={posts} />
         ) : (
-          <p className="text-center text-purple-600">No job postings available at the moment.</p>
+          <p className="text-center text-purple-600">
+            No job postings available at the moment.
+          </p>
         )}
       </div>
     </main>

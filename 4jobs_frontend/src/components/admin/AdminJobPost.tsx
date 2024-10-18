@@ -18,7 +18,6 @@ import {
   FaChevronRight,
   FaCalendarAlt,
   FaMapMarkerAlt,
-  FaSortAmountDown,
   FaBuilding,
 } from "react-icons/fa";
 import Header from "../admin/AdminHeader";

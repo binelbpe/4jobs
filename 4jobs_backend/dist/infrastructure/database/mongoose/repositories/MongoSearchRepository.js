@@ -29,37 +29,41 @@ let MongoSearchRepository = class MongoSearchRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const userDocs = yield UserModel_1.UserModel.find({
                 $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { email: { $regex: query, $options: 'i' } }
+                    { name: { $regex: query, $options: "i" } },
+                    { email: { $regex: query, $options: "i" } },
                 ],
                 _id: { $ne: new mongoose_1.default.Types.ObjectId(userId) },
-                isBlocked: { $ne: true } // Exclude blocked users
+                isBlocked: { $ne: true }, // Exclude blocked users
             }).limit(10);
             const jobPostDocs = yield jobPostModel_1.default.find({
                 $or: [
-                    { title: { $regex: query, $options: 'i' } },
-                    { 'company.name': { $regex: query, $options: 'i' } },
-                    { location: { $regex: query, $options: 'i' } },
-                    { skillsRequired: { $in: [new RegExp(query, 'i')] } },
-                    { qualifications: { $in: [new RegExp(query, 'i')] } }
+                    { title: { $regex: query, $options: "i" } },
+                    { "company.name": { $regex: query, $options: "i" } },
+                    { location: { $regex: query, $options: "i" } },
+                    { skillsRequired: { $in: [new RegExp(query, "i")] } },
+                    { qualifications: { $in: [new RegExp(query, "i")] } },
                 ],
-                isBlock: { $ne: true }
+                isBlock: { $ne: true },
             }).limit(10);
             const connections = yield ConnectionModel_1.ConnectionModel.find({
                 $or: [
                     { requester: new mongoose_1.default.Types.ObjectId(userId) },
-                    { recipient: new mongoose_1.default.Types.ObjectId(userId) }
+                    { recipient: new mongoose_1.default.Types.ObjectId(userId) },
                 ],
-                status: ['accepted', 'pending']
+                status: ["accepted", "pending"],
             });
-            const connectedUserIds = connections.map(conn => conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString());
+            const connectedUserIds = connections.map((conn) => conn.requester.toString() === userId
+                ? conn.recipient.toString()
+                : conn.requester.toString());
             const searchResults = yield UserModel_1.UserModel.find({
                 $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { email: { $regex: query, $options: 'i' } },
-                    { skills: { $elemMatch: { $regex: query, $options: 'i' } } }
-                ]
-            }).limit(10).skip(0);
+                    { name: { $regex: query, $options: "i" } },
+                    { email: { $regex: query, $options: "i" } },
+                    { skills: { $elemMatch: { $regex: query, $options: "i" } } },
+                ],
+            })
+                .limit(10)
+                .skip(0);
             const results = yield Promise.all(searchResults.map((doc) => __awaiter(this, void 0, void 0, function* () {
                 const isConnected = connectedUserIds.includes(doc._id.toString());
                 return {
@@ -68,13 +72,14 @@ let MongoSearchRepository = class MongoSearchRepository {
                     name: doc.name,
                     profileImage: doc.profileImage,
                     isConnected,
-                    isBlocked: doc.isBlocked // Include isBlocked in the returned user object
+                    isBlocked: doc.isBlocked, // Include isBlocked in the returned user object
                 };
             })));
-            const users = results.map(result => result);
-            const jobPosts = jobPostDocs.map(doc => {
+            const users = results.map((result) => result);
+            const jobPosts = jobPostDocs.map((doc) => {
                 var _a, _b;
-                const isApplied = ((_a = doc.applicants) === null || _a === void 0 ? void 0 : _a.some(applicant => applicant.toString() === userId)) || false;
+                const isApplied = ((_a = doc.applicants) === null || _a === void 0 ? void 0 : _a.some((applicant) => applicant.toString() === userId)) ||
+                    false;
                 return {
                     _id: doc._id.toString(),
                     title: doc.title,
@@ -87,12 +92,12 @@ let MongoSearchRepository = class MongoSearchRepository {
                     qualifications: doc.qualifications,
                     status: doc.status,
                     recruiterId: doc.recruiterId.toString(),
-                    applicants: ((_b = doc.applicants) === null || _b === void 0 ? void 0 : _b.map(id => id.toString())) || [],
+                    applicants: ((_b = doc.applicants) === null || _b === void 0 ? void 0 : _b.map((id) => id.toString())) || [],
                     reports: doc.reports,
                     isBlock: doc.isBlock,
                     createdAt: doc.createdAt,
                     updatedAt: doc.updatedAt,
-                    isApplied
+                    isApplied,
                 };
             });
             return { users, jobPosts };

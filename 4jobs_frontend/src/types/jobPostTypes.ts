@@ -50,6 +50,42 @@ export interface BasicJobPost {
   isBlock?: boolean;
 }
 
+export interface JobPost {
+  _id: string;
+  title: string;
+  company?: CompanyDetails;
+  description: string;
+  isApplied?: boolean;
+  location: string;
+  salaryRange: SalaryRange;
+  wayOfWork: string;
+  skillsRequired: string[];
+  qualifications: string[];
+  recruiterId?: string[]
+  jobPriority?: string;
+  status: string;
+  tags?: string[];
+  postedDate?: string;
+  lastUpdatedDate?: string;
+  applicants?: Array<{
+    _id: string;
+    name: string;
+    email: string;
+  }>;
+  reports?: Array<{
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+    };
+    reason: string;
+    createdAt: string;
+  }>;
+  createdAt: string; 
+  updatedAt: string;
+  isBlock?: boolean;
+}
+
 export interface BasicJobPostAdmin {
   _id: string;
   title: string;

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/slices/recruiterSlice';
-import { fetchJobPosts } from '../../redux/slices/jobPostSlice';
-import { useNavigate } from 'react-router-dom';
-import { RootState, AppDispatch } from '../../redux/store';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/slices/recruiterSlice";
+import { fetchJobPosts } from "../../redux/slices/jobPostSlice";
+import { useNavigate } from "react-router-dom";
+import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBriefcase,
@@ -13,22 +13,29 @@ import {
   faBars,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import { searchUsersAndJobs, clearSearch } from '../../redux/slices/recruiterSearchSlice';
-import { debounce } from 'lodash';
-import SearchResults from './RecruiterSearchResults';
+import {
+  searchUsersAndJobs,
+  clearSearch,
+} from "../../redux/slices/recruiterSearchSlice";
+import { debounce } from "lodash";
+import SearchResults from "./RecruiterSearchResults";
 
 const RecruiterHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const recruiterId = useSelector((state: RootState) => state.recruiter?.recruiter.id);
-  const searchResults = useSelector((state: RootState) => state.recruiterSearch.users);
-  const isLoading = useSelector((state: RootState) => state.recruiterSearch.loading);
+  const recruiterId = useSelector(
+    (state: RootState) => state.recruiter?.recruiter.id
+  );
+  const searchResults = useSelector(
+    (state: RootState) => state.recruiterSearch.users
+  );
+  const isLoading = useSelector(
+    (state: RootState) => state.recruiterSearch.loading
+  );
   const searchRef = useRef<HTMLDivElement>(null);
-
- 
 
   const debouncedSearch = debounce((query: string) => {
     if (query.length >= 3 && recruiterId) {
@@ -43,18 +50,21 @@ const RecruiterHeader = () => {
     return () => {
       debouncedSearch.cancel();
     };
-  }, [debouncedSearch,searchQuery, recruiterId]);
+  }, [debouncedSearch, searchQuery, recruiterId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowSearchResults(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -64,7 +74,7 @@ const RecruiterHeader = () => {
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     dispatch(clearSearch());
     setShowSearchResults(false);
   };
@@ -76,11 +86,11 @@ const RecruiterHeader = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/recruiter/login');
+    navigate("/recruiter/login");
   };
 
   const handleViewProfile = () => {
-    navigate('/recruiter/profile');
+    navigate("/recruiter/profile");
     setMenuOpen(false);
   };
 
@@ -88,15 +98,15 @@ const RecruiterHeader = () => {
     if (recruiterId) {
       dispatch(fetchJobPosts(recruiterId) as any);
     }
-    navigate('/recruiter/jobs');
+    navigate("/recruiter/jobs");
   };
 
   const handleLogoClick = () => {
-    navigate('/recruiter/dashboard');
+    navigate("/recruiter/dashboard");
   };
 
   const handleMessagesClick = () => {
-    navigate('/recruiter/messages');
+    navigate("/recruiter/messages");
   };
 
   return (
@@ -106,7 +116,9 @@ const RecruiterHeader = () => {
         <button onClick={handleLogoClick}>
           <img src="../../../logo.png" alt="Logo" className="h-20 w-20" />
         </button>
-        <span className="text-purple-700 font-semibold text-lg ml-2">4 Jobs Recruiter</span>
+        <span className="text-purple-700 font-semibold text-lg ml-2">
+          4 Jobs Recruiter
+        </span>
       </div>
 
       {/* Search Bar Section */}
@@ -134,7 +146,10 @@ const RecruiterHeader = () => {
         </div>
         {showSearchResults && searchResults && searchResults.length > 0 && (
           <div className="absolute z-10 w-full max-w-lg mx-auto mt-2">
-            <SearchResults results={searchResults} onSelectUser={handleViewContestant} />
+            <SearchResults
+              results={searchResults}
+              onSelectUser={handleViewContestant}
+            />
           </div>
         )}
         {isLoading && (
@@ -142,11 +157,14 @@ const RecruiterHeader = () => {
             Loading...
           </div>
         )}
-        {!isLoading && showSearchResults && searchResults && searchResults.length === 0 && (
-          <div className="absolute z-10 w-full max-w-lg mx-auto mt-2 bg-white p-2 text-center">
-            No results found
-          </div>
-        )}
+        {!isLoading &&
+          showSearchResults &&
+          searchResults &&
+          searchResults.length === 0 && (
+            <div className="absolute z-10 w-full max-w-lg mx-auto mt-2 bg-white p-2 text-center">
+              No results found
+            </div>
+          )}
       </div>
 
       {/* Mobile Menu Button */}
@@ -159,14 +177,14 @@ const RecruiterHeader = () => {
 
       {/* Navigation Items for larger screens */}
       <nav className="hidden md:flex space-x-6 items-center">
-        <button 
+        <button
           onClick={handleAddJobs}
           className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
         >
           <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
           <span>ADD JOBS</span>
         </button>
-        <button 
+        <button
           onClick={handleMessagesClick}
           className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
         >
