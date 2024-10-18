@@ -15,4 +15,5 @@ export interface IJobPostRepository {
     page: number,
     limit: number
   ): Promise<{ applicants: User[]; totalPages: number; totalCount: number }>;
+  findAll(): Promise<JobPost[]>;
 }

@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBriefcase,
   faComments,
-  faBell,
   faUser,
   faSearch,
   faBars,
@@ -174,10 +173,6 @@ const RecruiterHeader = () => {
           <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
           <span>Messages</span>
         </button>
-        <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
-          <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
-          <span>Notifications</span>
-        </button>
         <button
           className="text-purple-600 hover:text-gray-600"
           onClick={handleViewProfile}
@@ -210,10 +205,6 @@ const RecruiterHeader = () => {
           >
             <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
             <span>Messages</span>
-          </button>
-          <button className="flex items-center text-purple-600 hover:text-gray-600 mb-2">
-            <FontAwesomeIcon icon={faBell} className="h-6 w-6 mr-2" />
-            <span>Notifications</span>
           </button>
           <button
             className="text-purple-600 hover:text-gray-600 mb-2"

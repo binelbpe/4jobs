@@ -48,4 +48,8 @@ export class JobPostUseCase {
   async deleteJobPost(id: string): Promise<boolean> {
     return await this.jobPostRepository.delete(id);
   }
+
+  async getAllJobPosts(): Promise<JobPost[]> {
+    return await this.jobPostRepository.findAll();
+  }
 }

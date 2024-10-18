@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {  CreateBasicJobPostParams, UpdateBasicJobPostParams } from '../types/jobPostTypes';
+import { BasicJobPost, CreateBasicJobPostParams, UpdateBasicJobPostParams } from '../types/jobPostTypes';
 import { FetchUsersResponse, FetchUserDetailsResponse } from '../types/auth';
 import { Conversation, Message } from '../types/recruiterMessageType';
 
@@ -158,8 +158,22 @@ export const updateSubscriptionApi = async (recruiterId: string, subscriptionDat
 };
 
 export const searchUsers = async (query: string) => {
-  console.log('Searching users with query:', query); // Debugging log
+  console.log('Searching users with query:', query); 
   const response = await apiRequest('GET', `/search-users?query=${query}`);
-  console.log('Search API response:', response); // Debugging log
+  console.log('Search API response:', response); 
   return response;
+};
+
+export const fetchJobDetails = async (jobId: string): Promise<BasicJobPost> => {
+  return apiRequest('GET', `/job-details/${jobId}`);
+};
+
+export const getAllJobPosts = async () => {
+  try {
+    const response = await apiRequest('GET', '/all-job-posts');
+    return response;
+  } catch (error) {
+    console.error('Error fetching all job posts:', error);
+    throw error;
+  }
 };

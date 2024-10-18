@@ -75,6 +75,30 @@ export const deleteJobPost = createAsyncThunk(
   }
 );
 
+export const fetchJobDetails = createAsyncThunk(
+  'jobPosts/fetchJobDetails',
+  async (jobId: string, { rejectWithValue }) => {
+    try {
+      const response = await jobPostApi.fetchJobDetails(jobId);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job details');
+    }
+  }
+);
+
+export const fetchAllJobPosts = createAsyncThunk(
+  'jobPosts/fetchAllJobPosts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await jobPostApi.getAllJobPosts();
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch all job posts');
+    }
+  }
+);
+
 const jobPostSlice = createSlice({
   name: 'jobPosts',
   initialState,
@@ -125,6 +149,30 @@ const jobPostSlice = createSlice({
       })
       .addCase(deleteJobPost.rejected, (state, action) => {
         state.error = action.payload as string || 'Failed to delete job post';
+      })
+      .addCase(fetchJobDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchJobDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedPost = action.payload;
+      })
+      .addCase(fetchJobDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to fetch job details';
+      })
+      .addCase(fetchAllJobPosts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllJobPosts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.posts = action.payload;
+      })
+      .addCase(fetchAllJobPosts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to fetch all job posts';
       });
   },
 });

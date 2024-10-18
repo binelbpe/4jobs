@@ -1,14 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchAllJobPosts } from '../../redux/slices/jobPostSlice';
+import JobList from './RecruiterJobList';
 
-const MainContent = () => {
+const MainContent: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { posts, loading, error } = useSelector((state: RootState) => state.jobPosts);
+
+  useEffect(() => {
+    dispatch(fetchAllJobPosts());
+  }, [dispatch]);
+
+  if (loading) {
+    return <div className="text-center py-4 text-purple-600">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-4 text-red-500">Error: {error}</div>;
+  }
+
   return (
-    <main>
-      <div className="bg-white p-4 shadow-md rounded-lg mb-3">
-        <img src="https://via.placeholder.com/500" alt="Post" className="w-full rounded-lg" />
-        <p className="text-gray-500 mt-4">
-          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-        </p>
-        <button className="text-purple-600 mt-4">Share</button>
+    <main className="container mx-auto px-4 py-8 bg-purple-50">
+      <h2 className="text-3xl font-bold mb-6 text-purple-800">Job Listings</h2>
+      <div className="bg-white shadow-lg rounded-lg p-6">
+        {posts.length > 0 ? (
+          <JobList jobs={posts} />
+        ) : (
+          <p className="text-center text-purple-600">No job postings available at the moment.</p>
+        )}
       </div>
     </main>
   );

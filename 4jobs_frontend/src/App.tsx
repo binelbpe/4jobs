@@ -51,6 +51,8 @@ import AdminSubscriptionManagement from './components/admin/AdminSubscriptionMan
 import AdminUserPostManagement from './components/admin/AdminUserPostManagement';
 import SearchResults from './components/user/SearchResults';
 import UserVideoCall from './components/user/UserVideoCall';
+ import JobDetails from './components/recruiter/RecruiterJobDetails';
+import { Component } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { handleIncomingCall, isCallActive, incomingCallData, endCall } = useCall();
@@ -92,6 +94,7 @@ const AppContent: React.FC = () => {
         <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
         <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
         <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
+        <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />
@@ -118,7 +121,8 @@ const AppContent: React.FC = () => {
         <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
         <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
         <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
-        <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
+        <Route path="/recruiter/jobPost/:jobId" element={<RecruiterPrivateRoute><JobDetails /></RecruiterPrivateRoute>} />
+       
       </Routes>
       <IncomingCallDialog />
       {isCallActive && incomingCallData && (

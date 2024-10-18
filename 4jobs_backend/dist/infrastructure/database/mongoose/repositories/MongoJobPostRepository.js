@@ -50,27 +50,6 @@ let MongoJobPostRepository = class MongoJobPostRepository {
             return !!result;
         });
     }
-    findAll(page, limit, sortBy, sortOrder, filter) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const skip = (page - 1) * limit;
-            const sort = {
-                [sortBy]: sortOrder === "asc" ? 1 : -1,
-            };
-            const blockFilter = Object.assign(Object.assign({}, filter), { isBlock: false });
-            const totalCount = yield jobPostModel_1.default.countDocuments(blockFilter);
-            const totalPages = Math.ceil(totalCount / limit);
-            const jobPosts = yield jobPostModel_1.default.find(blockFilter)
-                .sort(sort)
-                .skip(skip)
-                .limit(limit)
-                .lean();
-            return {
-                jobPosts: jobPosts,
-                totalPages,
-                totalCount,
-            };
-        });
-    }
     findApplicantsByJobId(jobId, page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
@@ -111,6 +90,11 @@ let MongoJobPostRepository = class MongoJobPostRepository {
             role: doc.role || "",
             isAdmin: doc.isAdmin || false,
         };
+    }
+    findAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield jobPostModel_1.default.find({ isBlock: false }).lean();
+        });
     }
 };
 exports.MongoJobPostRepository = MongoJobPostRepository;

@@ -36,35 +36,7 @@ export class MongoJobPostRepository implements IJobPostRepository {
     return !!result;
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-    sortBy: string,
-    sortOrder: string,
-    filter: any
-  ): Promise<{ jobPosts: JobPost[]; totalPages: number; totalCount: number }> {
-    const skip = (page - 1) * limit;
-    const sort: { [key: string]: 1 | -1 } = {
-      [sortBy]: sortOrder === "asc" ? 1 : -1,
-    };
-
-    const blockFilter = { ...filter, isBlock: false };
-
-    const totalCount = await JobPostModel.countDocuments(blockFilter);
-    const totalPages = Math.ceil(totalCount / limit);
-
-    const jobPosts = await JobPostModel.find(blockFilter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    return {
-      jobPosts: jobPosts,
-      totalPages,
-      totalCount,
-    };
-  }
+ 
   
   async findApplicantsByJobId(
     jobId: string,
@@ -112,5 +84,9 @@ export class MongoJobPostRepository implements IJobPostRepository {
       role: doc.role || "", 
       isAdmin: doc.isAdmin || false, 
     };
+  }
+
+  async findAll(): Promise<JobPost[]> {
+    return await JobPostModel.find({ isBlock: false }).lean();
   }
 }

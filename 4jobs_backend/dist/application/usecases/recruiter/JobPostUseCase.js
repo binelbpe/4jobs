@@ -67,6 +67,11 @@ let JobPostUseCase = class JobPostUseCase {
             return yield this.jobPostRepository.delete(id);
         });
     }
+    getAllJobPosts() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.jobPostRepository.findAll();
+        });
+    }
 };
 exports.JobPostUseCase = JobPostUseCase;
 exports.JobPostUseCase = JobPostUseCase = __decorate([

@@ -97,4 +97,28 @@ console.log("jobuid page limit",jobId,page,limit)
       res.status(500).json({ error: 'Failed to fetch applicant' });
     }
   }
+
+  async getJobDetails(req: Request, res: Response): Promise<void> {
+    try {
+      const jobPost = await this.jobPostUseCase.getJobPostById(req.params.id);
+      if (jobPost && !jobPost.isBlock) {
+        res.json(jobPost);
+      } else {
+        res.status(404).json({ error: 'Job post not found or blocked' });
+      }
+    } catch (error) {
+      console.error('Error in getJobDetails:', error);
+      res.status(500).json({ error: 'Failed to fetch job details' });
+    }
+  }
+
+  async getAllJobPosts(req: Request, res: Response): Promise<void> {
+    try {
+      const jobPosts = await this.jobPostUseCase.getAllJobPosts();
+      res.json(jobPosts);
+    } catch (error) {
+      console.error('Error in getAllJobPosts:', error);
+      res.status(500).json({ error: 'Failed to fetch all job posts' });
+    }
+  }
 }

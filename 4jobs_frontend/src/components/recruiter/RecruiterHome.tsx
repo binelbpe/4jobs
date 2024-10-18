@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/store';
-import { logout } from '../../redux/slices/recruiterSlice';
+import { logout,selectRecruiter } from '../../redux/slices/recruiterSlice';
 import { useNavigate } from 'react-router-dom';
 import Header from './RecruiterHeader';
 import Sidebar from './RecruiterSidebar';
@@ -10,6 +10,7 @@ import Connections from './RecruiterConnections';
 
 const Dashboard: React.FC = () => {
   const { isApproved } = useSelector((state: RootState) => state.recruiter);
+  const { recruiter } = useSelector(selectRecruiter);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -48,21 +49,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <main className="col-span-12 md:col-span-8 bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4 text-purple-600">Welcome, Recruiter!</h1>
-          <div className="bg-white p-4 shadow-md rounded-lg mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-purple-200"></div>
-              <input
-                type="text"
-                className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none"
-                placeholder="Write about something"
-              />
-            </div>
-            <div className="flex space-x-4 mt-4">
-              <button className="text-purple-600">Add media</button>
-              <button className="text-purple-600">Write article</button>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold mb-4 text-purple-600">Welcome, {recruiter?.name}!</h1>
           <MainContent/>
         </main>
         

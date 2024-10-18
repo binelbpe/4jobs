@@ -128,4 +128,15 @@ recruiterRouter.put('/update-subscription/:recruiterId', subscriptionController.
 // Add this route
 recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recruiterController));
 
+// Add these new routes
+recruiterRouter.get(
+  "/job-details/:id",
+  jobPostController.getJobDetails.bind(jobPostController)
+);
+
+recruiterRouter.get(
+  "/all-job-posts",
+  jobPostController.getAllJobPosts.bind(jobPostController)
+);
+
 export { recruiterRouter };

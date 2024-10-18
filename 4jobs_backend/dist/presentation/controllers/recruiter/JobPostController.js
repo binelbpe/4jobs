@@ -136,6 +136,35 @@ let JobPostController = class JobPostController {
             }
         });
     }
+    getJobDetails(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const jobPost = yield this.jobPostUseCase.getJobPostById(req.params.id);
+                if (jobPost && !jobPost.isBlock) {
+                    res.json(jobPost);
+                }
+                else {
+                    res.status(404).json({ error: 'Job post not found or blocked' });
+                }
+            }
+            catch (error) {
+                console.error('Error in getJobDetails:', error);
+                res.status(500).json({ error: 'Failed to fetch job details' });
+            }
+        });
+    }
+    getAllJobPosts(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const jobPosts = yield this.jobPostUseCase.getAllJobPosts();
+                res.json(jobPosts);
+            }
+            catch (error) {
+                console.error('Error in getAllJobPosts:', error);
+                res.status(500).json({ error: 'Failed to fetch all job posts' });
+            }
+        });
+    }
 };
 exports.JobPostController = JobPostController;
 exports.JobPostController = JobPostController = __decorate([
