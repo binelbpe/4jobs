@@ -29,6 +29,7 @@ class UserRecruiterSocketService {
     | ((callerId: string, offer: string) => void)
     | null = null;
   private onCallEndedCallback: (() => void) | null = null;
+  private onlineStatusInterval: NodeJS.Timeout | null = null;
 
   connect(userId: string, userType: "user" | "recruiter") {
     console.log(
@@ -56,6 +57,7 @@ class UserRecruiterSocketService {
     );
 
     this.setupEventListeners();
+    this.startOnlineStatusUpdates();
   }
 
   private setupEventListeners() {
@@ -240,6 +242,33 @@ class UserRecruiterSocketService {
         this.onCallEndedCallback();
       }
     });
+
+    this.socket?.on("onlineStatusUpdate", (onlineUsers: string[]) => {
+      console.log("Received online status update:", onlineUsers);
+      if (this.userType === "user") {
+        store.dispatch(setUserOnlineStatus({ userId: this.userId!, online: true }));
+        onlineUsers.forEach((userId) => {
+          store.dispatch(setUserOnlineStatus({ userId, online: true }));
+        });
+      } else {
+        store.dispatch(setRecruiterOnlineStatus({ userId: this.userId!, online: true }));
+        onlineUsers.forEach((userId) => {
+          store.dispatch(setRecruiterOnlineStatus({ userId, online: true }));
+        });
+      }
+    });
+  }
+
+  private startOnlineStatusUpdates() {
+    if (this.onlineStatusInterval) {
+      clearInterval(this.onlineStatusInterval);
+    }
+
+    this.onlineStatusInterval = setInterval(() => {
+      if (this.socket && this.connected) {
+        this.socket.emit("requestOnlineStatus");
+      }
+    }, 30000); // Update every 30 seconds
   }
 
   joinConversation(conversationId: string) {
@@ -310,6 +339,9 @@ class UserRecruiterSocketService {
       this.socket = null;
     }
     this.connected = false;
+    if (this.onlineStatusInterval) {
+      clearInterval(this.onlineStatusInterval);
+    }
   }
 
   onIncomingCall(callback: (callerId: string, offer: string) => void) {
