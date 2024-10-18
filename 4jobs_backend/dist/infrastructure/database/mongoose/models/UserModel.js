@@ -32,8 +32,6 @@ const UserSchema = new mongoose_1.Schema({
     phone: { type: Number },
     role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'user' },
     isAdmin: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
     bio: { type: String },
     about: { type: String },
     experiences: [{
@@ -66,9 +64,7 @@ const UserSchema = new mongoose_1.Schema({
     resume: { type: String },
     appliedJobs: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'JobPost' }],
     isBlocked: { type: Boolean, default: false },
-});
-UserSchema.pre('save', function (next) {
-    this.updatedAt = new Date();
-    next();
+}, {
+    timestamps: true
 });
 exports.UserModel = mongoose_1.default.model('User', UserSchema);

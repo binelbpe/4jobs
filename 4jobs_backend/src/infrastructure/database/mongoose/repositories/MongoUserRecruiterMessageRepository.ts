@@ -26,8 +26,18 @@ export class MongoUserRecruiterMessageRepository implements IUserRecruiterMessag
     return conversation ? this.convertToUserRecruiterConversation(conversation) : null;
   }
 
-  async updateConversation(conversationId: string, lastMessage: string, lastMessageTimestamp: Date): Promise<void> {
-    await ConversationModel.findByIdAndUpdate(conversationId, { lastMessage, lastMessageTimestamp });
+  async updateConversation(conversationId: string, lastMessage: string, lastMessageTimestamp: Date): Promise<UserRecruiterConversation> {
+    const updatedConversation = await ConversationModel.findByIdAndUpdate(
+      conversationId,
+      { lastMessage, lastMessageTimestamp },
+      { new: true }
+    );
+
+    if (!updatedConversation) {
+      throw new Error('Conversation not found');
+    }
+
+    return this.convertToUserRecruiterConversation(updatedConversation);
   }
 
   async getConversationByParticipants(userId: string, recruiterId: string): Promise<UserRecruiterConversation | null> {

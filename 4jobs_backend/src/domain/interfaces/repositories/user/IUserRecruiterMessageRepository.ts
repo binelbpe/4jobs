@@ -5,7 +5,7 @@ export interface IUserRecruiterMessageRepository {
   getMessages(conversationId: string): Promise<UserRecruiterMessage[]>;
   saveMessage(message: UserRecruiterMessage): Promise<UserRecruiterMessage>;
   getConversationById(conversationId: string): Promise<UserRecruiterConversation | null>;
-  updateConversation(conversationId: string, lastMessage: string, lastMessageTimestamp: Date): Promise<void>;
+  updateConversation(conversationId: string, lastMessage: string, lastMessageTimestamp: Date): Promise<UserRecruiterConversation>;
   getConversationByParticipants(userId: string, recruiterId: string): Promise<UserRecruiterConversation | null>;
   saveConversation(conversation: UserRecruiterConversation): Promise<UserRecruiterConversation>;
   markMessageAsRead(messageId: string): Promise<void>;

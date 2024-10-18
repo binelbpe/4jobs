@@ -2,9 +2,16 @@ import { useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socketService } from "../services/socketService";
 import { RootState } from "../redux/store";
-import { addMessage, setTypingStatus, updateUnreadCount } from "../redux/slices/userMessageSlice";
-import { addUserRecruiterMessage, updateTotalUnreadCount } from "../redux/slices/userRecruiterMessageSlice";
-import { createSocketListener } from '../utils/socketUtils';
+import {
+  addMessage,
+  setTypingStatus,
+  updateUnreadCount,
+} from "../redux/slices/userMessageSlice";
+import {
+  addUserRecruiterMessage,
+  updateTotalUnreadCount,
+} from "../redux/slices/userRecruiterMessageSlice";
+import { createSocketListener } from "../utils/socketUtils";
 
 export const useSocket = (recipientId: string) => {
   const dispatch = useDispatch();
@@ -45,10 +52,22 @@ export const useSocket = (recipientId: string) => {
         dispatch(setTypingStatus(data));
       };
 
-      const removeConnectListener = createSocketListener("connect", handleConnect);
-      const removeDisconnectListener = createSocketListener("disconnect", handleDisconnect);
-      const removeNewMessageListener = createSocketListener("newMessage", handleNewMessage);
-      const removeUserTypingListener = createSocketListener("userTyping", handleUserTyping);
+      const removeConnectListener = createSocketListener(
+        "connect",
+        handleConnect
+      );
+      const removeDisconnectListener = createSocketListener(
+        "disconnect",
+        handleDisconnect
+      );
+      const removeNewMessageListener = createSocketListener(
+        "newMessage",
+        handleNewMessage
+      );
+      const removeUserTypingListener = createSocketListener(
+        "userTyping",
+        handleUserTyping
+      );
 
       return () => {
         console.log("Cleaning up socket connection");
@@ -61,20 +80,28 @@ export const useSocket = (recipientId: string) => {
     }
   }, [currentUser?.id, dispatch]);
 
-  const sendMessage = useCallback((message: { senderId: string, recipientId: string, content: string }) => {
-    console.log("Attempting to send message:", message);
-    if (isConnected) {
-      socketService.sendMessage(message);
-    } else {
-      console.error("Cannot send message: Socket is not connected");
-      // Implement retry logic or show an error to the user
-    }
-  }, [isConnected]);
+  const sendMessage = useCallback(
+    (message: { senderId: string; recipientId: string; content: string }) => {
+      console.log("Attempting to send message:", message);
+      if (isConnected) {
+        socketService.sendMessage(message);
+      } else {
+        console.error("Cannot send message: Socket is not connected");
+        // Implement retry logic or show an error to the user
+      }
+    },
+    [isConnected]
+  );
 
   const emitTyping = useCallback(
     (isTyping: boolean) => {
       if (currentUser && isConnected) {
-        console.log("Emitting typing event:", currentUser.id, recipientId, isTyping);
+        console.log(
+          "Emitting typing event:",
+          currentUser.id,
+          recipientId,
+          isTyping
+        );
         socketService.emitTyping(recipientId, isTyping);
       } else if (!isConnected) {
         console.error("Cannot emit typing: Socket is not connected");

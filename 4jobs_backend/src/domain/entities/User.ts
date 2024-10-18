@@ -1,7 +1,9 @@
 // src/domain/entities/User.ts
 import 'reflect-metadata';
+import { Document } from 'mongoose';
+
 export interface User {
-  id: string;
+  id: string; // Change this to non-optional
   email: string;
   password: string;
   phone?:number;
@@ -46,30 +48,8 @@ export interface MUser {
   isBlocked?: boolean;
 }
 
-
-export interface IUserDocument extends Document {
-  _id:string;
-  email: string;
-  password: string;
-  phone: number;
-  name: string;
-  role: 'user' | 'recruiter' | 'admin';
-  isAdmin: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  appliedJobs:string[]; 
-  bio?: string;
-  about?: string;
-  experiences?: Experience[];
-  projects?: Project[];
-  certificates?: Certificate[];
-  skills?: string[];
-  profileImage?: string;
-  dateOfBirth?: Date;
-  gender?: 'male' | 'female' | 'other';
-  resume?: string;
-  isBlocked:boolean;
-  
+export interface IUserDocument extends Omit<User, 'id'>, Document {
+  _id: string; // Add this line
 }
 
 export interface Experience {
@@ -101,6 +81,7 @@ export interface UserRecommendation {
   id: string;
   name: string;
   email: string;
-  profileImage?: string;
+  profileImage: string;
   connectionStatus: "none" | "pending" | "accepted" | "rejected";
+  matchingCriteria: string[];
 }

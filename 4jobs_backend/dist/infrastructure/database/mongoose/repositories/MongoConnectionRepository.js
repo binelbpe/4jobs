@@ -22,6 +22,7 @@ const UserModel_1 = require("../models/UserModel");
 let MongoConnectionRepository = class MongoConnectionRepository {
     getRecommendations(userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const user = yield UserModel_1.UserModel.findById(userId);
             if (!user) {
                 throw new Error('User not found');
@@ -35,9 +36,18 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 conn.recipient.toString()
             ]);
             const uniqueConnectedUserIds = [...new Set(connectedUserIds)].filter(id => id !== userId);
+            // Split the skills string into an array and create case-insensitive regex patterns
+            const userSkills = user.skills && user.skills[0] ? user.skills[0].split(',').map((skill) => skill.trim()) : [];
+            const skillPatterns = userSkills.map((skill) => new RegExp(skill, 'i'));
             const recommendedUsers = yield UserModel_1.UserModel.find({
                 _id: { $nin: [userId, ...uniqueConnectedUserIds] },
                 isAdmin: { $ne: true },
+                isBlocked: { $ne: true },
+                $or: [
+                    { skills: { $elemMatch: { $regex: skillPatterns.map((pattern) => pattern.source).join('|'), $options: 'i' } } },
+                    { 'experiences.title': { $in: ((_a = user.experiences) === null || _a === void 0 ? void 0 : _a.map((exp) => new RegExp(exp.title, 'i'))) || [] } },
+                    { 'experiences.company': { $in: ((_b = user.experiences) === null || _b === void 0 ? void 0 : _b.map((exp) => new RegExp(exp.company, 'i'))) || [] } }
+                ]
             }).limit(10);
             const pendingConnections = yield ConnectionModel_1.ConnectionModel.find({
                 $or: [
@@ -49,14 +59,39 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString(),
                 conn.requester.toString() === userId ? 'sent' : 'received'
             ]));
-            return recommendedUsers.map((user) => ({
-                id: user._id.toString(),
-                name: user.name,
-                email: user.email,
-                profileImage: user.profileImage,
-                connectionStatus: this.mapConnectionStatus(pendingConnectionMap.get(user._id.toString()))
+            return recommendedUsers.map((recommendedUser) => ({
+                id: recommendedUser._id.toString(),
+                name: recommendedUser.name,
+                email: recommendedUser.email,
+                profileImage: recommendedUser.profileImage || '',
+                connectionStatus: this.mapConnectionStatus(pendingConnectionMap.get(recommendedUser._id.toString())),
+                matchingCriteria: this.getMatchingCriteria(user, recommendedUser)
             }));
         });
+    }
+    getMatchingCriteria(currentUser, recommendedUser) {
+        var _a;
+        const matchingCriteria = [];
+        // Split the skills strings into arrays
+        const currentUserSkills = currentUser.skills && currentUser.skills[0] ? currentUser.skills[0].split(',').map((s) => s.trim().toLowerCase()) : [];
+        const recommendedUserSkills = recommendedUser.skills && recommendedUser.skills[0] ? recommendedUser.skills[0].split(',').map((s) => s.trim().toLowerCase()) : [];
+        // Check for matching skills (case-insensitive)
+        const matchingSkills = currentUserSkills.filter(skill => recommendedUserSkills.includes(skill));
+        if (matchingSkills.length > 0) {
+            matchingCriteria.push(`Matching skills: ${matchingSkills.join(', ')}`);
+        }
+        // Check for matching experience titles or companies (case-insensitive)
+        (_a = currentUser.experiences) === null || _a === void 0 ? void 0 : _a.forEach((exp) => {
+            var _a;
+            const matchingExperience = (_a = recommendedUser.experiences) === null || _a === void 0 ? void 0 : _a.find((recExp) => recExp.title.toLowerCase().includes(exp.title.toLowerCase()) ||
+                recExp.company.toLowerCase().includes(exp.company.toLowerCase()) ||
+                exp.title.toLowerCase().includes(recExp.title.toLowerCase()) ||
+                exp.company.toLowerCase().includes(recExp.company.toLowerCase()));
+            if (matchingExperience) {
+                matchingCriteria.push(`Similar experience: ${matchingExperience.title} at ${matchingExperience.company}`);
+            }
+        });
+        return matchingCriteria;
     }
     getConnectionProfile(connectionId) {
         return __awaiter(this, void 0, void 0, function* () {

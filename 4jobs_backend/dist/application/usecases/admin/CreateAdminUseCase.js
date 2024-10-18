@@ -44,7 +44,9 @@ let CreateAdminUseCase = class CreateAdminUseCase {
                 skills: [],
             });
             const adminUser = Object.assign(Object.assign({}, admin), { adminLevel });
-            yield this.userRepository.update(admin.id, adminUser);
+            if (admin.id) {
+                yield this.userRepository.update(admin.id, adminUser);
+            }
             return adminUser;
         });
     }

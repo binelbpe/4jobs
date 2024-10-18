@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
-import { fetchUserRecruiterMessages } from "../../redux/slices/userRecruiterMessageSlice";
+import { 
+  fetchUserRecruiterMessages,
+  setMessageSending
+} from "../../redux/slices/userRecruiterMessageSlice";
 import { URMessage } from "../../types/userRecruiterMessage";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid, parseISO } from "date-fns";
@@ -43,6 +46,7 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   const [incomingCallOffer, setIncomingCallOffer] = useState<string | null>(
     null
   );
+  const messageSending = useSelector((state: RootState) => state.userRecruiterMessages.messageSending);
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -65,26 +69,31 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && currentUser) {
+      dispatch(setMessageSending(true));
       userRecruiterSocketService.sendMessage(
         conversationId,
         newMessage,
         currentUser.id
       );
       setNewMessage("");
+      // You might want to add a setTimeout to set messageSending back to false
+      // in case the socket doesn't respond quickly enough
+      setTimeout(() => dispatch(setMessageSending(false)), 2000);
     }
   };
+  console.log("conversation",conversation)
 
   const handleTyping = () => {
     if (!isTyping) {
       setIsTyping(true);
-      userRecruiterSocketService.emitTyping(conversationId);
+      userRecruiterSocketService.emitTyping(conversationId, conversation?.participant.id || "");
     }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      userRecruiterSocketService.emitStoppedTyping(conversationId);
+      userRecruiterSocketService.emitStoppedTyping(conversationId, conversation?.participant.id || "");
     }, 3000);
   };
 
@@ -189,7 +198,7 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
       >
         {messages.map((message: URMessage) => (
           <div
-            key={message.id}
+            key={`${message.id}-${message.timestamp}`}
             className={`mb-4 flex ${
               message.senderId === currentUser?.id
                 ? "justify-end"
@@ -247,8 +256,9 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
           <button
             type="submit"
             className="bg-purple-500 text-white rounded-r-lg px-4 py-2"
+            disabled={messageSending}
           >
-            Send
+            {messageSending ? 'Sending...' : 'Send'}
           </button>
         </form>
       </div>

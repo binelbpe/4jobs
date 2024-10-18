@@ -16,6 +16,7 @@ interface UserRecruiterMessageState {
   onlineStatus: { [userId: string]: boolean };
   currentUserId: string;
   totalUnreadCount: number;
+  messageSending: boolean;
 }
 
 const initialState: UserRecruiterMessageState = {
@@ -27,6 +28,7 @@ const initialState: UserRecruiterMessageState = {
   onlineStatus: {},
   currentUserId: "",
   totalUnreadCount: 0,
+  messageSending: false,
 };
 
 export const fetchUserRecruiterConversations = createAsyncThunk(
@@ -84,14 +86,14 @@ const userRecruiterMessageSlice = createSlice({
   initialState,
   reducers: {
     addUserRecruiterMessage: (state, action: PayloadAction<URMessage>) => {
-      const { conversationId } = action.payload;
+      const { conversationId, id } = action.payload;
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = [];
       }
-      state.messages[conversationId].push({
-        ...action.payload,
-        locallyRead: false,
-      });
+      // Check if message with the same id already exists
+      if (!state.messages[conversationId].some(msg => msg.id === id)) {
+        state.messages[conversationId].push(action.payload);
+      }
 
       // Increment unread count if the message is not from the current user
       const conversation = state.conversations.find(
@@ -113,7 +115,10 @@ const userRecruiterMessageSlice = createSlice({
       if (!state.typingStatus[conversationId]) {
         state.typingStatus[conversationId] = {};
       }
-      state.typingStatus[conversationId][userId] = isTyping;
+      // Only set typing status for the other user, not the current user
+      if (userId !== state.currentUserId) {
+        state.typingStatus[conversationId][userId] = isTyping;
+      }
     },
     markUserRecruiterMessageAsRead: (
       state,
@@ -189,6 +194,9 @@ const userRecruiterMessageSlice = createSlice({
         (sum, conversation) => sum + (conversation.unreadCount || 0),
         0
       );
+    },
+    setMessageSending: (state, action: PayloadAction<boolean>) => {
+      state.messageSending = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -276,6 +284,7 @@ export const {
   addNewConversation,
   incrementUnreadCount,
   updateTotalUnreadCount,
+  setMessageSending,
 } = userRecruiterMessageSlice.actions;
 
 export const selectRecruiterUnreadCount = (state: RootState): number => {

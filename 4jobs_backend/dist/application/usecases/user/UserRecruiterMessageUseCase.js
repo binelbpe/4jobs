@@ -50,14 +50,13 @@ let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
             return this.userRecruiterMessageRepository.getMessages(conversationId);
         });
     }
-    sendMessage(conversationId, content, senderId) {
+    sendMessage(conversationId, content, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const conversation = yield this.userRecruiterMessageRepository.getConversationById(conversationId);
             if (!conversation) {
                 throw new Error('Conversation not found');
             }
-            const receiverId = conversation.userId === senderId ? conversation.recruiterId : conversation.userId;
-            const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, senderId, receiverId, 'user', content, new Date(), false);
+            const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, userId, conversation.recruiterId, 'user', content, new Date(), false);
             const savedMessage = yield this.userRecruiterMessageRepository.saveMessage(message);
             yield this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
             // Emit an event for real-time updates
@@ -83,6 +82,11 @@ let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
     updateMessage(message) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.userRecruiterMessageRepository.updateMessage(message);
+        });
+    }
+    updateConversationLastMessage(conversationId, lastMessage, lastMessageTimestamp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.userRecruiterMessageRepository.updateConversation(conversationId, lastMessage, lastMessageTimestamp);
         });
     }
 };

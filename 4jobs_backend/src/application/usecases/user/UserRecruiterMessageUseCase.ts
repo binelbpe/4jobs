@@ -25,19 +25,17 @@ export class UserRecruiterMessageUseCase {
     return this.userRecruiterMessageRepository.getMessages(conversationId);
   }
 
-  async sendMessage(conversationId: string, content: string, senderId: string): Promise<UserRecruiterMessage> {
+  async sendMessage(conversationId: string, content: string, userId: string): Promise<UserRecruiterMessage> {
     const conversation = await this.userRecruiterMessageRepository.getConversationById(conversationId);
     if (!conversation) {
       throw new Error('Conversation not found');
     }
 
-    const receiverId = conversation.userId === senderId ? conversation.recruiterId : conversation.userId;
-
     const message = new UserRecruiterMessage(
       '',
       conversationId,
-      senderId,
-      receiverId,
+      userId,
+      conversation.recruiterId,
       'user',
       content,
       new Date(),
@@ -76,5 +74,9 @@ export class UserRecruiterMessageUseCase {
 
   async updateMessage(message: UserRecruiterMessage): Promise<UserRecruiterMessage> {
     return this.userRecruiterMessageRepository.updateMessage(message);
+  }
+
+  async updateConversationLastMessage(conversationId: string, lastMessage: string, lastMessageTimestamp: Date): Promise<UserRecruiterConversation> {
+    return this.userRecruiterMessageRepository.updateConversation(conversationId, lastMessage, lastMessageTimestamp);
   }
 }

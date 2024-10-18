@@ -39,7 +39,9 @@ export class CreateAdminUseCase {
       adminLevel,
     };
 
-    await this.userRepository.update(admin.id, adminUser);
+    if (admin.id) {
+      await this.userRepository.update(admin.id, adminUser);
+    }
 
     return adminUser;
   }

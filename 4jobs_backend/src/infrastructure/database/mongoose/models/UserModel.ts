@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { IUserDocument,Experience,Project,Certificate } from '../../../../domain/entities/User';
+import { IUserDocument } from '../../../../domain/entities/User';
 
 
 const UserSchema = new Schema<IUserDocument>({
@@ -9,8 +9,6 @@ const UserSchema = new Schema<IUserDocument>({
   phone:{type: Number},
   role: { type: String, enum: ['user', 'recruiter', 'admin'], default: 'user' },
   isAdmin: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
   bio: { type: String },
   about: { type: String },
   experiences: [{
@@ -43,11 +41,8 @@ const UserSchema = new Schema<IUserDocument>({
   resume: { type: String },
   appliedJobs: [{ type: Schema.Types.ObjectId, ref: 'JobPost' }],
   isBlocked:{type: Boolean, default: false },
-});
-
-UserSchema.pre('save', function (next) {
-  this.updatedAt = new Date();
-  next();
+}, {
+  timestamps: true 
 });
 
 export const UserModel = mongoose.model<IUserDocument>('User', UserSchema);

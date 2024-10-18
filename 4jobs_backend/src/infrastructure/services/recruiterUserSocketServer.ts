@@ -4,8 +4,6 @@ import { Container } from 'inversify';
 import { EventEmitter } from 'events';
 import { UserManager } from './UserManager';
 import { socketAuthMiddleware } from '../../presentation/middlewares/socketAuthMiddleware';
-import { NotificationModel } from '../database/mongoose/models/NotificationModel';
-import { MessageUseCase } from '../../application/usecases/user/MessageUseCase';
 import { UserRecruiterMessageUseCase } from '../../application/usecases/user/UserRecruiterMessageUseCase';
 import { RecruiterMessageUseCase } from '../../application/usecases/recruiter/RecruiterMessageUseCase';
 import { InitiateVideoCallUseCase } from '../../application/usecases/recruiter/InitiateVideoCallUseCase';
@@ -22,7 +20,6 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
 
   const userManager = container.get<UserManager>(TYPES.UserManager);
   const eventEmitter = container.get<EventEmitter>(TYPES.NotificationEventEmitter);
-  const messageUseCase = container.get<MessageUseCase>(TYPES.MessageUseCase);
   const userRecruiterMessageUseCase = container.get<UserRecruiterMessageUseCase>(TYPES.UserRecruiterMessageUseCase);
   const recruiterMessageUseCase = container.get<RecruiterMessageUseCase>(TYPES.RecruiterMessageUseCase);
   const initiateVideoCallUseCase = container.get<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase);
@@ -43,72 +40,84 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
     socket.join(socket.userId);
     io.emit('userOnlineStatus', { userId: socket.userId, online: true });
 
-    // Existing message handling code...
-
-    socket.on('callOffer', async (data: { recipientId: string, offer: string }) => {
+    socket.on('sendUserRecruiterMessage', async (message: {
+      conversationId: string;
+      content: string;
+      senderId: string;
+      senderType: 'user' | 'recruiter';
+    }) => {
+      console.log("rec user messaging")
       try {
-        if (socket.userType !== 'recruiter' || !socket.userId) {
-          throw new Error('Unauthorized');
+        const { conversationId, content, senderId, senderType } = message;
+        console.log("senderId",senderId)
+        let savedMessage;
+        if (senderType === 'user') {
+          savedMessage = await userRecruiterMessageUseCase.sendMessage(conversationId, content, senderId);
+        } else {
+          savedMessage = await recruiterMessageUseCase.sendMessage(conversationId, content, senderId);
         }
+console.log("conversation id:",conversationId)
+        // Emit the message to all clients in the conversation
+        let newUserRecruiterMessage =io.emit('newUserRecruiterMessage', savedMessage);
+        console.log("newUserRecruiterMessage",newUserRecruiterMessage)
+        // Update the conversation's last message
+        const updatedConversation = await userRecruiterMessageUseCase.updateConversationLastMessage(
+          conversationId,
+          content,
+          new Date()
+        );
 
-        const videoCall = await initiateVideoCallUseCase.execute(socket.userId, data.recipientId);
-        
-        const recipientSocket = userManager.getUserSocketId(data.recipientId);
-        if (recipientSocket) {
-          io.to(recipientSocket).emit('incomingCall', { callerId: socket.userId, offer: data.offer });
-        }
+        // Emit the updated conversation to all relevant clients
+        io.emit('conversationUpdated', updatedConversation);
       } catch (error) {
-        console.error('Error initiating video call:', error);
-        socket.emit('videoCallError', { error: 'Failed to initiate video call' });
+        console.error('Error sending message:', error);
+        socket.emit('messageSendError', { error: 'Failed to send message' });
       }
     });
 
-    socket.on('callAnswer', async (data: { callerId: string, answer: string }) => {
+    socket.on('joinConversation', (conversationId: string) => {
+      socket.join(conversationId);
+      console.log(`User ${socket.userId} joined conversation ${conversationId}`);
+    });
+
+    socket.on('leaveConversation', (conversationId: string) => {
+      socket.leave(conversationId);
+      console.log(`User ${socket.userId} left conversation ${conversationId}`);
+    });
+
+    socket.on('userRecruiterTyping', ({ conversationId, recipientId }: { conversationId: string, recipientId: string }) => {
+      // Emit typing status only to the intended recipient
+      io.to(recipientId).emit('userRecruiterTyping', { senderId: socket.userId, conversationId });
+      console.log(`User ${socket.userId} is typing in conversation ${conversationId} for recipient ${recipientId}`);
+    });
+
+    socket.on('userRecruiterStoppedTyping', ({ conversationId, recipientId }: { conversationId: string, recipientId: string }) => {
+      // Emit stopped typing status only to the intended recipient
+      io.to(recipientId).emit('userRecruiterStoppedTyping', { senderId: socket.userId, conversationId });
+      console.log(`User ${socket.userId} stopped typing in conversation ${conversationId} for recipient ${recipientId}`);
+    });
+
+    socket.on('markMessageAsRead', async ({ messageId, conversationId }: { messageId: string, conversationId: string }) => {
       try {
-        if (socket.userType !== 'user' || !socket.userId) {
-          throw new Error('Unauthorized');
-        }
-
-        const videoCall = await respondToVideoCallUseCase.execute(data.callerId, true);
-        
-        const callerSocket = userManager.getUserSocketId(data.callerId);
-        if (callerSocket) {
-          io.to(callerSocket).emit('callAnswer', { answer: data.answer });
-        }
+        await userRecruiterMessageUseCase.markMessageAsRead(messageId);
+        io.emit('messageMarkedAsRead', { messageId, conversationId });
       } catch (error) {
-        console.error('Error responding to video call:', error);
-        socket.emit('videoCallError', { error: 'Failed to respond to video call' });
-      }
-    });
-
-    socket.on('callRejected', async (data: { callerId: string }) => {
-      try {
-        if (socket.userType !== 'user' || !socket.userId) {
-          throw new Error('Unauthorized');
-        }
-
-        await respondToVideoCallUseCase.execute(data.callerId, false);
-        
-        const callerSocket = userManager.getUserSocketId(data.callerId);
-        if (callerSocket) {
-          io.to(callerSocket).emit('callRejected');
-        }
-      } catch (error) {
-        console.error('Error rejecting video call:', error);
-        socket.emit('videoCallError', { error: 'Failed to reject video call' });
-      }
-    });
-
-    socket.on('endCall', async (data: { recipientId: string }) => {
-      const recipientSocket = userManager.getUserSocketId(data.recipientId);
-      if (recipientSocket) {
-        io.to(recipientSocket).emit('callEnded');
+        console.error('Error marking message as read:', error);
       }
     });
 
 
+
+    socket.on('disconnect', () => {
+      if (socket.userId) {
+        console.log(`User disconnected: ${socket.userId}`);
+        userManager.removeUser(socket.userId);
+        io.emit('userOnlineStatus', { userId: socket.userId, online: false });
+      } else {
+        console.log('User disconnected without userId');
+      }
+    });
   });
-
 
   return { io, userManager, eventEmitter };
 }

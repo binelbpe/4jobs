@@ -21,22 +21,21 @@ const UserModel_1 = require("../models/UserModel");
 let MongoRecruiterSearchRepository = class MongoRecruiterSearchRepository {
     searchUsers(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const searchFields = ['name', 'email', 'skills'];
-            const searchQuery = searchFields.map((field) => ({
-                [field]: { $regex: query, $options: 'i' }
+            const users = yield UserModel_1.UserModel.find({
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { email: { $regex: query, $options: 'i' } },
+                    { skills: { $elemMatch: { $regex: query, $options: 'i' } } }
+                ]
+            }).limit(10);
+            return users.map((userDoc) => ({
+                id: userDoc._id.toString(),
+                name: userDoc.name,
+                email: userDoc.email,
+                skills: userDoc.skills,
+                profileImage: userDoc.profileImage
             }));
-            const users = yield UserModel_1.UserModel.find({ $or: searchQuery });
-            return users.map(user => this.toUserSearchResult(user));
         });
-    }
-    toUserSearchResult(userDoc) {
-        return {
-            id: userDoc._id.toString(),
-            name: userDoc.name,
-            email: userDoc.email,
-            skills: userDoc.skills,
-            profileImage: userDoc.profileImage
-        };
     }
 };
 exports.MongoRecruiterSearchRepository = MongoRecruiterSearchRepository;

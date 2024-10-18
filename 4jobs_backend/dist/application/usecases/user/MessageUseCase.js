@@ -43,16 +43,16 @@ let MessageUseCase = class MessageUseCase {
                 console.error('Sender or recipient not found', { senderId, recipientId });
                 throw new Error('Sender or recipient not found');
             }
-            const newMessage = {
-                sender: sender,
-                recipient: recipient,
+            const message = {
+                sender: Object.assign(Object.assign({}, sender), { id: sender.id || '' }),
+                recipient: Object.assign(Object.assign({}, recipient), { id: recipient.id || '' }),
                 content,
                 createdAt: new Date(),
                 isRead: false,
                 status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
             };
-            console.log('MessageUseCase: Creating new message', newMessage);
-            const savedMessage = yield this.messageRepository.create(newMessage);
+            console.log('MessageUseCase: Creating new message', message);
+            const savedMessage = yield this.messageRepository.create(message);
             console.log('MessageUseCase: Message saved', savedMessage);
             return savedMessage;
         });
@@ -87,7 +87,7 @@ let MessageUseCase = class MessageUseCase {
                 return {
                     user,
                     lastMessage: conn.lastMessage,
-                    isOnline: this.userManager.isUserOnline(user.id)
+                    isOnline: this.userManager.isUserOnline(user.id || '')
                 };
             });
             return resp;

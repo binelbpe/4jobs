@@ -6,6 +6,7 @@ import { ConnectionModel } from '../models/ConnectionModel';
 import { User } from '../../../../domain/entities/User';
 import { JobPost } from '../../../../domain/entities/jobPostTypes';
 import mongoose from 'mongoose';
+import { IUserDocument } from '../../../../domain/entities/User';
 
 @injectable()
 export class MongoSearchRepository implements ISearchRepository {
@@ -42,7 +43,15 @@ export class MongoSearchRepository implements ISearchRepository {
       conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString()
     );
 
-    const users: Partial<User>[] = userDocs.map(doc => {
+    const searchResults = await UserModel.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+        { skills: { $elemMatch: { $regex: query, $options: 'i' } } }
+      ]
+    }).limit(10).skip(0);
+
+    const results = await Promise.all(searchResults.map(async (doc: IUserDocument) => {
       const isConnected = connectedUserIds.includes(doc._id.toString());
       return {
         id: doc._id.toString(),
@@ -52,7 +61,9 @@ export class MongoSearchRepository implements ISearchRepository {
         isConnected,
         isBlocked: doc.isBlocked // Include isBlocked in the returned user object
       };
-    });
+    }));
+
+    const users: Partial<User>[] = results.map(result => result);
 
     const jobPosts: JobPost[] = jobPostDocs.map(doc => {
       const isApplied = doc.applicants?.some(applicant => applicant.toString() === userId) || false;

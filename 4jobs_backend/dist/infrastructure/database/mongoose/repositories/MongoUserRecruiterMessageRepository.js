@@ -47,7 +47,11 @@ let MongoUserRecruiterMessageRepository = class MongoUserRecruiterMessageReposit
     }
     updateConversation(conversationId, lastMessage, lastMessageTimestamp) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield RecruiterMessageModel_1.ConversationModel.findByIdAndUpdate(conversationId, { lastMessage, lastMessageTimestamp });
+            const updatedConversation = yield RecruiterMessageModel_1.ConversationModel.findByIdAndUpdate(conversationId, { lastMessage, lastMessageTimestamp }, { new: true });
+            if (!updatedConversation) {
+                throw new Error('Conversation not found');
+            }
+            return this.convertToUserRecruiterConversation(updatedConversation);
         });
     }
     getConversationByParticipants(userId, recruiterId) {

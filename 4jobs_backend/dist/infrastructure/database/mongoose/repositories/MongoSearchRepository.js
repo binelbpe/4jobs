@@ -53,7 +53,14 @@ let MongoSearchRepository = class MongoSearchRepository {
                 status: ['accepted', 'pending']
             });
             const connectedUserIds = connections.map(conn => conn.requester.toString() === userId ? conn.recipient.toString() : conn.requester.toString());
-            const users = userDocs.map(doc => {
+            const searchResults = yield UserModel_1.UserModel.find({
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { email: { $regex: query, $options: 'i' } },
+                    { skills: { $elemMatch: { $regex: query, $options: 'i' } } }
+                ]
+            }).limit(10).skip(0);
+            const results = yield Promise.all(searchResults.map((doc) => __awaiter(this, void 0, void 0, function* () {
                 const isConnected = connectedUserIds.includes(doc._id.toString());
                 return {
                     id: doc._id.toString(),
@@ -63,7 +70,8 @@ let MongoSearchRepository = class MongoSearchRepository {
                     isConnected,
                     isBlocked: doc.isBlocked // Include isBlocked in the returned user object
                 };
-            });
+            })));
+            const users = results.map(result => result);
             const jobPosts = jobPostDocs.map(doc => {
                 var _a, _b;
                 const isApplied = ((_a = doc.applicants) === null || _a === void 0 ? void 0 : _a.some(applicant => applicant.toString() === userId)) || false;

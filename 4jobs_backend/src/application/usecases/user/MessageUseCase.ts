@@ -24,17 +24,17 @@ export class MessageUseCase {
       throw new Error('Sender or recipient not found');
     }
 
-    const newMessage: Partial<Message> = {
-      sender: sender,
-      recipient: recipient,
+    const message: Partial<Message> = {
+      sender: { ...sender, id: sender.id || '' },
+      recipient: { ...recipient, id: recipient.id || '' },
       content,
       createdAt: new Date(),
       isRead: false,
       status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
     };
 
-    console.log('MessageUseCase: Creating new message', newMessage);
-    const savedMessage = await this.messageRepository.create(newMessage);
+    console.log('MessageUseCase: Creating new message', message);
+    const savedMessage = await this.messageRepository.create(message);
     console.log('MessageUseCase: Message saved', savedMessage);
     return savedMessage;
   }
@@ -64,7 +64,7 @@ export class MessageUseCase {
       return {
         user,
         lastMessage: conn.lastMessage,
-        isOnline: this.userManager.isUserOnline(user.id)
+        isOnline: this.userManager.isUserOnline(user.id || '')
       };
     });
     return resp;
