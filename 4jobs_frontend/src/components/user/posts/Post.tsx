@@ -141,7 +141,7 @@ const Post: React.FC<PostType> = ({
           </div>
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center space-x-1 text-purple-500 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-200"
+            className="flex items-center space-x-1 text-purple-900 dark:text-purple-900 hover:text-purple-900 dark:hover:text-purple-300 transition-colors duration-200"
           >
             <FaComment />
             <span>{localComments.length}</span>
@@ -151,7 +151,7 @@ const Post: React.FC<PostType> = ({
         {/* Comments Section */}
         {showComments && (
           <div className="mt-4">
-            <h4 className="font-medium text-purple-700 dark:text-purple-400 mb-2">
+            <h4 className="font-medium text-purple-700 dark:text-purple-900 mb-2">
               Comments
             </h4>
             <div className="space-y-2 max-h-60 overflow-y-auto">
