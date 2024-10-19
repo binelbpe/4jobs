@@ -62,6 +62,10 @@ let MongoPostRepository = class MongoPostRepository {
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find({ status: 'active' })
                 .populate('userId', 'name email profileImage bio')
+                .populate({
+                path: 'comments.userId',
+                select: 'name profileImage'
+            })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -79,6 +83,10 @@ let MongoPostRepository = class MongoPostRepository {
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find()
                 .populate('userId', 'name email profileImage bio')
+                .populate({
+                path: 'comments.userId',
+                select: 'name profileImage'
+            })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -96,6 +104,10 @@ let MongoPostRepository = class MongoPostRepository {
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find({ userId })
                 .populate('userId', 'name profileImage bio')
+                .populate({
+                path: 'comments.userId',
+                select: 'name profileImage'
+            })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -114,10 +126,9 @@ let MongoPostRepository = class MongoPostRepository {
     }
     editPost(postId, userId, updatedPostData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = yield PostModel_1.default.findOne({ _id: postId, userId })
-                .populate('userId', 'name profileImage bio');
+            const post = yield PostModel_1.default.findOne({ _id: postId, userId }).populate("userId", "name profileImage bio");
             if (!post) {
-                throw new Error('Post not found or user not authorized to edit this post');
+                throw new Error("Post not found or user not authorized to edit this post");
             }
             Object.assign(post, updatedPostData);
             yield post.save();
@@ -126,11 +137,11 @@ let MongoPostRepository = class MongoPostRepository {
     }
     toggleBlockStatus(postId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const post = yield PostModel_1.default.findById(postId).populate('userId', 'name email profileImage bio');
+            const post = yield PostModel_1.default.findById(postId).populate("userId", "name email profileImage bio");
             if (!post) {
-                throw new Error('Post not found');
+                throw new Error("Post not found");
             }
-            post.status = post.status === 'active' ? 'blocked' : 'active';
+            post.status = post.status === "active" ? "blocked" : "active";
             yield post.save();
             return this.populateUserInfo(post);
         });
@@ -142,7 +153,10 @@ let MongoPostRepository = class MongoPostRepository {
                 email: post.userId.email,
                 profileImage: post.userId.profileImage,
                 bio: post.userId.bio,
-            } : undefined });
+            } : undefined, comments: postObj.comments.map((comment) => (Object.assign(Object.assign({}, comment), { user: comment.userId ? {
+                    name: comment.userId.name,
+                    profileImage: comment.userId.profileImage,
+                } : undefined }))) });
     }
     findAllForAdmin(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -150,15 +164,39 @@ let MongoPostRepository = class MongoPostRepository {
             const totalCount = yield PostModel_1.default.countDocuments();
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find()
-                .populate('userId', 'name email profileImage bio')
+                .populate("userId", "name email profileImage bio")
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
             return {
-                posts: posts.map(post => this.populateUserInfo(post)),
+                posts: posts.map((post) => this.populateUserInfo(post)),
                 totalPages,
-                currentPage: page
+                currentPage: page,
             };
+        });
+    }
+    addLike(postId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true }).populate("userId", "name email profileImage bio");
+            return post ? this.populateUserInfo(post) : null;
+        });
+    }
+    removeLike(postId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true }).populate("userId", "name email profileImage bio");
+            return post ? this.populateUserInfo(post) : null;
+        });
+    }
+    addComment(postId, comment) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findByIdAndUpdate(postId, { $push: { comments: comment } }, { new: true }).populate("userId", "name email profileImage bio");
+            return post ? this.populateUserInfo(post) : null;
+        });
+    }
+    deleteComment(postId, commentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield PostModel_1.default.findByIdAndUpdate(postId, { $pull: { comments: { _id: commentId } } }, { new: true }).populate("userId", "name email profileImage bio");
+            return post ? this.populateUserInfo(post) : null;
         });
     }
 };

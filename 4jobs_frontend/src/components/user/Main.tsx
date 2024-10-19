@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchPosts, resetPosts } from '../../redux/slices/postSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import CreatePostButton from '../user/posts/CreatePostButton';
-import Post from './posts/Post';
+import React, { useEffect, useRef, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPosts } from "../../redux/slices/postSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import CreatePostButton from "../user/posts/CreatePostButton";
+import Post from "./posts/Post";
 
 const MainFeed: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -13,16 +13,19 @@ const MainFeed: React.FC = () => {
   const hasMore = useSelector((state: RootState) => state.posts.hasMore);
 
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastPostElementRef = useCallback((node: HTMLDivElement | null) => {
-    if (status === 'loading') return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        dispatch(fetchPosts());
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [status, hasMore, dispatch]);
+  const lastPostElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (status === "loading") return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          dispatch(fetchPosts());
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [status, hasMore, dispatch]
+  );
 
   useEffect(() => {
     dispatch(fetchPosts());
@@ -33,22 +36,31 @@ const MainFeed: React.FC = () => {
     };
   }, [dispatch]);
 
-  if (status === 'loading' && (!posts || posts.length === 0)) return <div>Loading...</div>;
+  if (status === "loading" && (!posts || posts.length === 0))
+    return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!Array.isArray(posts) || posts.length === 0) return <div>No posts available.</div>;
+  if (!Array.isArray(posts) || posts.length === 0)
+    return <div>No posts available.</div>;
 
   return (
     <div className="w-full">
       <CreatePostButton />
       <div className="post-list space-y-4">
         {posts.map((post, index) => (
-          <div key={`${post._id}-${index}`} ref={index === posts.length - 1 ? lastPostElementRef : null}>
+          <div
+            key={`${post._id}-${index}`}
+            ref={index === posts.length - 1 ? lastPostElementRef : null}
+          >
             <Post {...post} />
           </div>
         ))}
-        {status === 'loading' && <div className="text-center py-4">Loading more posts...</div>}
-        {!hasMore && status !== 'loading' && (
-          <div className="text-center text-gray-500 py-4">All posts for you finished</div>
+        {status === "loading" && (
+          <div className="text-center py-4">Loading more posts...</div>
+        )}
+        {!hasMore && status !== "loading" && (
+          <div className="text-center text-gray-500 py-4">
+            All posts for you finished
+          </div>
         )}
       </div>
     </div>

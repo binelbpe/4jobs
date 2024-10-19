@@ -364,4 +364,29 @@ authRouter.get(
   authController.searchUsersAndJobs.bind(authController)
 );
 
+// Add these new routes
+authRouter.post(
+  "/posts/:postId/like",
+  authenticate,
+  postController.likePost.bind(postController)
+);
+authRouter.post(
+  "/posts/:postId/dislike",
+  authenticate,
+  postController.dislikePost.bind(postController)
+);
+authRouter.post(
+  "/posts/:postId/comment",
+  authenticate,
+  postController.commentOnPost.bind(postController)
+);
+
+// Add this new route to the authRouter
+
+authRouter.delete(
+  "/posts/:postId/comments/:commentId",
+  authenticate,
+  postController.deleteComment.bind(postController)
+);
+
 export default authRouter;

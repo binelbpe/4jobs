@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { editPost } from '../../../redux/slices/postSlice';
+import { editPost, deleteComment } from '../../../redux/slices/postSlice';
 import { RootState, AppDispatch } from '../../../redux/store';
-import { CreatePostData } from '../../../types/postTypes';
+import { CreatePostData, Comment } from '../../../types/postTypes';
 import Header from '../Header';
-import { ImageIcon, VideoIcon, XIcon } from 'lucide-react';
+import { ImageIcon, VideoIcon, XIcon, TrashIcon } from 'lucide-react';
+import ConfirmationModal from '../../common/ConfirmationModal';
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit'
+  });
+}
 
 const EditPost: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -21,6 +33,8 @@ const EditPost: React.FC = () => {
   const [video, setVideo] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (post) {
@@ -58,6 +72,18 @@ const EditPost: React.FC = () => {
       if (video) postData.video = video;
       await dispatch(editPost({ postId, userId, postData }));
       navigate(-1);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    setCommentToDelete(commentId);
+    setIsModalOpen(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (postId && commentToDelete) {
+      await dispatch(deleteComment({ postId, commentId: commentToDelete }));
+      setCommentToDelete(null);
     }
   };
 
@@ -142,8 +168,38 @@ const EditPost: React.FC = () => {
               </div>
             </form>
           </div>
+          <div className="p-6 border-t border-purple-200">
+            <h3 className="text-xl font-bold text-purple-700 mb-4">Post Details</h3>
+            <p className="text-purple-600 mb-2">Likes: {post.likes.length}</p>
+            <p className="text-purple-600 mb-4">Comments: {post.comments.length}</p>
+            <h4 className="text-lg font-semibold text-purple-700 mb-2">Comments</h4>
+            <div className="space-y-4 max-h-60 overflow-y-auto">
+              {post.comments.map((comment: Comment) => (
+                <div key={comment.id} className="bg-purple-50 p-3 rounded-lg flex justify-between items-start">
+                  <div>
+                    <p className="text-purple-800 font-medium">{comment.userId.name}</p>
+                    <p className="text-purple-600">{comment.content}</p>
+                    <p className="text-purple-400 text-sm">{formatDate(comment.createdAt)}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                  >
+                    <TrashIcon size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDeleteComment}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+      />
     </div>
   );
 };

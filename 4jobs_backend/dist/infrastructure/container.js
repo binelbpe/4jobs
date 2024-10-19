@@ -81,6 +81,9 @@ const InitiateVideoCallUseCase_1 = require("../application/usecases/recruiter/In
 const RespondToVideoCallUseCase_1 = require("../application/usecases/user/RespondToVideoCallUseCase");
 const MongoUserVideoCallRepository_1 = require("./database/mongoose/repositories/MongoUserVideoCallRepository");
 const UserVideoCallUseCase_1 = require("../application/usecases/user/UserVideoCallUseCase");
+const DislikePostUseCase_1 = require("../application/usecases/user/post/DislikePostUseCase");
+const LikePostUseCase_1 = require("../application/usecases/user/post/LikePostUseCase");
+const CommentOnPostUseCase_1 = require("../application/usecases/user/post/CommentOnPostUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -150,6 +153,7 @@ container
 container
     .bind(types_1.default.JobPostControllerUser)
     .to(JobPostControllerUser_1.JobPostControllerUser);
+container.bind(types_1.default.PostRepository).to(MongoPostRepository_1.MongoPostRepository);
 container.bind(types_1.default.IPostRepository).to(MongoPostRepository_1.MongoPostRepository);
 container.bind(PostController_1.PostController).toSelf();
 container
@@ -230,11 +234,32 @@ container
 container
     .bind(types_1.default.SearchUsersAndJobsUseCase)
     .to(SearchUsersAndJobsUseCase_1.SearchUsersAndJobsUseCase);
-container.bind(types_1.default.IRecruiterSearchRepository).to(MongoRecruiterSearchRepository_1.MongoRecruiterSearchRepository);
-container.bind(types_1.default.SearchUsersUseCase).to(SearchUsersUseCase_1.SearchUsersUseCase);
-container.bind(types_1.default.IVideoCallRepository).to(MongoVideoCallRepository_1.MongoVideoCallRepository);
-container.bind(types_1.default.InitiateVideoCallUseCase).to(InitiateVideoCallUseCase_1.InitiateVideoCallUseCase);
-container.bind(types_1.default.RespondToVideoCallUseCase).to(RespondToVideoCallUseCase_1.RespondToVideoCallUseCase);
-container.bind(types_1.default.IUserVideoCallRepository).to(MongoUserVideoCallRepository_1.MongoUserVideoCallRepository);
-container.bind(types_1.default.UserVideoCallUseCase).to(UserVideoCallUseCase_1.UserVideoCallUseCase);
+container
+    .bind(types_1.default.IRecruiterSearchRepository)
+    .to(MongoRecruiterSearchRepository_1.MongoRecruiterSearchRepository);
+container
+    .bind(types_1.default.SearchUsersUseCase)
+    .to(SearchUsersUseCase_1.SearchUsersUseCase);
+container
+    .bind(types_1.default.IVideoCallRepository)
+    .to(MongoVideoCallRepository_1.MongoVideoCallRepository);
+container
+    .bind(types_1.default.InitiateVideoCallUseCase)
+    .to(InitiateVideoCallUseCase_1.InitiateVideoCallUseCase);
+container
+    .bind(types_1.default.RespondToVideoCallUseCase)
+    .to(RespondToVideoCallUseCase_1.RespondToVideoCallUseCase);
+container
+    .bind(types_1.default.IUserVideoCallRepository)
+    .to(MongoUserVideoCallRepository_1.MongoUserVideoCallRepository);
+container
+    .bind(types_1.default.UserVideoCallUseCase)
+    .to(UserVideoCallUseCase_1.UserVideoCallUseCase);
+container
+    .bind(types_1.default.DislikePostUseCase)
+    .to(DislikePostUseCase_1.DislikePostUseCase);
+container.bind(types_1.default.LikePostUseCase).to(LikePostUseCase_1.LikePostUseCase);
+container
+    .bind(types_1.default.CommentOnPostUseCase)
+    .to(CommentOnPostUseCase_1.CommentOnPostUseCase);
 console.log(container);

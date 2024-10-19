@@ -24,22 +24,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LikePostUseCase = void 0;
+exports.DislikePostUseCase = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../../../types"));
-let LikePostUseCase = class LikePostUseCase {
+let DislikePostUseCase = class DislikePostUseCase {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
     execute(postId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.postRepository.addLike(postId, userId);
+            return this.postRepository.removeLike(postId, userId);
         });
     }
 };
-exports.LikePostUseCase = LikePostUseCase;
-exports.LikePostUseCase = LikePostUseCase = __decorate([
+exports.DislikePostUseCase = DislikePostUseCase;
+exports.DislikePostUseCase = DislikePostUseCase = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.default.PostRepository)),
     __metadata("design:paramtypes", [Object])
-], LikePostUseCase);
+], DislikePostUseCase);

@@ -164,4 +164,10 @@ exports.authRouter.post("/user-messages/:conversationId", authMiddleware_1.authe
 exports.authRouter.post("/user-conversations", authMiddleware_1.authenticate, userRecruiterMessageController.startConversation.bind(userRecruiterMessageController));
 // Update this route
 exports.authRouter.get("/search", authMiddleware_1.authenticate, authController.searchUsersAndJobs.bind(authController));
+// Add these new routes
+exports.authRouter.post("/posts/:postId/like", authMiddleware_1.authenticate, postController.likePost.bind(postController));
+exports.authRouter.post("/posts/:postId/dislike", authMiddleware_1.authenticate, postController.dislikePost.bind(postController));
+exports.authRouter.post("/posts/:postId/comment", authMiddleware_1.authenticate, postController.commentOnPost.bind(postController));
+// Add this new route to the authRouter
+exports.authRouter.delete("/posts/:postId/comments/:commentId", authMiddleware_1.authenticate, postController.deleteComment.bind(postController));
 exports.default = exports.authRouter;

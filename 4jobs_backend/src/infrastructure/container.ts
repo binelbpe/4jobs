@@ -85,16 +85,19 @@ import { ToggleUserPostBlockUseCase } from "../application/usecases/admin/Toggle
 import { ISearchRepository } from "../domain/interfaces/repositories/user/ISearchRepository";
 import { MongoSearchRepository } from "./database/mongoose/repositories/MongoSearchRepository";
 import { SearchUsersAndJobsUseCase } from "../application/usecases/user/SearchUsersAndJobsUseCase";
-import { IRecruiterSearchRepository } from '../domain/interfaces/repositories/recruiter/IRecruiterSearchRepository';
-import { MongoRecruiterSearchRepository } from './database/mongoose/repositories/MongoRecruiterSearchRepository';
-import { SearchUsersUseCase } from '../application/usecases/recruiter/SearchUsersUseCase';
-import { IVideoCallRepository } from '../domain/interfaces/repositories/IVideoCallRepository';
-import { MongoVideoCallRepository } from './database/mongoose/repositories/MongoVideoCallRepository';
-import { InitiateVideoCallUseCase } from '../application/usecases/recruiter/InitiateVideoCallUseCase';
-import { RespondToVideoCallUseCase } from '../application/usecases/user/RespondToVideoCallUseCase';
-import { IUserVideoCallRepository } from '../domain/interfaces/repositories/user/IUserVideoCallRepository';
-import { MongoUserVideoCallRepository } from './database/mongoose/repositories/MongoUserVideoCallRepository';
-import { UserVideoCallUseCase } from '../application/usecases/user/UserVideoCallUseCase';
+import { IRecruiterSearchRepository } from "../domain/interfaces/repositories/recruiter/IRecruiterSearchRepository";
+import { MongoRecruiterSearchRepository } from "./database/mongoose/repositories/MongoRecruiterSearchRepository";
+import { SearchUsersUseCase } from "../application/usecases/recruiter/SearchUsersUseCase";
+import { IVideoCallRepository } from "../domain/interfaces/repositories/IVideoCallRepository";
+import { MongoVideoCallRepository } from "./database/mongoose/repositories/MongoVideoCallRepository";
+import { InitiateVideoCallUseCase } from "../application/usecases/recruiter/InitiateVideoCallUseCase";
+import { RespondToVideoCallUseCase } from "../application/usecases/user/RespondToVideoCallUseCase";
+import { IUserVideoCallRepository } from "../domain/interfaces/repositories/user/IUserVideoCallRepository";
+import { MongoUserVideoCallRepository } from "./database/mongoose/repositories/MongoUserVideoCallRepository";
+import { UserVideoCallUseCase } from "../application/usecases/user/UserVideoCallUseCase";
+import { DislikePostUseCase } from "../application/usecases/user/post/DislikePostUseCase";
+import { LikePostUseCase } from "../application/usecases/user/post/LikePostUseCase";
+import { CommentOnPostUseCase } from "../application/usecases/user/post/CommentOnPostUseCase";
 
 const container = new Container();
 
@@ -172,6 +175,7 @@ container
   .bind<JobPostControllerUser>(TYPES.JobPostControllerUser)
   .to(JobPostControllerUser);
 
+container.bind<IPostRepository>(TYPES.PostRepository).to(MongoPostRepository);
 container.bind<IPostRepository>(TYPES.IPostRepository).to(MongoPostRepository);
 container.bind<PostController>(PostController).toSelf();
 container
@@ -262,13 +266,34 @@ container
   .bind<SearchUsersAndJobsUseCase>(TYPES.SearchUsersAndJobsUseCase)
   .to(SearchUsersAndJobsUseCase);
 
-container.bind<IRecruiterSearchRepository>(TYPES.IRecruiterSearchRepository).to(MongoRecruiterSearchRepository);
-container.bind<SearchUsersUseCase>(TYPES.SearchUsersUseCase).to(SearchUsersUseCase);
-container.bind<IVideoCallRepository>(TYPES.IVideoCallRepository).to(MongoVideoCallRepository);
-container.bind<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase).to(InitiateVideoCallUseCase);
-container.bind<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase).to(RespondToVideoCallUseCase);
-container.bind<IUserVideoCallRepository>(TYPES.IUserVideoCallRepository).to(MongoUserVideoCallRepository);
-container.bind<UserVideoCallUseCase>(TYPES.UserVideoCallUseCase).to(UserVideoCallUseCase);
+container
+  .bind<IRecruiterSearchRepository>(TYPES.IRecruiterSearchRepository)
+  .to(MongoRecruiterSearchRepository);
+container
+  .bind<SearchUsersUseCase>(TYPES.SearchUsersUseCase)
+  .to(SearchUsersUseCase);
+container
+  .bind<IVideoCallRepository>(TYPES.IVideoCallRepository)
+  .to(MongoVideoCallRepository);
+container
+  .bind<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase)
+  .to(InitiateVideoCallUseCase);
+container
+  .bind<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase)
+  .to(RespondToVideoCallUseCase);
+container
+  .bind<IUserVideoCallRepository>(TYPES.IUserVideoCallRepository)
+  .to(MongoUserVideoCallRepository);
+container
+  .bind<UserVideoCallUseCase>(TYPES.UserVideoCallUseCase)
+  .to(UserVideoCallUseCase);
+container
+  .bind<DislikePostUseCase>(TYPES.DislikePostUseCase)
+  .to(DislikePostUseCase);
+container.bind<LikePostUseCase>(TYPES.LikePostUseCase).to(LikePostUseCase);
+container
+  .bind<CommentOnPostUseCase>(TYPES.CommentOnPostUseCase)
+  .to(CommentOnPostUseCase);
 
 console.log(container);
 export { container };

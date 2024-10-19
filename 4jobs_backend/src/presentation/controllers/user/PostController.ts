@@ -4,7 +4,10 @@ import { CreatePostUseCase } from "../../../application/usecases/user/post/Creat
 import { GetAllPostsUseCase } from "../../../application/usecases/user/post/GetAllPostsUseCase";
 import { GetUserPostsUseCase } from "../../../application/usecases/user/post/GetUserPostsUseCase";
 import { DeletePostUseCase } from "../../../application/usecases/user/post/DeletePostUseCase";
-import { EditPostUseCase } from '../../../application/usecases/user/post/EditPostUseCase';
+import { EditPostUseCase } from "../../../application/usecases/user/post/EditPostUseCase";
+import { LikePostUseCase } from "../../../application/usecases/user/post/LikePostUseCase";
+import { DislikePostUseCase } from "../../../application/usecases/user/post/DislikePostUseCase";
+import { CommentOnPostUseCase } from "../../../application/usecases/user/post/CommentOnPostUseCase";
 import TYPES from "../../../types";
 
 @injectable()
@@ -19,7 +22,13 @@ export class PostController {
     @inject(TYPES.DeletePostUseCase)
     private deletePostUseCase: DeletePostUseCase,
     @inject(TYPES.EditPostUseCase)
-    private EditPostUseCase: EditPostUseCase
+    private EditPostUseCase: EditPostUseCase,
+    @inject(TYPES.LikePostUseCase)
+    private likePostUseCase: LikePostUseCase,
+    @inject(TYPES.DislikePostUseCase)
+    private dislikePostUseCase: DislikePostUseCase,
+    @inject(TYPES.CommentOnPostUseCase)
+    private commentOnPostUseCase: CommentOnPostUseCase
   ) {}
 
   async createPost(req: Request, res: Response): Promise<void> {
@@ -32,7 +41,7 @@ export class PostController {
       const { content } = req.body;
       const image = req.files?.["image"]?.[0];
       const video = req.files?.["video"]?.[0];
-   
+
       console.log("Extracted data:", { userId, content, image, video });
 
       const post = await this.createPostUseCase.execute({
@@ -69,7 +78,7 @@ export class PostController {
       const userId = req.params.id;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-     
+
       const posts = await this.getUserPostsUseCase.findByUserIdPosts(
         userId,
         page,
@@ -97,18 +106,89 @@ export class PostController {
   async editPost(req: Request, res: Response): Promise<void> {
     try {
       const postId = req.params.postId;
-      const userId = req.params.userId; 
+      const userId = req.params.userId;
       const updatedPostData = req.body;
-      console.log("updatedPostData",updatedPostData)
-      console.log("postIddd",postId)
-      console.log("userId",userId)
-      const updatedPost = await this.EditPostUseCase.editPost(postId, userId, updatedPostData);
-console.log("updatedPost",updatedPost)
+      console.log("updatedPostData", updatedPostData);
+      console.log("postIddd", postId);
+      console.log("userId", userId);
+      const updatedPost = await this.EditPostUseCase.editPost(
+        postId,
+        userId,
+        updatedPostData
+      );
+      console.log("updatedPost", updatedPost);
       res.status(200).json(updatedPost);
     } catch (error) {
-      console.error('Error editing post:', error);
-      res.status(500).json({ error: 'An error occurred while editing the post' });
+      console.error("Error editing post:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while editing the post" });
     }
   }
- 
+
+  async likePost(req: Request, res: Response): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const { userId } = req.body;
+      console.log("post like", postId, userId);
+      const updatedPost = await this.likePostUseCase.execute(postId, userId);
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error liking post:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while liking the post" });
+    }
+  }
+
+  async dislikePost(req: Request, res: Response): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const { userId } = req.body;
+      console.log("post dislike", postId, userId);
+      const updatedPost = await this.dislikePostUseCase.execute(postId, userId);
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error disliking post:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while disliking the post" });
+    }
+  }
+
+  async commentOnPost(req: Request, res: Response): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const { userId, content } = req.body;
+      console.log("post comment", postId, userId);
+      const updatedPost = await this.commentOnPostUseCase.execute(
+        postId,
+        userId,
+        content
+      );
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error commenting on post:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while commenting on the post" });
+    }
+  }
+
+  async deleteComment(req: Request, res: Response): Promise<void> {
+    try {
+      const { postId, commentId } = req.params;
+      const updatedPost = await this.commentOnPostUseCase.deleteComment(postId, commentId);
+      if (updatedPost) {
+        res.status(200).json(updatedPost);
+      } else {
+        res.status(404).json({ error: "Post or comment not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while deleting the comment" });
+    }
+  }
 }

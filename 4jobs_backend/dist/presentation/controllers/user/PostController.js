@@ -31,14 +31,20 @@ const GetAllPostsUseCase_1 = require("../../../application/usecases/user/post/Ge
 const GetUserPostsUseCase_1 = require("../../../application/usecases/user/post/GetUserPostsUseCase");
 const DeletePostUseCase_1 = require("../../../application/usecases/user/post/DeletePostUseCase");
 const EditPostUseCase_1 = require("../../../application/usecases/user/post/EditPostUseCase");
+const LikePostUseCase_1 = require("../../../application/usecases/user/post/LikePostUseCase");
+const DislikePostUseCase_1 = require("../../../application/usecases/user/post/DislikePostUseCase");
+const CommentOnPostUseCase_1 = require("../../../application/usecases/user/post/CommentOnPostUseCase");
 const types_1 = __importDefault(require("../../../types"));
 let PostController = class PostController {
-    constructor(createPostUseCase, getAllPostsUseCase, getUserPostsUseCase, deletePostUseCase, EditPostUseCase) {
+    constructor(createPostUseCase, getAllPostsUseCase, getUserPostsUseCase, deletePostUseCase, EditPostUseCase, likePostUseCase, dislikePostUseCase, commentOnPostUseCase) {
         this.createPostUseCase = createPostUseCase;
         this.getAllPostsUseCase = getAllPostsUseCase;
         this.getUserPostsUseCase = getUserPostsUseCase;
         this.deletePostUseCase = deletePostUseCase;
         this.EditPostUseCase = EditPostUseCase;
+        this.likePostUseCase = likePostUseCase;
+        this.dislikePostUseCase = dislikePostUseCase;
+        this.commentOnPostUseCase = commentOnPostUseCase;
     }
     createPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -125,8 +131,81 @@ let PostController = class PostController {
                 res.status(200).json(updatedPost);
             }
             catch (error) {
-                console.error('Error editing post:', error);
-                res.status(500).json({ error: 'An error occurred while editing the post' });
+                console.error("Error editing post:", error);
+                res
+                    .status(500)
+                    .json({ error: "An error occurred while editing the post" });
+            }
+        });
+    }
+    likePost(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId } = req.params;
+                const { userId } = req.body;
+                console.log("post like", postId, userId);
+                const updatedPost = yield this.likePostUseCase.execute(postId, userId);
+                res.status(200).json(updatedPost);
+            }
+            catch (error) {
+                console.error("Error liking post:", error);
+                res
+                    .status(500)
+                    .json({ error: "An error occurred while liking the post" });
+            }
+        });
+    }
+    dislikePost(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId } = req.params;
+                const { userId } = req.body;
+                console.log("post dislike", postId, userId);
+                const updatedPost = yield this.dislikePostUseCase.execute(postId, userId);
+                res.status(200).json(updatedPost);
+            }
+            catch (error) {
+                console.error("Error disliking post:", error);
+                res
+                    .status(500)
+                    .json({ error: "An error occurred while disliking the post" });
+            }
+        });
+    }
+    commentOnPost(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId } = req.params;
+                const { userId, content } = req.body;
+                console.log("post comment", postId, userId);
+                const updatedPost = yield this.commentOnPostUseCase.execute(postId, userId, content);
+                res.status(200).json(updatedPost);
+            }
+            catch (error) {
+                console.error("Error commenting on post:", error);
+                res
+                    .status(500)
+                    .json({ error: "An error occurred while commenting on the post" });
+            }
+        });
+    }
+    deleteComment(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { postId, commentId } = req.params;
+                const updatedPost = yield this.commentOnPostUseCase.deleteComment(postId, commentId);
+                if (updatedPost) {
+                    res.status(200).json(updatedPost);
+                }
+                else {
+                    res.status(404).json({ error: "Post or comment not found" });
+                }
+            }
+            catch (error) {
+                console.error("Error deleting comment:", error);
+                res
+                    .status(500)
+                    .json({ error: "An error occurred while deleting the comment" });
             }
         });
     }
@@ -139,9 +218,15 @@ exports.PostController = PostController = __decorate([
     __param(2, (0, inversify_1.inject)(types_1.default.GetUserPostsUseCase)),
     __param(3, (0, inversify_1.inject)(types_1.default.DeletePostUseCase)),
     __param(4, (0, inversify_1.inject)(types_1.default.EditPostUseCase)),
+    __param(5, (0, inversify_1.inject)(types_1.default.LikePostUseCase)),
+    __param(6, (0, inversify_1.inject)(types_1.default.DislikePostUseCase)),
+    __param(7, (0, inversify_1.inject)(types_1.default.CommentOnPostUseCase)),
     __metadata("design:paramtypes", [CreatePostUseCase_1.CreatePostUseCase,
         GetAllPostsUseCase_1.GetAllPostsUseCase,
         GetUserPostsUseCase_1.GetUserPostsUseCase,
         DeletePostUseCase_1.DeletePostUseCase,
-        EditPostUseCase_1.EditPostUseCase])
+        EditPostUseCase_1.EditPostUseCase,
+        LikePostUseCase_1.LikePostUseCase,
+        DislikePostUseCase_1.DislikePostUseCase,
+        CommentOnPostUseCase_1.CommentOnPostUseCase])
 ], PostController);

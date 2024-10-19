@@ -1,17 +1,19 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { Navigate } from 'react-router-dom';
-import { logoutAdmin, setLogoutAdmin } from '../../redux/slices/adminSlice';
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import { Navigate } from "react-router-dom";
+import { logoutAdmin, setLogoutAdmin } from "../../redux/slices/adminSlice";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
 const AdminPrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticatedAdmin } = useSelector((state: RootState) => state.admin);
+  const { isAuthenticatedAdmin } = useSelector(
+    (state: RootState) => state.admin
+  );
   const dispatch = useDispatch<AppDispatch>();
-  const token = localStorage.getItem('adminToken');
+  const token = localStorage.getItem("adminToken");
 
   useEffect(() => {
     if (!isAuthenticatedAdmin && token) {
