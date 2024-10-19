@@ -252,41 +252,24 @@ const AdminJobPost: React.FC = () => {
             </table>
           </div>
           {/* Pagination */}
-          <div className="mt-4 flex flex-col sm:flex-row justify-between items-center">
-            <div className="mb-2 sm:mb-0 text-sm text-purple-600">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
-              {Math.min(currentPage * ITEMS_PER_PAGE, filteredPosts.length)} of{" "}
-              {filteredPosts.length} entries
-            </div>
+          <div className="mt-4 flex justify-between items-center">
+            <span className="text-purple-800">
+              Page {currentPage} of {totalPages}
+            </span>
             <div className="flex space-x-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50 hover:bg-purple-200 transition-colors duration-200"
+                className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 disabled:bg-purple-300 disabled:cursor-not-allowed"
               >
-                <FaChevronLeft />
+                <FaChevronLeft className="inline mr-1" /> Previous
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === page
-                        ? "bg-purple-600 text-white"
-                        : "bg-purple-100 text-purple-800 hover:bg-purple-200"
-                    } transition-colors duration-200`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded bg-purple-100 text-purple-800 disabled:opacity-50 hover:bg-purple-200 transition-colors duration-200"
+                className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 disabled:bg-purple-300 disabled:cursor-not-allowed"
               >
-                <FaChevronRight />
+                Next <FaChevronRight className="inline ml-1" />
               </button>
             </div>
           </div>

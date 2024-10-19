@@ -137,7 +137,7 @@ const AdminRecruiterList: React.FC = () => {
                         {recruiter.governmentId ? (
                           <button
                             onClick={() => handleDownloadGovernmentId(recruiter.governmentId, recruiter.name)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 sm:py-2 px-2 sm:px-4 rounded text-xs sm:text-sm inline-flex items-center"
+                            className="bg-purple-400 hover:bg-purple-800 text-white font-bold py-1 sm:py-2 px-2 sm:px-4 rounded text-xs sm:text-sm inline-flex items-center"
                           >
                             <FaDownload className="mr-1 sm:mr-2" /> Download ID
                           </button>
