@@ -514,3 +514,4 @@ export const generateResumeApi = async (resumeData: ResumeData): Promise<string>
     }
   }
 };
+

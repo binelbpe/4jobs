@@ -7,6 +7,13 @@ import { CreatePostData, Comment } from '../../../types/postTypes';
 import Header from '../Header';
 import { ImageIcon, VideoIcon, XIcon, TrashIcon } from 'lucide-react';
 import ConfirmationModal from '../../common/ConfirmationModal';
+import { toast } from 'react-toastify';
+
+// Add these constants at the top of the file
+const MAX_CONTENT_LENGTH = 500;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -35,6 +42,8 @@ const EditPost: React.FC = () => {
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (post) {
@@ -44,32 +53,71 @@ const EditPost: React.FC = () => {
     }
   }, [post]);
 
+  const validateContent = (text: string) => {
+    if (text.length > MAX_CONTENT_LENGTH) {
+      setContentError(`Content must be ${MAX_CONTENT_LENGTH} characters or less`);
+      return false;
+    }
+    setContentError(null);
+    return true;
+  };
+
+  const validateFile = (file: File, isImage: boolean) => {
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError('File size must be 10MB or less');
+      return false;
+    }
+    const allowedTypes = isImage ? ALLOWED_IMAGE_TYPES : ALLOWED_VIDEO_TYPES;
+    if (!allowedTypes.includes(file.type)) {
+      setFileError(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
+      return false;
+    }
+    setFileError(null);
+    return true;
+  };
+
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+    const newContent = e.target.value;
+    setContent(newContent);
+    validateContent(newContent);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImage(file);
-      setPreviewImage(URL.createObjectURL(file));
+      if (validateFile(file, true)) {
+        setImage(file);
+        setPreviewImage(URL.createObjectURL(file));
+      } else {
+        e.target.value = '';
+      }
     }
   };
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setVideo(file);
-      setPreviewVideo(URL.createObjectURL(file));
+      if (validateFile(file, false)) {
+        setVideo(file);
+        setPreviewVideo(URL.createObjectURL(file));
+      } else {
+        e.target.value = '';
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateContent(content)) return;
+    if ((image && !validateFile(image, true)) || (video && !validateFile(video, false))) return;
     if (postId) {
       const postData: Partial<CreatePostData> = { content };
       if (image) postData.image = image;
       if (video) postData.video = video;
+      if (!content.trim() && !image && !video) {
+        toast.error('Please add some content, an image, or a video to your post.');
+        return;
+      }
       await dispatch(editPost({ postId, userId, postData }));
       navigate(-1);
     }
@@ -117,10 +165,13 @@ const EditPost: React.FC = () => {
                   id="content"
                   value={content}
                   onChange={handleContentChange}
-                  className="w-full px-3 py-2 text-purple-700 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 text-purple-700 border ${
+                    contentError ? 'border-red-500' : 'border-purple-300'
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                   rows={4}
                   placeholder="What's on your mind?"
                 />
+                {contentError && <p className="text-red-500 text-sm mt-1">{contentError}</p>}
               </div>
               <div className="flex items-center space-x-4">
                 <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300">
@@ -200,6 +251,7 @@ const EditPost: React.FC = () => {
         title="Delete Comment"
         message="Are you sure you want to delete this comment? This action cannot be undone."
       />
+      {fileError && <p className="text-red-500 text-sm mt-1">{fileError}</p>}
     </div>
   );
 };

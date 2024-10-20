@@ -169,13 +169,13 @@ const UserHeader: React.FC = () => {
     (icon: any, text: string, onClick: () => void, badge?: number) => (
       <button
         key={text}
-        className="flex items-center text-purple-600 hover:text-gray-600 px-4 py-2 relative"
+        className="flex items-center text-purple-600 hover:text-gray-600 px-2 sm:px-3 md:px-4 py-1 sm:py-2 relative text-xs sm:text-sm md:text-base"
         onClick={onClick}
       >
-        <FontAwesomeIcon icon={icon} className="h-5 w-5 mr-2" />
-        <span>{text}</span>
+        <FontAwesomeIcon icon={icon} className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+        <span className="hidden sm:inline">{text}</span>
         {badge !== undefined && badge > 0 && (
-          <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+          <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full px-1 sm:px-2 py-0.5 text-xxs sm:text-xs">
             {badge}
           </span>
         )}
@@ -212,43 +212,51 @@ const UserHeader: React.FC = () => {
     { icon: faSignOutAlt, text: "Logout", onClick: handleLogout },
   ];
 
+  // Add this new state
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // Add this new function to toggle the mobile menu
+  const toggleMobileMenu = useCallback(() => {
+    setShowMobileMenu((prev) => !prev);
+  }, []);
+
   return (
-    <header className="bg-white shadow-md p-2 sm:p-4">
+    <header className="bg-white shadow-md p-2 sm:p-3 md:p-4">
       <div className="container mx-auto">
         <div className="flex flex-wrap justify-between items-center">
           {/* Logo Section */}
-          <div className="flex items-center w-full sm:w-auto justify-between sm:justify-start mb-2 sm:mb-0">
+          <div className="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
             <button
               onClick={() => navigateTo("/dashboard")}
               className="flex items-center"
             >
-              <img src="/logo.png" alt="Logo" className="h-8 w-8 sm:h-10 sm:w-10 mr-2" />
-              <span className="text-purple-700 font-semibold text-lg">
+              <img src="/logo.png" alt="Logo" className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 mr-1 sm:mr-2" />
+              <span className="text-purple-700 font-semibold text-sm sm:text-base md:text-lg">
                 4 Jobs
               </span>
             </button>
-            <div className="flex sm:hidden">
+            <div className="flex md:hidden">
               <button
                 onClick={toggleSearch}
-                className="text-purple-600 mr-4"
+                className="text-purple-600 mr-2 sm:mr-4"
                 aria-label="Search"
               >
-                <FontAwesomeIcon icon={faSearch} className="h-6 w-6" />
+                <FontAwesomeIcon icon={faSearch} className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
               <button
                 className="text-purple-600 focus:outline-none"
-                onClick={toggleMenu}
+                onClick={toggleMobileMenu}
               >
                 <FontAwesomeIcon
-                  icon={menuOpen ? faTimes : faBars}
-                  className="h-6 w-6"
+                  icon={showMobileMenu ? faTimes : faBars}
+                  className="h-5 w-5 sm:h-6 sm:w-6"
                 />
               </button>
             </div>
           </div>
 
           {/* Search Bar Section */}
-          <div className="w-full sm:w-auto sm:flex-grow mx-0 sm:mx-4 mb-2 sm:mb-0 order-3 sm:order-2">
+          <div className={`w-full md:w-auto md:flex-grow mx-0 sm:mx-2 md:mx-4 mb-2 md:mb-0 order-3 md:order-2 ${showSearch || !showMobileMenu ? 'block' : 'hidden'} md:block`}>
             <div className="relative w-full max-w-lg mx-auto">
               <input
                 type="text"
@@ -256,59 +264,54 @@ const UserHeader: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               {searchQuery && (
                 <button
                   onClick={handleClearSearch}
-                  className="absolute right-12 top-2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-8 sm:right-12 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FontAwesomeIcon icon={faTimes} className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               )}
               <button
                 onClick={handleSearch}
-                className="absolute right-3 top-2 text-purple-500 hover:text-purple-700"
+                className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-purple-500 hover:text-purple-700"
               >
-                <FontAwesomeIcon icon={faSearch} />
+                <FontAwesomeIcon icon={faSearch} className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
 
           {/* Navigation Items */}
-          <nav className="hidden sm:flex space-x-2 md:space-x-4 items-center order-2 sm:order-3">
+          <nav className={`${showMobileMenu ? 'block' : 'hidden'} md:flex flex-col md:flex-row md:flex-wrap space-y-2 md:space-y-0 space-x-0 md:space-x-1 lg:space-x-2 xl:space-x-4 items-start md:items-center order-2 md:order-3 w-full md:w-auto mt-2 md:mt-0`}>
             {navItems.map((item) =>
               renderNavItem(item.icon, item.text, item.onClick, item.badge)
             )}
           </nav>
         </div>
 
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="sm:hidden bg-white border-t border-gray-200 py-4 mt-4">
-            <div className="space-y-4">
-              {navItems.map((item) =>
-                renderNavItem(item.icon, item.text, item.onClick, item.badge)
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Notifications Dropdown */}
         {showNotifications && (
-          <div className="absolute right-0 sm:right-4 mt-2 w-full sm:w-80 bg-white border border-gray-200 rounded-md shadow-lg z-20">
-            <div className="p-4 border-b border-gray-200 font-bold text-purple-700">
-              Notifications
+          <div className="fixed inset-0 z-50 md:absolute md:inset-auto md:right-4 md:top-16 mt-2 w-full md:w-80 bg-white border border-gray-200 rounded-md shadow-lg">
+            <div className="flex justify-between items-center p-2 sm:p-4 border-b border-gray-200">
+              <span className="font-bold text-purple-700 text-sm sm:text-base">Notifications</span>
+              <button
+                onClick={toggleNotifications}
+                className="text-gray-500 hover:text-gray-700 sm:hidden"
+              >
+                <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+              </button>
             </div>
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[calc(100vh-10rem)] sm:max-h-96 overflow-y-auto">
               {pendingConnectionRequests.length > 0 && (
                 <div
                   key="connection-requests"
-                  className="p-4 border-b border-gray-100 hover:bg-purple-50 cursor-pointer transition duration-300"
+                  className="p-2 sm:p-4 border-b border-gray-100 hover:bg-purple-50 cursor-pointer transition duration-300"
                   onClick={openConnectionRequests}
                 >
-                  <p className="text-sm flex items-center text-purple-600">
-                    <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
+                  <p className="text-xs sm:text-sm flex items-center text-purple-600">
+                    <FontAwesomeIcon icon={faUserPlus} className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                     {pendingConnectionRequests.length} pending connection
                     request(s)
                   </p>
@@ -317,17 +320,17 @@ const UserHeader: React.FC = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification._id}
-                  className="p-4 border-b border-gray-100 hover:bg-purple-50 transition duration-300"
+                  className="p-2 sm:p-4 border-b border-gray-100 hover:bg-purple-50 transition duration-300"
                 >
-                  <p className="text-sm">{notification.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs sm:text-sm">{notification.message}</p>
+                  <p className="text-xxs sm:text-xs text-gray-500 mt-1">
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
                 </div>
               ))}
               {notifications.length === 0 &&
                 pendingConnectionRequests.length === 0 && (
-                  <div className="p-4 text-gray-500">No new notifications</div>
+                  <div className="p-2 sm:p-4 text-gray-500 text-xs sm:text-sm">No new notifications</div>
                 )}
             </div>
           </div>

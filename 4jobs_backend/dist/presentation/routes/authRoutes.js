@@ -165,4 +165,15 @@ exports.authRouter.post("/user-messages/:conversationId", authMiddleware_1.authe
 exports.authRouter.post("/user-conversations", authMiddleware_1.authenticate, userRecruiterMessageController.startConversation.bind(userRecruiterMessageController));
 // Update the resume generation route
 exports.authRouter.post("/generate-resume", authMiddleware_1.authenticate, (req, res) => resumeController.generateResume(req, res));
+// Add these new routes:
+// Search route (add this back)
+exports.authRouter.get("/search", authMiddleware_1.authenticate, authController.searchUsersAndJobs.bind(authController));
+// Like post route
+exports.authRouter.post("/posts/:postId/like", authMiddleware_1.authenticate, postController.likePost.bind(postController));
+// Dislike post route
+exports.authRouter.post("/posts/:postId/dislike", authMiddleware_1.authenticate, postController.dislikePost.bind(postController));
+// Comment on post route
+exports.authRouter.post("/posts/:postId/comment", authMiddleware_1.authenticate, postController.commentOnPost.bind(postController));
+// Delete comment route
+exports.authRouter.delete("/posts/:postId/comments/:commentId", authMiddleware_1.authenticate, postController.deleteComment.bind(postController));
 exports.default = exports.authRouter;

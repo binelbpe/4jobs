@@ -366,4 +366,41 @@ authRouter.post(
   (req, res) => resumeController.generateResume(req, res)
 );
 
+// Add these new routes:
+
+// Search route (add this back)
+authRouter.get(
+  "/search",
+  authenticate,
+  authController.searchUsersAndJobs.bind(authController)
+);
+
+// Like post route
+authRouter.post(
+  "/posts/:postId/like",
+  authenticate,
+  postController.likePost.bind(postController)
+);
+
+// Dislike post route
+authRouter.post(
+  "/posts/:postId/dislike",
+  authenticate,
+  postController.dislikePost.bind(postController)
+);
+
+// Comment on post route
+authRouter.post(
+  "/posts/:postId/comment",
+  authenticate,
+  postController.commentOnPost.bind(postController)
+);
+
+// Delete comment route
+authRouter.delete(
+  "/posts/:postId/comments/:commentId",
+  authenticate,
+  postController.deleteComment.bind(postController)
+);
+
 export default authRouter;
