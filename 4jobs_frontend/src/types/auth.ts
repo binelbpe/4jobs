@@ -56,6 +56,7 @@ export interface User {
   resume?: string;
   isBlocked?: boolean;
   isConnected?: boolean; // Add this line
+  matchPercentage?: number; // Add this line
 }
 
 

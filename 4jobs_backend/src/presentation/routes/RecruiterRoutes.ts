@@ -139,4 +139,9 @@ recruiterRouter.get(
   jobPostController.getAllJobPosts.bind(jobPostController)
 );
 
+recruiterRouter.get(
+  "/filtered-applicants/:jobId",
+  jobPostController.getFilteredApplicants.bind(jobPostController)
+);
+
 export { recruiterRouter };

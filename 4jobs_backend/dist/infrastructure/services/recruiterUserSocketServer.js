@@ -19,7 +19,7 @@ const types_1 = __importDefault(require("../../types"));
 function setupSocketServer(server, container) {
     const io = new socket_io_1.Server(server, {
         cors: {
-            origin: process.env.CLIENT_URL || "http://localhost:3000",
+            origin: process.env.CLIENT_URL,
             methods: ["GET", "POST"]
         }
     });

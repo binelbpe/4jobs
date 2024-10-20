@@ -177,3 +177,9 @@ export const getAllJobPosts = async () => {
     throw error;
   }
 };
+
+export const fetchFilteredApplicants = async (jobId: string): Promise<FetchUsersResponse> => {
+ const response = await apiRequest('GET', `/filtered-applicants/${jobId}`);
+ console.log("filtered response",response)
+ return response
+};

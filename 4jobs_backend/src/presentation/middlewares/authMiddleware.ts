@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtAuthService } from '../../infrastructure/services/JwtAuthService';
 import {UserModel} from '../../infrastructure/database/mongoose/models/UserModel'; // Adjust the path to your user model
 
-const authService = new JwtAuthService(process.env.JWT_SECRET || 'secret_1');
+const authService = new JwtAuthService(process.env.JWT_SECRET !);
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');

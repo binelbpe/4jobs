@@ -2,10 +2,11 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { User, UserDetails, FetchUsersResponse, FetchUserDetailsResponse, ApiError } from '../../types/auth';
-import { fetchJobApplicants, fetchUserDetails } from '../../api/recruiterApi';
+import { fetchJobApplicants, fetchUserDetails, fetchFilteredApplicants } from '../../api/recruiterApi';
 
 interface ContestantState {
   contestants: User[];
+  filteredContestants: (User & { matchPercentage?: number })[];
   selectedContestant: UserDetails | null;
   loading: boolean;
   error: string | null;
@@ -15,6 +16,7 @@ interface ContestantState {
 
 const initialState: ContestantState = {
   contestants: [],
+  filteredContestants: [],
   selectedContestant: null,
   loading: false,
   error: null,
@@ -47,6 +49,39 @@ export const fetchContestantDetailsAsync = createAsyncThunk<
     return response;
   } catch (error: any) {
     return rejectWithValue({ message: error.message || 'Failed to fetch user details' });
+  }
+});
+
+interface FilteredUserResponse extends Omit<FetchUsersResponse, 'applicants'> {
+  applicants: (User & { matchPercentage?: number })[];
+}
+
+export const fetchFilteredContestantsForJob = createAsyncThunk<
+  FilteredUserResponse,
+  string,
+  { rejectValue: ApiError }
+>('contestants/fetchFilteredContestantsForJob', async (jobId, { rejectWithValue }) => {
+  try {
+    const response = await fetchFilteredApplicants(jobId);
+    console.log('Filtered Response:', response);
+    // Ensure that each applicant has a matchPercentage property
+    const filteredResponse: FilteredUserResponse = {
+      applicants: Array.isArray(response) 
+        ? response.map(applicant => ({
+            ...applicant,
+            matchPercentage: (applicant as any).matchPercentage || 0
+          }))
+        : [{
+            ...response,
+            matchPercentage: (response as any).matchPercentage || 0
+          }],
+      totalPages: (response as FetchUsersResponse).totalPages || 1,
+      currentPage: (response as FetchUsersResponse).currentPage || 1
+    };
+    console.log('Processed Filtered Response:', filteredResponse);
+    return filteredResponse;
+  } catch (error) {
+    return rejectWithValue({ message: error instanceof Error ? error.message : 'Failed to fetch filtered contestants' });
   }
 });
 
@@ -90,6 +125,13 @@ const contestantSlice = createSlice({
       .addCase(fetchContestantDetailsAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'An error occurred';
+      })
+      .addCase(fetchFilteredContestantsForJob.fulfilled, (state, action: PayloadAction<FilteredUserResponse>) => {
+        console.log('Reducer: Filtered Contestants', action.payload);
+        state.filteredContestants = action.payload.applicants;
+        state.totalPages = action.payload.totalPages || 1;
+        state.currentPage = action.payload.currentPage || 1;
+        state.loading = false;
       });
   },
 });

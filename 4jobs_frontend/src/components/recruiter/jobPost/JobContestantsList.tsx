@@ -4,9 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../redux/store";
 import {
   fetchContestantsForJob,
+  fetchFilteredContestantsForJob,
   clearContestants,
 } from "../../../redux/slices/contestantSlice";
-import { User, Mail, Eye , FileText } from "lucide-react";
+import { User, Mail, Eye, FileText, Filter } from "lucide-react";
 import Pagination from "../jobPost/common/agination";
 import ErrorMessage from "../jobPost/common/ErrorMessage";
 import LoadingSpinner from "../jobPost/common/LoadingSpinner";
@@ -17,7 +18,8 @@ const JobContestantsList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const {
-    contestants = [],
+    contestants,
+    filteredContestants,
     loading,
     error,
     totalPages,
@@ -25,6 +27,12 @@ const JobContestantsList: React.FC = () => {
   } = useSelector((state: RootState) => state.contestants);
 
   const [page, setPage] = useState(1);
+  const [isFiltered, setIsFiltered] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  console.log('Contestants:', contestants);
+  console.log('Filtered Contestants:', filteredContestants);
+  console.log('Is Filtered:', isFiltered);
 
   useEffect(() => {
     if (jobId) {
@@ -43,8 +51,28 @@ const JobContestantsList: React.FC = () => {
     setPage(newPage);
   };
 
+  const handleFilterApplicants = async () => {
+    console.log('Filtering applicants');
+    if (jobId) {
+      setIsFiltering(true);
+      await dispatch(fetchFilteredContestantsForJob(jobId));
+      setIsFiltered(true);
+      setIsFiltering(false);
+    }
+  };
+
+  const handleResetFilter = () => {
+    if (jobId) {
+      dispatch(fetchContestantsForJob({ jobId, page }));
+      setIsFiltered(false);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
+
+  const displayedContestants = isFiltered ? filteredContestants : contestants;
+  const contestantsToRender = Array.isArray(displayedContestants) ? displayedContestants : [displayedContestants];
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -53,14 +81,33 @@ const JobContestantsList: React.FC = () => {
         <h2 className="text-3xl font-bold mb-6 text-purple-800">
           Job Applicants
         </h2>
-        {Array.isArray(contestants) && contestants.length === 0 ? (
+        <div className="mb-4">
+          <button
+            onClick={isFiltered ? handleResetFilter : handleFilterApplicants}
+            className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center"
+            disabled={isFiltering}
+          >
+            {isFiltering ? (
+              <>
+                <LoadingSpinner size={18} className="mr-2" />
+                Filtering...
+              </>
+            ) : (
+              <>
+                <Filter size={18} className="mr-2" />
+                {isFiltered ? "Reset Filter" : "Filter Skilled Applicants"}
+              </>
+            )}
+          </button>
+        </div>
+        {contestantsToRender.length === 0 ? (
           <p className="text-center text-gray-600">
             No applicants for this job post yet.
           </p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {contestants.map((contestant) => (
+              {contestantsToRender.map((contestant) => (
                 <div
                   key={contestant.id}
                   className="bg-white border border-purple-200 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
@@ -85,12 +132,16 @@ const JobContestantsList: React.FC = () => {
                         <Mail size={14} className="mr-1" />
                         <span>{contestant.email}</span>
                       </div>
-
+                      {isFiltered && 'matchPercentage' in contestant && (
+                        <div className="text-green-600 font-semibold mt-1">
+                          Match: {contestant.matchPercentage}%
+                        </div>
+                      )}
                       <div className="flex items-center text-gray-600 mt-2">
                         <FileText size={14} className="mr-1" />
                         {contestant?.resume ? (
                           <a
-                            href={`http://localhost:5000${contestant.resume}`}
+                            href={`${contestant.resume}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             download

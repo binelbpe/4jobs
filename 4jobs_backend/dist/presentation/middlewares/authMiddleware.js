@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateadmin = exports.authenticate = void 0;
 const JwtAuthService_1 = require("../../infrastructure/services/JwtAuthService");
 const UserModel_1 = require("../../infrastructure/database/mongoose/models/UserModel"); // Adjust the path to your user model
-const authService = new JwtAuthService_1.JwtAuthService(process.env.JWT_SECRET || 'secret_1');
+const authService = new JwtAuthService_1.JwtAuthService(process.env.JWT_SECRET);
 const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');

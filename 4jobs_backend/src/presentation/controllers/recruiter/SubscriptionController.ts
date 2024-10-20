@@ -17,8 +17,8 @@ export class SubscriptionController {
     private updateSubscriptionUseCase: UpdateSubscriptionUseCase
   ) {
     this.razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_mRydipg2bgDZmQ",
-      key_secret: process.env.RAZORPAY_KEY_SECRET || "a2oY1G5RYIQh9gH04KWATpnx",
+      key_id: process.env.RAZORPAY_KEY_ID !,
+      key_secret: process.env.RAZORPAY_KEY_SECRET !,
     });
   }
 

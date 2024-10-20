@@ -4,12 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.recruiterEventEmitter = exports.recruiterSocketManager = exports.recruiterIo = exports.userEventEmitter = exports.userSocketManager = exports.userIo = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
+// Load environment variables
+dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
-const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
 const container_1 = require("./infrastructure/container");
 const userSocketServer_1 = require("./infrastructure/services/userSocketServer");
@@ -19,7 +21,9 @@ const adminRoutes_1 = require("./presentation/routes/adminRoutes");
 const RecruiterRoutes_1 = require("./presentation/routes/RecruiterRoutes");
 const validateRequest_1 = require("./presentation/middlewares/validateRequest");
 const errorHandler_1 = require("./presentation/middlewares/errorHandler");
-dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
+console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
+console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set');
+console.log('S3_BUCKET_NAME:', process.env.S3_BUCKET_NAME);
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const { io: userIo, userManager: userSocketManager, eventEmitter: userEventEmitter } = (0, userSocketServer_1.setupUserSocketServer)(server, container_1.container);

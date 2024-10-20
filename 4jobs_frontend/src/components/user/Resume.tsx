@@ -15,9 +15,9 @@ const Resume: React.FC = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const selectedFile = files[0];
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const allowedTypes = ['application/pdf'];
       if (!allowedTypes.includes(selectedFile.type)) {
-        toast.error("Only PDF, DOC, and DOCX files are allowed.");
+        toast.error("Only PDF files are allowed.");
         return;
       }
       if (selectedFile.size > 5 * 1024 * 1024) { // 5 MB

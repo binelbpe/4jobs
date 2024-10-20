@@ -35,8 +35,8 @@ let SubscriptionController = class SubscriptionController {
         this.recruiterRepository = recruiterRepository;
         this.updateSubscriptionUseCase = updateSubscriptionUseCase;
         this.razorpay = new razorpay_1.default({
-            key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_mRydipg2bgDZmQ",
-            key_secret: process.env.RAZORPAY_KEY_SECRET || "a2oY1G5RYIQh9gH04KWATpnx",
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
         });
     }
     createOrder(req, res) {

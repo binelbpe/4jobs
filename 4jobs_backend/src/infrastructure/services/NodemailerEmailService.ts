@@ -8,12 +8,12 @@ export class NodemailerEmailService implements IEmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '465', 10),
+      host: process.env.SMTP_HOST !,
+      port: parseInt(process.env.SMTP_PORT!, 10),
       secure: true,  
       auth: {
-        user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
-        pass: process.env.SMTP_PASS || 'layl xsji ajwz ksqh',
+        user: process.env.SMTP_USER !,
+        pass: process.env.SMTP_PASS !,
       },
       tls: {
         rejectUnauthorized: false 
@@ -28,7 +28,7 @@ export class NodemailerEmailService implements IEmailService {
   async sendWelcomeEmail(to: string, name: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
+        from: process.env.EMAIL_FROM !,
         to,
         subject: 'Welcome to 4JOBS',
         text: `Hello ${name},\n\nWelcome to 4JOBS! We're excited to have you on board.`,
@@ -43,7 +43,7 @@ export class NodemailerEmailService implements IEmailService {
   async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
+        from: process.env.EMAIL_FROM !,
         to,
         subject: 'Password Reset Request',
         text: `Please use the following token to reset your password: ${resetToken}`,

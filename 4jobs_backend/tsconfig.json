@@ -8,7 +8,9 @@
     "skipLibCheck": true,                    // Skip type checking of declaration files
     "forceConsistentCasingInFileNames": true, // Ensure consistent casing in file names
     "emitDecoratorMetadata": true,           // Emit metadata for decorators
-    "experimentalDecorators": true           // Enable experimental decorators
+    "experimentalDecorators": true,           // Enable experimental decorators
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "moduleResolution": "node"
   },
   "include": ["src/**/*", "src/types.ts"],                    // Include all files in src
   "exclude": ["node_modules", "**/*.spec.ts"] // Exclude node_modules and spec files

@@ -4,6 +4,7 @@ import {
   UpdateJobPostParams,
 } from "../../../entities/jobPostTypes";
 import { User } from "../../../entities/User";
+
 export interface IJobPostRepository {
   create(params: CreateJobPostParams): Promise<JobPost>;
   findById(id: string): Promise<JobPost | null>;

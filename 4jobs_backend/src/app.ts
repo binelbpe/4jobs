@@ -1,9 +1,13 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import 'reflect-metadata';
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
-import path from 'path';
 import http from 'http';
 import { container } from './infrastructure/container';
 import TYPES from './types';
@@ -17,7 +21,9 @@ import { recruiterRouter } from './presentation/routes/RecruiterRoutes';
 import { validateRequest } from './presentation/middlewares/validateRequest';
 import { errorHandler } from './presentation/middlewares/errorHandler';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
+console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set');
+console.log('S3_BUCKET_NAME:', process.env.S3_BUCKET_NAME);
 
 const app = express();
 const server = http.createServer(app);

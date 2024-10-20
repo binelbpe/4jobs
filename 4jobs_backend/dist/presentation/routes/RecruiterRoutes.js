@@ -57,3 +57,4 @@ recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recrui
 // Add these new routes
 recruiterRouter.get("/job-details/:id", jobPostController.getJobDetails.bind(jobPostController));
 recruiterRouter.get("/all-job-posts", jobPostController.getAllJobPosts.bind(jobPostController));
+recruiterRouter.get("/filtered-applicants/:jobId", jobPostController.getFilteredApplicants.bind(jobPostController));

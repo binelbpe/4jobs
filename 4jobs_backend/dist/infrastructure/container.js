@@ -87,6 +87,7 @@ const CommentOnPostUseCase_1 = require("../application/usecases/user/post/Commen
 const MongoResumeRepository_1 = require("./database/mongoose/repositories/MongoResumeRepository");
 const GenerateResumeUseCase_1 = require("../application/usecases/user/GenerateResumeUseCase");
 const ResumeController_1 = require("../presentation/controllers/user/ResumeController");
+const PDFExtractor_1 = require("./services/PDFExtractor");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -109,7 +110,7 @@ container
     .inSingletonScope();
 container
     .bind(types_1.default.JwtSecret)
-    .toConstantValue(process.env.JWT_SECRET || "secret_1");
+    .toConstantValue(process.env.JWT_SECRET);
 container
     .bind(types_1.default.OtpService)
     .toDynamicValue(() => new OtpService_1.OtpService(33 * 1000, container.get(types_1.default.NodemailerEmailService)));
@@ -174,6 +175,7 @@ container
 container.bind(types_1.default.EditPostUseCase).to(EditPostUseCase_1.EditPostUseCase);
 container.bind(types_1.default.ReportJobUseCase).to(ReportJobUseCase_1.ReportJobUseCase);
 container.bind(types_1.default.S3Service).to(S3Service_1.S3Service);
+container.bind(types_1.default.PDFExtractor).to(PDFExtractor_1.PDFExtractor);
 container
     .bind(types_1.default.IConnectionRepository)
     .to(MongoConnectionRepository_1.MongoConnectionRepository);

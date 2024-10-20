@@ -49,6 +49,7 @@ const TYPES = {
     CommentOnPostUseCase: Symbol.for("CommentOnPostUseCase"),
     DeleteCommentUseCase: Symbol.for("DeleteCommentUseCase"),
     S3Service: Symbol.for("S3Service"),
+    PDFExtractor: Symbol.for("PDFExtractor"),
     IPostRepository: Symbol.for("IPostRepository"),
     EditPostUseCase: Symbol.for("EditPostUseCase"),
     ReportJobUseCase: Symbol.for("ReportJobUseCase"),

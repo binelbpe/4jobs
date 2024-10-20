@@ -27,12 +27,12 @@ const inversify_1 = require("inversify");
 let NodemailerEmailService = class NodemailerEmailService {
     constructor() {
         this.transporter = nodemailer_1.default.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '465', 10),
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT, 10),
             secure: true,
             auth: {
-                user: process.env.SMTP_USER || 'binelbijupe@gmail.com',
-                pass: process.env.SMTP_PASS || 'layl xsji ajwz ksqh',
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
             },
             tls: {
                 rejectUnauthorized: false
@@ -47,7 +47,7 @@ let NodemailerEmailService = class NodemailerEmailService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.transporter.sendMail({
-                    from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
+                    from: process.env.EMAIL_FROM,
                     to,
                     subject: 'Welcome to 4JOBS',
                     text: `Hello ${name},\n\nWelcome to 4JOBS! We're excited to have you on board.`,
@@ -64,7 +64,7 @@ let NodemailerEmailService = class NodemailerEmailService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.transporter.sendMail({
-                    from: process.env.EMAIL_FROM || 'binelbijupe@gmail.com',
+                    from: process.env.EMAIL_FROM,
                     to,
                     subject: 'Password Reset Request',
                     text: `Please use the following token to reset your password: ${resetToken}`,

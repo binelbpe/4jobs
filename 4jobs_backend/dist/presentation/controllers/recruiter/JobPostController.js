@@ -165,6 +165,22 @@ let JobPostController = class JobPostController {
             }
         });
     }
+    getFilteredApplicants(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('getFilteredApplicants controller method called');
+            try {
+                const { jobId } = req.params;
+                console.log(`Fetching filtered applicants for jobId: ${jobId}`);
+                const filteredApplicants = yield this.jobPostUseCase.getFilteredApplicants(jobId);
+                console.log(`Filtered applicants returned: ${filteredApplicants.length}`);
+                res.json(filteredApplicants);
+            }
+            catch (error) {
+                console.error('Error in getFilteredApplicants:', error);
+                res.status(500).json({ error: 'Failed to fetch filtered applicants' });
+            }
+        });
+    }
 };
 exports.JobPostController = JobPostController;
 exports.JobPostController = JobPostController = __decorate([
