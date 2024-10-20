@@ -27,6 +27,7 @@ const s3Service = container_1.container.get(types_1.default.S3Service);
 const connectionController = container_1.container.get(types_1.default.ConnectionController);
 const messageController = container_1.container.get(types_1.default.MessageController);
 const userRecruiterMessageController = container_1.container.get(types_1.default.UserRecruiterMessageController);
+const resumeController = container_1.container.get(types_1.default.ResumeController);
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 exports.authRouter = (0, express_1.Router)();
@@ -162,12 +163,6 @@ exports.authRouter.get("/user-conversations/:userId", authMiddleware_1.authentic
 exports.authRouter.get("/user-messages/:conversationId", authMiddleware_1.authenticate, userRecruiterMessageController.getMessages.bind(userRecruiterMessageController));
 exports.authRouter.post("/user-messages/:conversationId", authMiddleware_1.authenticate, userRecruiterMessageController.sendMessage.bind(userRecruiterMessageController));
 exports.authRouter.post("/user-conversations", authMiddleware_1.authenticate, userRecruiterMessageController.startConversation.bind(userRecruiterMessageController));
-// Update this route
-exports.authRouter.get("/search", authMiddleware_1.authenticate, authController.searchUsersAndJobs.bind(authController));
-// Add these new routes
-exports.authRouter.post("/posts/:postId/like", authMiddleware_1.authenticate, postController.likePost.bind(postController));
-exports.authRouter.post("/posts/:postId/dislike", authMiddleware_1.authenticate, postController.dislikePost.bind(postController));
-exports.authRouter.post("/posts/:postId/comment", authMiddleware_1.authenticate, postController.commentOnPost.bind(postController));
-// Add this new route to the authRouter
-exports.authRouter.delete("/posts/:postId/comments/:commentId", authMiddleware_1.authenticate, postController.deleteComment.bind(postController));
+// Update the resume generation route
+exports.authRouter.post("/generate-resume", authMiddleware_1.authenticate, (req, res) => resumeController.generateResume(req, res));
 exports.default = exports.authRouter;

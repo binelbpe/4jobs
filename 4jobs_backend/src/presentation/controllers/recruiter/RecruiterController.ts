@@ -9,8 +9,8 @@ import { IRecruiterRepository } from "../../../domain/interfaces/repositories/re
 import { OtpService } from "../../../infrastructure/services/OtpService";
 import { S3Service } from "../../../infrastructure/services/S3Service";
 import { IRecruiter } from "../../../domain/entities/Recruiter";
-import { SearchUsersUseCase } from '../../../application/usecases/recruiter/SearchUsersUseCase';
-import { UserSearchResult } from '../../../domain/entities/UserSearchResult';
+import { SearchUsersUseCase } from "../../../application/usecases/recruiter/SearchUsersUseCase";
+import { UserSearchResult } from "../../../domain/entities/UserSearchResult";
 
 const tempRecruiterStore: {
   [email: string]: {
@@ -38,19 +38,30 @@ export class RecruiterController {
     @inject(TYPES.IRecruiterRepository)
     private recruiterRepository: IRecruiterRepository,
     @inject(TYPES.S3Service) private s3Service: S3Service,
-    @inject(TYPES.SearchUsersUseCase) private searchUsersUseCase: SearchUsersUseCase
+    @inject(TYPES.SearchUsersUseCase)
+    private searchUsersUseCase: SearchUsersUseCase
   ) {}
 
   async registerRecruiter(req: Request, res: Response) {
     try {
       const { email, password, companyName, phone, name } = req.body;
       const governmentIdFile = req.file;
-console.log("governmentId",req.file)
-      if (!email || !password || !companyName || !phone || !name || !governmentIdFile) {
-        return res.status(400).json({ error: "All fields are required, including government ID" });
+      console.log("governmentId", req.file);
+      if (
+        !email ||
+        !password ||
+        !companyName ||
+        !phone ||
+        !name ||
+        !governmentIdFile
+      ) {
+        return res
+          .status(400)
+          .json({ error: "All fields are required, including government ID" });
       }
 
-      const existingRecruiter = await this.recruiterRepository.findRecruiterByEmail(email);
+      const existingRecruiter =
+        await this.recruiterRepository.findRecruiterByEmail(email);
       if (existingRecruiter) {
         return res.status(400).json({ error: "Recruiter already exists" });
       }
@@ -71,7 +82,8 @@ console.log("governmentId",req.file)
       await this.otpService.sendOtp(email, otp);
 
       res.status(200).json({
-        message: "OTP sent to email. Please verify OTP to complete registration.",
+        message:
+          "OTP sent to email. Please verify OTP to complete registration.",
       });
     } catch (error) {
       console.error("Error during recruiter registration:", error);
@@ -79,7 +91,6 @@ console.log("governmentId",req.file)
     }
   }
 
-  
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
@@ -114,7 +125,6 @@ console.log("governmentId",req.file)
     }
   }
 
-  
   async loginRecruiter(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
@@ -132,7 +142,7 @@ console.log("governmentId",req.file)
       res.status(400).json({ error: (error as Error).message });
     }
   }
-  
+
   async sendOtp(req: Request, res: Response) {
     try {
       const { email } = req.body;
@@ -152,7 +162,6 @@ console.log("governmentId",req.file)
     }
   }
 
-  
   async getProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -169,7 +178,6 @@ console.log("governmentId",req.file)
     }
   }
 
-
   async updateProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -179,7 +187,9 @@ console.log("governmentId",req.file)
       const employeeIdFile = req.files?.["employeeIdImage"]?.[0];
 
       if (governmentIdFile) {
-        const governmentIdUrl = await this.s3Service.uploadFile(governmentIdFile);
+        const governmentIdUrl = await this.s3Service.uploadFile(
+          governmentIdFile
+        );
         updates.governmentId = governmentIdUrl;
       }
       if (employeeIdFile) {
@@ -187,7 +197,10 @@ console.log("governmentId",req.file)
         updates.employeeIdImage = employeeIdUrl;
       }
 
-      const updatedRecruiter = await this.updateRecruiterUseCase.execute(id, updates);
+      const updatedRecruiter = await this.updateRecruiterUseCase.execute(
+        id,
+        updates
+      );
       if (!updatedRecruiter) {
         return res.status(404).json({ error: "Recruiter not found" });
       }
@@ -202,14 +215,16 @@ console.log("governmentId",req.file)
   async searchUsers(req: Request, res: Response) {
     try {
       const { query } = req.query;
-      if (typeof query !== 'string') {
-        return res.status(400).json({ error: 'Invalid query parameter' });
+      if (typeof query !== "string") {
+        return res.status(400).json({ error: "Invalid query parameter" });
       }
-      const users: UserSearchResult[] = await this.searchUsersUseCase.execute(query);
+      const users: UserSearchResult[] = await this.searchUsersUseCase.execute(
+        query
+      );
       res.status(200).json(users);
     } catch (error) {
-      console.error('Error searching users:', error);
-      res.status(500).json({ error: 'Failed to search users' });
+      console.error("Error searching users:", error);
+      res.status(500).json({ error: "Failed to search users" });
     }
   }
 }

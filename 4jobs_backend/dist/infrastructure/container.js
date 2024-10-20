@@ -84,6 +84,9 @@ const UserVideoCallUseCase_1 = require("../application/usecases/user/UserVideoCa
 const DislikePostUseCase_1 = require("../application/usecases/user/post/DislikePostUseCase");
 const LikePostUseCase_1 = require("../application/usecases/user/post/LikePostUseCase");
 const CommentOnPostUseCase_1 = require("../application/usecases/user/post/CommentOnPostUseCase");
+const MongoResumeRepository_1 = require("./database/mongoose/repositories/MongoResumeRepository");
+const GenerateResumeUseCase_1 = require("../application/usecases/user/GenerateResumeUseCase");
+const ResumeController_1 = require("../presentation/controllers/user/ResumeController");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -262,4 +265,7 @@ container.bind(types_1.default.LikePostUseCase).to(LikePostUseCase_1.LikePostUse
 container
     .bind(types_1.default.CommentOnPostUseCase)
     .to(CommentOnPostUseCase_1.CommentOnPostUseCase);
+container.bind(types_1.default.IResumeRepository).to(MongoResumeRepository_1.MongoResumeRepository);
+container.bind(types_1.default.GenerateResumeUseCase).to(GenerateResumeUseCase_1.GenerateResumeUseCase);
+container.bind(types_1.default.ResumeController).to(ResumeController_1.ResumeController);
 console.log(container);

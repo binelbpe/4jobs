@@ -51,6 +51,7 @@ import AdminUserPostManagement from './components/admin/AdminUserPostManagement'
 import SearchResults from './components/user/SearchResults';
 import UserVideoCall from './components/user/UserVideoCall';
  import JobDetails from './components/recruiter/RecruiterJobDetails';
+import ResumeBuilder from './components/user/ResumeBuilder';
 
 const AppContent: React.FC = () => {
   const { handleIncomingCall, isCallActive, incomingCallData, endCall } = useCall();
@@ -93,6 +94,7 @@ const AppContent: React.FC = () => {
         <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
         <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
         <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
+        <Route path="/resume-builder" element={<PrivateRoute><ResumeBuilder /></PrivateRoute>} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />

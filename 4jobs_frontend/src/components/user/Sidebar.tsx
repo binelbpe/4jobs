@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { UserCircle } from 'lucide-react';
 
@@ -39,9 +40,11 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
       
-      {/* <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300">
-        Try Premium for free
-      </button> */}
+      <Link to="/resume-builder" className="block w-full mt-4">
+        <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300">
+          Build Resume
+        </button>
+      </Link>
     </div>
   );
 };

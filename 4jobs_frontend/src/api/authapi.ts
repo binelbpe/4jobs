@@ -16,6 +16,7 @@ import {
 import { Message } from "../types/messageType";
 import { User, UserConnection } from "../types/auth";
 import { URMessage, URConversation } from "../types/userRecruiterMessage";
+import { ResumeData } from '../types/resumeTypes';
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -463,4 +464,53 @@ export const deleteCommentAPI = async (
   commentId: string
 ): Promise<Post> => {
   return apiRequest("DELETE", `/posts/${postId}/comments/${commentId}`);
+};
+
+export const generateResumeApi = async (resumeData: ResumeData): Promise<string> => {
+  try {
+    console.log('Sending resume data:', resumeData);
+    const response = await axios.post(`${API_BASE_URL}/generate-resume`, resumeData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    console.log('Received response:', response);
+
+    if (response.data && response.data.pdfData) {
+      // Convert base64 to blob
+      const byteCharacters = atob(response.data.pdfData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      // Create a URL for the blob
+      const fileURL = URL.createObjectURL(blob);
+      return fileURL;
+    } else {
+      throw new Error('Invalid response format from server');
+    }
+  } catch (error) {
+    console.error("Error generating resume:", error);
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        throw new Error(`Server error: ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw new Error('No response from the server');
+      } else {
+        console.error('Error setting up request:', error.message);
+        throw new Error('Error setting up request');
+      }
+    } else if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error('An unexpected error occurred');
+    }
+  }
 };

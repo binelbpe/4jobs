@@ -58,21 +58,21 @@ let MongoPostRepository = class MongoPostRepository {
     findAll(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;
-            const totalCount = yield PostModel_1.default.countDocuments({ status: 'active' });
+            const totalCount = yield PostModel_1.default.countDocuments({ status: "active" });
             const totalPages = Math.ceil(totalCount / limit);
-            const posts = yield PostModel_1.default.find({ status: 'active' })
-                .populate('userId', 'name email profileImage bio')
+            const posts = yield PostModel_1.default.find({ status: "active" })
+                .populate("userId", "name email profileImage bio")
                 .populate({
-                path: 'comments.userId',
-                select: 'name profileImage'
+                path: "comments.userId",
+                select: "name profileImage",
             })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
             return {
-                posts: posts.map(post => this.populateUserInfo(post)),
+                posts: posts.map((post) => this.populateUserInfo(post)),
                 totalPages,
-                currentPage: page
+                currentPage: page,
             };
         });
     }
@@ -82,18 +82,18 @@ let MongoPostRepository = class MongoPostRepository {
             const totalCount = yield PostModel_1.default.countDocuments();
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find()
-                .populate('userId', 'name email profileImage bio')
+                .populate("userId", "name email profileImage bio")
                 .populate({
-                path: 'comments.userId',
-                select: 'name profileImage'
+                path: "comments.userId",
+                select: "name profileImage",
             })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
             return {
-                posts: posts.map(post => this.populateUserInfo(post)),
+                posts: posts.map((post) => this.populateUserInfo(post)),
                 totalPages,
-                currentPage: page
+                currentPage: page,
             };
         });
     }
@@ -103,18 +103,18 @@ let MongoPostRepository = class MongoPostRepository {
             const totalCount = yield PostModel_1.default.countDocuments({ userId });
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find({ userId })
-                .populate('userId', 'name profileImage bio')
+                .populate("userId", "name profileImage bio")
                 .populate({
-                path: 'comments.userId',
-                select: 'name profileImage'
+                path: "comments.userId",
+                select: "name profileImage",
             })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
             return {
-                posts: posts.map(post => this.populateUserInfo(post)),
+                posts: posts.map((post) => this.populateUserInfo(post)),
                 totalPages,
-                currentPage: page
+                currentPage: page,
             };
         });
     }
@@ -148,15 +148,19 @@ let MongoPostRepository = class MongoPostRepository {
     }
     populateUserInfo(post) {
         const postObj = post.toObject();
-        return Object.assign(Object.assign({}, postObj), { user: post.userId ? {
-                name: post.userId.name,
-                email: post.userId.email,
-                profileImage: post.userId.profileImage,
-                bio: post.userId.bio,
-            } : undefined, comments: postObj.comments.map((comment) => (Object.assign(Object.assign({}, comment), { user: comment.userId ? {
-                    name: comment.userId.name,
-                    profileImage: comment.userId.profileImage,
-                } : undefined }))) });
+        return Object.assign(Object.assign({}, postObj), { user: post.userId
+                ? {
+                    name: post.userId.name,
+                    email: post.userId.email,
+                    profileImage: post.userId.profileImage,
+                    bio: post.userId.bio,
+                }
+                : undefined, comments: postObj.comments.map((comment) => (Object.assign(Object.assign({}, comment), { user: comment.userId
+                    ? {
+                        name: comment.userId.name,
+                        profileImage: comment.userId.profileImage,
+                    }
+                    : undefined }))) });
     }
     findAllForAdmin(page, limit) {
         return __awaiter(this, void 0, void 0, function* () {

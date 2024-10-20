@@ -83,5 +83,8 @@ const TYPES = {
     RespondToVideoCallUseCase: Symbol.for("RespondToVideoCallUseCase"),
     IUserVideoCallRepository: Symbol.for("IUserVideoCallRepository"),
     UserVideoCallUseCase: Symbol.for("UserVideoCallUseCase"),
+    IResumeRepository: Symbol.for("IResumeRepository"),
+    GenerateResumeUseCase: Symbol.for("GenerateResumeUseCase"),
+    ResumeController: Symbol.for("ResumeController"),
 };
 exports.default = TYPES;

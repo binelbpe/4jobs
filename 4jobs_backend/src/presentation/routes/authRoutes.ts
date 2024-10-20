@@ -11,6 +11,7 @@ import { authenticate } from "../middlewares/authMiddleware";
 import { S3Service } from "../../infrastructure/services/S3Service";
 import { MessageController } from "../controllers/user/MessageController";
 import { UserRecruiterMessageController } from "../controllers/user/UserRecruiterMessageController";
+import { ResumeController } from "../controllers/user/ResumeController";
 
 const profileController = container.get<ProfileController>(
   TYPES.ProfileController
@@ -31,6 +32,7 @@ const userRecruiterMessageController =
   container.get<UserRecruiterMessageController>(
     TYPES.UserRecruiterMessageController
   );
+const resumeController = container.get<ResumeController>(TYPES.ResumeController);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -357,36 +359,11 @@ authRouter.post(
   )
 );
 
-// Update this route
-authRouter.get(
-  "/search",
-  authenticate,
-  authController.searchUsersAndJobs.bind(authController)
-);
-
-// Add these new routes
+// Update the resume generation route
 authRouter.post(
-  "/posts/:postId/like",
+  "/generate-resume",
   authenticate,
-  postController.likePost.bind(postController)
-);
-authRouter.post(
-  "/posts/:postId/dislike",
-  authenticate,
-  postController.dislikePost.bind(postController)
-);
-authRouter.post(
-  "/posts/:postId/comment",
-  authenticate,
-  postController.commentOnPost.bind(postController)
-);
-
-// Add this new route to the authRouter
-
-authRouter.delete(
-  "/posts/:postId/comments/:commentId",
-  authenticate,
-  postController.deleteComment.bind(postController)
+  (req, res) => resumeController.generateResume(req, res)
 );
 
 export default authRouter;

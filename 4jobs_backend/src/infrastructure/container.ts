@@ -98,6 +98,10 @@ import { UserVideoCallUseCase } from "../application/usecases/user/UserVideoCall
 import { DislikePostUseCase } from "../application/usecases/user/post/DislikePostUseCase";
 import { LikePostUseCase } from "../application/usecases/user/post/LikePostUseCase";
 import { CommentOnPostUseCase } from "../application/usecases/user/post/CommentOnPostUseCase";
+import { IResumeRepository } from "../domain/interfaces/repositories/user/IResumeRepository";
+import { MongoResumeRepository } from "./database/mongoose/repositories/MongoResumeRepository";
+import { GenerateResumeUseCase } from "../application/usecases/user/GenerateResumeUseCase";
+import { ResumeController } from "../presentation/controllers/user/ResumeController";
 
 const container = new Container();
 
@@ -294,6 +298,10 @@ container.bind<LikePostUseCase>(TYPES.LikePostUseCase).to(LikePostUseCase);
 container
   .bind<CommentOnPostUseCase>(TYPES.CommentOnPostUseCase)
   .to(CommentOnPostUseCase);
+
+container.bind<IResumeRepository>(TYPES.IResumeRepository).to(MongoResumeRepository);
+container.bind<GenerateResumeUseCase>(TYPES.GenerateResumeUseCase).to(GenerateResumeUseCase);
+container.bind<ResumeController>(TYPES.ResumeController).to(ResumeController);
 
 console.log(container);
 export { container };

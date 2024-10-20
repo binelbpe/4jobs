@@ -40,23 +40,23 @@ export class MongoPostRepository implements IPostRepository {
     limit: number
   ): Promise<{ posts: IPost[]; totalPages: number; currentPage: number }> {
     const skip = (page - 1) * limit;
-    const totalCount = await PostModel.countDocuments({ status: 'active' });
+    const totalCount = await PostModel.countDocuments({ status: "active" });
     const totalPages = Math.ceil(totalCount / limit);
 
-    const posts = await PostModel.find({ status: 'active' })
-      .populate('userId', 'name email profileImage bio')
+    const posts = await PostModel.find({ status: "active" })
+      .populate("userId", "name email profileImage bio")
       .populate({
-        path: 'comments.userId',
-        select: 'name profileImage'
+        path: "comments.userId",
+        select: "name profileImage",
       })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     return {
-      posts: posts.map(post => this.populateUserInfo(post)),
+      posts: posts.map((post) => this.populateUserInfo(post)),
       totalPages,
-      currentPage: page
+      currentPage: page,
     };
   }
 
@@ -69,19 +69,19 @@ export class MongoPostRepository implements IPostRepository {
     const totalPages = Math.ceil(totalCount / limit);
 
     const posts = await PostModel.find()
-      .populate('userId', 'name email profileImage bio')
+      .populate("userId", "name email profileImage bio")
       .populate({
-        path: 'comments.userId',
-        select: 'name profileImage'
+        path: "comments.userId",
+        select: "name profileImage",
       })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     return {
-      posts: posts.map(post => this.populateUserInfo(post)),
+      posts: posts.map((post) => this.populateUserInfo(post)),
       totalPages,
-      currentPage: page
+      currentPage: page,
     };
   }
 
@@ -95,19 +95,19 @@ export class MongoPostRepository implements IPostRepository {
     const totalPages = Math.ceil(totalCount / limit);
 
     const posts = await PostModel.find({ userId })
-      .populate('userId', 'name profileImage bio')
+      .populate("userId", "name profileImage bio")
       .populate({
-        path: 'comments.userId',
-        select: 'name profileImage'
+        path: "comments.userId",
+        select: "name profileImage",
       })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     return {
-      posts: posts.map(post => this.populateUserInfo(post)),
+      posts: posts.map((post) => this.populateUserInfo(post)),
       totalPages,
-      currentPage: page
+      currentPage: page,
     };
   }
 
@@ -157,18 +157,22 @@ export class MongoPostRepository implements IPostRepository {
     const postObj = post.toObject();
     return {
       ...postObj,
-      user: post.userId ? {
-        name: post.userId.name,
-        email: post.userId.email,
-        profileImage: post.userId.profileImage,
-        bio: post.userId.bio,
-      } : undefined,
+      user: post.userId
+        ? {
+            name: post.userId.name,
+            email: post.userId.email,
+            profileImage: post.userId.profileImage,
+            bio: post.userId.bio,
+          }
+        : undefined,
       comments: postObj.comments.map((comment: any) => ({
         ...comment,
-        user: comment.userId ? {
-          name: comment.userId.name,
-          profileImage: comment.userId.profileImage,
-        } : undefined,
+        user: comment.userId
+          ? {
+              name: comment.userId.name,
+              profileImage: comment.userId.profileImage,
+            }
+          : undefined,
       })),
     };
   }
@@ -227,7 +231,10 @@ export class MongoPostRepository implements IPostRepository {
     return post ? this.populateUserInfo(post) : null;
   }
 
-  async deleteComment(postId: string, commentId: string): Promise<IPost | null> {
+  async deleteComment(
+    postId: string,
+    commentId: string
+  ): Promise<IPost | null> {
     const post = await PostModel.findByIdAndUpdate(
       postId,
       { $pull: { comments: { _id: commentId } } },

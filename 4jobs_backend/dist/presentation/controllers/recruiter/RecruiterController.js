@@ -52,8 +52,15 @@ let RecruiterController = class RecruiterController {
                 const { email, password, companyName, phone, name } = req.body;
                 const governmentIdFile = req.file;
                 console.log("governmentId", req.file);
-                if (!email || !password || !companyName || !phone || !name || !governmentIdFile) {
-                    return res.status(400).json({ error: "All fields are required, including government ID" });
+                if (!email ||
+                    !password ||
+                    !companyName ||
+                    !phone ||
+                    !name ||
+                    !governmentIdFile) {
+                    return res
+                        .status(400)
+                        .json({ error: "All fields are required, including government ID" });
                 }
                 const existingRecruiter = yield this.recruiterRepository.findRecruiterByEmail(email);
                 if (existingRecruiter) {
@@ -191,15 +198,15 @@ let RecruiterController = class RecruiterController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { query } = req.query;
-                if (typeof query !== 'string') {
-                    return res.status(400).json({ error: 'Invalid query parameter' });
+                if (typeof query !== "string") {
+                    return res.status(400).json({ error: "Invalid query parameter" });
                 }
                 const users = yield this.searchUsersUseCase.execute(query);
                 res.status(200).json(users);
             }
             catch (error) {
-                console.error('Error searching users:', error);
-                res.status(500).json({ error: 'Failed to search users' });
+                console.error("Error searching users:", error);
+                res.status(500).json({ error: "Failed to search users" });
             }
         });
     }

@@ -1,7 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { injectable } from "inversify";
-import { v4 as uuidv4 } from 'uuid';
-import { config } from '../../config/index';
+import { v4 as uuidv4 } from "uuid";
 
 @injectable()
 export class S3Service {
@@ -9,27 +8,31 @@ export class S3Service {
 
   constructor() {
     this.s3Client = new S3Client({
-      region: config.aws.region,
+      region: process.env.AWS_REGION,
       credentials: {
-        accessKeyId: config.aws.accessKeyId!,
-        secretAccessKey: config.aws.secretAccessKey!,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
       },
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
-    const fileExtension = file.originalname.split('.').pop();
-    const fileName = `${uuidv4()}.${fileExtension}`;
+  async uploadFile(file: Express.Multer.File | Buffer, mimeType?: string): Promise<string> {
+    const bucketName = process.env.AWS_BUCKET_NAME!;
+    const key = `uploads/${uuidv4()}-${file instanceof Buffer ? 'resume.pdf' : file.originalname}`;
 
-    const command = new PutObjectCommand({
-      Bucket: config.aws.s3BucketName,
-      Key: fileName,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    });
+    const uploadParams = {
+      Bucket: bucketName,
+      Key: key,
+      Body: file instanceof Buffer ? file : file.buffer,
+      ContentType: file instanceof Buffer ? (mimeType || 'application/pdf') : file.mimetype,
+    };
 
-    await this.s3Client.send(command);
-
-    return `https://${config.aws.s3BucketName}.s3.${config.aws.region}.amazonaws.com/${fileName}`;
+    try {
+      await this.s3Client.send(new PutObjectCommand(uploadParams));
+      return `https://${bucketName}.s3.amazonaws.com/${key}`;
+    } catch (error) {
+      console.error("Error uploading file to S3:", error);
+      throw new Error("Failed to upload file to S3");
+    }
   }
 }

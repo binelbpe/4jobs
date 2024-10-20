@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,44 +20,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.S3Service = void 0;
-const client_s3_1 = require("@aws-sdk/client-s3");
+exports.ResumeController = void 0;
 const inversify_1 = require("inversify");
-const uuid_1 = require("uuid");
-let S3Service = class S3Service {
-    constructor() {
-        this.s3Client = new client_s3_1.S3Client({
-            region: process.env.AWS_REGION,
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            },
-        });
+const types_1 = __importDefault(require("../../../types"));
+const GenerateResumeUseCase_1 = require("../../../application/usecases/user/GenerateResumeUseCase");
+let ResumeController = class ResumeController {
+    constructor(generateResumeUseCase) {
+        this.generateResumeUseCase = generateResumeUseCase;
     }
-    uploadFile(file, mimeType) {
+    generateResume(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const bucketName = process.env.AWS_BUCKET_NAME;
-            const key = `uploads/${(0, uuid_1.v4)()}-${file instanceof Buffer ? 'resume.pdf' : file.originalname}`;
-            const uploadParams = {
-                Bucket: bucketName,
-                Key: key,
-                Body: file instanceof Buffer ? file : file.buffer,
-                ContentType: file instanceof Buffer ? (mimeType || 'application/pdf') : file.mimetype,
-            };
             try {
-                yield this.s3Client.send(new client_s3_1.PutObjectCommand(uploadParams));
-                return `https://${bucketName}.s3.amazonaws.com/${key}`;
+                const resumeData = req.body;
+                if (!resumeData.userId) {
+                    res.status(400).json({ error: "User ID is required" });
+                    return;
+                }
+                const pdfBuffer = yield this.generateResumeUseCase.execute(resumeData);
+                // Convert the buffer to base64
+                const base64Pdf = pdfBuffer.toString('base64');
+                // Send the base64 encoded PDF data
+                res.json({ pdfData: base64Pdf });
             }
             catch (error) {
-                console.error("Error uploading file to S3:", error);
-                throw new Error("Failed to upload file to S3");
+                console.error("Error generating resume:", error);
+                res.status(500).json({ error: "Failed to generate resume" });
             }
         });
     }
 };
-exports.S3Service = S3Service;
-exports.S3Service = S3Service = __decorate([
+exports.ResumeController = ResumeController;
+exports.ResumeController = ResumeController = __decorate([
     (0, inversify_1.injectable)(),
-    __metadata("design:paramtypes", [])
-], S3Service);
+    __param(0, (0, inversify_1.inject)(types_1.default.GenerateResumeUseCase)),
+    __metadata("design:paramtypes", [GenerateResumeUseCase_1.GenerateResumeUseCase])
+], ResumeController);
