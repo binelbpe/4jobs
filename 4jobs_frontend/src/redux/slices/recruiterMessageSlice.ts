@@ -45,7 +45,6 @@ export const fetchMessages = createAsyncThunk(
   async (conversationId: string, { rejectWithValue }) => {
     try {
       const response = await fetchMessagesApi(conversationId);
-      console.log("Fetched messages:", response.data);
       return { conversationId, messages: response.data };
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "An error occurred");
@@ -61,7 +60,6 @@ export const recruiterSendMessage = createAsyncThunk(
   ) => {
     try {
       const message = await sendMessageApi(conversationId, content);
-      console.log("Response in sendMessage thunk:", message);
       if (!message || typeof message !== "object" || !("id" in message)) {
         throw new Error("Invalid message structure received from API");
       }
@@ -212,7 +210,6 @@ const RecruitermessageSlice = createSlice({
           action: PayloadAction<{ conversationId: string; messages: Message[] }>
         ) => {
           state.recruiterLoading = false;
-          console.log("Storing messages in state:", action.payload);
           state.RecruiterMessages[action.payload.conversationId] =
             action.payload.messages || [];
         }

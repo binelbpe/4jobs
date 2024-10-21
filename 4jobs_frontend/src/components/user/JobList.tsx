@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import {
@@ -158,6 +158,45 @@ const JobList: React.FC = () => {
     setPage(1);
   };
 
+  const renderApplyButton = (jobId: string) => {
+    if (!user?.id) {
+      return (
+        <Link
+          to="/login"
+          className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-full shadow-md hover:shadow-lg text-sm"
+        >
+          Login to Apply
+        </Link>
+      );
+    }
+
+    if (!user.resume) {
+      return (
+        <Button
+          size="small"
+          color="warning"
+          variant="contained"
+          onClick={() => navigate(`/profile/${user.id}`)}
+          sx={{ ml: 1 }}
+        >
+          Update Profile
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        size="small"
+        color="primary"
+        variant="contained"
+        onClick={() => handleApply(jobId)}
+        disabled={appliedJobs?.includes(jobId)}
+        sx={{ ml: 1 }}
+      >
+        {appliedJobs?.includes(jobId) ? "Applied" : "Apply Now"}
+      </Button>
+    );
+  };
 
   if (loading)
     return (
@@ -267,16 +306,7 @@ const JobList: React.FC = () => {
                     >
                       View Details
                     </Button>
-                    <Button
-                      size="small"
-                      color="primary"
-                      variant="contained"
-                      onClick={() => handleApply(job._id)}
-                      disabled={appliedJobs?.includes(job._id)}
-                      sx={{ ml: 1 }}
-                    >
-                      {appliedJobs?.includes(job._id) ? "Applied" : "Apply Now"}
-                    </Button>
+                    {renderApplyButton(job._id)}
                     <IconButton
                       size="small"
                       color="error"

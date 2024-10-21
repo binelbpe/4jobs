@@ -127,7 +127,6 @@ const contestantSlice = createSlice({
         state.error = action.payload?.message || 'An error occurred';
       })
       .addCase(fetchFilteredContestantsForJob.fulfilled, (state, action: PayloadAction<FilteredUserResponse>) => {
-        console.log('Reducer: Filtered Contestants', action.payload);
         state.filteredContestants = action.payload.applicants;
         state.totalPages = action.payload.totalPages || 1;
         state.currentPage = action.payload.currentPage || 1;

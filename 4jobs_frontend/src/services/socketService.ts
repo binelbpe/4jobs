@@ -10,16 +10,14 @@ class SocketService {
   private connected: boolean = false;
 
   connect(userId: string) {
-    console.log(`Attempting to connect to socket server for user: ${userId}`);
+
     this.userId = userId;
 
     if (this.socket && this.socket.connected) {
-      console.log("Socket already connected. Disconnecting before reconnecting.");
       this.socket.disconnect();
     }
 
     const socketUrl = process.env.REACT_APP_SOCKET_URL || "http://localhost:5000";
-    console.log(`Connecting to socket server at: ${socketUrl}`);
 
     this.socket = io(socketUrl, {
       path: '/user-socket',
@@ -37,7 +35,6 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log(`Socket connected for user ${this.userId}, socket id: ${this.socket?.id}`);
       this.connected = true;
     });
 
@@ -47,22 +44,18 @@ class SocketService {
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log(`Socket disconnected for user ${this.userId}, reason: ${reason}`);
       this.connected = false;
     });
 
     this.socket.on("newMessage", (message: any) => {
-      console.log("Received new message:", message);
       store.dispatch(addMessage(message));
     });
 
     this.socket.on("messageSent", (message: any) => {
-      console.log("Message sent confirmation:", message);
       store.dispatch(addMessage(message));
     });
 
     this.socket.on("userTyping", ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
-      console.log("Received typing event:", userId, isTyping);
       store.dispatch(setTypingStatus({ userId, isTyping }));
     });
 
@@ -73,12 +66,10 @@ class SocketService {
 
   sendMessage(message: { senderId: string, recipientId: string, content: string }) {
     if (this.socket && this.connected) {
-      console.log("SocketService: Emitting sendMessage event with data:", message);
       this.socket.emit("sendMessage", message, (response: any) => {
         if (response.error) {
           console.error("Error sending message:", response.error);
         } else {
-          console.log("Message sent successfully:", response);
         }
       });
     } else {
@@ -88,7 +79,6 @@ class SocketService {
 
   emitTyping(recipientId: string, isTyping: boolean) {
     if (this.socket && this.connected) {
-      console.log("SocketService: Emitting typing event:", recipientId, isTyping);
       this.socket.emit("typing", { recipientId, isTyping });
     } else {
       console.warn("SocketService: Socket is not connected. Unable to emit typing status.");
@@ -125,7 +115,6 @@ class SocketService {
 
   markNotificationAsRead(notificationId: string) {
     if (this.socket && this.connected) {
-      console.log("SocketService: Marking notification as read:", notificationId);
       this.socket.emit("markNotificationAsRead", notificationId);
     } else {
       console.warn("SocketService: Socket is not connected. Unable to mark notification as read.");
@@ -164,7 +153,6 @@ class SocketService {
     }
   }
 
-  // Add this method to the SocketService class
   onCallRejected(callback: () => void): () => void {
     if (this.socket) {
       this.socket.on("callRejected", callback);

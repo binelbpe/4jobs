@@ -36,7 +36,6 @@ export const fetchUserRecruiterConversations = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await fetchUserConversationsApi(userId);
-      console.log("UR copnv festch  respo", response);
       return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "An error occurred");
@@ -49,7 +48,6 @@ export const fetchUserRecruiterMessages = createAsyncThunk(
   async (conversationId: string, { rejectWithValue }) => {
     try {
       const response = await fetchUserMessagesApi(conversationId);
-      console.log("UR fetchUserRecruiterMessages festch  respo", response);
       return { conversationId, messages: response };
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "An error occurred");
@@ -73,7 +71,7 @@ export const sendUserRecruiterMessage = createAsyncThunk(
         content,
         senderId
       );
-      console.log("UR sendUserRecruiterMessage festch  respo", message);
+  
       return { conversationId, message };
     } catch (error: any) {
       return rejectWithValue(error.message || "An error occurred");

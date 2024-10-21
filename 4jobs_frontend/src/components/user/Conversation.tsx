@@ -10,11 +10,12 @@ import { updateTotalUnreadCount } from "../../redux/slices/userRecruiterMessageS
 import { Message } from "../../types/messageType";
 import useSocket from "../../hooks/useSocket";
 import debounce from "lodash/debounce";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faVideo } from '@fortawesome/free-solid-svg-icons';
-import UserVideoCall from './UserVideoCall';
-import { socketService } from "../../services/socketService";
-import { useCall } from '../../contexts/CallContext';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faVideo } from "@fortawesome/free-solid-svg-icons";
+import UserVideoCall from "./UserVideoCall";
+import { useCall } from "../../contexts/CallContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ConversationProps {
   userId: string;
@@ -35,14 +36,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
   const connection = useSelector((state: RootState) =>
     state.messages.connections.find((conn) => conn.user.id === userId)
   );
-  const isTyping = useSelector((state: RootState) => {
-    const typingStatus =
+  const isTyping = useSelector(
+    (state: RootState) =>
       state.messages.connections.find((conn) => conn.user.id === userId)
-        ?.isTyping || false;
-    console.log("Typing status for user", userId, ":", typingStatus);
-    return typingStatus;
-  });
-  const isOnline = connection?.isOnline || false;
+        ?.isTyping || false
+  );
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
@@ -52,17 +50,17 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
   } = useSocket(userId);
   const [hasFetchedConversation, setHasFetchedConversation] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
-  const { 
-    isIncomingCall, 
-    incomingCallData, 
+  const {
+    isIncomingCall,
+    incomingCallData,
     isCallActive,
-    acceptCall, 
-    rejectCall, 
+    acceptCall,
+    rejectCall,
     setupVideoCall,
-    endCall
+    endCall,
   } = useCall();
 
+  // Fetch conversation data
   const fetchConversationData = useCallback(() => {
     if (
       currentUser &&
@@ -70,7 +68,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
       !hasFetchedConversation &&
       messages.length === 0
     ) {
-      dispatch(fetchConversation({ userId1: currentUser.id, userId2: userId }));
+      dispatch(fetchConversation({ userId1: currentUser.id, userId2: userId }))
+        .unwrap()
+        .catch((error) => {
+          // Handle error (e.g., show a notification to the user)
+        });
       setHasFetchedConversation(true);
     }
   }, [
@@ -90,6 +92,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Mark messages as read and update unread count
   useEffect(() => {
     const unreadMessages = messages.filter(
       (message: Message) =>
@@ -110,39 +113,32 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     }
   }, [dispatch, messages, userId]);
 
+  // Handle sending a message
   const handleSendMessage = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (newMessage.trim() && currentUser) {
+      if (newMessage.trim() && currentUser && isConnected) {
         const messageData = {
           senderId: currentUser.id,
           recipientId: userId,
           content: newMessage,
         };
-
-        if (isConnected) {
-          console.log("Attempting to send message:", messageData);
+        try {
           sendSocketMessage(messageData);
           setNewMessage("");
-        } else {
-          console.error("Cannot send message: Socket is not connected");
-          // Show an error message to the user
+        } catch (error) {
+          toast.error("Failed to send message. Please try again.");
         }
+      } else if (!isConnected) {
+        toast.error("Not connected to the server. Please try again later.");
       }
     },
-    [
-      newMessage,
-      currentUser,
-      userId,
-      sendSocketMessage,
-      isConnected,
-      setNewMessage,
-    ]
+    [newMessage, currentUser, userId, sendSocketMessage, isConnected]
   );
 
+  // Handle typing status
   const debouncedEmitTyping = useCallback(
     debounce((isTyping: boolean) => {
-      console.log("Emitting typing status:", isTyping);
       emitTyping(isTyping);
     }, 300),
     [emitTyping]
@@ -150,7 +146,6 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
 
   const handleTyping = useCallback(() => {
     if (currentUser) {
-      console.log("Handling typing event");
       debouncedEmitTyping(true);
 
       if (typingTimeoutRef.current) {
@@ -158,15 +153,10 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
       }
 
       typingTimeoutRef.current = setTimeout(() => {
-        console.log("Typing timeout, emitting false");
         debouncedEmitTyping(false);
       }, 3000);
     }
   }, [currentUser, debouncedEmitTyping]);
-
-  useEffect(() => {
-    console.log("isTyping changed:", isTyping);
-  }, [isTyping]);
 
   useEffect(() => {
     return () => {
@@ -176,25 +166,18 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     };
   }, []);
 
+  // Handle video call actions
   const handleAcceptCall = useCallback(() => {
-    console.log("Accepting call");
     acceptCall();
-    // You might want to add any additional logic here
   }, [acceptCall]);
 
   const handleStartVideoCall = useCallback(() => {
-    console.log("Starting video call");
     setupVideoCall(userId);
   }, [userId, setupVideoCall]);
 
   const handleEndVideoCall = useCallback(() => {
-    console.log("Ending video call");
     endCall();
   }, [endCall]);
-
-  useEffect(() => {
-    console.log("isCallActive changed:", isCallActive);
-  }, [isCallActive]);
 
   if (!currentUser) {
     return <div>Loading...</div>;
@@ -202,6 +185,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
 
   return (
     <div className="flex flex-col h-full">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+      />
       <div className="p-4 border-b border-gray-300 flex justify-between items-center">
         <h2 className="text-xl font-semibold text-purple-700">
           {connection?.user.name || "Chat"}
@@ -274,7 +262,9 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 text-center">
             <h2 className="text-2xl font-bold mb-4">Incoming Call</h2>
-            <p className="mb-6">You have an incoming call from {incomingCallData?.callerId}</p>
+            <p className="mb-6">
+              You have an incoming call from {incomingCallData?.callerId}
+            </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={handleAcceptCall}
@@ -292,7 +282,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
           </div>
         </div>
       )}
-      
+
       {isCallActive && (
         <UserVideoCall
           recipientId={userId}

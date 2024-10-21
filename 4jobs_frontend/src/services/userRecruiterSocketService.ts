@@ -32,16 +32,10 @@ class UserRecruiterSocketService {
   private onlineStatusInterval: NodeJS.Timeout | null = null;
 
   connect(userId: string, userType: "user" | "recruiter") {
-    console.log(
-      `Attempting to connect to socket server for ${userType}: ${userId}`
-    );
     this.userId = userId;
     this.userType = userType;
 
     if (this.socket && this.socket.connected) {
-      console.log(
-        "Socket already connected. Disconnecting before reconnecting."
-      );
       this.socket.disconnect();
     }
 
@@ -64,21 +58,14 @@ class UserRecruiterSocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log(
-        `Socket connected for ${this.userType} ${this.userId}, socket id: ${this.socket?.id}`
-      );
       this.connected = true;
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log(
-        `Socket disconnected for ${this.userType} ${this.userId}, reason: ${reason}`
-      );
       this.connected = false;
     });
 
     this.socket.on("newUserRecruiterMessage", (message: URMessage | Message) => {
-      console.log("Received new user-recruiter message:", message);
       if (this.userType === "user" && 'conversationId' in message) {
         store.dispatch(addUserRecruiterMessage(message as URMessage));
         store.dispatch(
@@ -111,7 +98,6 @@ class UserRecruiterSocketService {
         senderId: string;
         conversationId: string;
       }) => {
-        console.log("Received typing event:", senderId, conversationId);
         if (this.userType === "user") {
           store.dispatch(
             setUserRecruiterTypingStatus({
@@ -137,7 +123,6 @@ class UserRecruiterSocketService {
         senderId: string;
         conversationId: string;
       }) => {
-        console.log("Received stopped typing event:", senderId, conversationId);
         if (this.userType === "user") {
           store.dispatch(
             setUserRecruiterTypingStatus({
@@ -167,7 +152,6 @@ class UserRecruiterSocketService {
         messageId: string;
         conversationId: string;
       }) => {
-        console.log("Message marked as read:", messageId);
         if (this.userType === "user") {
           store.dispatch(
             markUserRecruiterMessageAsRead({ messageId, conversationId })
@@ -195,7 +179,6 @@ class UserRecruiterSocketService {
     this.socket.on(
       "userOnlineStatus",
       ({ userId, online }: { userId: string; online: boolean }) => {
-        console.log(`User ${userId} is ${online ? "online" : "offline"}`);
         if (this.userType === "user") {
           store.dispatch(setUserOnlineStatus({ userId, online }));
         } else {
@@ -205,7 +188,6 @@ class UserRecruiterSocketService {
     );
 
     this.socket.on("newRecruiterConversation", (conversation: any) => {
-      console.log("Received new recruiter conversation:", conversation);
       if (this.userType === "user") {
         store.dispatch(addNewConversation(conversation));
       } else {
@@ -214,7 +196,6 @@ class UserRecruiterSocketService {
     });
 
     this.socket.on("initialOnlineStatus", (onlineUsers: string[]) => {
-      console.log("Received initial online status:", onlineUsers);
       if (this.userType === "user") {
         onlineUsers.forEach((userId) => {
           store.dispatch(setUserOnlineStatus({ userId, online: true }));
@@ -229,7 +210,6 @@ class UserRecruiterSocketService {
     this.socket.on(
       "incomingCall",
       (data: { callerId: string; offer: string }) => {
-        console.log("Received incoming call:", data);
         if (this.onIncomingCallCallback) {
           this.onIncomingCallCallback(data.callerId, data.offer);
         }
@@ -237,14 +217,12 @@ class UserRecruiterSocketService {
     );
 
     this.socket.on("callEnded", () => {
-      console.log("Call ended by the other party");
       if (this.onCallEndedCallback) {
         this.onCallEndedCallback();
       }
     });
 
     this.socket?.on("onlineStatusUpdate", (onlineUsers: string[]) => {
-      console.log("Received online status update:", onlineUsers);
       if (this.userType === "user") {
         store.dispatch(setUserOnlineStatus({ userId: this.userId!, online: true }));
         onlineUsers.forEach((userId) => {
@@ -268,7 +246,7 @@ class UserRecruiterSocketService {
       if (this.socket && this.connected) {
         this.socket.emit("requestOnlineStatus");
       }
-    }, 30000); // Update every 30 seconds
+    }, 30000);
   }
 
   joinConversation(conversationId: string) {
@@ -296,11 +274,8 @@ class UserRecruiterSocketService {
         senderType: this.userType,
       };
 
-      console.log("Sending message:", message);
       this.socket.emit("sendUserRecruiterMessage", message);
 
-      // Remove the optimistic update from here
-      // The state will be updated when the server sends back the message
     }
   }
 
@@ -353,7 +328,6 @@ class UserRecruiterSocketService {
   }
 
   emitCallOffer(recipientId: string, offerBase64: string) {
-    console.log("Emitting call offer:", { recipientId, offerBase64 });
     this.socket?.emit("callOffer", { recipientId, offer: offerBase64 });
   }
 
@@ -374,7 +348,6 @@ class UserRecruiterSocketService {
   }
 
   emitEndCall(recipientId: string) {
-    console.log("Emitting end call:", recipientId);
     this.socket?.emit("endCall", { recipientId });
   }
 

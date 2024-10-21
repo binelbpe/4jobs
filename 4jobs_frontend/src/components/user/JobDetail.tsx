@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchJobPost, applyForJobAsync } from "../../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -27,6 +27,7 @@ const LoadingSpinner: React.FC = () => (
 const JobDetail: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const jobPost = useSelector((state: RootState) => {
     // First, check in the auth slice
@@ -38,7 +39,7 @@ const JobDetail: React.FC = () => {
   });
 
   const user = useSelector((state: RootState) => state.auth.user);
-  const userId = useSelector((state: RootState) => state.auth.user?.id);
+  const userId = user?.id;
   const error = useSelector((state: RootState) => state.auth.error);
 
   const [applying, setApplying] = useState(false);
@@ -69,8 +70,45 @@ const JobDetail: React.FC = () => {
 
   if (!jobPost) return <LoadingSpinner />;
 
-  // Update this line to correctly check if the user has applied
-  const hasApplied = user?.appliedJobs?.includes(jobPost._id)
+  const hasApplied = user?.appliedJobs?.includes(jobPost._id);
+  const hasResume = user?.resume; // Check if user has a resume
+
+  const renderApplyButton = () => {
+    if (!userId) {
+      return (
+        <Link to="/login" className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto text-center">
+          Login to Apply
+        </Link>
+      );
+    }
+
+    if (!hasResume) {
+      return (
+        <button
+          onClick={() => navigate(`/profile/${userId}`)}
+          className="px-6 py-3 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto text-center"
+        >
+          Update Profile to Apply
+        </button>
+      );
+    }
+
+    return (
+      <button
+        onClick={handleApply}
+        disabled={applying || hasApplied}
+        className={`px-6 py-3 rounded-full transition-all duration-300 ease-in-out ${
+          hasApplied
+            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+            : applying
+            ? "bg-purple-400"
+            : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+        } text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto`}
+      >
+        {applying ? "Applying..." : hasApplied ? "Already Applied" : "Apply Now"}
+      </button>
+    );
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -169,20 +207,14 @@ const JobDetail: React.FC = () => {
             </div>
 
             <div className="mt-8 flex justify-center">
-              <button
-                onClick={handleApply}
-                disabled={applying || hasApplied}
-                className={`px-6 py-3 rounded-full transition-all duration-300 ease-in-out ${
-                  hasApplied
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : applying
-                    ? "bg-purple-400"
-                    : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                } text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto`}
-              >
-                {applying ? "Applying..." : hasApplied ? "Already Applied" : "Apply Now"}
-              </button>
+              {renderApplyButton()}
             </div>
+
+            {!hasResume && userId && (
+              <div className="mt-4 text-center text-red-600">
+                Please update your profile and add a resume before applying.
+              </div>
+            )}
           </div>
         </div>
       </div>

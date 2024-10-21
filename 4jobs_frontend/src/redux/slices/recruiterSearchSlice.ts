@@ -19,8 +19,7 @@ export const searchUsersAndJobs = createAsyncThunk(
   async ({ query, userId }: { query: string; userId: string }, { rejectWithValue }) => {
     try {
       const response = await searchUsers(query);
-      console.log('Search API response:', response); // Debugging log
-      return response; // Return the entire response, not just response.data
+      return response; 
     } catch (error: any) {
       return rejectWithValue(error.message || 'An error occurred during the search');
     }
@@ -44,8 +43,7 @@ const recruiterSearchSlice = createSlice({
       })
       .addCase(searchUsersAndJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload; // Directly assign the payload to users
-        console.log('Search results updated:', state.users); // Debugging log
+        state.users = action.payload; 
       })
       .addCase(searchUsersAndJobs.rejected, (state, action) => {
         state.loading = false;

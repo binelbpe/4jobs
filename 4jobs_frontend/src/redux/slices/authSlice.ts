@@ -278,6 +278,9 @@ const authSlice = createSlice({
     setOtpStep: (state, action) => {
       state.otpStep = action.payload;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -509,5 +512,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setOtpStep  } = authSlice.actions;
+export const { logout, setOtpStep, clearError  } = authSlice.actions;
 export default authSlice.reducer;

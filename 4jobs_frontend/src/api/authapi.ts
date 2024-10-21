@@ -165,10 +165,7 @@ export const updateUserCertificatesApi = async (
     if (cert.file) {
       formData.append(`certificateImage`, cert.file, cert.file.name);
     }
-    console.log("cert.file", cert.file);
   });
-
-  console.log("form data", formData);
 
   return apiRequest("PUT", `/edit-certificates/${userId}`, formData, {
     "Content-Type": "multipart/form-data",
@@ -268,40 +265,32 @@ export const createPostAPI = async (
   if (postData.video instanceof File) {
     formData.append("video", postData.video, postData.video.name);
   }
-
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}: ${value instanceof File ? value.name : value}`);
-  }
+ 
 
   return apiUploadRequest("POST", `/posts/${userId}`, formData);
 };
 
 export const likePostAPI = async (likeData: LikePostData): Promise<Post> => {
-  console.log("Sending like request to API:", likeData);
   const response = await apiRequest("POST", `/posts/${likeData.postId}/like`, {
     userId: likeData.userId,
   });
-  console.log("API response for like:", response);
   return response;
 };
 
 export const dislikePostAPI = async (
   dislikeData: LikePostData
 ): Promise<Post> => {
-  console.log("Sending dislike request to API:", dislikeData);
   const response = await apiRequest(
     "POST",
     `/posts/${dislikeData.postId}/dislike`,
     { userId: dislikeData.userId }
   );
-  console.log("API response for dislike:", response);
   return response;
 };
 
 export const commentOnPostAPI = async (
   commentData: CommentPostData
 ): Promise<Post> => {
-  console.log("Sending comment request to API:", commentData);
   const response = await apiRequest(
     "POST",
     `/posts/${commentData.postId}/comment`,
@@ -312,12 +301,11 @@ export const commentOnPostAPI = async (
       userProfileImage: commentData.userProfileImage,
     }
   );
-  console.log("API response for comment:", response);
   return response;
 };
 
 export const deletePostAPI = async (postId: string): Promise<void> => {
-  return apiRequest("DELETE", `/posts/${postId}`);
+  return apiRequest("DELETE", `/posts/delete/${postId}`);
 };
 
 export const editPostAPI = async (
@@ -377,7 +365,6 @@ export const acceptConnectionRequestApi = async (
   requestId: string,
   userId: string
 ) => {
-  console.log("Accepting connection request:", { requestId, userId });
   return apiRequest("POST", `/connections/accept/${requestId}`, { userId });
 };
 
@@ -452,7 +439,6 @@ export const sendUserMessageApi = async (
 };
 
 export const searchUsersAndJobsApi = async (query: string, userId: string) => {
-  console.log("search ", userId);
   return apiRequest(
     "GET",
     `/search?query=${encodeURIComponent(query)}&userId=${userId}`
@@ -468,15 +454,12 @@ export const deleteCommentAPI = async (
 
 export const generateResumeApi = async (resumeData: ResumeData): Promise<string> => {
   try {
-    console.log('Sending resume data:', resumeData);
     const response = await axios.post(`${API_BASE_URL}/generate-resume`, resumeData, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
     });
-    
-    console.log('Received response:', response);
 
     if (response.data && response.data.pdfData) {
       // Convert base64 to blob

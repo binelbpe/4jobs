@@ -13,6 +13,7 @@ import ConversationHeader from "../shared/ConversationHeader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faVideo } from "@fortawesome/free-solid-svg-icons";
 import VideoCall from "../shared/VideoCall";
+import { toast } from "react-toastify";
 
 interface ConversationProps {
   conversationId: string;
@@ -46,7 +47,9 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     (state: RootState) => state.recruiterMessages.onlineStatus
   );
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Scroll to bottom of message list
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
@@ -54,9 +57,19 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   }, []);
 
   useEffect(() => {
-    dispatch(fetchMessages(conversationId));
-    dispatch(markAllMessagesAsLocallyRead(conversationId));
-    userRecruiterSocketService.joinConversation(conversationId);
+    const fetchMessagesAndJoinConversation = async () => {
+      try {
+        await dispatch(fetchMessages(conversationId)).unwrap();
+        dispatch(markAllMessagesAsLocallyRead(conversationId));
+        userRecruiterSocketService.joinConversation(conversationId);
+      } catch (error) {
+        setError("Failed to load messages. Please try again.");
+        toast.error("Failed to load messages. Please try again.");
+      }
+    };
+
+    fetchMessagesAndJoinConversation();
+
     return () => {
       userRecruiterSocketService.leaveConversation(conversationId);
     };
@@ -66,22 +79,28 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  // Handle sending a new message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && currentRecruiter) {
-      dispatch(setMessageSending(true));
-      userRecruiterSocketService.sendMessage(
-        conversationId,
-        newMessage,
-        currentRecruiter.id
-      );
-      setNewMessage("");
-      // You might want to add a setTimeout to set messageSending back to false
-      // in case the socket doesn't respond quickly enough
-      setTimeout(() => dispatch(setMessageSending(false)), 2000);
+      try {
+        dispatch(setMessageSending(true));
+        await userRecruiterSocketService.sendMessage(
+          conversationId,
+          newMessage,
+          currentRecruiter.id
+        );
+        setNewMessage("");
+      } catch (error) {
+        setError("Failed to send message. Please try again.");
+        toast.error("Failed to send message. Please try again.");
+      } finally {
+        dispatch(setMessageSending(false));
+      }
     }
   };
 
+  // Handle typing status
   const handleTyping = () => {
     if (!isTyping) {
       setIsTyping(true);
@@ -104,10 +123,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
 
   const formatMessageTime = (dateString: string) => {
     const date = new Date(dateString);
-    if (isValid(date)) {
-      return format(date, "HH:mm");
-    }
-    return "Invalid Date";
+    return isValid(date) ? format(date, "HH:mm") : "Invalid Date";
   };
 
   const isParticipantTyping = Object.values(typingStatus).some(
@@ -115,7 +131,6 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   );
 
   const handleStartVideoCall = () => {
-    console.log("Starting video call to:", conversation?.participant.id);
     setIsVideoCallActive(true);
   };
 
@@ -135,7 +150,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
       <ConversationHeader
         participantName={conversation?.participant.name || "Unknown"}
         isOnline={onlineStatus[conversation?.participant.id || ""] || false}
@@ -147,11 +162,16 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
           <FontAwesomeIcon icon={faVideo} />
         </button>
       </ConversationHeader>
-      <div ref={messageListRef} className="flex-1 overflow-y-auto p-4">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      <div ref={messageListRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message: Message) => (
           <div
             key={`${message.id}-${message.timestamp}`}
-            className={`mb-4 flex ${
+            className={`flex ${
               message.senderId === currentRecruiter?.id
                 ? "justify-end"
                 : "justify-start"
@@ -172,7 +192,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
                 }
               }}
             >
-              <div>{message.content}</div>
+              <div className="break-words">{message.content}</div>
               <div className="text-xs mt-1 flex justify-between items-center">
                 <span className="text-gray-500">
                   {formatMessageTime(message.timestamp)}
@@ -205,12 +225,12 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
               setNewMessage(e.target.value);
               handleTyping();
             }}
-            className="flex-1 border rounded-l-lg p-2"
+            className="flex-1 border rounded-l-lg p-2 w-full"
             placeholder="Type a message..."
           />
           <button
             type="submit"
-            className="bg-purple-500 text-white rounded-r-lg px-4 py-2"
+            className="bg-purple-500 text-white rounded-r-lg px-4 py-2 whitespace-nowrap"
           >
             Send
           </button>

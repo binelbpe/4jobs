@@ -44,7 +44,7 @@ export class OtpService {
     const subject = "Password Reset OTP";
     const text = `Your OTP for password reset is: ${otp}. This OTP is valid for 5 minutes.`;
     const html = `<p>Your OTP for password reset is: <strong>${otp}</strong>. This OTP is valid for 5 minutes.</p>`;
-console.log(`otp:${otp} email${email}`)
+console.log(`otp: ${otp} email ${email}`)
     await this.emailService.sendEmail(email, subject, text, html);
   }
 }

@@ -112,14 +112,11 @@ const userMessageSlice = createSlice({
       if (!state.conversations[conversationId]) {
         state.conversations[conversationId] = [];
       }
-      // Check if the message already exists to prevent duplicates
       const messageExists = state.conversations[conversationId].some(
         (msg) => msg.id === action.payload.id
       );
       if (!messageExists) {
         state.conversations[conversationId].push(action.payload);
-
-        // Update the connections list with the new message
         const connectionIndex = state.connections.findIndex(
           (conn) =>
             conn.user.id ===
@@ -127,7 +124,6 @@ const userMessageSlice = createSlice({
         );
         if (connectionIndex !== -1) {
           state.connections[connectionIndex].lastMessage = action.payload;
-          // Move this connection to the top of the list
           const [updatedConnection] = state.connections.splice(
             connectionIndex,
             1
@@ -140,19 +136,12 @@ const userMessageSlice = createSlice({
       state,
       action: PayloadAction<{ userId: string; isTyping: boolean }>
     ) => {
-      console.log("setTypingStatus action received:", action.payload);
       const connectionIndex = state.connections.findIndex(
         (conn) => conn.user.id === action.payload.userId
       );
       if (connectionIndex !== -1) {
         state.connections[connectionIndex].isTyping =
           action.payload.isTyping ?? false;
-        console.log(
-          "Typing status updated:",
-          state.connections[connectionIndex]
-        );
-      } else {
-        console.log("Connection not found for user:", action.payload.userId);
       }
     },
     setCurrentUserId: (state, action: PayloadAction<string>) => {

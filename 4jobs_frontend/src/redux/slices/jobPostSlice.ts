@@ -26,9 +26,7 @@ export const fetchJobPosts = createAsyncThunk(
   'jobPosts/fetchJobPosts',
   async (recruiterId: string, { rejectWithValue }) => {
     try {
-      console.log("jobpostlist",recruiterId)
       const response = await jobPostApi.getJobPosts(recruiterId);
-      console.log("jobpostlist",response)
       return response;
     } catch (error: any) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job posts');
@@ -52,9 +50,7 @@ export const updateJobPost = createAsyncThunk(
   'jobPosts/updateJobPost', 
   async (params: UpdateBasicJobPostParams, { rejectWithValue }) => {
     try {
-      console.log("params update jo po",params)
       const response = await jobPostApi.updateJobPost(params);
-      console.log('Update response:', response);
       return response;
     } catch (error: any) {
       console.error('Error in updateJobPost thunk:', error);
@@ -128,10 +124,8 @@ const jobPostSlice = createSlice({
       })
       .addCase(updateJobPost.pending, (state) => {
         state.error = null;
-        console.log('Update pending');
       })
       .addCase(updateJobPost.fulfilled, (state, action) => {
-        console.log('Update fulfilled:', action.payload);
         const index = state.posts.findIndex(post => post._id === action.payload._id);
         if (index !== -1) {
           state.posts[index] = action.payload;

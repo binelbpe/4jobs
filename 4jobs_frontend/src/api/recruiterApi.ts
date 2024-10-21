@@ -39,32 +39,26 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: s
 
 
 export const registerRecruiterApi = async (recruiterData: FormData) => {
-  console.log('Attempting recruiter registration with file:', recruiterData);
   return apiRequest('POST', '/register', recruiterData);
 };
 
 export const loginRecruiterApi = async (loginData: any) => {
-  console.log('Attempting recruiter login with:', loginData);
   return apiRequest('POST', '/login', loginData);
 };
 
 export const verifyOtpApi = async (otpData: any) => {
-  console.log('Attempting OTP verification:', otpData);
   return apiRequest('POST', '/verify-otp', otpData);
 };
 
 export const sendOtpApi = async (email: string) => {
-  console.log('Attempting to send OTP to:', email);
   return apiRequest('POST', '/send-otp', { email });
 };
 
 export const fetchRecruiterProfileApi = async (recruiterId: string) => {
-  console.log(`Fetching profile for recruiter ID: ${recruiterId}`);
   return apiRequest('GET', `/profile/${recruiterId}`);
 };
 
 export const updateRecruiterProfileApi = async (recruiterId: string, profileData: any) => {
-  console.log(`Updating profile for recruiter ID: ${recruiterId}`);
   return apiRequest('PUT', `/update-profile/${recruiterId}`, profileData);
 };
 export const getJobPosts = async (recruiterId: string) => {
@@ -89,11 +83,9 @@ export const updateJobPost = async (params: UpdateBasicJobPostParams) => {
   if (!params.id) {
     throw new Error('Job post ID is required to update the job post');
   }
-  console.log('Updating job post with ID:', params.id);
-  console.log('Update data:', params.postData);
+
   try {
     const result = await apiRequest('PUT', `/update-jobpost/${params.id}`, params.postData);
-    console.log('Update result:', result);
     return result;
   } catch (error) {
     console.error('Error updating job post:', error);
@@ -109,7 +101,6 @@ export const deleteJobPost = async (id: string) => {
 };
 
 export const fetchJobApplicants = async (jobId: string, page: number = 1): Promise<FetchUsersResponse> => {
-  console.log("job",jobId,page)
   return apiRequest('GET', `/job-applicants/${jobId}?page=${page}`);
 };
 
@@ -119,20 +110,17 @@ export const fetchUserDetails = async (userId: string): Promise<FetchUserDetails
 
 
 export const fetchConversationsApi = async (recruiterId:string): Promise<{ data: Conversation[] }> => {
-  console.log("recruiterId::::::",recruiterId)
   return apiRequest('GET', `/conversations/${recruiterId}`);
 };
 
 export const fetchMessagesApi = async (conversationId: string): Promise<{ data: Message[] }> => {
   const response = await apiRequest('GET', `/conversations/${conversationId}/messages`);
-  console.log('Raw API response:', response);
   return { data: Array.isArray(response.data) ? response.data : response };
 };
 
 export const sendMessageApi = async (conversationId: string, content: string): Promise<Message> => {
   try {
     const response = await apiRequest('POST', `/conversations/${conversationId}/messages`, { content });
-    console.log('Raw response from sendMessageApi:', response);
     if (response && typeof response === 'object' && 'id' in response) {
       return response as Message;
     } else if (response && typeof response === 'object' && 'data' in response && typeof response.data === 'object' && 'id' in response.data) {
@@ -153,14 +141,11 @@ export const startConversationApi = async (applicantId: string,recruiterId: stri
 };
 
 export const updateSubscriptionApi = async (recruiterId: string, subscriptionData: any) => {
-  console.log(`Updating subscription for recruiter ID: ${recruiterId}`);
   return apiRequest('PUT', `/update-subscription/${recruiterId}`, subscriptionData);
 };
 
 export const searchUsers = async (query: string) => {
-  console.log('Searching users with query:', query); 
   const response = await apiRequest('GET', `/search-users?query=${query}`);
-  console.log('Search API response:', response); 
   return response;
 };
 
@@ -180,6 +165,5 @@ export const getAllJobPosts = async () => {
 
 export const fetchFilteredApplicants = async (jobId: string): Promise<FetchUsersResponse> => {
  const response = await apiRequest('GET', `/filtered-applicants/${jobId}`);
- console.log("filtered response",response)
  return response
 };

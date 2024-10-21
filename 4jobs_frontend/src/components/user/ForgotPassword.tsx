@@ -30,6 +30,11 @@ const ForgotPassword: React.FC = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
+  // Reset error message after each change or re-render
+  useEffect(() => {
+    dispatch({ type: 'auth/clearError' });
+  }, [email, otp, newPassword, confirmPassword, dispatch]);
+
   const validateEmail = (email: string) => {
     return /^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/.test(email);
   };

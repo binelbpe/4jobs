@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../../redux/store';
@@ -18,11 +18,7 @@ const CreateJobPost: React.FC = () => {
   const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
 
-  useEffect(() => {
-    checkSubscriptionStatus();
-  }, [recruiter]);
-
-  const checkSubscriptionStatus = () => {
+  const checkSubscriptionStatus = useCallback(() => {
     if (recruiter) {
       const isSubscribed = recruiter.subscribed;
       const expiryDate = recruiter.expiryDate ? new Date(recruiter.expiryDate) : null;
@@ -34,7 +30,11 @@ const CreateJobPost: React.FC = () => {
         setShowSubscriptionPlans(false);
       }
     }
-  };
+  }, [recruiter]);
+
+  useEffect(() => {
+    checkSubscriptionStatus();
+  }, [checkSubscriptionStatus]);
 
   const handleSubmit = async (formData: BasicJobPostFormData) => {
     if (recruiter && recruiter.id) {

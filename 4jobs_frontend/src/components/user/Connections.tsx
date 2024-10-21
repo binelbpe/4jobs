@@ -11,7 +11,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUserCheck, faUserTimes, faEnvelope, faPhone, faBriefcase, faCalendarAlt, faVenusMars } from '@fortawesome/free-solid-svg-icons';
 import UserHeader from './Header';
 import { User } from '../../types/auth';
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface ConnectionRequest {
   _id: string;
@@ -32,13 +33,16 @@ const Connections: React.FC = () => {
     user: state.auth.user,
     ...state.connections
   }));
-  console.log("zzzzzzzzzz",connectionRequests)
   const [searchQuery, setSearchQuery] = useState('');
   const [localLoading, setLocalLoading] = useState<{ [key: string]: boolean }>({});
 
   const fetchData = useCallback(() => {
     if (user) {
-      dispatch(fetchConnections(user.id));
+      dispatch(fetchConnections(user.id))
+        .unwrap()
+        .catch((err) => {
+          toast.error('Failed to fetch connections. Please try again later.');
+        });
     }
   }, [dispatch, user]);
 
@@ -46,14 +50,13 @@ const Connections: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  useEffect(() => {
-    console.log("Connection Requests:", connectionRequests);
-    console.log("Connections:", connections);
-  }, [connectionRequests, connections]);
-
   const handleSearch = useCallback(() => {
     if (user) {
-      dispatch(searchConnections({ userId: user.id, query: searchQuery }));
+      dispatch(searchConnections({ userId: user.id, query: searchQuery }))
+        .unwrap()
+        .catch((err) => {
+          toast.error('Search failed. Please try again.');
+        });
     }
   }, [dispatch, user, searchQuery]);
 
@@ -61,16 +64,14 @@ const Connections: React.FC = () => {
     if (user && requestId) {
       setLocalLoading(prev => ({ ...prev, [requestId]: true }));
       try {
-        console.log("Accepting request with ID:", requestId);
         await dispatch(acceptConnectionRequest({ requestId, userId: user.id })).unwrap();
+        toast.success('Connection request accepted successfully.');
         fetchData();
       } catch (error) {
-        console.error("Error accepting request:", error);
+        toast.error('Failed to accept connection request. Please try again.');
       } finally {
         setLocalLoading(prev => ({ ...prev, [requestId]: false }));
       }
-    } else {
-      console.error("User or requestId is undefined", { user, requestId });
     }
   };
 
@@ -78,11 +79,11 @@ const Connections: React.FC = () => {
     if (user) {
       setLocalLoading(prev => ({ ...prev, [requestId]: true }));
       try {
-        console.log("Rejecting request with ID:", requestId);
         await dispatch(rejectConnectionRequest({ requestId, userId: user.id })).unwrap();
+        toast.success('Connection request rejected successfully.');
         fetchData();
       } catch (error) {
-        console.error("Error rejecting request:", error);
+        toast.error('Failed to reject connection request. Please try again.');
       } finally {
         setLocalLoading(prev => ({ ...prev, [requestId]: false }));
       }
@@ -92,20 +93,21 @@ const Connections: React.FC = () => {
   const truncateBio = (bio: string | undefined, wordLimit: number = 10) => {
     if (!bio) return 'No bio available';
     const words = bio.split(' ');
-    if (words.length > wordLimit) {
-      return words.slice(0, wordLimit).join(' ') + '...';
-    }
-    return bio;
+    return words.length > wordLimit ? words.slice(0, wordLimit).join(' ') + '...' : bio;
   };
 
-  if (error) return <div className="text-red-600 text-center mt-8">Error: {error}</div>;
+  if (error) {
+    toast.error(`An error occurred: ${error}`);
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen">
       <UserHeader />
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-purple-800">My Network</h1>
         
+        {/* Search bar */}
         <div className="mb-8">
           <div className="flex items-center max-w-md mx-auto">
             <input
@@ -131,6 +133,7 @@ const Connections: React.FC = () => {
           </div>
         ) : (
           <>
+            {/* Connection Requests Section */}
             <div className="bg-white shadow-md rounded-lg p-6 mb-8">
               <h2 className="text-2xl font-semibold mb-4 text-purple-800">Connection Requests</h2>
               {connectionRequests.length === 0 ? (
@@ -170,6 +173,7 @@ const Connections: React.FC = () => {
               )}
             </div>
 
+            {/* Connections List Section */}
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-2xl font-semibold mb-4 text-purple-800">Your Connections</h2>
               {connections?.length === 0 ? (

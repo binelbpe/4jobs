@@ -29,7 +29,6 @@ import { searchUsersAndJobs, clearSearch } from "../../redux/slices/userSearchSl
 import { createSocketListener } from '../../utils/socketUtils';
 
 const UserHeader: React.FC = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +58,6 @@ const UserHeader: React.FC = () => {
   const navigateTo = useCallback(
     (path: string) => {
       navigate(path);
-      setMenuOpen(false);
       setShowNotifications(false);
     },
     [navigate]
@@ -88,7 +86,7 @@ const UserHeader: React.FC = () => {
         socketService?.disconnect();
       };
     }
-  }, [user?.id, user, dispatch]);
+  }, [user, dispatch]);
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
@@ -142,15 +140,9 @@ const UserHeader: React.FC = () => {
     navigateTo("/connections");
   }, [navigateTo]);
 
-  const toggleMenu = useCallback(() => {
-    setMenuOpen((prev) => !prev);
-    setShowNotifications(false);
-    setShowSearch(false);
-  }, []);
-
   const toggleSearch = useCallback(() => {
     setShowSearch((prev) => !prev);
-    setMenuOpen(false);
+    setShowMobileMenu(false);
   }, []);
 
   const handleSearch = useCallback(() => {
@@ -169,11 +161,11 @@ const UserHeader: React.FC = () => {
     (icon: any, text: string, onClick: () => void, badge?: number) => (
       <button
         key={text}
-        className="flex items-center text-purple-600 hover:text-gray-600 px-2 sm:px-3 md:px-4 py-1 sm:py-2 relative text-xs sm:text-sm md:text-base"
+        className="flex items-center text-purple-600 hover:text-gray-600 px-2 sm:px-3 md:px-4 py-1 sm:py-2 relative text-xs sm:text-sm md:text-base w-full md:w-auto"
         onClick={onClick}
       >
-        <FontAwesomeIcon icon={icon} className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-        <span className="hidden sm:inline">{text}</span>
+        <FontAwesomeIcon icon={icon} className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+        <span className="inline">{text}</span>
         {badge !== undefined && badge > 0 && (
           <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full px-1 sm:px-2 py-0.5 text-xxs sm:text-xs">
             {badge}
@@ -218,6 +210,7 @@ const UserHeader: React.FC = () => {
   // Add this new function to toggle the mobile menu
   const toggleMobileMenu = useCallback(() => {
     setShowMobileMenu((prev) => !prev);
+    setShowSearch(false);
   }, []);
 
   return (

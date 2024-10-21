@@ -7,12 +7,11 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PATCH', endpoint:
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-console.log(token)
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
   if(!token){
-    console.log("no token")
+    console.error("no token")
   }
 
   try {
@@ -40,7 +39,6 @@ console.log(token)
 };
 // API for admin login
 export const adminLoginApi = async (email: string, password: string) => {
-  console.log('Attempting admin login:', email);
   return apiRequest('POST', '/login', { email, password });
 };
 
@@ -52,13 +50,11 @@ export const fetchAdminDashboardDataApi = async () => {
 // API for fetching recruiters
 export const fetchRecruitersApi = async () => {
    const response=apiRequest('GET', '/recruiters');
-   console.log("response",response)
    return response
 };
 
 // API for approving a recruiter
 export const approveRecruiterApi = async (recruiterId: string) => {
-  console.log("recruiterId",recruiterId)
   return apiRequest('PATCH', `/recruiters/${recruiterId}/approve`);
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { videoCallService } from "../../services/RecruiterUservideoCallService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -29,10 +29,17 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  const handleEndCall = useCallback(() => {
+    videoCallService.disconnectCall();
+    userRecruiterSocketService.emitEndCall(recipientId);
+    setLocalStream(null);
+    setRemoteStream(null);
+    onEndCall();
+  }, [recipientId, onEndCall]);
+
   useEffect(() => {
     const startCall = async () => {
       try {
-        console.log("Starting video call, isRecruiter:", isRecruiter);
         const stream = await videoCallService.startLocalStream();
         setLocalStream(stream);
         if (localVideoRef.current) {
@@ -40,7 +47,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
         }
 
         videoCallService.setOnRemoteStreamUpdate((stream) => {
-          console.log("Received remote stream");
           setRemoteStream(stream);
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = stream;
@@ -49,7 +55,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
         if (isRecruiter) {
           const offer = await videoCallService.makeCall(recipientId);
-          console.log("Created offer:", offer);
           userRecruiterSocketService.emitCallOffer(recipientId, offer);
         }
       } catch (error) {
@@ -61,7 +66,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
     startCall();
 
     userRecruiterSocketService.onCallAnswer(async (answerBase64) => {
-      console.log("Received call answer:", answerBase64);
       try {
         await videoCallService.handleAnswer(answerBase64);
       } catch (error) {
@@ -71,15 +75,13 @@ const VideoCall: React.FC<VideoCallProps> = ({
     });
 
     userRecruiterSocketService.onCallRejected(() => {
-      console.log("Call rejected");
       handleEndCall();
     });
 
     return () => {
-      console.log("Cleaning up video call");
       videoCallService.disconnectCall();
     };
-  }, [isRecruiter, recipientId]);
+  }, [isRecruiter, recipientId, handleEndCall]);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -101,15 +103,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const handleVideoToggle = () => {
     setIsVideoHidden(!isVideoHidden);
     videoCallService.hideVideo(!isVideoHidden);
-  };
-
-  const handleEndCall = () => {
-    console.log("Ending call");
-    videoCallService.disconnectCall();
-    userRecruiterSocketService.emitEndCall(recipientId);
-    setLocalStream(null);
-    setRemoteStream(null);
-    onEndCall();
   };
 
   if (error) {

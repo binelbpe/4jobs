@@ -29,10 +29,7 @@ const JobContestantsList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-
-  console.log('Contestants:', contestants);
-  console.log('Filtered Contestants:', filteredContestants);
-  console.log('Is Filtered:', isFiltered);
+  
 
   useEffect(() => {
     if (jobId) {
@@ -52,7 +49,6 @@ const JobContestantsList: React.FC = () => {
   };
 
   const handleFilterApplicants = async () => {
-    console.log('Filtering applicants');
     if (jobId) {
       setIsFiltering(true);
       await dispatch(fetchFilteredContestantsForJob(jobId));

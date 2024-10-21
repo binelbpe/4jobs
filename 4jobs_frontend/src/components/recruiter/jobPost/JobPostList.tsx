@@ -56,13 +56,10 @@ const JobPostList: React.FC = () => {
         ...post,
         status: post.status === "Open" ? "Closed" : "Open",
       };
-      console.log("Toggling status for post:", post._id);
-      console.log("Updated post data:", updatedPost);
       try {
-        const result = await dispatch(
+        await dispatch(
           updateJobPost({ id: post._id, postData: updatedPost })
         ).unwrap();
-        console.log("Update result:", result);
         await dispatch(fetchJobPosts(recruiter._id));
       } catch (error) {
         console.error("Failed to toggle job post status:", error);

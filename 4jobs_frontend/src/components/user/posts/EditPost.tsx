@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { editPost, deleteComment } from '../../../redux/slices/postSlice';
@@ -8,10 +8,13 @@ import Header from '../Header';
 import { ImageIcon, VideoIcon, XIcon, TrashIcon } from 'lucide-react';
 import ConfirmationModal from '../../common/ConfirmationModal';
 import { toast } from 'react-toastify';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
+import { formatFileSize, MAX_IMAGE_SIZE, MAX_VIDEO_SIZE, TARGET_VIDEO_SIZE, MAX_CONTENT_LENGTH } from '../../../utils/fileUtils';
+import CompressionLoader from '../../common/CompressionLoader';
+import FullScreenLoader from '../../common/FullScreenLoader';
 
-// Add these constants at the top of the file
-const MAX_CONTENT_LENGTH = 500;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+// Update these constants to match CreatePost.tsx
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
 
@@ -44,6 +47,10 @@ const EditPost: React.FC = () => {
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingUpdate, setPendingUpdate] = useState<{ postData: Partial<CreatePostData>; postId: string; userId: string } | null>(null);
+  const [compressedVideo, setCompressedVideo] = useState<File | null>(null);
 
   useEffect(() => {
     if (post) {
@@ -63,8 +70,9 @@ const EditPost: React.FC = () => {
   };
 
   const validateFile = (file: File, isImage: boolean) => {
-    if (file.size > MAX_FILE_SIZE) {
-      setFileError('File size must be 10MB or less');
+    const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
+    if (file.size > maxSize) {
+      setFileError(`File size exceeds the maximum allowed (${formatFileSize(maxSize)})`);
       return false;
     }
     const allowedTypes = isImage ? ALLOWED_IMAGE_TYPES : ALLOWED_VIDEO_TYPES;
@@ -94,12 +102,92 @@ const EditPost: React.FC = () => {
     }
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const updatePostInBackend = useCallback(async (postData: Partial<CreatePostData>, postId: string, userId: string) => {
+    setIsUploading(true);
+    try {
+      await dispatch(editPost({ postId, userId, postData }));
+      toast.success('Post updated successfully!');
+      navigate(-1);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(`Error updating post: ${error.message}`);
+      } else {
+        toast.error('An unknown error occurred while updating the post');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  }, [dispatch, navigate]);
+
+  const compressVideo = useCallback(async (inputFile: File): Promise<File> => {
+    setIsCompressing(true);
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load();
+
+    try {
+      const inputFileName = 'input.mp4';
+      const outputFileName = 'output.mp4';
+      ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
+
+      // Calculate target bitrate based on the desired file size
+      const duration = await getDuration(inputFile);
+      const targetBitrate = Math.floor((TARGET_VIDEO_SIZE * 8 * 1024 * 1024) / duration);
+
+      await ffmpeg.exec([
+        '-i', inputFileName,
+        '-b:v', `${targetBitrate}`,
+        '-maxrate', `${targetBitrate * 2}`,
+        '-bufsize', `${targetBitrate * 4}`,
+        '-c:v', 'libx264',
+        '-preset', 'slow',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        outputFileName
+      ]);
+
+      const compressedData = await ffmpeg.readFile(outputFileName);
+      const compressedBlob = new Blob([compressedData], { type: 'video/mp4' });
+      const compressedFile = new File([compressedBlob], 'compressed_video.mp4', { type: 'video/mp4' });
+
+      return compressedFile;
+    } finally {
+      setIsCompressing(false);
+      if (pendingUpdate) {
+        const updatedPostData = { ...pendingUpdate.postData, video: inputFile };
+        await updatePostInBackend(updatedPostData, pendingUpdate.postId, pendingUpdate.userId);
+        setPendingUpdate(null);
+      }
+    }
+  }, [pendingUpdate, updatePostInBackend]);
+
+  const getDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(video.duration);
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (validateFile(file, false)) {
         setVideo(file);
         setPreviewVideo(URL.createObjectURL(file));
+        
+        if (file.size > TARGET_VIDEO_SIZE) {
+          toast.info(`Compressing video to approximately ${formatFileSize(TARGET_VIDEO_SIZE)}, please wait...`);
+          const compressed = await compressVideo(file);
+          setCompressedVideo(compressed);
+          setPreviewVideo(URL.createObjectURL(compressed));
+          toast.success(`Video compressed to ${formatFileSize(compressed.size)}`);
+        } else {
+          setCompressedVideo(file);
+        }
       } else {
         e.target.value = '';
       }
@@ -110,16 +198,36 @@ const EditPost: React.FC = () => {
     e.preventDefault();
     if (!validateContent(content)) return;
     if ((image && !validateFile(image, true)) || (video && !validateFile(video, false))) return;
+    
     if (postId) {
+      setIsUploading(true);
+      if (video && video.size > TARGET_VIDEO_SIZE) {
+        toast.info(`Compressing video to approximately ${formatFileSize(TARGET_VIDEO_SIZE)}, please wait...`);
+        try {
+          const compressed = await compressVideo(video);
+          setCompressedVideo(compressed);
+          toast.success(`Video compressed to ${formatFileSize(compressed.size)}`);
+        } catch (error) {
+          toast.error("Error compressing video. Please try again.");
+          return;
+        }
+      }
+
       const postData: Partial<CreatePostData> = { content };
       if (image) postData.image = image;
-      if (video) postData.video = video;
-      if (!content.trim() && !image && !video) {
+      if (compressedVideo) {
+        postData.video = compressedVideo;
+      } else if (video) {
+        postData.video = video;
+      }
+      
+      if (!content.trim() && !image && !postData.video) {
         toast.error('Please add some content, an image, or a video to your post.');
         return;
       }
-      await dispatch(editPost({ postId, userId, postData }));
-      navigate(-1);
+      
+      await updatePostInBackend(postData, postId, userId);
+      setIsUploading(false);
     }
   };
 
@@ -142,6 +250,7 @@ const EditPost: React.FC = () => {
 
   const removeVideo = () => {
     setVideo(null);
+    setCompressedVideo(null);
     setPreviewVideo(null);
   };
 
@@ -182,8 +291,15 @@ const EditPost: React.FC = () => {
                 <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300">
                   <VideoIcon size={20} />
                   <span className="text-sm">Add Video</span>
-                  <input type="file" accept="video/*" onChange={handleVideoChange} className="hidden" />
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="hidden"
+                    disabled={isCompressing}
+                  />
                 </label>
+                {isCompressing && <CompressionLoader />}
               </div>
               {previewImage && (
                 <div className="relative">
@@ -209,12 +325,14 @@ const EditPost: React.FC = () => {
                   </button>
                 </div>
               )}
-              <div className="flex justify-end">
+              <div className="flex justify-end items-center">
+                {isCompressing && <span className="text-purple-600 mr-4">Compressing video...</span>}
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors duration-300"
+                  className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors duration-300 disabled:opacity-50"
+                  disabled={isUploading}
                 >
-                  Update Post
+                  {isUploading ? 'Updating...' : 'Update Post'}
                 </button>
               </div>
             </form>
@@ -252,6 +370,7 @@ const EditPost: React.FC = () => {
         message="Are you sure you want to delete this comment? This action cannot be undone."
       />
       {fileError && <p className="text-red-500 text-sm mt-1">{fileError}</p>}
+      {(isCompressing || isUploading) && <FullScreenLoader />}
     </div>
   );
 };

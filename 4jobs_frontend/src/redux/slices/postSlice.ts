@@ -45,7 +45,6 @@ export const fetchPosts = createAsyncThunk(
   async (_, { getState }) => {
     const { posts } = getState() as { posts: PostsState };
     const response = await fetchPostsAPI(posts.page);
-    console.log("all posts", response);
     return Array.isArray(response)
       ? response
       : (response as PostsApiResponse).posts;
@@ -57,7 +56,6 @@ export const fetchPostsByUserId = createAsyncThunk<
   { userId: string; page: number; limit: number }
 >("posts/fetchPostsByUserId", async ({ userId, page, limit }) => {
   const response = await fetchPostsByUserIdAPI(userId, page, limit);
-  console.log("Fetched posts:", response);
   return response;
 });
 
@@ -79,9 +77,7 @@ export const likePost = createAsyncThunk(
   "posts/likePost",
   async (likeData: LikePostData, { rejectWithValue }) => {
     try {
-      console.log("Calling likePostAPI with data:", likeData);
       const response = await likePostAPI(likeData);
-      console.log("likePostAPI response:", response);
       return response;
     } catch (error: unknown) {
       console.error("Error in likePost:", error);
@@ -134,9 +130,7 @@ export const editPost = createAsyncThunk(
     userId: string;
     postData: Partial<CreatePostData>;
   }) => {
-    console.log("edit post", userId, postId, postData);
     const response = await editPostAPI(postId, userId, postData);
-    console.log("response", response);
     return response;
   }
 );
