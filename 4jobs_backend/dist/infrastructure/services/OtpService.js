@@ -26,9 +26,11 @@ class OtpService {
     sendOtp(email, otp) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(`Sending OTP ${otp} to email ${email}`);
-                yield this.emailService.sendWelcomeEmail(email, `Your OTP: ${otp}`);
-                console.log(`Sending OTP ${otp} to email ${email}`);
+                const subject = 'Your OTP for 4JOBS';
+                const text = `Your OTP is: ${otp}`;
+                const html = `<p>Your OTP is: <strong>${otp}</strong></p>`;
+                yield this.emailService.sendEmail(email, subject, text, html);
+                console.log(`Sent OTP ${otp} to email ${email}`);
             }
             catch (error) {
                 console.error('Error sending OTP email:', error);
@@ -44,6 +46,15 @@ class OtpService {
         return __awaiter(this, void 0, void 0, function* () {
             const storedOtp = otpStore[email];
             return storedOtp === otp;
+        });
+    }
+    sendForgotPasswordOtp(email, otp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const subject = "Password Reset OTP";
+            const text = `Your OTP for password reset is: ${otp}. This OTP is valid for 5 minutes.`;
+            const html = `<p>Your OTP for password reset is: <strong>${otp}</strong>. This OTP is valid for 5 minutes.</p>`;
+            console.log(`otp:${otp} email${email}`);
+            yield this.emailService.sendEmail(email, subject, text, html);
         });
     }
 }

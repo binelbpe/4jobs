@@ -25,33 +25,34 @@ export class NodemailerEmailService implements IEmailService {
     });
   }
 
-  async sendWelcomeEmail(to: string, name: string): Promise<void> {
+  async sendEmail(to: string, subject: string, text: string, html: string): Promise<void> {
     try {
       await this.transporter.sendMail({
         from: process.env.EMAIL_FROM !,
         to,
-        subject: 'Welcome to 4JOBS',
-        text: `Hello ${name},\n\nWelcome to 4JOBS! We're excited to have you on board.`,
-        html: `<h1>Welcome, ${name}!</h1><p>We're excited to have you on board.</p>`,
+        subject,
+        text,
+        html,
       });
     } catch (error) {
-      console.error('Error sending welcome email:', error);
-      throw new Error('Could not send welcome email');
+      console.error('Error sending email:', error);
+      throw new Error('Could not send email');
     }
   }
 
+  async sendWelcomeEmail(to: string, name: string): Promise<void> {
+    const subject = 'Welcome to 4JOBS';
+    const text = `Hello ${name},\n\nWelcome to 4JOBS! We're excited to have you on board.`;
+    const html = `<h1>Welcome, ${name}!</h1><p>We're excited to have you on board.</p>`;
+    
+    await this.sendEmail(to, subject, text, html);
+  }
+
   async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
-    try {
-      await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM !,
-        to,
-        subject: 'Password Reset Request',
-        text: `Please use the following token to reset your password: ${resetToken}`,
-        html: `<p>Please use the following token to reset your password: <strong>${resetToken}</strong></p>`,
-      });
-    } catch (error) {
-      console.error('Error sending password reset email:', error);
-      throw new Error('Could not send password reset email');
-    }
+    const subject = 'Password Reset Request';
+    const text = `Please use the following token to reset your password: ${resetToken}`;
+    const html = `<p>Please use the following token to reset your password: <strong>${resetToken}</strong></p>`;
+    
+    await this.sendEmail(to, subject, text, html);
   }
 }

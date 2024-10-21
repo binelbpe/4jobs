@@ -16,8 +16,8 @@ export class JwtAuthService implements IAuthService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10; 
-    return await bcrypt.hash(password, saltRounds);
+    const saltRounds = 10;
+    return bcrypt.hash(password, saltRounds);
   }
 
   async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {

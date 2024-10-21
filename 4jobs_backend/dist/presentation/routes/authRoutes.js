@@ -176,4 +176,9 @@ exports.authRouter.post("/posts/:postId/dislike", authMiddleware_1.authenticate,
 exports.authRouter.post("/posts/:postId/comment", authMiddleware_1.authenticate, postController.commentOnPost.bind(postController));
 // Delete comment route
 exports.authRouter.delete("/posts/:postId/comments/:commentId", authMiddleware_1.authenticate, postController.deleteComment.bind(postController));
+// Add these new routes
+exports.authRouter.post("/forgot-password", authController.sendForgotPasswordOtp.bind(authController));
+exports.authRouter.post("/verify-forgot-password-otp", authController.verifyForgotPasswordOtp.bind(authController));
+// Add this new route
+exports.authRouter.post("/reset-password", authController.resetPassword.bind(authController));
 exports.default = exports.authRouter;

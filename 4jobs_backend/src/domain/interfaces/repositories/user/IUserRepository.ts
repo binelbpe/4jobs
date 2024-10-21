@@ -9,4 +9,5 @@ export interface IUserRepository {
   update(id: string, user: Partial<User>): Promise<User | null>;
   searchUsers(query: string, userIds: string[]): Promise<User[]>;
   findUsersByIds(userIds: string[]): Promise<User[]>;
+  updatePassword(id: string, newPassword: string): Promise<void>;
 }

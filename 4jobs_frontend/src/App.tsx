@@ -52,6 +52,8 @@ import SearchResults from './components/user/SearchResults';
 import UserVideoCall from './components/user/UserVideoCall';
  import JobDetails from './components/recruiter/RecruiterJobDetails';
 import ResumeBuilder from './components/user/ResumeBuilder';
+import RecruiterJobDetails from './components/recruiter/RecruiterJobDetails';
+import ForgotPassword from './components/user/ForgotPassword';
 
 const AppContent: React.FC = () => {
   const { handleIncomingCall, isCallActive, incomingCallData, endCall } = useCall();
@@ -95,6 +97,7 @@ const AppContent: React.FC = () => {
         <Route path="/user/messages" element={<PrivateRoute><UserMessaging /></PrivateRoute>} />
         <Route path="/search-results" element={<PrivateRoute><SearchResults /></PrivateRoute>} />
         <Route path="/resume-builder" element={<PrivateRoute><ResumeBuilder /></PrivateRoute>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />
@@ -121,7 +124,7 @@ const AppContent: React.FC = () => {
         <Route path="/recruiter/job-applicants/:jobId" element={<RecruiterPrivateRoute><JobContestantsList /></RecruiterPrivateRoute>} />
         <Route path="/recruiter/contestant/:contestantId" element={<RecruiterPrivateRoute><ContestantDetails /></RecruiterPrivateRoute>} />
         <Route path="/recruiter/messages" element={<RecruiterPrivateRoute><RecruiterMessage /></RecruiterPrivateRoute>} />
-        <Route path="/recruiter/jobPost/:jobId" element={<RecruiterPrivateRoute><JobDetails /></RecruiterPrivateRoute>} />
+        <Route path="/recruiter/jobPost/:jobId" element={<RecruiterPrivateRoute><RecruiterJobDetails /></RecruiterPrivateRoute>} />
        
       </Routes>
       <IncomingCallDialog />

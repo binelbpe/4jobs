@@ -82,4 +82,10 @@ export class MongoUserRepository implements IUserRepository {
       isBlocked: doc.isBlocked,
     };
   }
+
+  // Add this new method to the MongoUserRepository class
+
+  async updatePassword(id: string, newPassword: string): Promise<void> {
+    await UserModel.findByIdAndUpdate(id, { password: newPassword });
+  }
 }

@@ -200,6 +200,72 @@ let AuthController = class AuthController {
             }
         });
     }
+    sendForgotPasswordOtp(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = req.body;
+                if (!email) {
+                    return res.status(400).json({ error: "Email is required" });
+                }
+                const user = yield this.userRepository.findByEmail(email);
+                if (!user) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+                const otp = this.otpService.generateOtp();
+                this.otpService.storeOtp(email, otp);
+                yield this.otpService.sendForgotPasswordOtp(email, otp);
+                res.status(200).json({ message: "OTP sent to email for password reset." });
+            }
+            catch (error) {
+                console.error("Error sending forgot password OTP:", error);
+                res.status(500).json({ error: "Failed to send OTP" });
+            }
+        });
+    }
+    verifyForgotPasswordOtp(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, otp } = req.body;
+                const isValid = yield this.otpService.verifyOtp(email, otp);
+                if (isValid) {
+                    // OTP is valid, you can add additional logic here if needed
+                    res.status(200).json({ message: "OTP verified successfully" });
+                }
+                else {
+                    res.status(400).json({ error: "Invalid OTP" });
+                }
+            }
+            catch (error) {
+                console.error("Error verifying forgot password OTP:", error);
+                res.status(500).json({ error: "Failed to verify OTP" });
+            }
+        });
+    }
+    resetPassword(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, newPassword, otp } = req.body;
+                if (!email || !newPassword || !otp) {
+                    return res.status(400).json({ error: "Email, new password, and OTP are required" });
+                }
+                const user = yield this.userRepository.findByEmail(email);
+                if (!user) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+                const isValidOtp = yield this.otpService.verifyOtp(email, otp);
+                if (!isValidOtp) {
+                    return res.status(400).json({ error: "Invalid OTP" });
+                }
+                const hashedPassword = yield this.jwtAuthService.hashPassword(newPassword);
+                yield this.userRepository.updatePassword(user.id, hashedPassword);
+                res.status(200).json({ message: "Password reset successfully" });
+            }
+            catch (error) {
+                console.error("Error resetting password:", error);
+                res.status(500).json({ error: "Failed to reset password" });
+            }
+        });
+    }
 };
 exports.AuthController = AuthController;
 exports.AuthController = AuthController = __decorate([

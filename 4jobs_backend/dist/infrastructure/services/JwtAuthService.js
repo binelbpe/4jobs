@@ -36,7 +36,7 @@ let JwtAuthService = class JwtAuthService {
     hashPassword(password) {
         return __awaiter(this, void 0, void 0, function* () {
             const saltRounds = 10;
-            return yield bcrypt_1.default.hash(password, saltRounds);
+            return bcrypt_1.default.hash(password, saltRounds);
         });
     }
     comparePasswords(plainPassword, hashedPassword) {

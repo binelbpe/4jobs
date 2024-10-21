@@ -18,9 +18,12 @@ export class OtpService {
 
   async sendOtp(email: string, otp: string): Promise<void> {
     try {
-      console.log(`Sending OTP ${otp} to email ${email}`);
-      await this.emailService.sendWelcomeEmail(email, `Your OTP: ${otp}`);
-      console.log(`Sending OTP ${otp} to email ${email}`);
+      const subject = 'Your OTP for 4JOBS';
+      const text = `Your OTP is: ${otp}`;
+      const html = `<p>Your OTP is: <strong>${otp}</strong></p>`;
+      
+      await this.emailService.sendEmail(email, subject, text, html);
+      console.log(`Sent OTP ${otp} to email ${email}`);
     } catch (error) {
       console.error('Error sending OTP email:', error);
       throw new Error('Failed to send OTP via email');
@@ -35,5 +38,13 @@ export class OtpService {
   async verifyOtp(email: string, otp: string): Promise<boolean> {
     const storedOtp = otpStore[email];
     return storedOtp === otp;
+  }
+
+  async sendForgotPasswordOtp(email: string, otp: string): Promise<void> {
+    const subject = "Password Reset OTP";
+    const text = `Your OTP for password reset is: ${otp}. This OTP is valid for 5 minutes.`;
+    const html = `<p>Your OTP for password reset is: <strong>${otp}</strong>. This OTP is valid for 5 minutes.</p>`;
+console.log(`otp:${otp} email${email}`)
+    await this.emailService.sendEmail(email, subject, text, html);
   }
 }

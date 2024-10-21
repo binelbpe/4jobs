@@ -193,4 +193,73 @@ export class AuthController {
       res.status(500).json({ error: 'An error occurred while searching' });
     }
   }
+
+  async sendForgotPasswordOtp(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const otp = this.otpService.generateOtp();
+      this.otpService.storeOtp(email, otp);
+      await this.otpService.sendForgotPasswordOtp(email, otp);
+
+      res.status(200).json({ message: "OTP sent to email for password reset." });
+    } catch (error) {
+      console.error("Error sending forgot password OTP:", error);
+      res.status(500).json({ error: "Failed to send OTP" });
+    }
+  }
+
+  async verifyForgotPasswordOtp(req: Request, res: Response) {
+    try {
+      const { email, otp } = req.body;
+
+      const isValid = await this.otpService.verifyOtp(email, otp);
+      if (isValid) {
+        // OTP is valid, you can add additional logic here if needed
+        res.status(200).json({ message: "OTP verified successfully" });
+      } else {
+        res.status(400).json({ error: "Invalid OTP" });
+      }
+    } catch (error) {
+      console.error("Error verifying forgot password OTP:", error);
+      res.status(500).json({ error: "Failed to verify OTP" });
+    }
+  }
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, newPassword, otp } = req.body;
+
+      if (!email || !newPassword || !otp) {
+        return res.status(400).json({ error: "Email, new password, and OTP are required" });
+      }
+
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const isValidOtp = await this.otpService.verifyOtp(email, otp);
+      if (!isValidOtp) {
+        return res.status(400).json({ error: "Invalid OTP" });
+      }
+
+      const hashedPassword = await this.jwtAuthService.hashPassword(newPassword);
+      await this.userRepository.updatePassword(user.id, hashedPassword);
+
+      res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ error: "Failed to reset password" });
+    }
+  }
 }

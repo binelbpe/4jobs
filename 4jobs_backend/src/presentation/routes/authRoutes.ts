@@ -403,4 +403,23 @@ authRouter.delete(
   postController.deleteComment.bind(postController)
 );
 
+// Add these new routes
+
+authRouter.post(
+  "/forgot-password",
+  authController.sendForgotPasswordOtp.bind(authController)
+);
+
+authRouter.post(
+  "/verify-forgot-password-otp",
+  authController.verifyForgotPasswordOtp.bind(authController)
+);
+
+// Add this new route
+
+authRouter.post(
+  "/reset-password",
+  authController.resetPassword.bind(authController)
+);
+
 export default authRouter;

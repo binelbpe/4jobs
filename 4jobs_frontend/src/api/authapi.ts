@@ -515,3 +515,17 @@ export const generateResumeApi = async (resumeData: ResumeData): Promise<string>
   }
 };
 
+// Add these new functions to the existing file
+
+export const sendForgotPasswordOtpApi = async (email: string) => {
+  return apiRequest("POST", "/forgot-password", { email });
+};
+
+export const verifyForgotPasswordOtpApi = async (email: string, otp: string) => {
+  return apiRequest("POST", "/verify-forgot-password-otp", { email, otp });
+};
+
+// Add this new function
+export const resetPasswordApi = async (email: string, newPassword: string, otp: string) => {
+  return apiRequest("POST", "/reset-password", { email, newPassword, otp });
+};

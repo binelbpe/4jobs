@@ -16,7 +16,10 @@ import {
   FetchJobPostsParams,
   applyForJob,
   fetchJobPostApi,
-  reportJobApi 
+  reportJobApi,
+  sendForgotPasswordOtpApi,
+  verifyForgotPasswordOtpApi,
+  resetPasswordApi
 } from '../../api/authapi';
 
 
@@ -217,6 +220,42 @@ export const reportJobAsync = createAsyncThunk(
         return rejectWithValue(error.response.data.error || 'Failed to report job');
       }
       return rejectWithValue('Failed to report job');
+    }
+  }
+);
+
+export const sendForgotPasswordOtp = createAsyncThunk(
+  'auth/sendForgotPasswordOtp',
+  async (email: string, thunkAPI) => {
+    try {
+      const response = await sendForgotPasswordOtpApi(email);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
+export const verifyForgotPasswordOtp = createAsyncThunk(
+  'auth/verifyForgotPasswordOtp',
+  async ({ email, otp }: { email: string; otp: string }, thunkAPI) => {
+    try {
+      const response = await verifyForgotPasswordOtpApi(email, otp);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ email, newPassword, otp }: { email: string; newPassword: string; otp: string }, thunkAPI) => {
+    try {
+      const response = await resetPasswordApi(email, newPassword, otp);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
   }
 );
@@ -431,6 +470,39 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(reportJobAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(sendForgotPasswordOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendForgotPasswordOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendForgotPasswordOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(verifyForgotPasswordOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyForgotPasswordOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(verifyForgotPasswordOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -12,6 +12,7 @@ import {
   Eye,
   AlertTriangle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface JobPostProps {
   jobPosts: BasicJobPost[];
@@ -28,6 +29,12 @@ const JobPost: React.FC<JobPostProps> = ({
   onToggleStatus,
   onViewContestants,
 }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = (postId: string) => {
+    navigate(`/recruiter/jobPost/${postId}`);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {jobPosts.map((post) => (
@@ -122,6 +129,13 @@ const JobPost: React.FC<JobPostProps> = ({
             >
               <Eye size={16} className="mr-1" />
               View Applicants
+            </button>
+            <button
+              onClick={() => handleViewDetails(post._id)}
+              className="flex items-center bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition-colors duration-300"
+            >
+              <Eye size={16} className="mr-1" />
+              View Details
             </button>
           </div>
         </div>
