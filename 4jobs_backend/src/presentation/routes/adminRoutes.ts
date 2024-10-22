@@ -53,4 +53,7 @@ adminRouter.post("/user-posts/:postId/toggle-block", authenticateadmin, (req, re
   adminController.toggleUserPostBlock(req, res)
 );
 
+// Add a new route for refreshing admin token
+adminRouter.post('/refresh-token', adminController.refreshAdminToken.bind(adminController));
+
 export { adminRouter };

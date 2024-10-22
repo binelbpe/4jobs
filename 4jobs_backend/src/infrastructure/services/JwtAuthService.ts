@@ -36,6 +36,18 @@ generateToken(user: User): string {
   );
 }
 
+// Add a method to generate refresh token
+generateRefreshToken(user: User): string {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    this.JWT_SECRET,
+    { expiresIn: '7d' } // Longer expiration for refresh token
+  );
+}
 
   verifyToken(token: string): any {
     return jwt.verify(token, this.JWT_SECRET);

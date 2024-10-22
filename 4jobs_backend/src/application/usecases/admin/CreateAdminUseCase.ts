@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../domain/interfaces/repositories/user/IUserRepository";
 import { IAuthService } from "../../../domain/interfaces/services/IAuthService";
-import { Admin } from "../../../domain/entities/Admin";
+import  {Admin}  from "../../../domain/entities/Admin";
 import { injectable } from "inversify";
 
 @injectable()

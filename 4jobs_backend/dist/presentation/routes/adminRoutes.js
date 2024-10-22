@@ -25,3 +25,5 @@ adminRouter.get("/subscriptions", authMiddleware_1.authenticateadmin, (req, res)
 adminRouter.post("/subscriptions/:recruiterId/cancel", authMiddleware_1.authenticateadmin, (req, res) => adminController.cancelSubscription(req, res));
 adminRouter.get("/user-posts", authMiddleware_1.authenticateadmin, (req, res) => adminController.getUserPosts(req, res));
 adminRouter.post("/user-posts/:postId/toggle-block", authMiddleware_1.authenticateadmin, (req, res) => adminController.toggleUserPostBlock(req, res));
+// Add a new route for refreshing admin token
+adminRouter.post('/refresh-token', adminController.refreshAdminToken.bind(adminController));

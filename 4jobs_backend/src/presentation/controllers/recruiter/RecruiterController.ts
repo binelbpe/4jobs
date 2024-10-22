@@ -11,6 +11,8 @@ import { S3Service } from "../../../infrastructure/services/S3Service";
 import { IRecruiter } from "../../../domain/entities/Recruiter";
 import { SearchUsersUseCase } from "../../../application/usecases/recruiter/SearchUsersUseCase";
 import { UserSearchResult } from "../../../domain/entities/UserSearchResult";
+import { JwtAuthService } from "../../../infrastructure/services/JwtAuthService";
+import { User } from "../../../domain/entities/User";
 
 const tempRecruiterStore: {
   [email: string]: {
@@ -39,7 +41,8 @@ export class RecruiterController {
     private recruiterRepository: IRecruiterRepository,
     @inject(TYPES.S3Service) private s3Service: S3Service,
     @inject(TYPES.SearchUsersUseCase)
-    private searchUsersUseCase: SearchUsersUseCase
+    private searchUsersUseCase: SearchUsersUseCase,
+    @inject(TYPES.JwtAuthService) private jwtAuthService: JwtAuthService
   ) {}
 
   async registerRecruiter(req: Request, res: Response) {
@@ -225,6 +228,22 @@ export class RecruiterController {
     } catch (error) {
       console.error("Error searching users:", error);
       res.status(500).json({ error: "Failed to search users" });
+    }
+  }
+
+  async refreshRecruiterToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      const decoded = this.jwtAuthService.verifyToken(refreshToken);
+      const recruiter = await this.recruiterRepository.findById(decoded.id);
+      if (!recruiter) {
+        return res.status(404).json({ error: 'Recruiter not found' });
+      }
+      const newToken = this.jwtAuthService.generateToken(recruiter as unknown as User);
+      res.json({ token: newToken, recruiter });
+    } catch (error) {
+      console.error('Error refreshing recruiter token:', error);
+      res.status(401).json({ error: 'Invalid refresh token' });
     }
   }
 }

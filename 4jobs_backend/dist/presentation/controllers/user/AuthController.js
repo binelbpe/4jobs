@@ -188,15 +188,17 @@ let AuthController = class AuthController {
                 const { query } = req.query;
                 const { userId } = req.query;
                 console.log("query and userId", userId, query);
-                if (typeof query !== 'string' || query.length < 3 || !userId) {
-                    return res.status(400).json({ error: 'Invalid query or user not authenticated' });
+                if (typeof query !== "string" || query.length < 3 || !userId) {
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid query or user not authenticated" });
                 }
                 const results = yield this.searchUsersAndJobsUseCase.execute(query, userId);
                 res.status(200).json(results);
             }
             catch (error) {
-                console.error('Error searching users and jobs:', error);
-                res.status(500).json({ error: 'An error occurred while searching' });
+                console.error("Error searching users and jobs:", error);
+                res.status(500).json({ error: "An error occurred while searching" });
             }
         });
     }
@@ -204,21 +206,13 @@ let AuthController = class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                if (!email) {
-                    return res.status(400).json({ error: "Email is required" });
-                }
-                const user = yield this.userRepository.findByEmail(email);
-                if (!user) {
-                    return res.status(404).json({ error: "User not found" });
-                }
                 const otp = this.otpService.generateOtp();
-                this.otpService.storeOtp(email, otp);
                 yield this.otpService.sendForgotPasswordOtp(email, otp);
-                res.status(200).json({ message: "OTP sent to email for password reset." });
+                res.status(200).json({ message: 'OTP sent for password reset' });
             }
             catch (error) {
-                console.error("Error sending forgot password OTP:", error);
-                res.status(500).json({ error: "Failed to send OTP" });
+                console.error('Error sending forgot password OTP:', error);
+                res.status(500).json({ error: 'Failed to send OTP' });
             }
         });
     }
@@ -228,16 +222,15 @@ let AuthController = class AuthController {
                 const { email, otp } = req.body;
                 const isValid = yield this.otpService.verifyOtp(email, otp);
                 if (isValid) {
-                    // OTP is valid, you can add additional logic here if needed
-                    res.status(200).json({ message: "OTP verified successfully" });
+                    res.status(200).json({ message: 'OTP verified successfully' });
                 }
                 else {
-                    res.status(400).json({ error: "Invalid OTP" });
+                    res.status(400).json({ error: 'Invalid OTP' });
                 }
             }
             catch (error) {
-                console.error("Error verifying forgot password OTP:", error);
-                res.status(500).json({ error: "Failed to verify OTP" });
+                console.error('Error verifying forgot password OTP:', error);
+                res.status(500).json({ error: 'Failed to verify OTP' });
             }
         });
     }
@@ -245,24 +238,21 @@ let AuthController = class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, newPassword, otp } = req.body;
-                if (!email || !newPassword || !otp) {
-                    return res.status(400).json({ error: "Email, new password, and OTP are required" });
+                const isValidOtp = yield this.otpService.verifyOtp(email, otp);
+                if (!isValidOtp) {
+                    return res.status(400).json({ error: 'Invalid OTP' });
                 }
                 const user = yield this.userRepository.findByEmail(email);
                 if (!user) {
-                    return res.status(404).json({ error: "User not found" });
-                }
-                const isValidOtp = yield this.otpService.verifyOtp(email, otp);
-                if (!isValidOtp) {
-                    return res.status(400).json({ error: "Invalid OTP" });
+                    return res.status(404).json({ error: 'User not found' });
                 }
                 const hashedPassword = yield this.jwtAuthService.hashPassword(newPassword);
                 yield this.userRepository.updatePassword(user.id, hashedPassword);
-                res.status(200).json({ message: "Password reset successfully" });
+                res.status(200).json({ message: 'Password reset successfully' });
             }
             catch (error) {
-                console.error("Error resetting password:", error);
-                res.status(500).json({ error: "Failed to reset password" });
+                console.error('Error resetting password:', error);
+                res.status(500).json({ error: 'Failed to reset password' });
             }
         });
     }

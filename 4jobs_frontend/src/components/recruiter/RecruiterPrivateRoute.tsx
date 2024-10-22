@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Navigate } from 'react-router-dom';
-import { RootState } from '../../redux/store';
-import { logout } from '../../redux/slices/recruiterSlice';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { RootState, AppDispatch } from '../../redux/store';
+import { logout, refreshRecruiterToken } from '../../redux/slices/recruiterSlice';
 
 interface RecruiterPrivateRouteProps {
   children: React.ReactNode;
@@ -10,15 +10,24 @@ interface RecruiterPrivateRouteProps {
 
 const RecruiterPrivateRoute: React.FC<RecruiterPrivateRouteProps> = ({ children }) => {
   const { isAuthenticatedRecruiter } = useSelector((state: RootState) => state.recruiter);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const token = localStorage.getItem('recruiterToken');
 
   useEffect(() => {
-    if (!isAuthenticatedRecruiter && token) {
-      // Token exists but not authenticated, logout and redirect
-      dispatch(logout());
-    }
-  }, [isAuthenticatedRecruiter, token, dispatch]);
+    const verifyToken = async () => {
+      if (!isAuthenticatedRecruiter && token) {
+        try {
+          await dispatch(refreshRecruiterToken()).unwrap();
+        } catch (error) {
+          dispatch(logout());
+          navigate('/recruiter/login');
+        }
+      }
+    };
+
+    verifyToken();
+  }, [isAuthenticatedRecruiter, token, dispatch, navigate]);
 
   if (!isAuthenticatedRecruiter && !token) {
     return <Navigate to="/recruiter/login" replace />;

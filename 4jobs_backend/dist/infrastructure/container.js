@@ -267,7 +267,11 @@ container.bind(types_1.default.LikePostUseCase).to(LikePostUseCase_1.LikePostUse
 container
     .bind(types_1.default.CommentOnPostUseCase)
     .to(CommentOnPostUseCase_1.CommentOnPostUseCase);
-container.bind(types_1.default.IResumeRepository).to(MongoResumeRepository_1.MongoResumeRepository);
-container.bind(types_1.default.GenerateResumeUseCase).to(GenerateResumeUseCase_1.GenerateResumeUseCase);
+container
+    .bind(types_1.default.IResumeRepository)
+    .to(MongoResumeRepository_1.MongoResumeRepository);
+container
+    .bind(types_1.default.GenerateResumeUseCase)
+    .to(GenerateResumeUseCase_1.GenerateResumeUseCase);
 container.bind(types_1.default.ResumeController).to(ResumeController_1.ResumeController);
 console.log(container);

@@ -301,8 +301,12 @@ container
   .bind<CommentOnPostUseCase>(TYPES.CommentOnPostUseCase)
   .to(CommentOnPostUseCase);
 
-container.bind<IResumeRepository>(TYPES.IResumeRepository).to(MongoResumeRepository);
-container.bind<GenerateResumeUseCase>(TYPES.GenerateResumeUseCase).to(GenerateResumeUseCase);
+container
+  .bind<IResumeRepository>(TYPES.IResumeRepository)
+  .to(MongoResumeRepository);
+container
+  .bind<GenerateResumeUseCase>(TYPES.GenerateResumeUseCase)
+  .to(GenerateResumeUseCase);
 container.bind<ResumeController>(TYPES.ResumeController).to(ResumeController);
 
 console.log(container);

@@ -8,6 +8,7 @@ import {
   sendOtpApi,
   fetchRecruiterProfileApi,
   updateRecruiterProfileApi,
+  refreshRecruiterTokenApi,
 } from "../../api/recruiterApi";
 
 interface RecruiterState {
@@ -112,6 +113,18 @@ export const updateSubscription = createAsyncThunk(
       return subscriptionData;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
+    }
+  }
+);
+
+export const refreshRecruiterToken = createAsyncThunk(
+  'recruiter/refreshRecruiterToken',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await refreshRecruiterTokenApi();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
   }
 );
@@ -239,6 +252,11 @@ const recruiterSlice = createSlice({
             expiryDate: action.payload.expiryDate,
           };
         }
+      })
+      .addCase(refreshRecruiterToken.fulfilled, (state, action) => {
+        state.isAuthenticatedRecruiter = true;
+        state.recruiter = action.payload.recruiter;
+        localStorage.setItem('recruiterToken', action.payload.token);
       });
   },
 });

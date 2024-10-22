@@ -58,3 +58,5 @@ recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recrui
 recruiterRouter.get("/job-details/:id", jobPostController.getJobDetails.bind(jobPostController));
 recruiterRouter.get("/all-job-posts", jobPostController.getAllJobPosts.bind(jobPostController));
 recruiterRouter.get("/filtered-applicants/:jobId", jobPostController.getFilteredApplicants.bind(jobPostController));
+// Add a new route for refreshing recruiter token
+recruiterRouter.post('/refresh-token', recruiterController.refreshRecruiterToken.bind(recruiterController));

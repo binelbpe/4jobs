@@ -3,6 +3,9 @@ import { injectable, inject } from "inversify";
 import TYPES from "../../types";
 import { IAdminRepository } from "../../domain/interfaces/repositories/admin/IAdminRepository";
 import { IPostRepository } from "../../domain/interfaces/repositories/user/IPostRepository";
+import { JwtAuthService } from "../../infrastructure/services/JwtAuthService";
+import { User } from "../../domain/entities/User";
+import { IRecruiter } from "../../domain/entities/Recruiter";
 
 // Import Use Cases
 import { LoginAdminUseCase } from "../../application/usecases/admin/LoginAdminUseCase";
@@ -16,7 +19,7 @@ import { AdminDashboardUseCase } from "../../application/usecases/admin/AdminDas
 import { FetchJobPostsUseCase } from "../../application/usecases/admin/FetchJobPostsUseCase";
 import { BlockJobPostUseCase } from "../../application/usecases/admin/BlockJobPostUseCase";
 import { UnblockJobPostUseCase } from "../../application/usecases/admin/UnblockJobPostUseCase";
-import { ToggleUserPostBlockUseCase } from "../../application/usecases/admin/ToggleUserPostBlockUseCase"
+import { ToggleUserPostBlockUseCase } from "../../application/usecases/admin/ToggleUserPostBlockUseCase";
 
 @injectable()
 export class AdminController {
@@ -46,7 +49,9 @@ export class AdminController {
     @inject(TYPES.ToggleUserPostBlockUseCase)
     private toggleUserPostBlockUseCase: ToggleUserPostBlockUseCase,
     @inject(TYPES.IPostRepository)
-    private postRepository: IPostRepository
+    private postRepository: IPostRepository,
+    @inject(TYPES.JwtAuthService)
+    private jwtAuthService: JwtAuthService
   ) {}
 
   // Admin login
@@ -209,12 +214,10 @@ export class AdminController {
         recruiterId
       );
       if (updatedRecruiter) {
-        res
-          .status(200)
-          .json({
-            message: "Subscription cancelled successfully",
-            recruiter: updatedRecruiter,
-          });
+        res.status(200).json({
+          message: "Subscription cancelled successfully",
+          recruiter: updatedRecruiter,
+        });
       } else {
         res.status(404).json({ error: "Recruiter not found" });
       }
@@ -229,21 +232,21 @@ export class AdminController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const result = await this.postRepository.findAllAdmin(page, limit);
-      
-      const userPosts = result.posts.map(post => ({
+
+      const userPosts = result.posts.map((post) => ({
         id: post._id,
-        userName: post.user?.name || 'Unknown',
-        userEmail: post.user?.email || 'Unknown',
+        userName: post.user?.name || "Unknown",
+        userEmail: post.user?.email || "Unknown",
         content: post.content,
         imageUrl: post.imageUrl,
         videoUrl: post.videoUrl,
-        isBlocked: post.status === 'blocked'
+        isBlocked: post.status === "blocked",
       }));
 
       res.status(200).json({
         userPosts,
         totalPages: result.totalPages,
-        currentPage: result.currentPage
+        currentPage: result.currentPage,
       });
     } catch (error) {
       console.error("Error fetching user posts:", error);
@@ -257,11 +260,30 @@ export class AdminController {
       const updatedPost = await this.toggleUserPostBlockUseCase.execute(postId);
       res.status(200).json({
         id: updatedPost._id,
-        isBlocked: updatedPost.status === 'blocked'
+        isBlocked: updatedPost.status === "blocked",
       });
     } catch (error) {
       console.error("Error toggling user post block status:", error);
-      res.status(500).json({ error: "Failed to toggle user post block status" });
+      res
+        .status(500)
+        .json({ error: "Failed to toggle user post block status" });
+    }
+  }
+
+  // Add a new method for refreshing admin token
+  async refreshAdminToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      const decoded = this.jwtAuthService.verifyToken(refreshToken);
+      const admin = await this.adminRepository.findById(decoded.id);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(404).json({ error: 'Admin not found' });
+      }
+      const newToken = this.jwtAuthService.generateToken(admin as unknown as User);
+      res.json({ token: newToken, admin });
+    } catch (error) {
+      console.error('Error refreshing admin token:', error);
+      res.status(401).json({ error: 'Invalid refresh token' });
     }
   }
 }

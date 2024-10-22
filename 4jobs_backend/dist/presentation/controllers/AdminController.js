@@ -27,6 +27,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("../../types"));
+const JwtAuthService_1 = require("../../infrastructure/services/JwtAuthService");
 // Import Use Cases
 const LoginAdminUseCase_1 = require("../../application/usecases/admin/LoginAdminUseCase");
 const FetchAllUsersUseCase_1 = require("../../application/usecases/admin/FetchAllUsersUseCase");
@@ -40,7 +41,7 @@ const BlockJobPostUseCase_1 = require("../../application/usecases/admin/BlockJob
 const UnblockJobPostUseCase_1 = require("../../application/usecases/admin/UnblockJobPostUseCase");
 const ToggleUserPostBlockUseCase_1 = require("../../application/usecases/admin/ToggleUserPostBlockUseCase");
 let AdminController = class AdminController {
-    constructor(loginAdminUseCase, fetchAllUsersUseCase, blockUserUseCase, unblockUserUseCase, fetchRecruitersUseCase, approveRecruiterUseCase, adminDashboardUseCase, fetchJobPostsUseCase, blockJobPostUseCase, unblockJobPostUseCase, adminRepository, toggleUserPostBlockUseCase, postRepository) {
+    constructor(loginAdminUseCase, fetchAllUsersUseCase, blockUserUseCase, unblockUserUseCase, fetchRecruitersUseCase, approveRecruiterUseCase, adminDashboardUseCase, fetchJobPostsUseCase, blockJobPostUseCase, unblockJobPostUseCase, adminRepository, toggleUserPostBlockUseCase, postRepository, jwtAuthService) {
         this.loginAdminUseCase = loginAdminUseCase;
         this.fetchAllUsersUseCase = fetchAllUsersUseCase;
         this.blockUserUseCase = blockUserUseCase;
@@ -54,6 +55,7 @@ let AdminController = class AdminController {
         this.adminRepository = adminRepository;
         this.toggleUserPostBlockUseCase = toggleUserPostBlockUseCase;
         this.postRepository = postRepository;
+        this.jwtAuthService = jwtAuthService;
     }
     // Admin login
     login(req, res) {
@@ -233,9 +235,7 @@ let AdminController = class AdminController {
                 const { recruiterId } = req.params;
                 const updatedRecruiter = yield this.adminRepository.cancelSubscription(recruiterId);
                 if (updatedRecruiter) {
-                    res
-                        .status(200)
-                        .json({
+                    res.status(200).json({
                         message: "Subscription cancelled successfully",
                         recruiter: updatedRecruiter,
                     });
@@ -256,22 +256,22 @@ let AdminController = class AdminController {
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 10;
                 const result = yield this.postRepository.findAllAdmin(page, limit);
-                const userPosts = result.posts.map(post => {
+                const userPosts = result.posts.map((post) => {
                     var _a, _b;
                     return ({
                         id: post._id,
-                        userName: ((_a = post.user) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown',
-                        userEmail: ((_b = post.user) === null || _b === void 0 ? void 0 : _b.email) || 'Unknown',
+                        userName: ((_a = post.user) === null || _a === void 0 ? void 0 : _a.name) || "Unknown",
+                        userEmail: ((_b = post.user) === null || _b === void 0 ? void 0 : _b.email) || "Unknown",
                         content: post.content,
                         imageUrl: post.imageUrl,
                         videoUrl: post.videoUrl,
-                        isBlocked: post.status === 'blocked'
+                        isBlocked: post.status === "blocked",
                     });
                 });
                 res.status(200).json({
                     userPosts,
                     totalPages: result.totalPages,
-                    currentPage: result.currentPage
+                    currentPage: result.currentPage,
                 });
             }
             catch (error) {
@@ -287,12 +287,33 @@ let AdminController = class AdminController {
                 const updatedPost = yield this.toggleUserPostBlockUseCase.execute(postId);
                 res.status(200).json({
                     id: updatedPost._id,
-                    isBlocked: updatedPost.status === 'blocked'
+                    isBlocked: updatedPost.status === "blocked",
                 });
             }
             catch (error) {
                 console.error("Error toggling user post block status:", error);
-                res.status(500).json({ error: "Failed to toggle user post block status" });
+                res
+                    .status(500)
+                    .json({ error: "Failed to toggle user post block status" });
+            }
+        });
+    }
+    // Add a new method for refreshing admin token
+    refreshAdminToken(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { refreshToken } = req.body;
+                const decoded = this.jwtAuthService.verifyToken(refreshToken);
+                const admin = yield this.adminRepository.findById(decoded.id);
+                if (!admin || admin.role !== 'admin') {
+                    return res.status(404).json({ error: 'Admin not found' });
+                }
+                const newToken = this.jwtAuthService.generateToken(admin);
+                res.json({ token: newToken, admin });
+            }
+            catch (error) {
+                console.error('Error refreshing admin token:', error);
+                res.status(401).json({ error: 'Invalid refresh token' });
             }
         });
     }
@@ -313,6 +334,7 @@ exports.AdminController = AdminController = __decorate([
     __param(10, (0, inversify_1.inject)(types_1.default.IAdminRepository)),
     __param(11, (0, inversify_1.inject)(types_1.default.ToggleUserPostBlockUseCase)),
     __param(12, (0, inversify_1.inject)(types_1.default.IPostRepository)),
+    __param(13, (0, inversify_1.inject)(types_1.default.JwtAuthService)),
     __metadata("design:paramtypes", [LoginAdminUseCase_1.LoginAdminUseCase,
         FetchAllUsersUseCase_1.FetchAllUsersUseCase,
         BlockUserUseCase_1.BlockUserUseCase,
@@ -322,5 +344,5 @@ exports.AdminController = AdminController = __decorate([
         AdminDashboardUseCase_1.AdminDashboardUseCase,
         FetchJobPostsUseCase_1.FetchJobPostsUseCase,
         BlockJobPostUseCase_1.BlockJobPostUseCase,
-        UnblockJobPostUseCase_1.UnblockJobPostUseCase, Object, ToggleUserPostBlockUseCase_1.ToggleUserPostBlockUseCase, Object])
+        UnblockJobPostUseCase_1.UnblockJobPostUseCase, Object, ToggleUserPostBlockUseCase_1.ToggleUserPostBlockUseCase, Object, JwtAuthService_1.JwtAuthService])
 ], AdminController);

@@ -34,9 +34,10 @@ const GetRecruiterProfileUseCase_1 = require("../../../application/usecases/recr
 const OtpService_1 = require("../../../infrastructure/services/OtpService");
 const S3Service_1 = require("../../../infrastructure/services/S3Service");
 const SearchUsersUseCase_1 = require("../../../application/usecases/recruiter/SearchUsersUseCase");
+const JwtAuthService_1 = require("../../../infrastructure/services/JwtAuthService");
 const tempRecruiterStore = {};
 let RecruiterController = class RecruiterController {
-    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository, s3Service, searchUsersUseCase) {
+    constructor(registerUseCase, loginUseCase, updateRecruiterUseCase, getRecruiterProfileUseCase, otpService, recruiterRepository, s3Service, searchUsersUseCase, jwtAuthService) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
         this.updateRecruiterUseCase = updateRecruiterUseCase;
@@ -45,6 +46,7 @@ let RecruiterController = class RecruiterController {
         this.recruiterRepository = recruiterRepository;
         this.s3Service = s3Service;
         this.searchUsersUseCase = searchUsersUseCase;
+        this.jwtAuthService = jwtAuthService;
     }
     registerRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -210,6 +212,24 @@ let RecruiterController = class RecruiterController {
             }
         });
     }
+    refreshRecruiterToken(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { refreshToken } = req.body;
+                const decoded = this.jwtAuthService.verifyToken(refreshToken);
+                const recruiter = yield this.recruiterRepository.findById(decoded.id);
+                if (!recruiter) {
+                    return res.status(404).json({ error: 'Recruiter not found' });
+                }
+                const newToken = this.jwtAuthService.generateToken(recruiter);
+                res.json({ token: newToken, recruiter });
+            }
+            catch (error) {
+                console.error('Error refreshing recruiter token:', error);
+                res.status(401).json({ error: 'Invalid refresh token' });
+            }
+        });
+    }
 };
 exports.RecruiterController = RecruiterController;
 exports.RecruiterController = RecruiterController = __decorate([
@@ -222,10 +242,12 @@ exports.RecruiterController = RecruiterController = __decorate([
     __param(5, (0, inversify_1.inject)(types_1.default.IRecruiterRepository)),
     __param(6, (0, inversify_1.inject)(types_1.default.S3Service)),
     __param(7, (0, inversify_1.inject)(types_1.default.SearchUsersUseCase)),
+    __param(8, (0, inversify_1.inject)(types_1.default.JwtAuthService)),
     __metadata("design:paramtypes", [RegisterRecruiterUsecase_1.RegisterRecruiterUseCase,
         LoginRecruiterUseCase_1.LoginRecruiterUseCase,
         UpdateRecruiterUseCase_1.UpdateRecruiterUseCase,
         GetRecruiterProfileUseCase_1.GetRecruiterProfileUseCase,
         OtpService_1.OtpService, Object, S3Service_1.S3Service,
-        SearchUsersUseCase_1.SearchUsersUseCase])
+        SearchUsersUseCase_1.SearchUsersUseCase,
+        JwtAuthService_1.JwtAuthService])
 ], RecruiterController);

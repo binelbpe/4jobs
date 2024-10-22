@@ -2,6 +2,8 @@ import axios from 'axios';
 import { BasicJobPost, CreateBasicJobPostParams, UpdateBasicJobPostParams } from '../types/jobPostTypes';
 import { FetchUsersResponse, FetchUserDetailsResponse } from '../types/auth';
 import { Conversation, Message } from '../types/recruiterMessageType';
+import  store  from '../redux/store';
+import { logout } from '../redux/slices/recruiterSlice';
 
 const API_BASE_URL = 'http://localhost:5000/recruiter';
 
@@ -25,6 +27,11 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: s
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
+        if (error.response.status === 401) {
+          // Token is invalid or expired
+          store.dispatch(logout());
+          throw new Error('Authentication failed. Please log in again.');
+        }
         console.error('API Error:', error.response.data);
         throw new Error(error.response.data.error || 'Server Error');
       } else if (error.request) {
@@ -166,4 +173,8 @@ export const getAllJobPosts = async () => {
 export const fetchFilteredApplicants = async (jobId: string): Promise<FetchUsersResponse> => {
  const response = await apiRequest('GET', `/filtered-applicants/${jobId}`);
  return response
+};
+
+export const refreshRecruiterTokenApi = async () => {
+  return apiRequest('POST', '/refresh-token');
 };

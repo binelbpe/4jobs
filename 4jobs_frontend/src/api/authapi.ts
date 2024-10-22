@@ -17,6 +17,8 @@ import { Message } from "../types/messageType";
 import { User, UserConnection } from "../types/auth";
 import { URMessage, URConversation } from "../types/userRecruiterMessage";
 import { ResumeData } from '../types/resumeTypes';
+import  store  from '../redux/store';
+import { logout } from '../redux/slices/authSlice';
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -27,6 +29,21 @@ export interface FetchJobPostsParams {
 }
 
 const API_BASE_URL = "http://localhost:5000";
+
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
 
 const apiRequest = async (
   method: "POST" | "GET" | "PUT" | "DELETE",
@@ -54,14 +71,17 @@ const apiRequest = async (
     });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        console.error("API Error:", error.response.data);
-        throw new Error(error.response.data.error || "Server Error");
-      } else if (error.request) {
-        console.error("No response received:", error.request);
-        throw new Error("No response from the server");
+    if (axios.isAxiosError(error) && error.response) {
+      if (error.response.status === 401) {
+        // Token is invalid or expired
+        store.dispatch(logout());
+        throw new Error('Authentication failed. Please log in again.');
       }
+      console.error("API Error:", error.response.data);
+      throw new Error(error.response.data.error || "Server Error");
+    } else if (axios.isAxiosError(error) && error.request) {
+      console.error("No response received:", error.request);
+      throw new Error("No response from the server");
     }
     console.error("Unexpected error:", error);
     throw new Error("An unknown error occurred");
@@ -512,3 +532,13 @@ export const verifyForgotPasswordOtpApi = async (email: string, otp: string) => 
 export const resetPasswordApi = async (email: string, newPassword: string, otp: string) => {
   return apiRequest("POST", "/reset-password", { email, newPassword, otp });
 };
+
+export const refreshTokenApi = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+  const response = await axios.post(`${API_BASE_URL}/refresh-token`, { refreshToken });
+  return response.data.token;
+};
+

@@ -1,4 +1,3 @@
-// src/interface/middlewares/recruiterAuthMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import { JwtAuthService } from "../../infrastructure/services/JwtAuthService";
 

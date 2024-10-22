@@ -19,7 +19,8 @@ import {
   reportJobApi,
   sendForgotPasswordOtpApi,
   verifyForgotPasswordOtpApi,
-  resetPasswordApi
+  resetPasswordApi,
+  refreshTokenApi
 } from '../../api/authapi';
 
 
@@ -256,6 +257,18 @@ export const resetPassword = createAsyncThunk(
       return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
+export const refreshToken = createAsyncThunk(
+  'auth/refreshToken',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await refreshTokenApi();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
   }
 );
@@ -508,6 +521,11 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        localStorage.setItem('token', action.payload.token);
       });
   },
 });

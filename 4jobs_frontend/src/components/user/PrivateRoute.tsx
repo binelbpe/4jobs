@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { Navigate } from 'react-router-dom';
-import { logout } from '../../redux/slices/authSlice';
+import { RootState, AppDispatch } from '../../redux/store';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { logout, refreshToken } from '../../redux/slices/authSlice';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -10,15 +10,24 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (!isAuthenticated && token) {
-      // Token exists but not authenticated, logout and redirect
-      dispatch(logout());
-    }
-  }, [isAuthenticated, token, dispatch]);
+    const verifyToken = async () => {
+      if (!isAuthenticated && token) {
+        try {
+          await dispatch(refreshToken()).unwrap();
+        } catch (error) {
+          dispatch(logout());
+          navigate('/login');
+        }
+      }
+    };
+
+    verifyToken();
+  }, [isAuthenticated, token, dispatch, navigate]);
 
   if (!isAuthenticated && !token) {
     return <Navigate to="/login" replace />;

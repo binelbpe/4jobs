@@ -10,3 +10,4 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
     res.status(403).json({ error: 'Forbidden' });
   }
 };
+

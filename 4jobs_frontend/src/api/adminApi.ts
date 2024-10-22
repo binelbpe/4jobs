@@ -1,4 +1,6 @@
 import axios from 'axios';
+import  store  from '../redux/store';
+import { setLogoutAdmin } from '../redux/slices/adminSlice';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/admin';
 
@@ -25,6 +27,11 @@ const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PATCH', endpoint:
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
+        if (error.response.status === 401) {
+          // Token is invalid or expired
+          store.dispatch(setLogoutAdmin());
+          throw new Error('Authentication failed. Please log in again.');
+        }
         console.error('API Error:', error.response.data.error || 'Unknown error from API');
         throw new Error(error.response.data.error || 'Server Error');
       } else if (error.request) {
@@ -114,4 +121,8 @@ export const fetchUserPostsApi = async (page: number, limit: number) => {
 
 export const blockUserPostApi = async (postId: string) => {
   return apiRequest('POST', `/user-posts/${postId}/toggle-block`);
+};
+
+export const refreshAdminTokenApi = async () => {
+  return apiRequest('POST', '/refresh-token');
 };

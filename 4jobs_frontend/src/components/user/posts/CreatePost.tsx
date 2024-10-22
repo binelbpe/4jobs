@@ -82,36 +82,7 @@ const CreatePost: React.FC = () => {
       return;
 
     if (content.trim() || image || video) {
-      setIsSubmitting(true);
-      setIsProcessing(true);
-
-      if (submitTimeoutRef.current) {
-        clearTimeout(submitTimeoutRef.current);
-      }
-
-      submitTimeoutRef.current = setTimeout(async () => {
-        if (video && video.size > TARGET_VIDEO_SIZE) {
-          toast.info(
-            `Compressing video to approximately ${formatFileSize(
-              TARGET_VIDEO_SIZE
-            )}, please wait...`
-          );
-          try {
-            const compressed = await compressVideo(video);
-            setCompressedVideo(compressed);
-            toast.success(
-              `Video compressed to ${formatFileSize(compressed.size)}`
-            );
-          } catch (error) {
-            toast.error("Error compressing video. Please try again.");
-            setIsProcessing(false);
-            setIsSubmitting(false);
-            return;
-          }
-        }
-        setShowConfirmModal(true);
-        setIsSubmitting(false);
-      }, 300); // 300ms debounce
+      setShowConfirmModal(true);
     } else {
       toast.error(
         "Please add some content, an image, or a video to your post."
@@ -126,6 +97,28 @@ const CreatePost: React.FC = () => {
     }
     setIsConfirmed(true);
     setShowConfirmModal(false);
+    setIsProcessing(true);
+
+    if (video && video.size > TARGET_VIDEO_SIZE) {
+      toast.info(
+        `Compressing video to approximately ${formatFileSize(
+          TARGET_VIDEO_SIZE
+        )}, please wait...`
+      );
+      try {
+        const compressed = await compressVideo(video);
+        setCompressedVideo(compressed);
+        toast.success(
+          `Video compressed to ${formatFileSize(compressed.size)}`
+        );
+      } catch (error) {
+        toast.error("Error compressing video. Please try again.");
+        setIsProcessing(false);
+        setIsConfirmed(false);
+        return;
+      }
+    }
+
     setIsUploading(true);
     const postData = {
       content: content.trim() ? content : undefined,
@@ -136,7 +129,6 @@ const CreatePost: React.FC = () => {
     await createPostInBackend(postData, user.id);
     setIsUploading(false);
     setIsProcessing(false);
-    setIsSubmitting(false);
     setIsConfirmed(false);
   };
 
@@ -389,17 +381,12 @@ const CreatePost: React.FC = () => {
                 <p className="text-red-500 text-sm mt-1">{fileError}</p>
               )}
               <div className="flex justify-end items-center">
-                {isCompressing && (
-                  <span className="text-purple-600 mr-4">
-                    Compressing video...
-                  </span>
-                )}
                 <button
                   type="submit"
                   className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50"
-                  disabled={isUploading || isSubmitting}
+                  disabled={isUploading || isProcessing}
                 >
-                  {isUploading ? "Posting..." : isSubmitting ? "Processing..." : "Post"}
+                  {isUploading ? "Posting..." : isProcessing ? "Processing..." : "Post"}
                 </button>
               </div>
             </form>
@@ -412,8 +399,6 @@ const CreatePost: React.FC = () => {
           onConfirm={confirmPost}
           onCancel={() => {
             setShowConfirmModal(false);
-            setIsProcessing(false);
-            setIsSubmitting(false);
           }}
         />
       )}

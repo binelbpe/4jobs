@@ -19,6 +19,7 @@ const multer_1 = __importDefault(require("multer"));
 const types_1 = __importDefault(require("../../types"));
 const PostController_1 = require("../controllers/user/PostController");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const authMiddleware_2 = require("../middlewares/authMiddleware");
 const profileController = container_1.container.get(types_1.default.ProfileController);
 const authController = container_1.container.get(types_1.default.AuthController);
 const jobPostControllerUser = container_1.container.get(types_1.default.JobPostControllerUser);
@@ -181,4 +182,6 @@ exports.authRouter.post("/forgot-password", authController.sendForgotPasswordOtp
 exports.authRouter.post("/verify-forgot-password-otp", authController.verifyForgotPasswordOtp.bind(authController));
 // Add this new route
 exports.authRouter.post("/reset-password", authController.resetPassword.bind(authController));
+// Add a new route for token refresh
+exports.authRouter.post('/refresh-token', authMiddleware_2.refreshTokenMiddleware);
 exports.default = exports.authRouter;

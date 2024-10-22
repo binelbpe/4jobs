@@ -12,6 +12,7 @@ import { S3Service } from "../../infrastructure/services/S3Service";
 import { MessageController } from "../controllers/user/MessageController";
 import { UserRecruiterMessageController } from "../controllers/user/UserRecruiterMessageController";
 import { ResumeController } from "../controllers/user/ResumeController";
+import { refreshTokenMiddleware } from '../middlewares/authMiddleware';
 
 const profileController = container.get<ProfileController>(
   TYPES.ProfileController
@@ -32,7 +33,9 @@ const userRecruiterMessageController =
   container.get<UserRecruiterMessageController>(
     TYPES.UserRecruiterMessageController
   );
-const resumeController = container.get<ResumeController>(TYPES.ResumeController);
+const resumeController = container.get<ResumeController>(
+  TYPES.ResumeController
+);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -360,10 +363,8 @@ authRouter.post(
 );
 
 // Update the resume generation route
-authRouter.post(
-  "/generate-resume",
-  authenticate,
-  (req, res) => resumeController.generateResume(req, res)
+authRouter.post("/generate-resume", authenticate, (req, res) =>
+  resumeController.generateResume(req, res)
 );
 
 // Add these new routes:
@@ -421,5 +422,8 @@ authRouter.post(
   "/reset-password",
   authController.resetPassword.bind(authController)
 );
+
+// Add a new route for token refresh
+authRouter.post('/refresh-token', refreshTokenMiddleware);
 
 export default authRouter;

@@ -8,6 +8,7 @@ import {
   blockUserApi,
   unblockUserApi,
   fetchDashboardDataApi,
+  refreshAdminTokenApi,
 } from "../../api/adminApi";
 
 interface User {
@@ -163,6 +164,18 @@ export const initializeAdminState = createAsyncThunk(
   }
 );
 
+export const refreshAdminToken = createAsyncThunk(
+  'admin/refreshAdminToken',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await refreshAdminTokenApi();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
 const adminSlice = createSlice({
   name: "admin",
   initialState,
@@ -281,7 +294,11 @@ const adminSlice = createSlice({
           state.loading = false;
           state.error = action.payload || "Failed to fetch dashboard data";
         }
-      );
+      )
+      .addCase(refreshAdminToken.fulfilled, (state, action) => {
+        state.isAuthenticatedAdmin = true;
+        state.token = action.payload.token;
+      });
   },
 });
 
