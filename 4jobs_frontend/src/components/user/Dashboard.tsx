@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../redux/store';
-import { fetchRecommendations } from '../../redux/slices/connectionSlice';
-import Header from './Header'; // Ensure this is correct
-import Sidebar from './Sidebar'; // Ensure this is correct
-import MainFeed from './Main'; // Ensure this is correct
-import RecommendationsPanel from './RecommendationsPanel'; // Ensure this is correct
-import { ChevronLeft, ChevronRight } from 'lucide-react'; // Ensure this is correct
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import { fetchRecommendations } from "../../redux/slices/connectionSlice";
+import Header from "./Header"; // Ensure this is correct
+import Sidebar from "./Sidebar"; // Ensure this is correct
+import MainFeed from "./Main"; // Ensure this is correct
+import RecommendationsPanel from "./RecommendationsPanel"; // Ensure this is correct
+import { ChevronLeft, ChevronRight } from "lucide-react"; // Ensure this is correct
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -61,7 +61,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Collapsible Recommendations for smaller screens */}
-          <div className={`lg:hidden transition-transform duration-300 ease-in-out ${isRecommendationsOpen ? 'block' : 'hidden'}`}>
+          <div
+            className={`lg:hidden transition-transform duration-300 ease-in-out ${
+              isRecommendationsOpen ? "block" : "hidden"
+            }`}
+          >
             <RecommendationsPanel isOpen={isRecommendationsOpen} />
           </div>
 
@@ -74,7 +78,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Sidebar for smaller screens */}
-          <div className={`lg:hidden transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'block' : 'hidden'}`}>
+          <div
+            className={`lg:hidden transition-transform duration-300 ease-in-out ${
+              isSidebarOpen ? "block" : "hidden"
+            }`}
+          >
             <Sidebar isOpen={isSidebarOpen} />
           </div>
 

@@ -56,20 +56,20 @@ const ConnectionProfileDisplay: React.FC<ConnectionProfileDisplayProps> = ({ use
             <img
               src={`${connectionProfile.profileImage}`}
               alt="Profile"
-              className="w-32 h-32 rounded-full object-cover mb-4 sm:mb-0 sm:mr-6 border-4 border-white"
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 rounded-full object-cover mb-2 sm:mb-0 sm:mr-4 border-4 border-white"
             />
           ) : (
             <UserCircle className="w-20 h-20 text-gray-400" />
           )}
           <div className="text-center sm:text-left text-white">
-            <h1 className="text-3xl font-bold">{connectionProfile.name}</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{connectionProfile.name}</h1>
           </div>
         </div>
       </div>
       <div className="p-4 sm:p-6 md:p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="flex items-center">
-            <FontAwesomeIcon icon={faEnvelope} className="text-purple-500 mr-2" />
+            <FontAwesomeIcon icon={faEnvelope} className="text-purple-500 mr-1 sm:mr-2" />
             <span>{connectionProfile.email}</span>
           </div>
           {connectionProfile.phone && (

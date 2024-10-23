@@ -9,7 +9,7 @@ import {
 } from "../../../redux/slices/jobPostSlice";
 import JobPost from "./JobPost";
 import { BasicJobPost } from "../../../types/jobPostTypes";
-import { Plus, Loader, AlertCircle, RefreshCw } from "lucide-react";
+import { Plus, Loader, AlertCircle } from "lucide-react";
 import RecruiterHeader from "../RecruiterHeader";
 import ConfirmationModal from "./ConfirmationModal"; // Import the new ConfirmationModal component
 
@@ -34,7 +34,6 @@ const JobPostWrapper: React.FC = () => {
     setIsModalOpen(true);
   }, []);
   
-
   const confirmDelete = useCallback(async (): Promise<void> => {
     if (postToDelete) {
       try {
@@ -64,12 +63,6 @@ const JobPostWrapper: React.FC = () => {
     navigate(`/recruiter/job-applicants/${postId}`);
   }, [navigate]);
 
-  const handleRefresh = useCallback(() => {
-    if (recruiter && recruiter._id) {
-      dispatch(fetchJobPosts(recruiter._id));
-    }
-  }, [dispatch, recruiter]);
-
   if (!recruiter) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -86,18 +79,11 @@ const JobPostWrapper: React.FC = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-4xl font-extrabold text-purple-900">Job Posts</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-purple-900">Job Posts</h2>
             <div className="flex space-x-4">
               <button 
-                onClick={handleRefresh}
-                className="bg-white text-purple-600 py-2 px-4 rounded-lg border border-purple-600 hover:bg-purple-50 transition duration-300 flex items-center shadow-sm"
-              >
-                <RefreshCw size={20} className="mr-2" />
-                Refresh
-              </button>
-              <button 
                 onClick={handleCreate}
-                className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center shadow-md"
+                className="bg-purple-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center shadow-md text-sm sm:text-base"
               >
                 <Plus size={20} className="mr-2" />
                 Create New Job Post
@@ -124,7 +110,7 @@ const JobPostWrapper: React.FC = () => {
               <p className="text-gray-600 mb-4">Click 'Create New Job Post' to add your first job listing.</p>
               <button 
                 onClick={handleCreate}
-                className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 inline-flex items-center"
+                className="bg-purple-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-purple-700 transition duration-300 inline-flex items-center text-sm sm:text-base"
               >
                 <Plus size={20} className="mr-2" />
                 Create New Job Post

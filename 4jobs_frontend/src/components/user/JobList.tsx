@@ -32,6 +32,7 @@ import {
   IconButton,
   CircularProgress,
   SelectChangeEvent,
+  useMediaQuery,
 } from "@mui/material";
 import { Business, LocationOn, CalendarToday, Flag } from "@mui/icons-material";
 
@@ -50,6 +51,7 @@ const JobList: React.FC = () => {
   const [reportDialog, setReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const isSmallScreen = useMediaQuery('(max-width:400px)'); // Check if screen is below 400px
 
   useEffect(() => {
     dispatch(fetchJobPostsAsync({ page, limit, sortBy, sortOrder, filter }));
@@ -199,7 +201,7 @@ const JobList: React.FC = () => {
       <ToastContainer />
 
       <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h4" component="h1" gutterBottom className="text-purple-700 font-bold text-2xl sm:text-3xl">
+        <Typography variant="h4" component="h1" gutterBottom className={`text-purple-700 font-bold ${isSmallScreen ? 'text-xl' : 'text-2xl sm:text-3xl'}`}>
           Job Listings
         </Typography>
 
@@ -259,31 +261,31 @@ const JobList: React.FC = () => {
 
         <Grid container spacing={3}>
           {posts.map((job: BasicJobPost) => (
-            <Grid item xs={12} key={job._id} md={12} lg={12}> {/* Change to full width on larger screens */}
-              <Box sx={{ 
-                boxShadow: 2, 
+            <Grid item xs={12} key={job._id} md={12} lg={12}>
+              <Box sx={{
+                boxShadow: 2,
                 border: '1px solid',
                 borderColor: 'purple.300',
                 borderRadius: 2,
-                p: 2,
+                p: isSmallScreen ? 1 : 2, // Adjust padding for small screens
                 mb: 2,
                 bgcolor: 'white'
               }}>
-                <Typography variant="h6" component="h2" className="text-purple-700 text-lg sm:text-xl">
+                <Typography variant="h6" component="h2" className={`text-purple-700 ${isSmallScreen ? 'text-lg' : 'text-lg sm:text-xl'}`}>
                   {job.title}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className="flex items-center text-sm sm:text-base">
+                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
                   <Business className="mr-1 text-purple-600" /> {job.company?.name}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className="flex items-center text-sm sm:text-base">
+                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
                   <LocationOn className="mr-1 text-purple-600" /> {job.location}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className="flex items-center text-sm sm:text-base">
+                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
                   <CalendarToday className="mr-1 text-purple-600" /> Posted on {new Date(job.createdAt).toLocaleDateString()}
                 </Typography>
                 <CardActions sx={{ justifyContent: 'flex-end' }}>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     variant="contained"
                     onClick={() => handleViewDetails(job._id)}
                     sx={{
@@ -292,7 +294,7 @@ const JobList: React.FC = () => {
                         bgcolor: '#7E22CE' // purple-700
                       }
                     }}
-                    className="text-sm sm:text-base"
+                    className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}
                   >
                     View Details
                   </Button>
@@ -302,9 +304,9 @@ const JobList: React.FC = () => {
                     color="error"
                     onClick={() => handleReportClick(job._id)}
                     title="Report Job"
-                    className="text-sm sm:text-base"
+                    className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}
                   >
-                    <Flag className="text-sm sm:text-base" />
+                    <Flag className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`} />
                   </IconButton>
                 </CardActions>
               </Box>
@@ -342,8 +344,8 @@ const JobList: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setReportDialog(false)} 
+          <Button
+            onClick={() => setReportDialog(false)}
             sx={{
               bgcolor: '#9333EA', // purple-600
               color: 'white',
@@ -354,7 +356,7 @@ const JobList: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleReport}
             sx={{
               bgcolor: '#9333EA', // purple-600

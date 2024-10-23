@@ -87,9 +87,9 @@ const Projects: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Projects</h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-4">Projects</h2>
       {projects.map((project, index) => (
-        <div key={project.id} className="bg-white shadow rounded-lg p-6 relative">
+        <div key={`${project.id}-${index}`} className="bg-white shadow rounded-lg p-6 relative">
           <button
             type="button"
             onClick={() => removeProject(index)}
@@ -126,21 +126,10 @@ const Projects: React.FC = () => {
                 id={`project-description-${index}`}
                 value={project.description}
                 onChange={(e) => handleChange(index, 'description', e.target.value)}
-                rows={3}
                 className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.description ? 'border-red-500' : ''}`}
+                rows={3}
               />
               {errors[index]?.description && <p className="text-red-500 text-sm">{errors[index].description}</p>}
-            </div>
-            <div className="md:col-span-2">
-              <label htmlFor={`project-image-${index}`} className="block text-sm font-medium text-gray-700">Image URL</label>
-              <input
-                type="url"
-                id={`project-image-${index}`}
-                value={project.imageUrl}
-                onChange={(e) => handleChange(index, 'imageUrl', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.imageUrl ? 'border-red-500' : ''}`}
-              />
-              {errors[index]?.imageUrl && <p className="text-red-500 text-sm">{errors[index].imageUrl}</p>}
             </div>
           </div>
         </div>
@@ -149,14 +138,14 @@ const Projects: React.FC = () => {
         <button
           type="button"
           onClick={addProject}
-          className="flex items-center px-4 py-2 bg-purple-500 text-dark rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          className="flex items-center px-4 py-2 text-sm sm:text-base bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Project
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-purple-500 text-dark rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          className="px-4 py-2 text-sm sm:text-base bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
         >
           Update Projects
         </button>

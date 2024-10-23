@@ -46,7 +46,7 @@ const Resume: React.FC = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
         <Upload className="w-12 h-12 text-gray-400 mb-4" />
-        <p className="text-sm text-gray-600 mb-2">click to select a file</p>
+        <p className="text-sm text-gray-600 mb-2">Click to select a file</p>
         <input
           type="file"
           onChange={handleFileChange}

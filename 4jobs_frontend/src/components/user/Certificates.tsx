@@ -4,7 +4,7 @@ import { updateUserCertificates } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { Certificate } from "../../types/auth";
 import { toast } from "react-toastify";
-import {  X, Edit2 } from 'lucide-react';
+import { X, Edit2 } from 'lucide-react';
 
 interface CertificateWithFile extends Omit<Certificate, "file"> {
   file: File | null;
@@ -119,11 +119,11 @@ const Certificates: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-8 text-gray-800">Certificates</h2>
+      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">Certificates</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {certificates.map((certificate, index) => (
-          <div key={certificate.id} className="bg-white shadow-md rounded-lg p-6 relative">
+          <div key={`${certificate.id}-${index}`} className="bg-white shadow-md rounded-lg p-6 relative">
             <button
               type="button"
               onClick={() => removeCertificate(index)}
@@ -131,13 +131,13 @@ const Certificates: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-xl font-semibold mb-2 text-gray-800">{certificate.name}</h3>
+            <h3 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800">{certificate.name}</h3>
             <p className="text-gray-600 mb-1">{certificate.issuingOrganization}</p>
-            <p className="text-sm text-gray-500 mb-4">{certificate.dateOfIssue}</p>
+            <p className="text-sm md:text-base text-gray-500 mb-4">{certificate.dateOfIssue}</p>
             <button
               type="button"
               onClick={() => editCertificate(index)}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+              className="inline-flex items-center px-3 py-2 text-sm md:text-base border border-transparent leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
             >
               <Edit2 className="w-4 h-4 mr-2" />
               Edit
@@ -147,7 +147,7 @@ const Certificates: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
-        <h3 className="text-2xl font-semibold mb-6 text-gray-800">
+        <h3 className="text-2xl md:text-3xl font-semibold mb-6 text-gray-800">
           {editingIndex !== null ? "Edit Certificate" : "Add New Certificate"}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
