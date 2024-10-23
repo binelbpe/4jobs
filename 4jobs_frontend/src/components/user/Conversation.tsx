@@ -184,7 +184,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full container mx-auto">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -214,7 +214,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
                 message.sender.id === currentUser?.id
                   ? "bg-purple-600 text-white"
                   : "bg-gray-200 text-gray-800"
-              }`}
+              } break-words max-w-[70%]`}
             >
               {message.content}
             </div>
@@ -239,7 +239,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
         onSubmit={handleSendMessage}
         className="p-4 border-t border-gray-300"
       >
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row">
           <input
             type="text"
             value={newMessage}
@@ -248,11 +248,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
               handleTyping();
             }}
             placeholder="Type a message..."
-            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2 sm:mb-0"
           />
           <button
             type="submit"
-            className="bg-purple-600 text-white p-2 rounded-r hover:bg-purple-700 transition duration-300"
+            className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 transition duration-300"
           >
             Send
           </button>

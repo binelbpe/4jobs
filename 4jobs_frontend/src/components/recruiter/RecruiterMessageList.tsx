@@ -98,7 +98,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 </p>
               </div>
               {unreadCount > 0 && (
-                <div className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs ml-2">
+                <div className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs ml-2 absolute right-0">
                   {unreadCount}
                 </div>
               )}

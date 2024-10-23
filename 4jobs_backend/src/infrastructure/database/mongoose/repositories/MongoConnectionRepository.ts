@@ -225,9 +225,14 @@ export class MongoConnectionRepository implements IConnectionRepository {
 
 
 
-  async deleteConnection(connectionId: string): Promise<Connection | null> {
-    const deletedConnection = await ConnectionModel.findByIdAndDelete(connectionId);
-    return deletedConnection ? this.mapConnectionToEntity(deletedConnection) : null;
+  async deleteConnection(userId: string, connectionId: string): Promise<Connection | null> {
+    const connection = await ConnectionModel.findOneAndDelete({
+        $or: [
+            { requester: userId, recipient: connectionId },
+            { requester: connectionId, recipient: userId }
+        ]
+    });
+    return connection ? this.mapConnectionToEntity(connection) : null; // Return deleted connection or null
   }
 
   async searchConnections(userId: string, query: string) {

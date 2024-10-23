@@ -9,7 +9,7 @@ export interface IConnectionRepository {
   getRequests(userId: string): Promise<ConnectionRequest[]>;
   getConnectionById(connectionId: string): Promise<Connection | null>;
   updateConnectionStatus(connectionId: string, status: 'accepted' | 'rejected'): Promise<Connection>;
-  deleteConnection(connectionId: string): Promise<Connection | null>;
+  deleteConnection(userId: string, connectionId: string): Promise<Connection | null>;
   getConnections(userId: string): Promise<any[]>;
   getConnectionRequestsALL(userId: string): Promise<any[]>;
   searchConnections(userId: string, query: string): Promise<any[]>;

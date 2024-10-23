@@ -183,5 +183,7 @@ exports.authRouter.post("/verify-forgot-password-otp", authController.verifyForg
 // Add this new route
 exports.authRouter.post("/reset-password", authController.resetPassword.bind(authController));
 // Add a new route for token refresh
-exports.authRouter.post('/refresh-token', authMiddleware_2.refreshTokenMiddleware);
+exports.authRouter.post("/refresh-token", authMiddleware_2.refreshTokenMiddleware);
+// Update the delete connection route to use userId and connectionId
+exports.authRouter.delete("/connections/:userId/remove/:connectionId", authMiddleware_1.authenticate, connectionController.deleteConnection.bind(connectionController));
 exports.default = exports.authRouter;

@@ -542,3 +542,6 @@ export const refreshTokenApi = async () => {
   return response.data.token;
 };
 
+export const removeConnectionApi = async (userId: string, connectionId: string) => {
+  return apiRequest("DELETE", `/connections/${userId}/remove/${connectionId}`);
+};

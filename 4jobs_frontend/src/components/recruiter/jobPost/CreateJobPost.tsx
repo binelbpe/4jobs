@@ -89,7 +89,7 @@ const CreateJobPost: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         {showSubscriptionPlans ? (
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-purple-700">Subscribe to Create Job Posts</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-purple-700">Subscribe to Create Job Posts</h2>
             <SubscriptionPlans onSelectPlan={handleSelectPlan} />
             {selectedPlan && (
               <div className="mt-8 text-center">
@@ -104,8 +104,8 @@ const CreateJobPost: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-purple-700 flex items-center">
-              <PlusCircle className="mr-2" /> Create New Job Post
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-purple-700 flex items-center">
+              <PlusCircle className="mr-2 w-6 h-6 sm:w-8 sm:h-8" /> Create New Job Post
             </h2>
             <JobPostForm
               recruiterId={recruiter.id}

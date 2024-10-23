@@ -50,6 +50,7 @@ const MainFeed: React.FC = () => {
           <div
             key={`${post._id}-${index}`}
             ref={index === posts.length - 1 ? lastPostElementRef : null}
+            className="text-xs sm:text-sm md:text-base lg:text-lg"
           >
             <Post {...post} />
           </div>

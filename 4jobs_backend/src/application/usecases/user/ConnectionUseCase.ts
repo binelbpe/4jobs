@@ -1,14 +1,18 @@
-import { inject, injectable } from 'inversify';
-import TYPES from '../../../types';
-import { IConnectionRepository } from '../../../domain/interfaces/repositories/user/IConnectionRepository';
-import { UserRecommendation, User } from '../../../domain/entities/User';
-import { Connection, ConnectionRequest } from '../../../domain/entities/Connection';
-import { IUserRepository } from '../../../domain/interfaces/repositories/user/IUserRepository';
+import { inject, injectable } from "inversify";
+import TYPES from "../../../types";
+import { IConnectionRepository } from "../../../domain/interfaces/repositories/user/IConnectionRepository";
+import { UserRecommendation, User } from "../../../domain/entities/User";
+import {
+  Connection,
+  ConnectionRequest,
+} from "../../../domain/entities/Connection";
+import { IUserRepository } from "../../../domain/interfaces/repositories/user/IUserRepository";
 
 @injectable()
 export class ConnectionUseCase {
   constructor(
-    @inject(TYPES.IConnectionRepository) private connectionRepository: IConnectionRepository,
+    @inject(TYPES.IConnectionRepository)
+    private connectionRepository: IConnectionRepository,
     @inject(TYPES.IUserRepository) private userRepository: IUserRepository
   ) {}
 
@@ -24,33 +28,54 @@ export class ConnectionUseCase {
     return this.connectionRepository.getRequests(userId);
   }
 
-  async sendConnectionRequest(requesterId: string, recipientId: string): Promise<Connection> {
-    const existingConnection = await this.connectionRepository.getConnectionStatus(requesterId, recipientId);
+  async sendConnectionRequest(
+    requesterId: string,
+    recipientId: string
+  ): Promise<Connection> {
+    const existingConnection =
+      await this.connectionRepository.getConnectionStatus(
+        requesterId,
+        recipientId
+      );
     if (existingConnection) {
-      throw new Error('Connection request already exists');
+      throw new Error("Connection request already exists");
     }
-    return this.connectionRepository.createConnectionRequest(requesterId, recipientId);
+    return this.connectionRepository.createConnectionRequest(
+      requesterId,
+      recipientId
+    );
   }
 
   async acceptConnectionRequest(connectionId: string): Promise<Connection> {
-    const connection = await this.connectionRepository.getConnectionById(connectionId);
+    const connection = await this.connectionRepository.getConnectionById(
+      connectionId
+    );
     if (!connection) {
-      throw new Error('Connection request not found');
+      throw new Error("Connection request not found");
     }
-    return this.connectionRepository.updateConnectionStatus(connectionId, 'accepted');
+    return this.connectionRepository.updateConnectionStatus(
+      connectionId,
+      "accepted"
+    );
   }
 
   async rejectConnectionRequest(connectionId: string): Promise<Connection> {
-    const connection = await this.connectionRepository.getConnectionById(connectionId);
+    const connection = await this.connectionRepository.getConnectionById(
+      connectionId
+    );
     if (!connection) {
-      throw new Error('Connection request not found');
+      throw new Error("Connection request not found");
     }
-    return this.connectionRepository.updateConnectionStatus(connectionId, 'rejected');
+    return this.connectionRepository.updateConnectionStatus(
+      connectionId,
+      "rejected"
+    );
   }
 
   async getConnections(userId: string) {
     const connections = await this.connectionRepository.getConnections(userId);
-    const connectionRequests = await this.connectionRepository.getConnectionRequestsALL(userId);
+    const connectionRequests =
+      await this.connectionRepository.getConnectionRequestsALL(userId);
     return { connections, connectionRequests };
   }
 
@@ -58,16 +83,18 @@ export class ConnectionUseCase {
     return this.connectionRepository.searchConnections(userId, query);
   }
 
- 
-
-  async searchMessageConnections(userId: string, query: string): Promise<User[]> {
+  async searchMessageConnections(
+    userId: string,
+    query: string
+  ): Promise<User[]> {
     const connections = await this.connectionRepository.getConnections(userId);
-    const connectedUserIds = connections.map((c: Connection) => 
+    const connectedUserIds = connections.map((c: Connection) =>
       c.requesterId === userId ? c.recipientId : c.requesterId
     );
     return this.userRepository.searchUsers(query, connectedUserIds);
   }
 
-
-
+  async deleteConnection(userId: string, connectionId: string): Promise<Connection | null> {
+    return this.connectionRepository.deleteConnection(userId, connectionId); // Call repository method to delete connection
+  }
 }

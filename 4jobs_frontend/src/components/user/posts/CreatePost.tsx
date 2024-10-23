@@ -293,7 +293,7 @@ const CreatePost: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
-            <h2 className="text-3xl font-bold text-purple-700 mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-purple-700 mb-6">
               Create a Post
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -315,16 +315,16 @@ const CreatePost: React.FC = () => {
                   rows={4}
                   className={`w-full px-3 py-2 text-purple-700 border ${
                     contentError ? "border-red-500" : "border-purple-300"
-                  } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none`}
+                  } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base`}
                 />
                 {contentError && (
                   <p className="text-red-500 text-sm mt-1">{contentError}</p>
                 )}
               </div>
               <div className="flex items-center space-x-4">
-                <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300">
+                <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300 text-sm sm:text-base">
                   <ImageIcon size={20} />
-                  <span className="text-sm">Add Image</span>
+                  <span className="text-sm sm:text-base">Add Image</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -332,9 +332,9 @@ const CreatePost: React.FC = () => {
                     className="hidden"
                   />
                 </label>
-                <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300">
+                <label className="flex items-center space-x-2 cursor-pointer text-purple-600 hover:bg-purple-100 p-2 rounded-full transition duration-300 text-sm sm:text-base">
                   <VideoIcon size={20} />
-                  <span className="text-sm">Add Video</span>
+                  <span className="text-sm sm:text-base">Add Video</span>
                   <input
                     type="file"
                     accept="video/*"
@@ -383,7 +383,7 @@ const CreatePost: React.FC = () => {
               <div className="flex justify-end items-center">
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50"
+                  className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50 text-sm sm:text-base"
                   disabled={isUploading || isProcessing}
                 >
                   {isUploading ? "Posting..." : isProcessing ? "Processing..." : "Post"}

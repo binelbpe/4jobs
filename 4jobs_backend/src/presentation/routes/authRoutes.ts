@@ -12,7 +12,7 @@ import { S3Service } from "../../infrastructure/services/S3Service";
 import { MessageController } from "../controllers/user/MessageController";
 import { UserRecruiterMessageController } from "../controllers/user/UserRecruiterMessageController";
 import { ResumeController } from "../controllers/user/ResumeController";
-import { refreshTokenMiddleware } from '../middlewares/authMiddleware';
+import { refreshTokenMiddleware } from "../middlewares/authMiddleware";
 
 const profileController = container.get<ProfileController>(
   TYPES.ProfileController
@@ -424,6 +424,13 @@ authRouter.post(
 );
 
 // Add a new route for token refresh
-authRouter.post('/refresh-token', refreshTokenMiddleware);
+authRouter.post("/refresh-token", refreshTokenMiddleware);
+
+// Update the delete connection route to use userId and connectionId
+authRouter.delete(
+  "/connections/:userId/remove/:connectionId",
+  authenticate,
+  connectionController.deleteConnection.bind(connectionController)
+);
 
 export default authRouter;

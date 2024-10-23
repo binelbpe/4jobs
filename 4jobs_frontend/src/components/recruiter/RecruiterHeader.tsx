@@ -110,11 +110,15 @@ const RecruiterHeader = () => {
   };
 
   return (
-    <header className="bg-white shadow-md p-4 flex justify-between items-center">
+    <header className="bg-white shadow-md p-4 flex justify-between items-center h-16">
       {/* Logo Section */}
       <div className="flex items-center">
         <button onClick={handleLogoClick}>
-          <img src="../../../logo.png" alt="Logo" className="h-20 w-20" />
+          <img
+            src="../../../logo.png"
+            alt="Logo"
+            className="h-12 w-12 md:h-16 md:w-16"
+          />
         </button>
         <span className="text-purple-700 font-semibold text-lg ml-2">
           4 Jobs Recruiter
@@ -122,7 +126,7 @@ const RecruiterHeader = () => {
       </div>
 
       {/* Search Bar Section */}
-      <div className="flex-grow mx-10 relative" ref={searchRef}>
+      <div className="flex-grow mx-4 relative" ref={searchRef}>
         <div className="relative w-full max-w-lg mx-auto">
           <input
             type="text"
@@ -182,14 +186,14 @@ const RecruiterHeader = () => {
           className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
         >
           <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
-          <span>ADD JOBS</span>
+          <span className="text-sm">ADD JOBS</span>
         </button>
         <button
           onClick={handleMessagesClick}
           className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
         >
           <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
-          <span>Messages</span>
+          <span className="text-sm">Messages</span>
         </button>
         <button
           className="text-purple-600 hover:text-gray-600"
@@ -215,28 +219,28 @@ const RecruiterHeader = () => {
             onClick={handleAddJobs}
           >
             <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6 mr-2" />
-            <span>ADD JOBS</span>
+            <span className="text-sm">ADD JOBS</span>
           </button>
           <button
             className="flex items-center text-purple-600 hover:text-gray-600 mb-2"
             onClick={handleMessagesClick}
           >
             <FontAwesomeIcon icon={faComments} className="h-6 w-6 mr-2" />
-            <span>Messages</span>
+            <span className="text-sm">Messages</span>
           </button>
           <button
             className="text-purple-600 hover:text-gray-600 mb-2"
             onClick={handleViewProfile}
           >
             <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
-            <span>Profile</span>
+            <span className="text-sm">Profile</span>
           </button>
           <button
             className="flex items-center text-purple-600 hover:text-gray-600"
             onClick={handleLogout}
           >
             <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
-            <span>Logout</span>
+            <span className="text-sm">Logout</span>
           </button>
         </div>
       )}

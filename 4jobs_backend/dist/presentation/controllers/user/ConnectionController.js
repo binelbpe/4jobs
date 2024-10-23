@@ -43,11 +43,11 @@ let ConnectionController = class ConnectionController {
             try {
                 const { senderId, recipientId } = req.body;
                 const connection = yield this.connectionUseCase.sendConnectionRequest(senderId, recipientId);
-                yield this.createAndEmitNotification('connection_request', senderId, recipientId, connection.id);
-                res.json({ message: 'Connection request sent successfully', connection });
+                yield this.createAndEmitNotification("connection_request", senderId, recipientId, connection.id);
+                res.json({ message: "Connection request sent successfully", connection });
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to send connection request');
+                this.handleError(res, error, "Failed to send connection request");
             }
         });
     }
@@ -57,12 +57,14 @@ let ConnectionController = class ConnectionController {
                 const userId = req.params.userId;
                 const notifications = yield NotificationModel_1.NotificationModel.find({
                     recipient: userId,
-                    status: { $ne: "read" }
-                }).sort({ createdAt: -1 }).limit(20);
+                    status: { $ne: "read" },
+                })
+                    .sort({ createdAt: -1 })
+                    .limit(20);
                 res.json(notifications);
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to get notifications');
+                this.handleError(res, error, "Failed to get notifications");
             }
         });
     }
@@ -74,7 +76,7 @@ let ConnectionController = class ConnectionController {
                 res.json(recommendations);
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to get recommendations');
+                this.handleError(res, error, "Failed to get recommendations");
             }
         });
     }
@@ -87,7 +89,7 @@ let ConnectionController = class ConnectionController {
                 res.json(profile);
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to get connection profile');
+                this.handleError(res, error, "Failed to get connection profile");
             }
         });
     }
@@ -99,7 +101,7 @@ let ConnectionController = class ConnectionController {
                 res.json(requests);
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to get connection requests');
+                this.handleError(res, error, "Failed to get connection requests");
             }
         });
     }
@@ -109,11 +111,14 @@ let ConnectionController = class ConnectionController {
                 const { connectionId } = req.params;
                 const { userId } = req.body;
                 const connection = yield this.connectionUseCase.acceptConnectionRequest(connectionId);
-                yield this.createAndEmitNotification('connection_accepted', userId, connection.requesterId, connection.id);
-                res.json({ message: 'Connection request accepted successfully', connection });
+                yield this.createAndEmitNotification("connection_accepted", userId, connection.requesterId, connection.id);
+                res.json({
+                    message: "Connection request accepted successfully",
+                    connection,
+                });
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to accept connection request');
+                this.handleError(res, error, "Failed to accept connection request");
             }
         });
     }
@@ -124,10 +129,13 @@ let ConnectionController = class ConnectionController {
                 const { userId } = req.body;
                 const connection = yield this.connectionUseCase.rejectConnectionRequest(connectionId);
                 console.log("connection", connection);
-                res.json({ message: 'Connection request rejected successfully', connection });
+                res.json({
+                    message: "Connection request rejected successfully",
+                    connection,
+                });
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to reject connection request');
+                this.handleError(res, error, "Failed to reject connection request");
             }
         });
     }
@@ -135,7 +143,7 @@ let ConnectionController = class ConnectionController {
         return __awaiter(this, void 0, void 0, function* () {
             const sender = yield UserModel_1.UserModel.findById(senderId);
             if (sender) {
-                const message = type === 'connection_request'
+                const message = type === "connection_request"
                     ? `${sender.name} sent you a connection request`
                     : `${sender.name} accepted your connection request`;
                 const notification = yield NotificationModel_1.NotificationModel.create({
@@ -144,9 +152,9 @@ let ConnectionController = class ConnectionController {
                     sender: senderId,
                     recipient: recipientId,
                     relatedItem: relatedItemId,
-                    status: 'unread'
+                    status: "unread",
                 });
-                this.eventEmitter.emit('sendNotification', notification);
+                this.eventEmitter.emit("sendNotification", notification);
             }
         });
     }
@@ -158,7 +166,7 @@ let ConnectionController = class ConnectionController {
                 res.json(result);
             }
             catch (error) {
-                res.status(500).json({ error: 'Failed to fetch connections' });
+                res.status(500).json({ error: "Failed to fetch connections" });
             }
         });
     }
@@ -171,7 +179,7 @@ let ConnectionController = class ConnectionController {
                 res.json(result);
             }
             catch (error) {
-                res.status(500).json({ error: 'Failed to search connections' });
+                res.status(500).json({ error: "Failed to search connections" });
             }
         });
     }
@@ -184,13 +192,29 @@ let ConnectionController = class ConnectionController {
                 res.json(results);
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to search message connections');
+                this.handleError(res, error, "Failed to search message connections");
             }
         });
     }
     handleError(res, error, message) {
         console.error(`Error: ${message}`, error);
         res.status(500).json({ error: message });
+    }
+    deleteConnection(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId, connectionId } = req.params; // Get userId and connectionId from request parameters
+                const deletedConnection = yield this.connectionUseCase.deleteConnection(userId, connectionId); // Call use case to delete connection
+                if (!deletedConnection) {
+                    res.status(404).json({ message: 'Connection not found' }); // Handle not found case
+                    return;
+                }
+                res.json({ message: 'Connection removed successfully', deletedConnection }); // Return success message
+            }
+            catch (error) {
+                this.handleError(res, error, 'Failed to remove connection'); // Handle errors
+            }
+        });
     }
 };
 exports.ConnectionController = ConnectionController;

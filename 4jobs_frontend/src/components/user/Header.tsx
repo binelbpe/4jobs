@@ -25,8 +25,11 @@ import {
 import { fetchConnectionRequests } from "../../redux/slices/connectionSlice";
 import { resetUnreadCount } from "../../redux/slices/userMessageSlice";
 import { socketService } from "../../services/socketService";
-import { searchUsersAndJobs, clearSearch } from "../../redux/slices/userSearchSlice";
-import { createSocketListener } from '../../utils/socketUtils';
+import {
+  searchUsersAndJobs,
+  clearSearch,
+} from "../../redux/slices/userSearchSlice";
+import { createSocketListener } from "../../utils/socketUtils";
 
 const UserHeader: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -68,8 +71,6 @@ const UserHeader: React.FC = () => {
     navigateTo("/messages");
   }, [dispatch, navigateTo]);
 
-
-
   useEffect(() => {
     if (user) {
       const controller = new AbortController();
@@ -93,7 +94,10 @@ const UserHeader: React.FC = () => {
       dispatch(addNotification(notification));
     };
 
-    const removeNewNotificationListener = createSocketListener("newNotification", handleNewNotification);
+    const removeNewNotificationListener = createSocketListener(
+      "newNotification",
+      handleNewNotification
+    );
 
     return () => {
       removeNewNotificationListener();
@@ -124,7 +128,9 @@ const UserHeader: React.FC = () => {
 
   useEffect(() => {
     if (showNotifications && notifications.length > 0) {
-      const unreadNotifications = notifications.filter(notification => !notification.isRead);
+      const unreadNotifications = notifications.filter(
+        (notification) => !notification.isRead
+      );
       if (unreadNotifications.length > 0) {
         dispatch(markAllAsRead());
         unreadNotifications.forEach((notification) => {
@@ -223,7 +229,11 @@ const UserHeader: React.FC = () => {
               onClick={() => navigateTo("/dashboard")}
               className="flex items-center"
             >
-              <img src="/logo.png" alt="Logo" className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 mr-1 sm:mr-2" />
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 mr-1 sm:mr-2"
+              />
               <span className="text-purple-700 font-semibold text-sm sm:text-base md:text-lg">
                 4 Jobs
               </span>
@@ -234,7 +244,10 @@ const UserHeader: React.FC = () => {
                 className="text-purple-600 mr-2 sm:mr-4"
                 aria-label="Search"
               >
-                <FontAwesomeIcon icon={faSearch} className="h-5 w-5 sm:h-6 sm:w-6" />
+                <FontAwesomeIcon
+                  icon={faSearch}
+                  className="h-5 w-5 sm:h-6 sm:w-6"
+                />
               </button>
               <button
                 className="text-purple-600 focus:outline-none"
@@ -249,7 +262,11 @@ const UserHeader: React.FC = () => {
           </div>
 
           {/* Search Bar Section */}
-          <div className={`w-full md:w-auto md:flex-grow mx-0 sm:mx-2 md:mx-4 mb-2 md:mb-0 order-3 md:order-2 ${showSearch || !showMobileMenu ? 'block' : 'hidden'} md:block`}>
+          <div
+            className={`w-full md:w-auto md:flex-grow mx-0 sm:mx-2 md:mx-4 mb-2 md:mb-0 order-3 md:order-2 ${
+              showSearch || !showMobileMenu ? "block" : "hidden"
+            } md:block`}
+          >
             <div className="relative w-full max-w-lg mx-auto">
               <input
                 type="text"
@@ -264,20 +281,30 @@ const UserHeader: React.FC = () => {
                   onClick={handleClearSearch}
                   className="absolute right-8 sm:right-12 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <FontAwesomeIcon
+                    icon={faTimes}
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                  />
                 </button>
               )}
               <button
                 onClick={handleSearch}
                 className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-purple-500 hover:text-purple-700"
               >
-                <FontAwesomeIcon icon={faSearch} className="h-4 w-4 sm:h-5 sm:w-5" />
+                <FontAwesomeIcon
+                  icon={faSearch}
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                />
               </button>
             </div>
           </div>
 
           {/* Navigation Items */}
-          <nav className={`${showMobileMenu ? 'block' : 'hidden'} md:flex flex-col md:flex-row md:flex-wrap space-y-2 md:space-y-0 space-x-0 md:space-x-1 lg:space-x-2 xl:space-x-4 items-start md:items-center order-2 md:order-3 w-full md:w-auto mt-2 md:mt-0`}>
+          <nav
+            className={`${
+              showMobileMenu ? "block" : "hidden"
+            } md:flex flex-col md:flex-row md:flex-wrap space-y-2 md:space-y-0 space-x-0 md:space-x-1 lg:space-x-2 xl:space-x-4 items-start md:items-center order-2 md:order-3 w-full md:w-auto mt-2 md:mt-0`}
+          >
             {navItems.map((item) =>
               renderNavItem(item.icon, item.text, item.onClick, item.badge)
             )}
@@ -288,7 +315,9 @@ const UserHeader: React.FC = () => {
         {showNotifications && (
           <div className="fixed inset-0 z-50 md:absolute md:inset-auto md:right-4 md:top-16 mt-2 w-full md:w-80 bg-white border border-gray-200 rounded-md shadow-lg">
             <div className="flex justify-between items-center p-2 sm:p-4 border-b border-gray-200">
-              <span className="font-bold text-purple-700 text-sm sm:text-base">Notifications</span>
+              <span className="font-bold text-purple-700 text-sm sm:text-base">
+                Notifications
+              </span>
               <button
                 onClick={toggleNotifications}
                 className="text-gray-500 hover:text-gray-700 sm:hidden"
@@ -304,7 +333,10 @@ const UserHeader: React.FC = () => {
                   onClick={openConnectionRequests}
                 >
                   <p className="text-xs sm:text-sm flex items-center text-purple-600">
-                    <FontAwesomeIcon icon={faUserPlus} className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <FontAwesomeIcon
+                      icon={faUserPlus}
+                      className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4"
+                    />
                     {pendingConnectionRequests.length} pending connection
                     request(s)
                   </p>
@@ -323,7 +355,9 @@ const UserHeader: React.FC = () => {
               ))}
               {notifications.length === 0 &&
                 pendingConnectionRequests.length === 0 && (
-                  <div className="p-2 sm:p-4 text-gray-500 text-xs sm:text-sm">No new notifications</div>
+                  <div className="p-2 sm:p-4 text-gray-500 text-xs sm:text-sm">
+                    No new notifications
+                  </div>
                 )}
             </div>
           </div>

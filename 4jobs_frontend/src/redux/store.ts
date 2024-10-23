@@ -12,6 +12,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import * as CryptoJS from "crypto-js";
+import { createSelector } from 'reselect';
 
 import authReducer from "./slices/authSlice";
 import adminReducer from "./slices/adminSlice";
@@ -235,3 +236,10 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 export default store;
+
+export const selectConnections = (state: RootState) => state.connections.connections;
+
+export const selectMemoizedConnections = createSelector(
+  [selectConnections],
+  (connections) => connections
+);

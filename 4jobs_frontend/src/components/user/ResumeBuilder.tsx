@@ -144,7 +144,7 @@ const ResumeBuilder: React.FC = () => {
     <>
       <UserHeader />
       <div className="max-w-4xl m-3 mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl sm:text-3xl font-bold text-purple-700 mb-6">Resume Builder</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-purple-700 mb-6">Resume Builder</h1>
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ const ResumeBuilder: React.FC = () => {
                 </button>
               </div>
             ))}
-            <button type="button" onClick={addProject} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+            <button type="button" onClick={addProject} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm sm:text-base md:text-lg lg:text-xl">
               Add Project
             </button>
           </div>
@@ -311,7 +311,7 @@ const ResumeBuilder: React.FC = () => {
                 </button>
               </div>
             ))}
-            <button type="button" onClick={addExperience} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+            <button type="button" onClick={addExperience} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm sm:text-base md:text-lg lg:text-xl">
               Add Experience
             </button>
           </div>
@@ -358,14 +358,14 @@ const ResumeBuilder: React.FC = () => {
                 </button>
               </div>
             ))}
-            <button type="button" onClick={addEducation} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+            <button type="button" onClick={addEducation} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm sm:text-base md:text-lg lg:text-xl">
               Add Education
             </button>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50"
+            className="w-full bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50 text-sm sm:text-base md:text-lg lg:text-xl"
             disabled={loading || Object.values(formErrors).some(error => error !== '')}
           >
             {loading ? 'Generating...' : 'Generate Resume'}

@@ -135,7 +135,7 @@ export interface ApiError {
 
 
 export interface RecommendationUser extends User {
-  connectionStatus: 'none' | 'pending' | 'rejected';
+  connectionStatus: 'none' | 'pending' | 'rejected'; // Ensure this is included
 }
 
 export interface UserConnection {

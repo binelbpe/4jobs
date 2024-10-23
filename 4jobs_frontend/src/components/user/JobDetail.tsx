@@ -6,17 +6,17 @@ import { AppDispatch, RootState } from "../../redux/store";
 import Header from "../user/Header";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { BasicJobPost } from '../../types/jobPostTypes';
-import { 
-  Briefcase, 
-  MapPin, 
-  Clock, 
-  IndianRupee, 
-  Calendar, 
-  Award, 
+import { BasicJobPost } from "../../types/jobPostTypes";
+import {
+  Briefcase,
+  MapPin,
+  Clock,
+  IndianRupee,
+  Calendar,
+  Award,
   BookOpen,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 
 const LoadingSpinner: React.FC = () => (
   <div className="flex justify-center items-center h-screen">
@@ -30,12 +30,13 @@ const JobDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const jobPost = useSelector((state: RootState) => {
-    // First, check in the auth slice
-    const authJobPost = state.auth.jobPosts.posts.find((job: BasicJobPost) => job._id === jobId);
+    const authJobPost = state.auth.jobPosts.posts.find(
+      (job: BasicJobPost) => job._id === jobId
+    );
     if (authJobPost) return authJobPost;
-
-    // If not found, check in the userSearch slice
-    return state.userSearch.jobPosts.find((job: BasicJobPost) => job._id === jobId);
+    return state.userSearch.jobPosts.find(
+      (job: BasicJobPost) => job._id === jobId
+    );
   });
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -58,7 +59,9 @@ const JobDetail: React.FC = () => {
         toast.success("Successfully applied for the job!");
       } catch (error) {
         console.error("Error applying for job:", error);
-        toast.error("Error occurred while applying for the job. Please try again.");
+        toast.error(
+          "Error occurred while applying for the job. Please try again."
+        );
       } finally {
         setApplying(false);
       }
@@ -71,12 +74,15 @@ const JobDetail: React.FC = () => {
   if (!jobPost) return <LoadingSpinner />;
 
   const hasApplied = user?.appliedJobs?.includes(jobPost._id);
-  const hasResume = user?.resume; // Check if user has a resume
+  const hasResume = user?.resume;
 
   const renderApplyButton = () => {
     if (!userId) {
       return (
-        <Link to="/login" className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto text-center">
+        <Link
+          to="/login"
+          className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto text-center"
+        >
           Login to Apply
         </Link>
       );
@@ -102,10 +108,14 @@ const JobDetail: React.FC = () => {
             ? "bg-gray-300 text-gray-600 cursor-not-allowed"
             : applying
             ? "bg-purple-400"
-            : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-        } text-white font-bold text-lg shadow-md hover:shadow-lg w-full sm:w-auto`}
+            : "bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500"
+        } text-white font-bold text-lg sm:text-base shadow-md hover:shadow-lg w-full sm:w-auto`}
       >
-        {applying ? "Applying..." : hasApplied ? "Already Applied" : "Apply Now"}
+        {applying
+          ? "Applying..."
+          : hasApplied
+          ? "Already Applied"
+          : "Apply Now"}
       </button>
     );
   };
@@ -116,15 +126,20 @@ const JobDetail: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-purple-600 to-purple-300 text-white p-6">
-            <h1 className="text-3xl font-bold mb-2">{jobPost.title}</h1>
-            <p className="text-xl flex items-center">
-              <Briefcase className="mr-2" size={20} />
+            <h1 className="text-3xl font-bold mb-2 md:text-2xl sm:text-xl">
+              {jobPost.title}
+            </h1>
+            <p className="text-xl flex items-center md:text-lg sm:text-base">
+              <Briefcase className="mr-2 text-base sm:text-lg" />
               {jobPost.company?.name}
             </p>
           </div>
           <div className="p-6">
             {error && (
-              <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex items-center" role="alert">
+              <div
+                className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex items-center"
+                role="alert"
+              >
                 <AlertCircle className="mr-2" size={20} />
                 <p>{error}</p>
               </div>
@@ -132,31 +147,35 @@ const JobDetail: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold mb-2">Job Details</h2>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <MapPin className="mr-2 text-gray-600" size={20} />
-                  <span className="font-semibold mr-2">Location:</span> {jobPost.location}
+                  <span className="font-semibold mr-2">Location:</span>{" "}
+                  {jobPost.location}
                 </p>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <Clock className="mr-2 text-gray-600" size={20} />
-                  <span className="font-semibold mr-2">Work Type:</span> {jobPost.wayOfWork}
+                  <span className="font-semibold mr-2">Work Type:</span>{" "}
+                  {jobPost.wayOfWork}
                 </p>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <IndianRupee className="mr-2 text-gray-600" size={20} />
-                  <span className="font-semibold mr-2">Salary Range:</span> ₹{jobPost.salaryRange.min} - ₹{jobPost.salaryRange.max}
+                  <span className="font-semibold mr-2">Salary Range:</span> ₹
+                  {jobPost.salaryRange.min} - ₹{jobPost.salaryRange.max}
                 </p>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <AlertCircle className="mr-2 text-gray-600" size={20} />
-                  <span className="font-semibold mr-2">Status:</span> {jobPost.status}
+                  <span className="font-semibold mr-2">Status:</span>{" "}
+                  {jobPost.status}
                 </p>
               </div>
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold mb-2">Date Information</h2>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <Calendar className="mr-2 text-gray-600" size={20} />
                   <span className="font-semibold mr-2">Posted Date:</span>{" "}
                   {new Date(jobPost.createdAt).toLocaleDateString()}
                 </p>
-                <p className="flex items-center">
+                <p className="flex items-center text-base md:text-sm">
                   <Calendar className="mr-2 text-gray-600" size={20} />
                   <span className="font-semibold mr-2">Last Updated:</span>{" "}
                   {new Date(jobPost.updatedAt).toLocaleDateString()}
@@ -169,7 +188,9 @@ const JobDetail: React.FC = () => {
                 <Award className="mr-2 text-purple-600" size={24} />
                 Description
               </h2>
-              <p className="text-gray-700 leading-relaxed">{jobPost.description}</p>
+              <p className="text-gray-700 leading-relaxed">
+                {jobPost.description}
+              </p>
             </div>
 
             <div className="mb-6">
@@ -218,7 +239,11 @@ const JobDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+      />
     </div>
   );
 };

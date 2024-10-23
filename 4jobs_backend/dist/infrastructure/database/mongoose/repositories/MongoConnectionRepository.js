@@ -213,10 +213,15 @@ let MongoConnectionRepository = class MongoConnectionRepository {
             }).populate('requester', 'name profileImage');
         });
     }
-    deleteConnection(connectionId) {
+    deleteConnection(userId, connectionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const deletedConnection = yield ConnectionModel_1.ConnectionModel.findByIdAndDelete(connectionId);
-            return deletedConnection ? this.mapConnectionToEntity(deletedConnection) : null;
+            const connection = yield ConnectionModel_1.ConnectionModel.findOneAndDelete({
+                $or: [
+                    { requester: userId, recipient: connectionId },
+                    { requester: connectionId, recipient: userId }
+                ]
+            });
+            return connection ? this.mapConnectionToEntity(connection) : null; // Return deleted connection or null
         });
     }
     searchConnections(userId, query) {

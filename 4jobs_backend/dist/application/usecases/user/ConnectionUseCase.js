@@ -51,7 +51,7 @@ let ConnectionUseCase = class ConnectionUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const existingConnection = yield this.connectionRepository.getConnectionStatus(requesterId, recipientId);
             if (existingConnection) {
-                throw new Error('Connection request already exists');
+                throw new Error("Connection request already exists");
             }
             return this.connectionRepository.createConnectionRequest(requesterId, recipientId);
         });
@@ -60,18 +60,18 @@ let ConnectionUseCase = class ConnectionUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const connection = yield this.connectionRepository.getConnectionById(connectionId);
             if (!connection) {
-                throw new Error('Connection request not found');
+                throw new Error("Connection request not found");
             }
-            return this.connectionRepository.updateConnectionStatus(connectionId, 'accepted');
+            return this.connectionRepository.updateConnectionStatus(connectionId, "accepted");
         });
     }
     rejectConnectionRequest(connectionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const connection = yield this.connectionRepository.getConnectionById(connectionId);
             if (!connection) {
-                throw new Error('Connection request not found');
+                throw new Error("Connection request not found");
             }
-            return this.connectionRepository.updateConnectionStatus(connectionId, 'rejected');
+            return this.connectionRepository.updateConnectionStatus(connectionId, "rejected");
         });
     }
     getConnections(userId) {
@@ -91,6 +91,11 @@ let ConnectionUseCase = class ConnectionUseCase {
             const connections = yield this.connectionRepository.getConnections(userId);
             const connectedUserIds = connections.map((c) => c.requesterId === userId ? c.recipientId : c.requesterId);
             return this.userRepository.searchUsers(query, connectedUserIds);
+        });
+    }
+    deleteConnection(userId, connectionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connectionRepository.deleteConnection(userId, connectionId); // Call repository method to delete connection
         });
     }
 };
