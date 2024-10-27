@@ -88,86 +88,36 @@ const infrastructure = {
 }
 ```
 
-## ⚙️ Environment Configuration
+## ⚙️ Environment Variables
 
-The application requires the following environment variables to be set. Create a `.env` file in the root directory with these configurations:
+The application requires the following environment variables to be set in a `.env` file:
 
-```typescript
-// Server Configuration
-PORT=3000                    // Server port number
-CLIENT_URL=                  // Frontend application URL
+```bash
+# Server Configuration
+PORT=3000                    # Server port number
+CLIENT_URL=                  # Frontend application URL
+DATABASE_URL=                # MongoDB connection string
+JWT_SECRET=                  # Secret key for JWT tokens
 
-// Database Configuration
-DATABASE_URL=                // MongoDB connection string
+# Email Configuration
+SMTP_HOST=                   # SMTP server host
+SMTP_PORT=                   # SMTP server port
+SMTP_USER=                   # SMTP username
+SMTP_PASS=                   # SMTP password
+EMAIL_FROM=                  # Default sender email
 
-// JWT Configuration
-JWT_SECRET=                  // Secret key for JWT token generation
+# Authentication
+GOOGLE_CLIENT_ID=            # Google OAuth client ID
 
-// Email Configuration (SMTP)
-SMTP_HOST=                   // SMTP server host
-SMTP_PORT=                   // SMTP server port
-SMTP_USER=                   // SMTP username
-SMTP_PASS=                   // SMTP password
-EMAIL_FROM=                  // Default sender email address
+# AWS S3 Configuration
+AWS_REGION=                  # AWS region
+AWS_ACCESS_KEY_ID=          # AWS access key
+AWS_SECRET_ACCESS_KEY=      # AWS secret key
+S3_BUCKET_NAME=             # S3 bucket name
 
-// Google OAuth
-GOOGLE_CLIENT_ID=            // Google OAuth client ID
-
-// AWS Configuration
-AWS_REGION=                  // AWS region (e.g., us-east-1)
-AWS_ACCESS_KEY_ID=          // AWS access key ID
-AWS_SECRET_ACCESS_KEY=      // AWS secret access key
-S3_BUCKET_NAME=             // AWS S3 bucket name
-
-// Razorpay Payment Gateway
-RAZORPAY_KEY_ID=            // Razorpay API key ID
-RAZORPAY_SECRET=            // Razorpay API secret key
-```
-
-### TypeScript Configuration
-The project includes type definitions for environment variables. They are declared globally using:
-
-```typescript
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      SMTP_HOST: string;
-      SMTP_PORT: string;
-      SMTP_USER: string;
-      SMTP_PASS: string;
-      EMAIL_FROM: string;
-      JWT_SECRET: string;
-      DATABASE_URL: string;
-      PORT: string;
-      GOOGLE_CLIENT_ID: string;
-      AWS_REGION: string;
-      AWS_ACCESS_KEY_ID: string;
-      AWS_SECRET_ACCESS_KEY: string;
-      S3_BUCKET_NAME: string;
-      RAZORPAY_KEY_ID: string;
-      RAZORPAY_SECRET: string;
-      CLIENT_URL: string;
-    }
-  }
-}
-
-export {};
-```
-
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    A[Client Layer] --> B[API Gateway]
-    B --> C[Business Logic Layer]
-    C --> D[Data Access Layer]
-    D --> E[(MongoDB)]
-    
-    style A fill:#ddf,stroke:#aaf,stroke-width:2px
-    style B fill:#ddf,stroke:#aaf,stroke-width:2px
-    style C fill:#ddf,stroke:#aaf,stroke-width:2px
-    style D fill:#ddf,stroke:#aaf,stroke-width:2px
-    style E fill:#ddf,stroke:#aaf,stroke-width:2px
+# Payment Gateway
+RAZORPAY_KEY_ID=            # Razorpay key ID
+RAZORPAY_SECRET=            # Razorpay secret
 ```
 
 ## 🚀 Getting Started
