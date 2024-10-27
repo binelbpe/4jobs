@@ -8,9 +8,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-<p align="center">
-  <img src="/api/placeholder/800/400" alt="4jobs Platform Demo" width="800"/>
-</p>
+
 
 ### 🌟 Connecting Talent with Opportunity
 
