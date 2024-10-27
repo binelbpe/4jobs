@@ -6,6 +6,6 @@ export const formatFileSize = (bytes: number): string => {
 };
 
 export const MAX_IMAGE_SIZE = 10 * 1024 * 1024; 
-export const MAX_VIDEO_SIZE = 200 * 1024 * 1024; 
+export const MAX_VIDEO_SIZE = 40 * 1024 * 1024; 
 export const TARGET_VIDEO_SIZE = 40 * 1024 * 1024; 
 export const MAX_CONTENT_LENGTH = 2000; 

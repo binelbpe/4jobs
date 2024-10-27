@@ -19,6 +19,7 @@ import { URMessage, URConversation } from "../types/userRecruiterMessage";
 import { ResumeData } from '../types/resumeTypes';
 import  store  from '../redux/store';
 import { logout } from '../redux/slices/authSlice';
+import { JobSearchFilters } from '../types/jobSearchTypes';
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -28,22 +29,10 @@ export interface FetchJobPostsParams {
   filter?: any;
 }
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+console.log("API_BASE_URL",API_BASE_URL,"  process.env.REACT_APP_API_BASE_URL ",process.env.REACT_APP_API_BASE_URL)
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  
-  failedQueue = [];
-};
 
 const apiRequest = async (
   method: "POST" | "GET" | "PUT" | "DELETE",
@@ -545,3 +534,24 @@ export const refreshTokenApi = async () => {
 export const removeConnectionApi = async (userId: string, connectionId: string) => {
   return apiRequest("DELETE", `/connections/${userId}/remove/${connectionId}`);
 };
+
+// Add this function to the existing authapi.ts
+export const advancedJobSearchApi = async (
+  filters: JobSearchFilters,
+  page: number = 1,
+  limit: number = 10
+): Promise<{
+  exactMatches: BasicJobPost[];
+  similarMatches: BasicJobPost[];
+  totalPages: number;
+  currentPage: number;
+  totalExactCount: number;
+  totalSimilarCount: number;
+}> => {
+  return apiRequest("POST", "/jobs/advanced-search", {
+    filters,
+    page,
+    limit
+  });
+};
+

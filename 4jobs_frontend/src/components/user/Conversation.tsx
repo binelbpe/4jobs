@@ -19,9 +19,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 interface ConversationProps {
   userId: string;
+  onBack: () => void;
 }
 
-const Conversation: React.FC<ConversationProps> = ({ userId }) => {
+const Conversation: React.FC<ConversationProps> = ({ userId, onBack }) => {
   const dispatch = useDispatch<AppDispatch>();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const conversationId =
@@ -59,8 +60,8 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     setupVideoCall,
     endCall,
   } = useCall();
+  const debouncedEmitTypingRef = useRef<(isTyping: boolean) => void>();
 
-  // Fetch conversation data
   const fetchConversationData = useCallback(() => {
     if (
       currentUser &&
@@ -70,9 +71,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     ) {
       dispatch(fetchConversation({ userId1: currentUser.id, userId2: userId }))
         .unwrap()
-        .catch((error) => {
-          // Handle error (e.g., show a notification to the user)
-        });
+        .catch((error) => {});
       setHasFetchedConversation(true);
     }
   }, [
@@ -92,7 +91,6 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Mark messages as read and update unread count
   useEffect(() => {
     const unreadMessages = messages.filter(
       (message: Message) =>
@@ -113,7 +111,6 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     }
   }, [dispatch, messages, userId]);
 
-  // Handle sending a message
   const handleSendMessage = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -136,27 +133,25 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     [newMessage, currentUser, userId, sendSocketMessage, isConnected]
   );
 
-  // Handle typing status
-  const debouncedEmitTyping = useCallback(
-    debounce((isTyping: boolean) => {
+  useEffect(() => {
+    debouncedEmitTypingRef.current = debounce((isTyping: boolean) => {
       emitTyping(isTyping);
-    }, 300),
-    [emitTyping]
-  );
+    }, 300);
+  }, [emitTyping]);
 
   const handleTyping = useCallback(() => {
     if (currentUser) {
-      debouncedEmitTyping(true);
+      debouncedEmitTypingRef.current?.(true);
 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
 
       typingTimeoutRef.current = setTimeout(() => {
-        debouncedEmitTyping(false);
+        debouncedEmitTypingRef.current?.(false);
       }, 3000);
     }
-  }, [currentUser, debouncedEmitTyping]);
+  }, [currentUser]);
 
   useEffect(() => {
     return () => {
@@ -166,7 +161,6 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
     };
   }, []);
 
-  // Handle video call actions
   const handleAcceptCall = useCallback(() => {
     acceptCall();
   }, [acceptCall]);
@@ -191,6 +185,12 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
         hideProgressBar={false}
       />
       <div className="p-4 border-b border-gray-300 flex justify-between items-center">
+        <button
+          onClick={onBack}
+          className="text-purple-600 hover:text-purple-800 mr-2"
+        >
+          Back
+        </button>
         <h2 className="text-xl font-semibold text-purple-700">
           {connection?.user.name || "Chat"}
         </h2>
@@ -239,7 +239,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
         onSubmit={handleSendMessage}
         className="p-4 border-t border-gray-300"
       >
-        <div className="flex flex-col sm:flex-row">
+        <div className="flex">
           <input
             type="text"
             value={newMessage}
@@ -248,11 +248,11 @@ const Conversation: React.FC<ConversationProps> = ({ userId }) => {
               handleTyping();
             }}
             placeholder="Type a message..."
-            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2 sm:mb-0"
+            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <button
             type="submit"
-            className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 transition duration-300"
+            className="bg-purple-600 text-white p-2 rounded-r hover:bg-purple-700 transition duration-300"
           >
             Send
           </button>

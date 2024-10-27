@@ -54,6 +54,16 @@ const validateExperience = (experience: Experience): boolean => {
     return false;
   }
 
+  if (startDate && new Date(startDate) > new Date()) {
+    toast.error("Start date cannot be a future date.");
+    return false;
+  }
+
+  if (endDate && new Date(endDate) > new Date()) {
+    toast.error("End date cannot be a future date.");
+    return false;
+  }
+
   return true;
 };
 
@@ -244,6 +254,7 @@ const Experiences: React.FC = () => {
                 onChange={(e) => handleChange("startDate", e.target.value)}
                 placeholder="e.g., Jan 2020"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                min={new Date().toISOString().split("T")[0]} // Block future dates
               />
             </div>
             <div>

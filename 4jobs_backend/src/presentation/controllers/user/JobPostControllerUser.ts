@@ -5,6 +5,7 @@ import { ApplyForJobUseCase } from "../../../application/usecases/user/ApplyForJ
 import { GetJobPostByIdUseCase } from "../../../application/usecases/user/GetJobPostByIdUseCase";
 import { GetJobPostsUseCase } from "../../../application/usecases/user/GetJobPostsUseCase";
 import { ReportJobUseCase } from "../../../application/usecases/user/ReportJobUseCase";
+import { AdvancedJobSearchUseCase } from "../../../application/usecases/user/AdvancedJobSearchUseCase";
 
 
 @injectable()
@@ -19,7 +20,10 @@ export class JobPostControllerUser {
     @inject(TYPES.GetJobPostsUseCase)
     private getJobPostsUseCase: GetJobPostsUseCase,
     @inject(TYPES.ReportJobUseCase)
-    private reportJobUseCase: ReportJobUseCase
+    private reportJobUseCase: ReportJobUseCase,
+
+    @inject(TYPES.AdvancedJobSearchUseCase)
+    private advancedJobSearchUseCase: AdvancedJobSearchUseCase
   ) {}
 
  
@@ -119,6 +123,25 @@ export class JobPostControllerUser {
       }
   
       res.status(500).json({ message: "An unexpected error occurred" });
+    }
+  }
+
+  async advancedSearch(req: Request, res: Response) {
+    try {
+      const filters = req.body.filters;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await this.advancedJobSearchUseCase.execute(
+        filters,
+        page,
+        limit
+      );
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in advanced job search:", error);
+      res.status(500).json({ error: "Failed to perform advanced job search" });
     }
   }
 }

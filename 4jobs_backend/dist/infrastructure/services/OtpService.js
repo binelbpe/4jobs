@@ -39,22 +39,36 @@ class OtpService {
         });
     }
     storeOtp(email, otp) {
-        otpStore[email] = otp;
+        otpStore[email] = { otp, timestamp: Date.now() };
         setTimeout(() => delete otpStore[email], this.otpExpiry);
     }
     verifyOtp(email, otp) {
         return __awaiter(this, void 0, void 0, function* () {
-            const storedOtp = otpStore[email];
-            return storedOtp === otp;
+            const storedData = otpStore[email];
+            if (!storedData) {
+                return "OTP has expired or does not exist";
+            }
+            const { otp: storedOtp, timestamp } = storedData;
+            const isExpired = Date.now() - timestamp > this.otpExpiry;
+            if (isExpired) {
+                delete otpStore[email];
+                return "OTP has expired";
+            }
+            const isValid = storedOtp === otp;
+            if (isValid) {
+                delete otpStore[email];
+            }
+            return isValid;
         });
     }
     sendForgotPasswordOtp(email, otp) {
         return __awaiter(this, void 0, void 0, function* () {
             const subject = "Password Reset OTP";
-            const text = `Your OTP for password reset is: ${otp}. This OTP is valid for 5 minutes.`;
-            const html = `<p>Your OTP for password reset is: <strong>${otp}</strong>. This OTP is valid for 5 minutes.</p>`;
+            const text = `Your OTP for password reset is: ${otp}. This OTP is valid for 30 seconds.`;
+            const html = `<p>Your OTP for password reset is: <strong>${otp}</strong>. This OTP is valid for 30 seconds.</p>`;
             console.log(`otp: ${otp} email ${email}`);
             yield this.emailService.sendEmail(email, subject, text, html);
+            this.storeOtp(email, otp);
         });
     }
 }

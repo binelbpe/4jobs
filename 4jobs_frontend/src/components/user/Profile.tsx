@@ -72,6 +72,20 @@ const Profile: React.FC = () => {
       isValid = false;
     }
 
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 16);
+
+    if (formData.dateOfBirth && new Date(formData.dateOfBirth) > today) {
+      newErrors.dateOfBirth = 'Date of Birth cannot be a future date.';
+      isValid = false;
+    }
+
+    if (formData.dateOfBirth && new Date(formData.dateOfBirth) > minDate) {
+      newErrors.dateOfBirth = 'You must be at least 16 years old.';
+      isValid = false;
+    }
+
     const skillsArray = formData.skills.split(',').map(skill => skill.trim());
     if (skillsArray.length > 10) {
       newErrors.skills = 'You can list a maximum of 10 skills.';
@@ -174,6 +188,7 @@ const Profile: React.FC = () => {
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
+            max={new Date().toISOString().split("T")[0]} // Block future dates
             className={`w-full px-3 py-2 border ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
           />
           {errors.dateOfBirth && <p className="text-red-500 text-sm">{errors.dateOfBirth}</p>}

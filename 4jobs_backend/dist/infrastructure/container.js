@@ -88,6 +88,7 @@ const MongoResumeRepository_1 = require("./database/mongoose/repositories/MongoR
 const GenerateResumeUseCase_1 = require("../application/usecases/user/GenerateResumeUseCase");
 const ResumeController_1 = require("../presentation/controllers/user/ResumeController");
 const PDFExtractor_1 = require("./services/PDFExtractor");
+const AdvancedJobSearchUseCase_1 = require("../application/usecases/user/AdvancedJobSearchUseCase");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -113,7 +114,7 @@ container
     .toConstantValue(process.env.JWT_SECRET);
 container
     .bind(types_1.default.OtpService)
-    .toDynamicValue(() => new OtpService_1.OtpService(33 * 1000, container.get(types_1.default.NodemailerEmailService)));
+    .toDynamicValue(() => new OtpService_1.OtpService(31 * 1000, container.get(types_1.default.NodemailerEmailService)));
 container.bind(types_1.default.LoginAdminUseCase).to(LoginAdminUseCase_1.LoginAdminUseCase);
 container.bind(types_1.default.FetchAllUsersUseCase).to(FetchAllUsersUseCase_1.FetchAllUsersUseCase);
 container.bind(types_1.default.BlockUserUseCase).to(BlockUserUseCase_1.BlockUserUseCase);
@@ -274,4 +275,5 @@ container
     .bind(types_1.default.GenerateResumeUseCase)
     .to(GenerateResumeUseCase_1.GenerateResumeUseCase);
 container.bind(types_1.default.ResumeController).to(ResumeController_1.ResumeController);
+container.bind(types_1.default.AdvancedJobSearchUseCase).to(AdvancedJobSearchUseCase_1.AdvancedJobSearchUseCase);
 console.log(container);

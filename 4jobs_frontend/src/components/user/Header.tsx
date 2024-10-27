@@ -207,17 +207,27 @@ const UserHeader: React.FC = () => {
       text: "Profile",
       onClick: () => navigateTo(`/profile/${user?.id}`),
     },
-    { icon: faSignOutAlt, text: "Logout", onClick: handleLogout },
   ];
 
-  // Add this new state
+  
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  // Add this new function to toggle the mobile menu
+ 
   const toggleMobileMenu = useCallback(() => {
     setShowMobileMenu((prev) => !prev);
     setShowSearch(false);
   }, []);
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    handleLogout();
+    setShowLogoutModal(false);
+  };
 
   return (
     <header className="bg-white shadow-md p-2 sm:p-3 md:p-4">
@@ -306,8 +316,15 @@ const UserHeader: React.FC = () => {
             } md:flex flex-col md:flex-row md:flex-wrap space-y-2 md:space-y-0 space-x-0 md:space-x-1 lg:space-x-2 xl:space-x-4 items-start md:items-center order-2 md:order-3 w-full md:w-auto mt-2 md:mt-0`}
           >
             {navItems.map((item) =>
-              renderNavItem(item.icon, item.text, item.onClick, item.badge)
+              renderNavItem(item.icon, item.text, item.onClick)
             )}
+            <button
+              className="flex items-center text-purple-600 hover:text-gray-600"
+              onClick={handleLogoutClick}
+            >
+              <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6 mr-2" />
+              <span className="text-xs">Logout</span>
+            </button>
           </nav>
         </div>
 
@@ -359,6 +376,30 @@ const UserHeader: React.FC = () => {
                     No new notifications
                   </div>
                 )}
+            </div>
+          </div>
+        )}
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-purple-500 rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">Confirm Logout</h2>
+              <p>Are you sure you want to logout?</p>
+              <div className="flex justify-end mt-4">
+                <button
+                  className="bg-purple-600 text-white px-4 py-2 rounded mr-2"
+                  onClick={confirmLogout}
+                >
+                  Yes
+                </button>
+                <button
+                  className="bg-gray-300 px-4 py-2 rounded"
+                  onClick={() => setShowLogoutModal(false)}
+                >
+                  No
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -82,10 +82,10 @@ let MongoPostRepository = class MongoPostRepository {
             const totalCount = yield PostModel_1.default.countDocuments();
             const totalPages = Math.ceil(totalCount / limit);
             const posts = yield PostModel_1.default.find()
-                .populate("userId", "name email profileImage bio")
+                .populate("userId", "name email profileImage bio _id")
                 .populate({
                 path: "comments.userId",
-                select: "name profileImage",
+                select: "name profileImage _id",
             })
                 .sort({ createdAt: -1 })
                 .skip(skip)
@@ -150,6 +150,7 @@ let MongoPostRepository = class MongoPostRepository {
         const postObj = post.toObject();
         return Object.assign(Object.assign({}, postObj), { user: post.userId
                 ? {
+                    _id: post.userId._id,
                     name: post.userId.name,
                     email: post.userId.email,
                     profileImage: post.userId.profileImage,

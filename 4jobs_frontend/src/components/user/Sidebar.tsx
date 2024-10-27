@@ -39,17 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         </p>
       </div>
 
-      <div className="mb-4">
-        <div className="flex justify-between text-xs mb-2">
-          <span className="text-purple-600">Profile viewers</span>
-          <span className="font-semibold text-purple-600">55</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-purple-600">Post impressions</span>
-          <span className="font-semibold text-purple-600">1</span>
-        </div>
-      </div>
-
       <Link to="/resume-builder" className="block w-full mt-4">
         <button className="w-full bg-purple-600 text-white py-1 px-2 rounded-full hover:bg-purple-700 transition duration-300 text-xs">
           Build Resume

@@ -31,12 +31,14 @@ const ApplyForJobUseCase_1 = require("../../../application/usecases/user/ApplyFo
 const GetJobPostByIdUseCase_1 = require("../../../application/usecases/user/GetJobPostByIdUseCase");
 const GetJobPostsUseCase_1 = require("../../../application/usecases/user/GetJobPostsUseCase");
 const ReportJobUseCase_1 = require("../../../application/usecases/user/ReportJobUseCase");
+const AdvancedJobSearchUseCase_1 = require("../../../application/usecases/user/AdvancedJobSearchUseCase");
 let JobPostControllerUser = class JobPostControllerUser {
-    constructor(applyForJobUseCase, getJobPostByIdUseCase, getJobPostsUseCase, reportJobUseCase) {
+    constructor(applyForJobUseCase, getJobPostByIdUseCase, getJobPostsUseCase, reportJobUseCase, advancedJobSearchUseCase) {
         this.applyForJobUseCase = applyForJobUseCase;
         this.getJobPostByIdUseCase = getJobPostByIdUseCase;
         this.getJobPostsUseCase = getJobPostsUseCase;
         this.reportJobUseCase = reportJobUseCase;
+        this.advancedJobSearchUseCase = advancedJobSearchUseCase;
     }
     getJobPosts(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -121,6 +123,21 @@ let JobPostControllerUser = class JobPostControllerUser {
             }
         });
     }
+    advancedSearch(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const filters = req.body.filters;
+                const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 10;
+                const result = yield this.advancedJobSearchUseCase.execute(filters, page, limit);
+                res.status(200).json(result);
+            }
+            catch (error) {
+                console.error("Error in advanced job search:", error);
+                res.status(500).json({ error: "Failed to perform advanced job search" });
+            }
+        });
+    }
 };
 exports.JobPostControllerUser = JobPostControllerUser;
 exports.JobPostControllerUser = JobPostControllerUser = __decorate([
@@ -129,8 +146,10 @@ exports.JobPostControllerUser = JobPostControllerUser = __decorate([
     __param(1, (0, inversify_1.inject)(types_1.default.GetJobPostByIdUseCase)),
     __param(2, (0, inversify_1.inject)(types_1.default.GetJobPostsUseCase)),
     __param(3, (0, inversify_1.inject)(types_1.default.ReportJobUseCase)),
+    __param(4, (0, inversify_1.inject)(types_1.default.AdvancedJobSearchUseCase)),
     __metadata("design:paramtypes", [ApplyForJobUseCase_1.ApplyForJobUseCase,
         GetJobPostByIdUseCase_1.GetJobPostByIdUseCase,
         GetJobPostsUseCase_1.GetJobPostsUseCase,
-        ReportJobUseCase_1.ReportJobUseCase])
+        ReportJobUseCase_1.ReportJobUseCase,
+        AdvancedJobSearchUseCase_1.AdvancedJobSearchUseCase])
 ], JobPostControllerUser);

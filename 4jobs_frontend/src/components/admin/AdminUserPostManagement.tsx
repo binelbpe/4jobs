@@ -218,10 +218,8 @@ const AdminUserPostManagement: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={confirmBlockPost}
-        title={`${selectedPost?.isBlocked ? "Unblock" : "Block"} User Post`}
-        message={`Are you sure you want to ${
-          selectedPost?.isBlocked ? "unblock" : "block"
-        } this post by ${selectedPost?.userName}?`}
+        title={selectedPost?.isBlocked ? "Unblock User Post" : "Block User Post"}
+        message={`Are you sure you want to ${selectedPost?.isBlocked ? "unblock" : "block"} this post by ${selectedPost?.userName}?`}
       />
     </div>
   );

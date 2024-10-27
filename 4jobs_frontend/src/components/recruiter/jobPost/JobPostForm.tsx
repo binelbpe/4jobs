@@ -11,9 +11,10 @@ import {
   Users,
   Book,
   CheckSquare,
-  Laptop,
 } from "lucide-react";
 import { validateJobPostForm } from "./formValidation";
+import { WORK_TYPES, WorkType } from '../../../constants/jobConstants';
+import { FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectChangeEvent } from '@mui/material';
 
 interface JobPostFormProps {
   initialData?: BasicJobPostFormData;
@@ -35,7 +36,7 @@ const JobPostForm: React.FC<JobPostFormProps> = ({
     company: { name: "", website: "", logo: "" },
     location: "",
     salaryRange: { min: 0, max: 0 },
-    wayOfWork: "",
+    wayOfWork: "Full-time", // Set a default value from WORK_TYPES
     skillsRequired: [],
     qualifications: [],
     status: "Open",
@@ -87,6 +88,13 @@ const JobPostForm: React.FC<JobPostFormProps> = ({
     setFormData((prev) => ({
       ...prev,
       [fieldName]: value.split(",").map((item) => item.trim()),
+    }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<typeof formData.wayOfWork>) => {
+    setFormData(prev => ({
+      ...prev,
+      wayOfWork: e.target.value as WorkType
     }));
   };
 
@@ -248,89 +256,86 @@ const JobPostForm: React.FC<JobPostFormProps> = ({
         <p className="text-red-500 text-sm mt-1">{errors.salaryRange}</p>
       )}
 
-      <div>
-        <label
-          htmlFor="wayOfWork"
-          className="mb-1 font-medium text-gray-700 flex items-center"
-        >
-          <Laptop className="mr-2 text-purple-600" size={20} />
-          Way of Work
-        </label>
-        <select
-          name="wayOfWork"
-          id="wayOfWork"
-          value={formData.wayOfWork}
-          onChange={handleChange}
-          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
-        >
-          <option value="">Select work type</option>
-          <option value="Remote">Remote</option>
-          <option value="On-site">On-site</option>
-          <option value="Hybrid">Hybrid</option>
-        </select>
-        {errors.wayOfWork && (
-          <p className="text-red-500 text-sm mt-1">{errors.wayOfWork}</p>
-        )}
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormControl fullWidth>
+          <InputLabel id="wayOfWork-label">Work Type</InputLabel>
+          <Select
+            labelId="wayOfWork-label"
+            id="wayOfWork"
+            name="wayOfWork"
+            value={formData.wayOfWork}
+            onChange={handleSelectChange}
+            label="Work Type"
+            required
+          >
+            {WORK_TYPES.map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Select the type of work arrangement</FormHelperText>
+        </FormControl>
 
-      <div>
-        <label
-          htmlFor="skillsRequired"
-          className="mb-1 font-medium text-gray-700 flex items-center"
-        >
-          <Users className="mr-2 text-purple-600" size={20} />
-          Skills Required (comma separated)
-        </label>
-        <input
-          type="text"
-          id="skillsRequired"
-          value={formData.skillsRequired.join(", ")}
-          onChange={(e) => handleArrayChange(e, "skillsRequired")}
-          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
-        />
-        {errors.skillsRequired && (
-          <p className="text-red-500 text-sm mt-1">{errors.skillsRequired}</p>
-        )}
-      </div>
+        <div>
+          <label
+            htmlFor="skillsRequired"
+            className="mb-1 font-medium text-gray-700 flex items-center"
+          >
+            <Users className="mr-2 text-purple-600" size={20} />
+            Skills Required (comma separated)
+          </label>
+          <input
+            type="text"
+            id="skillsRequired"
+            value={formData.skillsRequired.join(", ")}
+            onChange={(e) => handleArrayChange(e, "skillsRequired")}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+          {errors.skillsRequired && (
+            <p className="text-red-500 text-sm mt-1">{errors.skillsRequired}</p>
+          )}
+        </div>
 
-      <div>
-        <label
-          htmlFor="qualifications"
-          className="mb-1 font-medium text-gray-700 flex items-center"
-        >
-          <CheckSquare className="mr-2 text-purple-600" size={20} />
-          Qualifications (comma separated)
-        </label>
-        <input
-          type="text"
-          id="qualifications"
-          value={formData.qualifications.join(", ")}
-          onChange={(e) => handleArrayChange(e, "qualifications")}
-          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
-        />
-        {errors.qualifications && (
-          <p className="text-red-500 text-sm mt-1">{errors.qualifications}</p>
-        )}
-      </div>
+        <div>
+          <label
+            htmlFor="qualifications"
+            className="mb-1 font-medium text-gray-700 flex items-center"
+          >
+            <CheckSquare className="mr-2 text-purple-600" size={20} />
+            Qualifications (comma separated)
+          </label>
+          <input
+            type="text"
+            id="qualifications"
+            value={formData.qualifications.join(", ")}
+            onChange={(e) => handleArrayChange(e, "qualifications")}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          />
+          {errors.qualifications && (
+            <p className="text-red-500 text-sm mt-1">{errors.qualifications}</p>
+          )}
+        </div>
 
-      <div>
-        <label
-          htmlFor="status"
-          className="mb-1 font-medium text-gray-700 flex items-center"
-        >
-          <CheckSquare className="mr-2 text-purple-600" size={20} />
-          Status
-        </label>
-        <select
-          name="status"
-          id="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
-        >
-          <option value="Open">Open</option>
-          <option value="Closed">Closed</option>
-        </select>
+        <div>
+          <label
+            htmlFor="status"
+            className="mb-1 font-medium text-gray-700 flex items-center"
+          >
+            <CheckSquare className="mr-2 text-purple-600" size={20} />
+            Status
+          </label>
+          <select
+            name="status"
+            id="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+          >
+            <option value="Open">Open</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
       </div>
 
       <button

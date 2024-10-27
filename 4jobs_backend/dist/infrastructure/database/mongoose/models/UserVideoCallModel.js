@@ -28,8 +28,19 @@ const mongoose_1 = __importStar(require("mongoose"));
 const UserVideoCallSchema = new mongoose_1.Schema({
     callerId: { type: String, required: true },
     recipientId: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'accepted', 'rejected', 'ended'], default: 'pending' },
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'ended', 'initiating'],
+        default: 'pending'
+    },
+    mediaStatus: {
+        audio: { type: Boolean, default: true },
+        video: { type: Boolean, default: true }
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    expiresAt: { type: Date, default: () => new Date(Date.now() + 30000) } // 30 seconds timeout
 });
+// Add index for active calls cleanup
+UserVideoCallSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 exports.UserVideoCallModel = mongoose_1.default.model('UserVideoCall', UserVideoCallSchema);

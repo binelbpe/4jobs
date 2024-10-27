@@ -17,7 +17,7 @@ class SocketService {
       this.socket.disconnect();
     }
 
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || "http://localhost:5000";
+    const socketUrl = process.env.REACT_APP_SOCKET_URL ;
 
     this.socket = io(socketUrl, {
       path: '/user-socket',
@@ -123,7 +123,12 @@ class SocketService {
 
   emitUserCallOffer(recipientId: string, offer: string) {
     if (this.socket && this.connected) {
-      this.socket.emit("userCallOffer", { recipientId, offer });
+      console.log("Emitting call offer to:", recipientId);
+      this.socket.emit("userCallOffer", { 
+        recipientId, 
+        offer,
+        callerId: this.userId  // Add this to identify the caller
+      });
     }
   }
 
@@ -157,6 +162,41 @@ class SocketService {
     if (this.socket) {
       this.socket.on("callRejected", callback);
       return () => this.socket?.off("callRejected", callback);
+    }
+    return () => {};
+  }
+
+  emitIceCandidate(recipientId: string, candidate: RTCIceCandidate) {
+    if (this.socket && this.connected) {
+      this.socket.emit("iceCandidate", { recipientId, candidate });
+    }
+  }
+
+  onIceCandidate(callback: (data: { candidate: RTCIceCandidate }) => void): () => void {
+    if (this.socket) {
+      this.socket.on("iceCandidate", callback);
+      return () => this.socket?.off("iceCandidate", callback);
+    }
+    return () => {};
+  }
+
+  emitCallAccepted(callerId: string) {
+    if (this.socket && this.connected) {
+      console.log("Emitting call accepted to:", callerId);
+      this.socket.emit("callAccepted", { 
+        callerId,
+        accepterId: this.userId  // Add this to identify who accepted
+      });
+    }
+  }
+
+  onCallAccepted(callback: () => void): () => void {
+    if (this.socket) {
+      this.socket.on("callAccepted", (data) => {
+        console.log("Call accepted event received", data);
+        callback();
+      });
+      return () => this.socket?.off("callAccepted", callback);
     }
     return () => {};
   }

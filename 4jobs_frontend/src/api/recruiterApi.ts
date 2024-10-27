@@ -5,7 +5,7 @@ import { Conversation, Message } from '../types/recruiterMessageType';
 import  store  from '../redux/store';
 import { logout } from '../redux/slices/recruiterSlice';
 
-const API_BASE_URL = 'http://localhost:5000/recruiter';
+const API_BASE_URL =process.env.REACT_APP_API_BASE_URL_RECRUITER ;
 
 
 const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PUT', endpoint: string, data: any = {}) => {

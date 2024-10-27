@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
 import {
@@ -17,6 +17,7 @@ const Messages: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [conversationKey, setConversationKey] = useState(0); // Key for re-render
   const recruiterUnreadCount = useSelector((state: RootState) => {
     const conversations = state.userRecruiterMessages.conversations;
     const messages = state.userRecruiterMessages.messages;
@@ -39,11 +40,14 @@ const Messages: React.FC = () => {
   const handleSelectUser = (userId: string) => {
     setSelectedUserId(userId);
     setShowSearch(false);
+    setConversationKey(prevKey => prevKey + 1); // Increment the key to force re-render
   };
 
-  const handleBackToConversations = () => {
+  const handleBackToConversations = useCallback(() => {
     setSelectedUserId(null);
-  };
+    setShowSearch(false);
+    setConversationKey(prev => prev + 1);
+  }, []);
 
   return (
     <div className="flex flex-col h-screen">
@@ -89,7 +93,11 @@ const Messages: React.FC = () => {
               >
                 Back to Conversations
               </button>
-              <Conversation userId={selectedUserId} />
+              <Conversation 
+                key={conversationKey} 
+                userId={selectedUserId} 
+                onBack={handleBackToConversations}
+              />
             </>
           ) : (
             <div className="flex-grow flex items-center justify-center text-gray-500">

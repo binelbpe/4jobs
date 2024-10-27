@@ -17,6 +17,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
+import ConfirmationModal from "./ConfirmationModal"; 
 
 const UserList: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -26,17 +27,37 @@ const UserList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<string | null>(null);
+  const [userToUnblock, setUserToUnblock] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<"block" | "unblock" | null>(null);
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
   const handleBlock = (userId: string) => {
-    dispatch(blockUser(userId));
+    setUserToBlock(userId);
+    setActionType("block");
+    setIsModalOpen(true);
   };
 
   const handleUnblock = (userId: string) => {
-    dispatch(unblockUser(userId));
+    setUserToUnblock(userId);
+    setActionType("unblock");
+    setIsModalOpen(true);
+  };
+
+  const confirmAction = () => {
+    if (actionType === "block" && userToBlock) {
+      dispatch(blockUser(userToBlock));
+      setUserToBlock(null);
+    } else if (actionType === "unblock" && userToUnblock) {
+      dispatch(unblockUser(userToUnblock));
+      setUserToUnblock(null);
+    }
+    setIsModalOpen(false);
+    setActionType(null);
   };
 
   const filteredUsers = users.filter(
@@ -189,6 +210,13 @@ const UserList: React.FC = () => {
               </div>
             </div>
           </div>
+          <ConfirmationModal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            onConfirm={confirmAction} 
+            title={actionType === "block" ? "Confirm Block User" : "Confirm Unblock User"}
+            message={actionType === "block" ? "Are you sure you want to block this user?" : "Are you sure you want to unblock this user?"}
+          />
         </main>
       </div>
     </div>

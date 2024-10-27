@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
 import { AppDispatch, RootState } from "../../redux/store";
 import { fetchRecommendations } from "../../redux/slices/connectionSlice";
 import RecommendationCard from "./RecommendationCard";
@@ -8,7 +8,7 @@ import { RecommendationUser } from "../../types/auth";
 
 const Recommendations: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
+ 
   const { recommendations, loading, error } = useSelector(
     (state: RootState) => state.connections
   );
@@ -20,11 +20,7 @@ const Recommendations: React.FC = () => {
     }
   }, [dispatch, currentUser]);
 
-  const handleViewProfile = (userId: string) => {
-    console.log("View profile clicked for user:", userId);
-    navigate(`/connection/profile/${userId}`);
-  };
-
+  
 
   if (loading) {
     return (
@@ -74,7 +70,6 @@ const Recommendations: React.FC = () => {
           <RecommendationCard
             key={user.id}
             user={user}
-            onViewProfile={handleViewProfile}
           />
         ))}
       </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
-import { 
+import {
   fetchUserRecruiterMessages,
-  setMessageSending
+  setMessageSending,
 } from "../../redux/slices/userRecruiterMessageSlice";
 import { URMessage } from "../../types/userRecruiterMessage";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
@@ -46,7 +46,9 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   const [incomingCallOffer, setIncomingCallOffer] = useState<string | null>(
     null
   );
-  const messageSending = useSelector((state: RootState) => state.userRecruiterMessages.messageSending);
+  const messageSending = useSelector(
+    (state: RootState) => state.userRecruiterMessages.messageSending
+  );
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -81,19 +83,25 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
       setTimeout(() => dispatch(setMessageSending(false)), 2000);
     }
   };
-  console.log("conversation",conversation)
+  console.log("conversation", conversation);
 
   const handleTyping = () => {
     if (!isTyping) {
       setIsTyping(true);
-      userRecruiterSocketService.emitTyping(conversationId, conversation?.participant.id || "");
+      userRecruiterSocketService.emitTyping(
+        conversationId,
+        conversation?.participant.id || ""
+      );
     }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      userRecruiterSocketService.emitStoppedTyping(conversationId, conversation?.participant.id || "");
+      userRecruiterSocketService.emitStoppedTyping(
+        conversationId,
+        conversation?.participant.id || ""
+      );
     }, 3000);
   };
 
@@ -186,7 +194,7 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full p-4">
       <ConversationHeader
         participantName={conversation?.participant.name || "Unknown"}
         isOnline={onlineStatus[conversation?.participant.id || ""] || false}
@@ -194,7 +202,7 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
       <div
         ref={messageListRef}
         className="flex-grow overflow-y-auto p-4"
-        style={{ maxHeight: "calc(100vh - 200px)" }}
+        style={{ maxHeight: "calc(100vh - 200px)" }} // Adjusted for smaller screens
       >
         {messages.map((message: URMessage) => (
           <div
@@ -258,7 +266,7 @@ const UserConversation: React.FC<ConversationProps> = ({ conversationId }) => {
             className="bg-purple-500 text-white rounded-r-lg px-4 py-2"
             disabled={messageSending}
           >
-            {messageSending ? 'Sending...' : 'Send'}
+            {messageSending ? "Sending..." : "Send"}
           </button>
         </form>
       </div>

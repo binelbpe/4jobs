@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 
 class VideoCallService {
   private peerConnection: RTCPeerConnection | null = null;
@@ -13,7 +13,7 @@ class VideoCallService {
 
   private initializePeerConnection() {
     this.peerConnection = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
     this.peerConnection.ontrack = (event) => {
@@ -39,7 +39,10 @@ class VideoCallService {
   }
 
   async startLocalStream(): Promise<MediaStream> {
-    this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
     return this.localStream;
   }
 
@@ -50,7 +53,7 @@ class VideoCallService {
       await this.startLocalStream();
     }
 
-    this.localStream!.getTracks().forEach(track => {
+    this.localStream!.getTracks().forEach((track) => {
       if (this.peerConnection) {
         this.peerConnection.addTrack(track, this.localStream!);
       }
@@ -61,7 +64,7 @@ class VideoCallService {
 
     // Convert the offer to a Base64 string
     const offerString = JSON.stringify(offer);
-    const offerBase64 = Buffer.from(offerString).toString('base64');
+    const offerBase64 = Buffer.from(offerString).toString("base64");
 
     return offerBase64;
   }
@@ -73,43 +76,49 @@ class VideoCallService {
       await this.startLocalStream();
     }
 
-    this.localStream!.getTracks().forEach(track => {
+    this.localStream!.getTracks().forEach((track) => {
       if (this.peerConnection) {
         this.peerConnection.addTrack(track, this.localStream!);
       }
     });
 
     // Convert the Base64 offer back to an RTCSessionDescriptionInit object
-    const offerString = Buffer.from(offerBase64, 'base64').toString('utf-8');
+    const offerString = Buffer.from(offerBase64, "base64").toString("utf-8");
     const offer = JSON.parse(offerString);
 
-    await this.peerConnection!.setRemoteDescription(new RTCSessionDescription(offer));
+    await this.peerConnection!.setRemoteDescription(
+      new RTCSessionDescription(offer)
+    );
     const answer = await this.peerConnection!.createAnswer();
     await this.peerConnection!.setLocalDescription(answer);
 
     // Convert the answer to a Base64 string
     const answerString = JSON.stringify(answer);
-    const answerBase64 = Buffer.from(answerString).toString('base64');
+    const answerBase64 = Buffer.from(answerString).toString("base64");
 
     return answerBase64;
   }
 
   async handleAnswer(answerBase64: string): Promise<void> {
     if (!this.peerConnection) {
-      throw new Error('Peer connection not initialized');
+      throw new Error("Peer connection not initialized");
     }
 
-    const answerString = Buffer.from(answerBase64, 'base64').toString('utf-8');
+    const answerString = Buffer.from(answerBase64, "base64").toString("utf-8");
     const answer = JSON.parse(answerString);
-    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    await this.peerConnection.setRemoteDescription(
+      new RTCSessionDescription(answer)
+    );
   }
 
   async handleIceCandidate(candidateBase64: string): Promise<void> {
     if (!this.peerConnection) {
-      throw new Error('Peer connection not initialized');
+      throw new Error("Peer connection not initialized");
     }
 
-    const candidateString = Buffer.from(candidateBase64, 'base64').toString('utf-8');
+    const candidateString = Buffer.from(candidateBase64, "base64").toString(
+      "utf-8"
+    );
     const candidate = JSON.parse(candidateString);
     await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
   }
@@ -124,8 +133,8 @@ class VideoCallService {
 
   disconnectCall(): void {
     if (this.localStream) {
-      this.localStream.getTracks().forEach(track => {
-        track.stop(); 
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
       });
     }
     if (this.peerConnection) {
@@ -135,7 +144,7 @@ class VideoCallService {
     this.remoteStream = null;
     this.peerConnection = null;
     if (this.onCallStateChange) {
-      this.onCallStateChange('ended');
+      this.onCallStateChange("ended");
     }
   }
 
@@ -147,7 +156,7 @@ class VideoCallService {
 
   muteAudio(mute: boolean): void {
     if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => {
+      this.localStream.getAudioTracks().forEach((track) => {
         track.enabled = !mute;
       });
     }
@@ -155,7 +164,7 @@ class VideoCallService {
 
   hideVideo(hide: boolean): void {
     if (this.localStream) {
-      this.localStream.getVideoTracks().forEach(track => {
+      this.localStream.getVideoTracks().forEach((track) => {
         track.enabled = !hide;
       });
     }

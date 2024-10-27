@@ -16,6 +16,8 @@ let UserManager = class UserManager {
     addUser(userId, socketId, userType) {
         this.userConnections.set(userId, { socketId, userType });
         console.log(`${userType} ${userId} connected with socket ${socketId}`);
+        // Handle video call connections if necessary
+        // This can be expanded based on the requirements
         console.log('Current userConnections:', Array.from(this.userConnections.entries()));
     }
     removeUser(userId) {

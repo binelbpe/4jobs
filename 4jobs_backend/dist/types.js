@@ -87,5 +87,6 @@ const TYPES = {
     IResumeRepository: Symbol.for("IResumeRepository"),
     GenerateResumeUseCase: Symbol.for("GenerateResumeUseCase"),
     ResumeController: Symbol.for("ResumeController"),
+    AdvancedJobSearchUseCase: Symbol.for("AdvancedJobSearchUseCase"),
 };
 exports.default = TYPES;

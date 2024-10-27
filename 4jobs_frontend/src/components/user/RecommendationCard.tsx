@@ -4,24 +4,21 @@ import { AppDispatch, RootState } from "../../redux/store";
 import { sendConnectionRequest } from "../../redux/slices/connectionSlice";
 import { RecommendationUser } from "../../types/auth";
 import { UserCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface RecommendationCardProps {
   user: RecommendationUser;
-  onViewProfile: (userId: string) => void;
 }
 
-const RecommendationCard: React.FC<RecommendationCardProps> = ({ user, onViewProfile }) => {
+const RecommendationCard: React.FC<RecommendationCardProps> = ({ user }) => {
   const dispatch = useDispatch<AppDispatch>();
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const navigate = useNavigate();
 
   const handleSendRequest = () => {
     if (currentUser) {
       dispatch(sendConnectionRequest({ senderId: currentUser.id, recipientId: user.id }));
     }
-  };
-
-  const handleViewProfile = () => {
-    onViewProfile(user.id);
   };
 
   const getConnectionButton = () => {
@@ -71,7 +68,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user, onViewPro
       <div className="flex flex-col space-y-2 mt-auto">
         {getConnectionButton()}
         <button
-          onClick={handleViewProfile}
+          onClick={() => navigate(`/connection/profile/${user.id}`)}
           className="w-full text-sm bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300 transition duration-300 ease-in-out"
         >
           View Profile

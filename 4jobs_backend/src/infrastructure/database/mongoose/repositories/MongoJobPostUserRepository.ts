@@ -9,6 +9,7 @@ import {
   UpdateJobPostParams,
 } from "../../../../domain/entities/jobPostTypes";
 import { User } from "../../../../domain/entities/User";
+import { AdvancedSearchFilters, AdvancedSearchResult, JobPostWithMatch } from "../../../../domain/entities/AdvancedSearchTypes";
 
 @injectable()
 export class MongoJobPostUserRepository implements IJobPostUserRepository {
@@ -77,5 +78,135 @@ export class MongoJobPostUserRepository implements IJobPostUserRepository {
     );
 
     return updatedJobPost;
+  }
+
+  async advancedSearch(
+    filters: AdvancedSearchFilters,
+    page: number,
+    limit: number
+  ): Promise<AdvancedSearchResult> {
+    const skip = (page - 1) * limit;
+    const baseQuery: any = { isBlock: false, status: "Open" };
+
+    // Function to check if a search term matches a target string
+    const isMatch = (searchTerm: string, target: string): boolean => {
+      return target.toLowerCase().includes(searchTerm.toLowerCase());
+    };
+
+    // Function to calculate match percentage for all criteria
+    const calculateMatchPercentage = (job: JobPost) => {
+      let matchedCriteria = 0;
+      let totalCriteria = 0;
+
+      // Check each filter criteria
+      if (filters.title) {
+        totalCriteria++;
+        if (isMatch(filters.title, job.title)) {
+          matchedCriteria++;
+        }
+      }
+
+      if (filters.company) {
+        totalCriteria++;
+        if (isMatch(filters.company, job.company.name)) {
+          matchedCriteria++;
+        }
+      }
+
+      if (filters.location) {
+        totalCriteria++;
+        if (isMatch(filters.location, job.location)) {
+          matchedCriteria++;
+        }
+      }
+
+      if (filters.wayOfWork) {
+        totalCriteria++;
+        if (job.wayOfWork === filters.wayOfWork) {
+          matchedCriteria++;
+        }
+      }
+
+      // Check salary range
+      if (filters.salaryMin || filters.salaryMax) {
+        totalCriteria++;
+        if (
+          (!filters.salaryMin || job.salaryRange.max >= filters.salaryMin) &&
+          (!filters.salaryMax || job.salaryRange.min <= filters.salaryMax)
+        ) {
+          matchedCriteria++;
+        }
+      }
+
+      // Check skills - now with proper typing
+      if (filters.skills && filters.skills.length > 0) {
+        totalCriteria++;
+        const matchedSkills = filters.skills.filter(searchSkill =>
+          job.skillsRequired.some((jobSkill: string) =>
+            isMatch(searchSkill, jobSkill)
+          )
+        );
+        if (matchedSkills.length === filters.skills.length) {
+          matchedCriteria++;
+        }
+      }
+
+      // Calculate percentage only if there are criteria to match
+      const percentage = totalCriteria > 0 
+        ? (matchedCriteria / totalCriteria) * 100 
+        : 0;
+
+      return {
+        percentage: Math.round(percentage),
+        matchedCriteria,
+        totalCriteria
+      };
+    };
+
+    // Get all jobs
+    const allJobs = await JobPostModel.find(baseQuery).lean() as JobPost[];
+
+    // Process and categorize jobs
+    let exactMatches: JobPostWithMatch[] = [];
+    let similarMatches: JobPostWithMatch[] = [];
+
+    allJobs.forEach(job => {
+      const result = calculateMatchPercentage(job);
+      const jobWithMatch: JobPostWithMatch = {
+        ...job,
+        matchPercentage: result.percentage
+      };
+
+      if (result.matchedCriteria === result.totalCriteria && result.totalCriteria > 0) {
+        // All specified criteria match - Exact match
+        exactMatches.push(jobWithMatch);
+      } else if (result.percentage >= 50) {
+        // 50% or more criteria match - Similar match
+        similarMatches.push(jobWithMatch);
+      }
+    });
+
+    // Sort by match percentage
+    exactMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
+    similarMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+    // Apply pagination
+    const paginatedExactMatches = exactMatches.slice(skip, skip + limit);
+    const paginatedSimilarMatches = similarMatches.slice(skip, skip + limit);
+
+    return {
+      exactMatches: paginatedExactMatches.map(match => ({
+        ...match,
+        _id: match._id?.toString() || undefined
+      })),
+      similarMatches: paginatedSimilarMatches.map(match => ({
+        ...match,
+        _id: match._id?.toString() || undefined
+      })),
+      totalPages: Math.ceil(Math.max(exactMatches.length, similarMatches.length) / limit),
+      currentPage: page,
+      totalExactCount: exactMatches.length,
+      totalSimilarCount: similarMatches.length
+    };
   }
 }

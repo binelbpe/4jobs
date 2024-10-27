@@ -4,14 +4,14 @@ import { RootState, AppDispatch } from "../../redux/store";
 import {
   fetchMessages,
   markAllMessagesAsLocallyRead,
-  setMessageSending
+  setMessageSending,
 } from "../../redux/slices/recruiterMessageSlice";
 import { Message } from "../../types/recruiterMessageType";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid } from "date-fns";
 import ConversationHeader from "../shared/ConversationHeader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faVideo } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faVideo } from "@fortawesome/free-solid-svg-icons";
 import VideoCall from "../shared/VideoCall";
 import { toast } from "react-toastify";
 
@@ -49,7 +49,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Scroll to bottom of message list
+
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
@@ -79,7 +79,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Handle sending a new message
+ 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && currentRecruiter) {
@@ -100,18 +100,24 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     }
   };
 
-  // Handle typing status
+
   const handleTyping = () => {
     if (!isTyping) {
       setIsTyping(true);
-      userRecruiterSocketService.emitTyping(conversationId, conversation?.participant.id || "");
+      userRecruiterSocketService.emitTyping(
+        conversationId,
+        conversation?.participant.id || ""
+      );
     }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      userRecruiterSocketService.emitStoppedTyping(conversationId, conversation?.participant.id || "");
+      userRecruiterSocketService.emitStoppedTyping(
+        conversationId,
+        conversation?.participant.id || ""
+      );
     }, 3000);
   };
 
@@ -130,9 +136,9 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     (status) => status
   );
 
-  const handleStartVideoCall = () => {
-    setIsVideoCallActive(true);
-  };
+  // const handleStartVideoCall = () => {
+  //   setIsVideoCallActive(true);
+  // };
 
   const handleEndVideoCall = () => {
     setIsVideoCallActive(false);
@@ -150,24 +156,30 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full p-4">
       <ConversationHeader
         participantName={conversation?.participant.name || "Unknown"}
         isOnline={onlineStatus[conversation?.participant.id || ""] || false}
       >
-        <button
+        {/* <button
           onClick={handleStartVideoCall}
-          className="ml-2 p-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+          className="ml-2 p-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors text-sm md:text-base"
         >
-          <FontAwesomeIcon icon={faVideo} />
-        </button>
+          <FontAwesomeIcon icon={faVideo} className="text-lg md:text-xl" />
+        </button> */}
       </ConversationHeader>
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      <div ref={messageListRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div
+        ref={messageListRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
         {messages.map((message: Message) => (
           <div
             key={`${message.id}-${message.timestamp}`}
@@ -225,12 +237,12 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
               setNewMessage(e.target.value);
               handleTyping();
             }}
-            className="flex-1 border rounded-l-lg p-2 w-full"
+            className="flex-1 border rounded-l-lg p-2 w-full text-sm md:text-base"
             placeholder="Type a message..."
           />
           <button
             type="submit"
-            className="bg-purple-500 text-white rounded-r-lg px-4 py-2 whitespace-nowrap"
+            className="bg-purple-500 text-white rounded-r-lg px-4 py-2 whitespace-nowrap text-sm md:text-base"
           >
             Send
           </button>

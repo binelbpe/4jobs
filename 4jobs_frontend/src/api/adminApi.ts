@@ -2,7 +2,7 @@ import axios from 'axios';
 import  store  from '../redux/store';
 import { setLogoutAdmin } from '../redux/slices/adminSlice';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/admin';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL_ADMIN ;
 
 const apiRequest = async (method: 'POST' | 'GET' | 'DELETE' | 'PATCH', endpoint: string, data: any = {}) => {
   const token = localStorage.getItem('adminToken'); 

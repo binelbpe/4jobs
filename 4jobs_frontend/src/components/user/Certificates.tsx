@@ -117,6 +117,20 @@ const Certificates: React.FC = () => {
     setCertificates(certificates.filter((_, i) => i !== index));
   };
 
+  const renderCertificate = (certificate: CertificateWithFile) => {
+    const fileExtension = certificate.file?.name.split('.').pop()?.toLowerCase();
+    if (fileExtension === 'pdf') {
+      return (
+        <a href={certificate.imageUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800">
+          View Certificate (PDF)
+        </a>
+      );
+    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension || '')) {
+      return <img src={certificate.imageUrl} alt={certificate.name} className="w-full h-auto" />;
+    }
+    return <p>Unsupported file type</p>;
+  };
+
   return (
     <div>
       <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">Certificates</h2>
@@ -142,6 +156,7 @@ const Certificates: React.FC = () => {
               <Edit2 className="w-4 h-4 mr-2" />
               Edit
             </button>
+            {renderCertificate(certificate)}
           </div>
         ))}
       </div>

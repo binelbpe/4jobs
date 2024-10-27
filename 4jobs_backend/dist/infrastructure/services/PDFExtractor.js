@@ -17,31 +17,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PDFExtractor = void 0;
 const inversify_1 = require("inversify");
-const node_poppler_1 = require("node-poppler");
+const pdf_parse_1 = __importDefault(require("pdf-parse"));
 let PDFExtractor = class PDFExtractor {
-    constructor() {
-        this.poppler = new node_poppler_1.Poppler();
-    }
+    constructor() { }
     extractText(buffer) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 console.log("Starting PDF extraction");
-                const options = {
-                    maintainLayout: true,
-                    quiet: true
-                };
-                const result = yield this.poppler.pdfToText(buffer);
-                if (typeof result === 'string') {
-                    console.log(`PDF extraction completed. Text length: ${result.length}`);
-                    console.log("First 200 characters of extracted text:", result.substring(0, 200));
-                    return result;
-                }
-                else {
-                    throw new Error("Unexpected result from pdfToText");
-                }
+                const data = yield (0, pdf_parse_1.default)(buffer);
+                const text = data.text;
+                console.log(`PDF extraction completed. Text length: ${text.length}`);
+                console.log("First 200 characters of extracted text:", text.substring(0, 200));
+                return text;
             }
             catch (error) {
                 console.error("Error extracting text from PDF:", error);

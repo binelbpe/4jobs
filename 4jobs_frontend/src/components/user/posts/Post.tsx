@@ -8,6 +8,7 @@ import {
 } from "../../../redux/slices/postSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
 import { FaThumbsUp, FaThumbsDown, FaComment } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -35,6 +36,7 @@ const Post: React.FC<PostType> = ({
   const [newComment, setNewComment] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [localComments, setLocalComments] = useState<Comment[]>(comments);
+  const navigate = useNavigate();
 
   const handleLike = () => {
     if (currentUser && currentUser.id && _id) {
@@ -85,12 +87,16 @@ const Post: React.FC<PostType> = ({
       <div className="p-4 border-b text-purple-600 border-purple-200 dark:border-purple-700">
         <div className="flex items-center space-x-3">
           <img
-            src={user.profileImage || "https://via.placeholder.com/40"}
-            alt={user.name}
-            className="w-10 h-10 rounded-full object-cover"
+            src={user.profileImage}
+            alt="Profile"
+            className="w-10 h-10 rounded-full object-cover cursor-pointer"
+            onClick={() => navigate(`/connection/profile/${user._id}`)}
           />
           <div>
-            <h3 className="font-semibold text-purple-800 dark:text-purple-500">
+            <h3
+              className="font-semibold text-purple-800 dark:text-purple-500 cursor-pointer"
+              onClick={() => navigate(`/connection/profile/${user._id}`)}
+            >
               {user.name}
             </h3>
             <p className="text-sm text-purple-600 dark:text-purple-400">
@@ -166,11 +172,21 @@ const Post: React.FC<PostType> = ({
                       "https://via.placeholder.com/40"
                     }
                     alt={comment.userId.name}
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover cursor-pointer"
+                    onClick={() =>
+                      navigate(`/connection/profile/${comment.userId.id}`)
+                    }
                   />
                   <div>
                     <p className="text-sm font-medium text-purple-800 dark:text-purple-600">
-                      {comment.userId.name}
+                      <span
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate(`/connection/profile/${comment.userId.id}`)
+                        }
+                      >
+                        {comment.userId.name}
+                      </span>
                     </p>
                     <p className="text-sm text-purple-700 dark:text-purple-500">
                       {comment.content}

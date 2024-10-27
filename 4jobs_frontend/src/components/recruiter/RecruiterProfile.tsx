@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../redux/store';
 import { fetchProfile, selectRecruiter } from '../../redux/slices/recruiterSlice';
 import { useNavigate } from 'react-router-dom';
-import RecruiterHeader from '../recruiter/RecruiterHeader'; // Adjust the path if needed
+import RecruiterHeader from '../recruiter/RecruiterHeader';
 
 const RecruiterProfile: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();

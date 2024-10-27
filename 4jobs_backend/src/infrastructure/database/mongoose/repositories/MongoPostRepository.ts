@@ -69,10 +69,10 @@ export class MongoPostRepository implements IPostRepository {
     const totalPages = Math.ceil(totalCount / limit);
 
     const posts = await PostModel.find()
-      .populate("userId", "name email profileImage bio")
+      .populate("userId", "name email profileImage bio _id")
       .populate({
         path: "comments.userId",
-        select: "name profileImage",
+        select: "name profileImage _id",
       })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -159,6 +159,7 @@ export class MongoPostRepository implements IPostRepository {
       ...postObj,
       user: post.userId
         ? {
+          _id:post.userId._id,
             name: post.userId.name,
             email: post.userId.email,
             profileImage: post.userId.profileImage,

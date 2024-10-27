@@ -45,14 +45,13 @@ export const fetchConnectionProfile = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await fetchConnectionProfileApi(userId);
+      console.log("Fetched profile:", response); // Log the response
       return { userId, profile: response };
     } catch (error: unknown) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(
-        "Failed to fetch connection profile. Please try again later."
-      );
+      return rejectWithValue("Failed to fetch connection profile. Please try again later.");
     }
   }
 );

@@ -33,7 +33,6 @@ const Dashboard: React.FC = () => {
       <Header />
       <div className="max-w-7xl mx-auto m-3 px-4 sm:px-6 lg:px-8 relative">
         <div className="flex flex-col lg:flex-row gap-5">
-          {/* Clickable area on the left side to toggle the sidebar on smaller screens */}
           <div
             className={`lg:hidden fixed top-1/2 left-0 transform -translate-y-1/2 w-16 cursor-pointer opacity-0 hover:opacity-100 transition-opacity duration-300`}
             onClick={toggleSidebar}

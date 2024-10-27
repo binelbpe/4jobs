@@ -66,7 +66,6 @@ const RecommendationsPanel: React.FC<RecommendationsPanelProps> = ({
           <RecommendationCard
             key={user.id}
             user={user}
-            onViewProfile={() => {}}
           />
         ))}
       </div>

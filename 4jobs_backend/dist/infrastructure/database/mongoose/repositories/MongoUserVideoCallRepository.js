@@ -26,6 +26,8 @@ let MongoUserVideoCallRepository = class MongoUserVideoCallRepository {
                 callerId,
                 recipientId,
                 status: 'pending',
+                mediaStatus: { audio: true, video: true },
+                expiresAt: new Date(Date.now() + 30000) // 30 seconds expiry
             });
             yield videoCall.save();
             return this.mapToEntity(videoCall);
@@ -33,7 +35,8 @@ let MongoUserVideoCallRepository = class MongoUserVideoCallRepository {
     }
     updateStatus(callId, status) {
         return __awaiter(this, void 0, void 0, function* () {
-            const videoCall = yield UserVideoCallModel_1.UserVideoCallModel.findByIdAndUpdate(callId, { status, updatedAt: new Date() }, { new: true });
+            const videoCall = yield UserVideoCallModel_1.UserVideoCallModel.findByIdAndUpdate(callId, Object.assign({ status, updatedAt: new Date() }, (status === 'accepted' && { expiresAt: new Date(Date.now() + 3600000) }) // 1 hour
+            ), { new: true });
             if (!videoCall) {
                 throw new Error('Video call not found');
             }
@@ -50,7 +53,9 @@ let MongoUserVideoCallRepository = class MongoUserVideoCallRepository {
         });
     }
     mapToEntity(model) {
-        return new UserVideoCall_1.UserVideoCall(model._id.toString(), model.callerId, model.recipientId, model.status, model.createdAt, model.updatedAt);
+        return new UserVideoCall_1.UserVideoCall(model._id.toString(), model.callerId, model.recipientId, model.status, model.mediaStatus || { audio: true, video: true }, // Default media status if not set
+        model.createdAt, model.updatedAt, model.expiresAt || new Date(model.createdAt.getTime() + 30000) // Default expiry if not set
+        );
     }
 };
 exports.MongoUserVideoCallRepository = MongoUserVideoCallRepository;

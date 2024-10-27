@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchJobPost, applyForJobAsync } from "../../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -26,14 +26,21 @@ const LoadingSpinner: React.FC = () => (
 
 const JobDetail: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
+  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  // Get job details from navigation state if available
+  const jobDetailsFromState = location.state?.jobDetails;
+
   const jobPost = useSelector((state: RootState) => {
+    if (jobDetailsFromState) return jobDetailsFromState;
+    
     const authJobPost = state.auth.jobPosts.posts.find(
       (job: BasicJobPost) => job._id === jobId
     );
     if (authJobPost) return authJobPost;
+    
     return state.userSearch.jobPosts.find(
       (job: BasicJobPost) => job._id === jobId
     );
@@ -199,7 +206,7 @@ const JobDetail: React.FC = () => {
                 Required Skills
               </h2>
               <div className="flex flex-wrap gap-2">
-                {jobPost.skillsRequired.map((skill, index) => (
+                {jobPost.skillsRequired.map((skill: string, index: number) => (
                   <span
                     key={index}
                     className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium"
@@ -216,7 +223,7 @@ const JobDetail: React.FC = () => {
                 Required Qualifications
               </h2>
               <div className="flex flex-wrap gap-2">
-                {jobPost.qualifications.map((qualification, index) => (
+                {jobPost.qualifications.map((qualification: string, index: number) => (
                   <span
                     key={index}
                     className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium"

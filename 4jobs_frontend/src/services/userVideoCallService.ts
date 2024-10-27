@@ -6,79 +6,204 @@ class UserVideoCallService {
   private remoteStream: MediaStream | null = null;
   private onRemoteStreamUpdate: ((stream: MediaStream) => void) | null = null;
   private onCallStateChange: ((state: string) => void) | null = null;
+  private onIceCandidate: ((candidate: RTCIceCandidate) => void) | null = null;
+  private initialized = false;
 
   constructor() {
     this.initializePeerConnection();
   }
 
   private initializePeerConnection() {
+    if (this.peerConnection) {
+      this.peerConnection.close();
+    }
+
     this.peerConnection = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        {
+          urls: 'turn:numb.viagenie.ca',
+          username: 'webrtc@live.com',
+          credential: 'muazkh'
+        }
+      ]
     });
 
     this.peerConnection.ontrack = (event) => {
-      this.remoteStream = event.streams[0];
+      console.log('Received remote track:', event.track.kind, event.track.enabled);
+      
+      if (!this.remoteStream) {
+        this.remoteStream = new MediaStream();
+        console.log('Created new remote MediaStream');
+      }
+      
+      this.remoteStream.addTrack(event.track);
+      console.log('Added track to remote stream:', event.track.kind);
+      
       if (this.onRemoteStreamUpdate) {
+        console.log('Updating remote stream with tracks:', 
+          this.remoteStream.getTracks().map(t => `${t.kind}:${t.enabled}`));
         this.onRemoteStreamUpdate(this.remoteStream);
       }
     };
 
     this.peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        // Send the ICE candidate to the other peer
-        // This should be implemented using your signaling mechanism (e.g., WebSocket)
+      if (event.candidate && this.onIceCandidate) {
+        this.onIceCandidate(event.candidate);
       }
+    };
+
+    // Add connection state change handler
+    this.peerConnection.onconnectionstatechange = () => {
+      console.log('Connection state changed to:', this.peerConnection?.connectionState);
+      if (this.peerConnection?.connectionState === 'connected') {
+        console.log('Peer connection established successfully');
+      }
+    };
+
+    // Add ICE connection state change handler
+    this.peerConnection.oniceconnectionstatechange = () => {
+      console.log('ICE connection state:', this.peerConnection?.iceConnectionState);
     };
   }
 
   private resetPeerConnection() {
+    console.log("Resetting peer connection");
+    
     if (this.peerConnection) {
+      // Remove all tracks from peer connection
+      const senders = this.peerConnection.getSenders();
+      senders.forEach(sender => {
+        this.peerConnection?.removeTrack(sender);
+      });
+      
       this.peerConnection.close();
+      this.peerConnection = null;
     }
+    
+    console.log("Initializing new peer connection");
     this.initializePeerConnection();
+    
+    if (!this.peerConnection) {
+      throw new Error("Failed to initialize peer connection");
+    }
   }
 
   async startLocalStream(): Promise<MediaStream> {
-    this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    return this.localStream;
+    try {
+      console.log("Requesting media permissions...");
+      this.localStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: true
+      });
+
+      console.log("Media permissions granted, tracks:", 
+        this.localStream.getTracks().map(t => `${t.kind}:${t.enabled}`));
+
+      return this.localStream;
+    } catch (error) {
+      console.error("Error getting local stream:", error);
+      throw error;
+    }
   }
 
   async makeCall(recipientId: string): Promise<string> {
-    this.resetPeerConnection();
+    try {
+      this.resetPeerConnection();
 
-    if (!this.localStream) {
-      await this.startLocalStream();
-    }
-
-    this.localStream!.getTracks().forEach(track => {
-      if (this.peerConnection) {
-        this.peerConnection.addTrack(track, this.localStream!);
+      if (!this.localStream) {
+        await this.startLocalStream();
       }
-    });
 
-    const offer = await this.peerConnection!.createOffer();
-    await this.peerConnection!.setLocalDescription(offer);
+      // Add all tracks to peer connection
+      this.localStream!.getTracks().forEach(track => {
+        if (this.peerConnection) {
+          console.log('Adding track to outgoing call:', track.kind, track.id);
+          this.peerConnection.addTrack(track, this.localStream!);
+        }
+      });
 
-    const offerString = JSON.stringify(offer);
-    const offerBase64 = Buffer.from(offerString).toString('base64');
+      const offer = await this.peerConnection!.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      });
+      
+      await this.peerConnection!.setLocalDescription(offer);
+      console.log('Local description set for outgoing call');
 
-    return offerBase64;
+      return Buffer.from(JSON.stringify(offer)).toString('base64');
+    } catch (error) {
+      console.error('Error making call:', error);
+      throw error;
+    }
   }
 
   async handleIncomingCall(offerBase64: string): Promise<void> {
-    const offerString = Buffer.from(offerBase64, 'base64').toString('utf-8');
-    const offer = JSON.parse(offerString);
-    await this.peerConnection!.setRemoteDescription(new RTCSessionDescription(offer));
+    try {
+      this.resetPeerConnection();
+
+      if (!this.localStream) {
+        await this.startLocalStream();
+      }
+
+      // Add local tracks before setting remote description
+      this.localStream!.getTracks().forEach(track => {
+        if (this.peerConnection) {
+          console.log('Adding local track for incoming call:', track.kind, track.id);
+          this.peerConnection.addTrack(track, this.localStream!);
+        }
+      });
+
+      const offerString = Buffer.from(offerBase64, 'base64').toString('utf-8');
+      const offer = JSON.parse(offerString);
+
+      await this.peerConnection!.setRemoteDescription(new RTCSessionDescription(offer));
+      console.log('Remote description set for incoming call');
+    } catch (error) {
+      console.error('Error handling incoming call:', error);
+      throw error;
+    }
   }
 
   async createAnswer(): Promise<string> {
-    if (!this.peerConnection) {
-      throw new Error('Peer connection not initialized');
+    try {
+      console.log("Starting to create answer");
+      
+      if (!this.peerConnection) {
+        console.error("No peer connection available for creating answer");
+        throw new Error("Peer connection not initialized");
+      }
+
+      console.log("Creating answer with peer connection state:", {
+        connectionState: this.peerConnection.connectionState,
+        signalingState: this.peerConnection.signalingState,
+        iceGatheringState: this.peerConnection.iceGatheringState,
+        iceConnectionState: this.peerConnection.iceConnectionState
+      });
+
+      const answer = await this.peerConnection.createAnswer();
+      console.log("Answer created:", {
+        type: answer.type,
+        sdpLength: answer.sdp?.length
+      });
+
+      await this.peerConnection.setLocalDescription(answer);
+      console.log("Local description set for answer");
+
+      const answerString = JSON.stringify(answer);
+      return Buffer.from(answerString).toString('base64');
+    } catch (error) {
+      console.error("Error in createAnswer:", {
+        error,
+        peerConnectionState: this.peerConnection?.connectionState,
+        signalingState: this.peerConnection?.signalingState
+      });
+      throw error;
     }
-    const answer = await this.peerConnection.createAnswer();
-    await this.peerConnection.setLocalDescription(answer);
-    const answerString = JSON.stringify(answer);
-    return Buffer.from(answerString).toString('base64');
   }
 
   async handleAnswer(answerBase64: string): Promise<void> {
@@ -109,6 +234,10 @@ class UserVideoCallService {
     this.onCallStateChange = callback;
   }
 
+  setOnIceCandidate(callback: (candidate: RTCIceCandidate) => void): void {
+    this.onIceCandidate = callback;
+  }
+
   disconnectCall(): void {
     if (this.localStream) {
       this.localStream.getTracks().forEach(track => {
@@ -129,6 +258,7 @@ class UserVideoCallService {
     if (this.onCallStateChange) {
       this.onCallStateChange('ended');
     }
+    this.initialized = false;
   }
 
   muteAudio(mute: boolean): void {

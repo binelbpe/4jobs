@@ -27,7 +27,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
             onClick={onClose}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
           >
-            Cancel
+            NO
           </button>
           <button
             onClick={() => {
@@ -36,7 +36,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
             }}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
           >
-            Delete
+            YES
           </button>
         </div>
       </div>

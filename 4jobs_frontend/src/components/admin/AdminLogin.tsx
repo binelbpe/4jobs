@@ -74,6 +74,7 @@ const AdminLogin: React.FC = () => {
               />
               {formErrors.password && <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>}
             </div>
+            {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
             <button
               type="submit"
               disabled={loading}
@@ -82,7 +83,6 @@ const AdminLogin: React.FC = () => {
               {loading ? 'Logging in...' : 'Submit'}
             </button>
           </form>
-          {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ import { formatFileSize, MAX_IMAGE_SIZE, MAX_VIDEO_SIZE, TARGET_VIDEO_SIZE, MAX_
 import CompressionLoader from '../../common/CompressionLoader';
 import FullScreenLoader from '../../common/FullScreenLoader';
 
-// Update these constants to match CreatePost.tsx
+
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
 
@@ -129,7 +129,7 @@ const EditPost: React.FC = () => {
       const outputFileName = 'output.mp4';
       ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
 
-      // Calculate target bitrate based on the desired file size
+ 
       const duration = await getDuration(inputFile);
       const targetBitrate = Math.floor((TARGET_VIDEO_SIZE * 8 * 1024 * 1024) / duration);
 

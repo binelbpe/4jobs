@@ -22,6 +22,7 @@ export const CallProvider: React.FC<CallProviderProps> = ({ children }) => {
   const [isIncomingCall, setIsIncomingCall] = useState(false);
   const [incomingCallData, setIncomingCallData] = useState<{ callerId: string; offer: string } | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isCallInitialized, setIsCallInitialized] = useState(false);
 
   const handleIncomingCall = useCallback((data: { callerId: string; offer: string }) => {
     console.log("Incoming call from:", data.callerId);
@@ -31,10 +32,13 @@ export const CallProvider: React.FC<CallProviderProps> = ({ children }) => {
 
   const acceptCall = useCallback(() => {
     console.log("Call accepted in CallContext");
+    if (incomingCallData?.callerId) {
+      console.log("Emitting call accepted to:", incomingCallData.callerId);
+      socketService.emitCallAccepted(incomingCallData.callerId);
+    }
     setIsIncomingCall(false);
     setIsCallActive(true);
-    console.log("isCallActive set to true");
-  }, []);
+  }, [incomingCallData]);
 
   const rejectCall = useCallback(() => {
     if (incomingCallData) {
@@ -45,14 +49,21 @@ export const CallProvider: React.FC<CallProviderProps> = ({ children }) => {
   }, [incomingCallData]);
 
   const setupVideoCall = useCallback((recipientId: string) => {
+    if (isCallInitialized) {
+      console.log("Call already initialized");
+      return;
+    }
+    
     console.log(`Setting up video call with ${recipientId}`);
     setIsCallActive(true);
-  }, []);
+    setIsCallInitialized(true);
+  }, [isCallInitialized]);
 
   const endCall = useCallback(() => {
     console.log("Call ended");
     setIsCallActive(false);
     setIncomingCallData(null);
+    setIsCallInitialized(false);
   }, []);
 
   return (

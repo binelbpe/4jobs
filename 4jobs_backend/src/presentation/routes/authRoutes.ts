@@ -433,4 +433,11 @@ authRouter.delete(
   connectionController.deleteConnection.bind(connectionController)
 );
 
+// Add new advanced search route
+authRouter.post(
+  "/jobs/advanced-search",
+  authenticate,
+  jobPostControllerUser.advancedSearch.bind(jobPostControllerUser)
+);
+
 export default authRouter;

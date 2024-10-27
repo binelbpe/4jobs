@@ -24,7 +24,7 @@ import { User } from "../../types/auth";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import { selectMemoizedConnections } from "../../redux/store"; // Ensure this import is present
+import { selectMemoizedConnections } from '../../redux/store';
 
 interface ConnectionRequest {
   _id: string;
@@ -44,10 +44,10 @@ const Connections: React.FC = () => {
   const { user, connections, connectionRequests, loading, error } = useSelector(
     (state: RootState) => ({
       user: state.auth.user,
-      connections: selectMemoizedConnections(state), // Use the memoized selector
+      connections: selectMemoizedConnections(state),
       connectionRequests: state.connections.connectionRequests,
-      loading: state.connections.loading, // Add loading
-      error: state.connections.error, // Add error
+      loading: state.connections.loading,
+      error: state.connections.error, 
     })
   );
   const [searchQuery, setSearchQuery] = useState("");
@@ -121,7 +121,7 @@ const Connections: React.FC = () => {
           removeConnection({ userId: user.id, connectionId })
         ).unwrap();
         toast.success("Connection removed successfully.");
-        fetchData(); // Refresh the connections list
+        fetchData();
       } catch (error) {
         toast.error("Failed to remove connection. Please try again.");
       }
@@ -140,7 +140,7 @@ const Connections: React.FC = () => {
     if (error) {
       toast.error(`An error occurred: ${error}`);
     }
-  }, [error]); // Only show toast when error changes
+  }, [error]); 
 
   return (
     <div className="bg-gray-100 min-h-screen">

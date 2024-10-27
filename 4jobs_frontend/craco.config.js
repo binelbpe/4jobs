@@ -2,17 +2,10 @@ const webpack = require('webpack');
 
 module.exports = {
   webpack: {
-    configure: {
-      resolve: {
-        fallback: {
-          "buffer": require.resolve("buffer/")
-        }
-      },
-      plugins: [
-        new webpack.ProvidePlugin({
-          Buffer: ['buffer', 'Buffer'],
-        }),
-      ],
+    configure: (webpackConfig) => {
+      // Ensure no fallback property is present
+      delete webpackConfig.resolve.fallback; // Remove if it exists
+      return webpackConfig;
     },
   },
 };

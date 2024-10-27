@@ -56,9 +56,9 @@ const UserConversationList: React.FC<ConversationListProps> = ({
   }
 
   return (
-    <div className="w-1/3 border-r">
+    <div className="w-full md:w-1/3 border-r">
       <h2 className="text-xl font-semibold p-4 border-b">Conversations</h2>
-      <ul>
+      <ul className="overflow-y-auto max-h-[calc(100vh-100px)]">
         {conversations.map((conversation: URConversation) => {
           const unreadCount = getUnreadCount(conversation.id);
           return (
@@ -89,7 +89,7 @@ const UserConversationList: React.FC<ConversationListProps> = ({
               </div>
               <div className="flex-grow min-w-0">
                 <h3 className="font-semibold truncate">
-                  {conversation.participant.name}
+                  {conversation.participant.name} - {conversation.participant.companyName}
                 </h3>
                 <p className="text-sm text-gray-600 truncate">
                   {conversation.lastMessage}

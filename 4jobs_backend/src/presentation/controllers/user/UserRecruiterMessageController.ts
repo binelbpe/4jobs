@@ -23,6 +23,7 @@ export class UserRecruiterMessageController {
           participant: {
             id: recruiter?.id,
             name: recruiter?.name,
+            companyName: recruiter?.companyName
           },
           lastMessage: conv.lastMessage,
           lastMessageTimestamp: conv.lastMessageTimestamp.toISOString(),

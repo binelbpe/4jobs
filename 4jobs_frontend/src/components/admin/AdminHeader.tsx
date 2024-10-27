@@ -9,6 +9,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     dispatch(logoutAdmin());
@@ -21,6 +22,15 @@ const Header: React.FC = () => {
 
   const goToProfile = () => {
     navigate('/admin/profile'); 
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    handleLogout();
+    setShowLogoutModal(false);
   };
 
   return (
@@ -44,7 +54,7 @@ const Header: React.FC = () => {
                 <span>Profile</span>
               </li>
               <li
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="px-3 sm:px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 cursor-pointer text-sm sm:text-base"
               >
                 <FaSignOutAlt />
@@ -54,6 +64,30 @@ const Header: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-purple-500 rounded-lg shadow-lg p-6">
+            <h2 className="text-lg font-semibold">Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-purple-600 text-white px-4 py-2 rounded mr-2"
+                onClick={confirmLogout}
+              >
+                Yes
+              </button>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

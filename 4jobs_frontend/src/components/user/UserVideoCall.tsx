@@ -12,16 +12,51 @@ interface UserVideoCallProps {
 }
 
 const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, incomingCallData }) => {
-  console.log("UserVideoCall component rendered", { recipientId, incomingCallData });
-  
   const { incomingCallData: contextIncomingCallData } = useCall();
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoHidden, setIsVideoHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  const attachStreamToVideo = useCallback((stream: MediaStream, videoElement: HTMLVideoElement | null) => {
+    if (videoElement && stream) {
+      try {
+        console.log(`Attaching ${videoElement === localVideoRef.current ? 'local' : 'remote'} stream:`, 
+          stream.getTracks().map(t => `${t.kind}:${t.enabled}`));
+        
+        videoElement.srcObject = stream;
+        videoElement.muted = videoElement === localVideoRef.current;
+        
+        const playPromise = videoElement.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            if (error.name !== 'AbortError') {
+              console.error("Error playing video:", error);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error attaching stream to video:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      attachStreamToVideo(localStream, localVideoRef.current);
+    }
+  }, [localStream, attachStreamToVideo]);
+
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      attachStreamToVideo(remoteStream, remoteVideoRef.current);
+      setIsInitializing(false); // Set initializing to false when remote stream is attached
+    }
+  }, [remoteStream, attachStreamToVideo]);
 
   const handleEndCall = useCallback(() => {
     console.log("Ending call");
@@ -33,70 +68,72 @@ const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, i
   }, [recipientId, onEndCall]);
 
   useEffect(() => {
+    let mounted = true;
+    let callInitialized = false;
+
     const startCall = async () => {
+      if (callInitialized) return;
+      callInitialized = true;
+
       try {
-        console.log("Starting user-to-user video call");
         const stream = await userVideoCallService.startLocalStream();
-        console.log("Local stream obtained:", stream);
+        if (!mounted) return;
+
+        console.log("Local stream obtained:", stream.getTracks());
         setLocalStream(stream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
 
         userVideoCallService.setOnRemoteStreamUpdate((stream) => {
-          console.log("Received remote stream");
+          if (!mounted) return;
+          console.log("Remote stream received:", stream.getTracks());
           setRemoteStream(stream);
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = stream;
-          }
+          setIsInitializing(false);
         });
 
         const callData = incomingCallData || contextIncomingCallData;
         if (callData) {
-          // Handle incoming call
           await userVideoCallService.handleIncomingCall(callData.offer);
           const answer = await userVideoCallService.createAnswer();
           socketService.emitCallAnswer(callData.callerId, answer);
+          setIsInitializing(false);
         } else {
-          // Initiate outgoing call
           const offer = await userVideoCallService.makeCall(recipientId);
-          console.log("Created offer:", offer);
           socketService.emit("userCallOffer", { recipientId, offer });
         }
+
+        // Set up socket event listeners
+        const listeners = [
+          socketService.onCallAccepted(() => {
+            console.log("Call accepted, waiting for media");
+            if (mounted) setIsInitializing(false);
+          }),
+          socketService.on("userCallAnswer", async (data: { answerBase64: string }) => {
+            await userVideoCallService.handleAnswer(data.answerBase64);
+          })
+        ];
+
+        return () => {
+          listeners.forEach(removeListener => removeListener());
+        };
       } catch (error) {
-        console.error('Error starting video call:', error);
-        setError('Failed to start video call. Please try again.');
+        console.error("Error in call setup:", error);
+        if (mounted) {
+          setError(`Failed to start video call: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setIsInitializing(false);
+        }
       }
     };
 
     startCall();
 
-    const removeCallAnswerListener = socketService.on("userCallAnswer", async (data: { answerBase64: string }) => {
-      console.log("Received call answer:", data.answerBase64);
-      try {
-        await userVideoCallService.handleAnswer(data.answerBase64);
-      } catch (error) {
-        console.error('Error handling call answer:', error);
-        setError('Failed to establish connection. Please try again.');
-      }
-    });
-
-    const removeCallRejectedListener = socketService.onCallRejected(() => {
-      console.log("Call rejected");
-      handleEndCall();
-    });
-
-    const removeCallEndedListener = socketService.on("userCallEnded", () => {
-      console.log("Call ended by the other user");
-      handleEndCall();
-    });
-
     return () => {
-      console.log("Cleaning up user video call");
+      mounted = false;
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+      }
       userVideoCallService.disconnectCall();
-      removeCallAnswerListener();
-      removeCallRejectedListener();
-      removeCallEndedListener();
     };
   }, [recipientId, incomingCallData, contextIncomingCallData, handleEndCall]);
 
@@ -109,6 +146,18 @@ const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, i
     setIsVideoHidden(!isVideoHidden);
     userVideoCallService.hideVideo(!isVideoHidden);
   };
+
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      console.log('Attaching remote stream:', remoteStream.getTracks());
+      remoteVideoRef.current.srcObject = remoteStream; // Ensure this is set correctly
+      remoteVideoRef.current.play().catch(error => {
+        console.error("Error playing remote video:", error);
+      });
+    } else {
+      console.log('No remote stream available to attach');
+    }
+  }, [remoteStream]);
 
   if (error) {
     return (
@@ -128,7 +177,7 @@ const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, i
   }
 
   return (
-    <div className="fixed inset-0  bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl p-4">
         <div className="relative aspect-w-16 aspect-h-9 mb-4">
           <div className="w-full h-full bg-black rounded-lg overflow-hidden">
@@ -141,21 +190,11 @@ const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, i
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-white">
-                {localStream ? (
-                  <video
-                    ref={localVideoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  "Initializing call..."
-                )}
+                {isInitializing ? "Initializing call..." : "Waiting for other participant..."}
               </div>
             )}
           </div>
-          {localStream && remoteStream && (
+          {localStream && (
             <div className="absolute bottom-4 right-4 w-1/4 h-1/4">
               <video
                 ref={localVideoRef}
@@ -185,6 +224,11 @@ const UserVideoCall: React.FC<UserVideoCallProps> = ({ recipientId, onEndCall, i
             className="p-3 rounded-full bg-red-500 text-white"
           >
             <FontAwesomeIcon icon={faPhone} className="text-xl transform rotate-135" />
+          </button>
+          <button onClick={() => {
+            console.log('Current remote stream tracks:', remoteStream?.getTracks().map(t => `${t.kind}:${t.enabled}`));
+          }}>
+            Log Remote Stream
           </button>
         </div>
       </div>

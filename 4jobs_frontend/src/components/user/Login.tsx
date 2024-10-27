@@ -88,6 +88,7 @@ const Login: React.FC = () => {
                     required
                   />
                   {errors.password && <p className="mt-2 text-sm text-red-500">{errors.password}</p>}
+                  {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
                 </div>
                 <button
                   type="submit"
@@ -96,7 +97,6 @@ const Login: React.FC = () => {
                 >
                   {loading ? 'Logging in...' : 'Submit'}
                 </button>
-                {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
                 <Link to="/forgot-password" className="block text-sm text-purple-600 hover:underline mt-2">
                   Forgot Password?
                 </Link>

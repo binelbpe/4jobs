@@ -22,6 +22,7 @@ import {
 } from "react-icons/fa";
 import Header from "../admin/AdminHeader";
 import Sidebar from "../admin/AdminSidebar";
+import ConfirmationModal from "../common/ConfirmationModal"; // Ensure this is imported
 
 const ITEMS_PER_PAGE = 10;
 
@@ -80,13 +81,6 @@ const AdminJobPost: React.FC = () => {
       } else {
         dispatch(unblockJobPost(confirmAction.postId));
       }
-      setLocalJobPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post._id === confirmAction.postId
-            ? { ...post, isBlock: confirmAction.type === "block" }
-            : post
-        )
-      );
       setConfirmAction(null);
     }
   };
@@ -275,6 +269,13 @@ const AdminJobPost: React.FC = () => {
               </button>
             </div>
           </div>
+          <ConfirmationModal
+            isOpen={!!confirmAction}
+            onClose={() => setConfirmAction(null)}
+            onConfirm={confirmBlockUnblock}
+            title={confirmAction?.type === "block" ? "Confirm Block Job Post" : "Confirm Unblock Job Post"}
+            message={confirmAction?.type === "block" ? "Are you sure you want to block this job post?" : "Are you sure you want to unblock this job post?"}
+          />
         </div>
       </div>
       {selectedPost && (
@@ -461,41 +462,6 @@ const AdminJobPost: React.FC = () => {
                 className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors duration-200"
               >
                 Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {confirmAction && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4 text-purple-800">
-              Confirm Action
-            </h2>
-            <p className="mb-4">
-              Are you sure you want to{" "}
-              {confirmAction.type === "block" ? "block" : "unblock"} this job
-              post?
-              {confirmAction.type === "block"
-                ? " This will prevent users from viewing or applying to this job."
-                : " This will make the job post visible and allow users to apply again."}
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setConfirmAction(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmBlockUnblock}
-                className={`px-4 py-2 text-white rounded transition-colors duration-200 ${
-                  confirmAction.type === "block"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
-              >
-                Confirm {confirmAction.type === "block" ? "Block" : "Unblock"}
               </button>
             </div>
           </div>

@@ -16,7 +16,13 @@ export class VerifyOtpUseCase {
   }
 
   async execute(email: string, otp: string) {
-    const isValid = await this.otpService.verifyOtp(email, otp);
+    const verificationResult = await this.otpService.verifyOtp(email, otp);
+    
+    if (typeof verificationResult === "string") {
+      throw new Error(verificationResult); // Handle error message from verifyOtp
+    }
+
+    const isValid = verificationResult; // This will be true or false
     if (isValid) {
       const recruiter = await this.recruiterRepository.findByEmail(email);
       if (recruiter) {

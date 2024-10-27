@@ -1,3 +1,5 @@
+import { WorkType } from '../constants/jobConstants';
+
 export interface CompanyDetails {
   name: string;
   website?: string;
@@ -18,7 +20,7 @@ export interface BasicJobPost {
   isApplied?: boolean;
   location: string;
   salaryRange: SalaryRange;
-  wayOfWork: string;
+  wayOfWork: WorkType;
   skillsRequired: string[];
   qualifications: string[];
   recruiterId?: {
@@ -58,7 +60,7 @@ export interface JobPost {
   isApplied?: boolean;
   location: string;
   salaryRange: SalaryRange;
-  wayOfWork: string;
+  wayOfWork: WorkType;
   skillsRequired: string[];
   qualifications: string[];
   recruiterId?: string[]
@@ -100,7 +102,7 @@ export interface BasicJobPostAdmin {
     min: number;
     max: number;
   };
-  wayOfWork: string;
+  wayOfWork: WorkType;
   skillsRequired: string[];
   qualifications: string[];
   status: 'Open' | 'Closed';
@@ -129,7 +131,9 @@ export interface BasicJobPostAdmin {
 }
 
 
-export interface BasicJobPostFormData extends Omit<BasicJobPost, '_id'> {}
+export interface BasicJobPostFormData extends Omit<BasicJobPost, '_id'> {
+  wayOfWork: WorkType;
+}
 
 export interface CreateBasicJobPostParams {
   recruiterId: string;

@@ -30,7 +30,7 @@ const ForgotPassword: React.FC = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  // Reset error message after each change or re-render
+
   useEffect(() => {
     dispatch({ type: 'auth/clearError' });
   }, [email, otp, newPassword, confirmPassword, dispatch]);

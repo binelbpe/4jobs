@@ -2,11 +2,10 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../redux/store';
-import { fetchConnectionProfile } from '../../redux/slices/connectionSlice';
+import { fetchConnectionProfile } from '../../redux/slices/connectionSlice'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {  faEnvelope, faPhone, faBirthdayCake, faVenusMars, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faPhone, faBirthdayCake, faVenusMars, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { UserCircle } from 'lucide-react';
-import Header from './Header'
 
 
 const ConnectionProfile: React.FC = () => {
@@ -17,7 +16,7 @@ const ConnectionProfile: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      dispatch(fetchConnectionProfile(userId));
+      dispatch(fetchConnectionProfile(userId)); 
     }
   }, [dispatch, userId]);
 
@@ -27,36 +26,34 @@ const ConnectionProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <>
-        <div className="flex justify-center m-3 items-center h-screen bg-gray-100">
-          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-        </div>
-      </>
+      <div className="flex justify-center m-3 items-center h-screen bg-gray-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-          <div className="text-red-500 text-xl">{error}</div>
-        </div>
-      </>
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="text-red-500 text-xl">{error}</div>
+      </div>
     );
   }
 
   if (!connectionProfile) {
     return (
-      <>
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-          <div className="text-gray-500 text-xl">No profile found</div>
-        </div>
-      </>
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="text-gray-500 text-xl">No profile found</div>
+      </div>
     );
   }
 
+  console.log("Connection Profile:", connectionProfile);
+  console.log("Loading:", loading);
+  console.log("Error:", error);
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 connection-profile">
       <div className="container mx-auto px-4 py-8">
         <button onClick={handleClose} className="mb-4 flex items-center text-purple-700 hover:text-purple-900">
           <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />

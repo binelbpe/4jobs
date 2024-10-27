@@ -1,5 +1,5 @@
-import { JobPost, UpdateJobPostParams } from "../../../entities/jobPostTypes";
-import { User } from "../../../entities/User";
+import { JobPost } from "../../../entities/jobPostTypes";
+import { AdvancedSearchFilters, AdvancedSearchResult } from "../../../entities/AdvancedSearchTypes";
 
 export interface IJobPostUserRepository {
   findAll(
@@ -15,4 +15,11 @@ export interface IJobPostUserRepository {
   update(id: string, userId: string): Promise<JobPost | null>;
   
   reportJob(userId: string, jobId: string, reason: string): Promise<JobPost | null>;
+
+  // Add new method for advanced search
+  advancedSearch(
+    filters: AdvancedSearchFilters,
+    page: number,
+    limit: number
+  ): Promise<AdvancedSearchResult>;
 }

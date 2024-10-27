@@ -58,9 +58,9 @@ const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className="w-1/3 border-r">
+    <div className="w-full md:w-1/3 border-r">
       <h2 className="text-xl font-semibold p-4 border-b">Conversations</h2>
-      <ul>
+      <ul className="overflow-y-auto max-h-[calc(100vh-100px)]">
         {conversations.map((conversation: Conversation) => {
           const unreadCount = getUnreadCount(conversation.id);
           return (

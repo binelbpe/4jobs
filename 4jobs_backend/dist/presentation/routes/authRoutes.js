@@ -186,4 +186,6 @@ exports.authRouter.post("/reset-password", authController.resetPassword.bind(aut
 exports.authRouter.post("/refresh-token", authMiddleware_2.refreshTokenMiddleware);
 // Update the delete connection route to use userId and connectionId
 exports.authRouter.delete("/connections/:userId/remove/:connectionId", authMiddleware_1.authenticate, connectionController.deleteConnection.bind(connectionController));
+// Add new advanced search route
+exports.authRouter.post("/jobs/advanced-search", authMiddleware_1.authenticate, jobPostControllerUser.advancedSearch.bind(jobPostControllerUser));
 exports.default = exports.authRouter;

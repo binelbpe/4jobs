@@ -39,16 +39,13 @@ class UserRecruiterSocketService {
       this.socket.disconnect();
     }
 
-    this.socket = io(
-      process.env.REACT_APP_SOCKET_URL || "http://localhost:5000",
-      {
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        auth: { userId, userType },
-      }
-    );
+    this.socket = io(process.env.REACT_APP_SOCKET_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      auth: { userId, userType },
+    });
 
     this.setupEventListeners();
     this.startOnlineStatusUpdates();
@@ -65,29 +62,35 @@ class UserRecruiterSocketService {
       this.connected = false;
     });
 
-    this.socket.on("newUserRecruiterMessage", (message: URMessage | Message) => {
-      if (this.userType === "user" && 'conversationId' in message) {
-        store.dispatch(addUserRecruiterMessage(message as URMessage));
-        store.dispatch(
-          updateConversation({
-            id: message.conversationId,
-            lastMessage: message.content,
-            lastMessageTimestamp: message.timestamp,
-            lastMessageRead: false,
-          })
-        );
-      } else if (this.userType === "recruiter" && 'conversationId' in message) {
-        store.dispatch(addRecruiterMessage(message as Message));
-        store.dispatch(
-          updateRecruiterConversation({
-            id: message.conversationId,
-            lastMessage: message.content,
-            lastMessageTimestamp: message.timestamp,
-            lastMessageRead: false,
-          })
-        );
+    this.socket.on(
+      "newUserRecruiterMessage",
+      (message: URMessage | Message) => {
+        if (this.userType === "user" && "conversationId" in message) {
+          store.dispatch(addUserRecruiterMessage(message as URMessage));
+          store.dispatch(
+            updateConversation({
+              id: message.conversationId,
+              lastMessage: message.content,
+              lastMessageTimestamp: message.timestamp,
+              lastMessageRead: false,
+            })
+          );
+        } else if (
+          this.userType === "recruiter" &&
+          "conversationId" in message
+        ) {
+          store.dispatch(addRecruiterMessage(message as Message));
+          store.dispatch(
+            updateRecruiterConversation({
+              id: message.conversationId,
+              lastMessage: message.content,
+              lastMessageTimestamp: message.timestamp,
+              lastMessageRead: false,
+            })
+          );
+        }
       }
-    });
+    );
 
     this.socket.on(
       "userRecruiterTyping",
@@ -108,7 +111,11 @@ class UserRecruiterSocketService {
           );
         } else {
           store.dispatch(
-            setRecruiterTypingStatus({ userId: senderId, conversationId, isTyping: true })
+            setRecruiterTypingStatus({
+              userId: senderId,
+              conversationId,
+              isTyping: true,
+            })
           );
         }
       }
@@ -224,12 +231,16 @@ class UserRecruiterSocketService {
 
     this.socket?.on("onlineStatusUpdate", (onlineUsers: string[]) => {
       if (this.userType === "user") {
-        store.dispatch(setUserOnlineStatus({ userId: this.userId!, online: true }));
+        store.dispatch(
+          setUserOnlineStatus({ userId: this.userId!, online: true })
+        );
         onlineUsers.forEach((userId) => {
           store.dispatch(setUserOnlineStatus({ userId, online: true }));
         });
       } else {
-        store.dispatch(setRecruiterOnlineStatus({ userId: this.userId!, online: true }));
+        store.dispatch(
+          setRecruiterOnlineStatus({ userId: this.userId!, online: true })
+        );
         onlineUsers.forEach((userId) => {
           store.dispatch(setRecruiterOnlineStatus({ userId, online: true }));
         });
@@ -275,7 +286,6 @@ class UserRecruiterSocketService {
       };
 
       this.socket.emit("sendUserRecruiterMessage", message);
-
     }
   }
 

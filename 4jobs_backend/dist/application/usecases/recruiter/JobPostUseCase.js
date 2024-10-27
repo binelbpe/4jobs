@@ -100,7 +100,7 @@ let JobPostUseCase = class JobPostUseCase {
                     console.log(`Resume fetched for applicant ${applicant.id}. Buffer length: ${resumeBuffer.length}`);
                     const resumeText = yield this.pdfExtractor.extractText(resumeBuffer);
                     console.log(`Resume text extracted for applicant ${applicant.id}. Text length: ${resumeText.length}`);
-                    console.log(`First 200 characters of resume text: ${resumeText.substring(0, 200)}`);
+                    console.log(`First 200 characters of resume text: ${resumeText.substring(0, 500)}`);
                     if (resumeText.trim().length === 0) {
                         console.log(`Skipping applicant ${applicant.id}: Empty resume text`);
                         return null;

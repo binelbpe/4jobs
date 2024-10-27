@@ -45,6 +45,7 @@ let UserRecruiterMessageController = class UserRecruiterMessageController {
                         participant: {
                             id: recruiter === null || recruiter === void 0 ? void 0 : recruiter.id,
                             name: recruiter === null || recruiter === void 0 ? void 0 : recruiter.name,
+                            companyName: recruiter === null || recruiter === void 0 ? void 0 : recruiter.companyName
                         },
                         lastMessage: conv.lastMessage,
                         lastMessageTimestamp: conv.lastMessageTimestamp.toISOString(),

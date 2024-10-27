@@ -6,7 +6,7 @@ export interface URMessage {
   timestamp: string;
   isRead: boolean;
   senderType: string;
-  locallyRead: boolean; // New field to track if the message has been read locally
+  locallyRead: boolean; 
 }
 
 export interface URConversation {
@@ -15,6 +15,7 @@ export interface URConversation {
     id: string;
     name: string;
     profileImage?: string;
+    companyName?: string;
   };
   lastMessage: string;
   lastMessageTimestamp: string;

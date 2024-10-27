@@ -12,6 +12,7 @@ import {
   faSearch,
   faBars,
   faTimes,
+  faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   searchUsersAndJobs,
@@ -24,6 +25,7 @@ const RecruiterHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const recruiterId = useSelector(
@@ -84,9 +86,14 @@ const RecruiterHeader = () => {
     setShowSearchResults(false);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     dispatch(logout());
     navigate("/recruiter/login");
+    setShowLogoutModal(false);
   };
 
   const handleViewProfile = () => {
@@ -204,9 +211,9 @@ const RecruiterHeader = () => {
         </button>
         <button
           className="text-purple-600 hover:text-gray-600"
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
         >
-          <FontAwesomeIcon icon={faUser} className="h-6 w-6" />
+          <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6" />
           <span className="text-xs">Logout</span>
         </button>
       </nav>
@@ -237,11 +244,35 @@ const RecruiterHeader = () => {
           </button>
           <button
             className="flex items-center text-purple-600 hover:text-gray-600"
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
           >
-            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-2" />
+            <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6 mr-2" />
             <span className="text-sm">Logout</span>
           </button>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-purple-500 rounded-lg shadow-lg p-6">
+            <h2 className="text-lg font-semibold">Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-purple-600 text-white px-4 py-2 rounded mr-2"
+                onClick={confirmLogout}
+              >
+                Yes
+              </button>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                No
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </header>

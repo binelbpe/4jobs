@@ -115,7 +115,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ children }) => {
                 title="Date of Birth"
                 content={
                   user?.dateOfBirth
-                    ? new Date(user.dateOfBirth).toLocaleDateString()
+                    ? formatDate(user.dateOfBirth)
                     : "Not specified"
                 }
               />
@@ -220,6 +220,11 @@ const ProfileDetail: React.FC<{
     </div>
   </div>
 );
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(); // Show only date
+};
 
 const Section: React.FC<{
   title: string;

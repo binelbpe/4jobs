@@ -42,7 +42,7 @@ const AdminRecruiterList: React.FC = () => {
 
   const handleDownloadGovernmentId = (url: string, recruiterName: string) => {
     const anchor = document.createElement("a");
-    const fullurl = `http://localhost:5000/${url}`;
+    const fullurl = `${url}`;
     anchor.href = fullurl;
     anchor.setAttribute("download", `${recruiterName}-government-id`);
     document.body.appendChild(anchor);

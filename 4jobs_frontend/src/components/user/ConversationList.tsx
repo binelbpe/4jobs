@@ -19,18 +19,21 @@ const ConversationList: React.FC<ConversationListProps> = ({
     (state: RootState) => state.messages.conversations
   );
 
-  // Filter out the current user's conversation
   const filteredConnections = connections.filter(
     (connection) => connection.user.id !== currentUserId
   );
 
   const getUnreadCount = (userId: string): number => {
-    const conversationId = currentUserId < userId
-      ? `${currentUserId}-${userId}`
-      : `${userId}-${currentUserId}`;
+    const conversationId =
+      currentUserId < userId
+        ? `${currentUserId}-${userId}`
+        : `${userId}-${currentUserId}`;
     const conversation = conversations[conversationId] || [];
-    return conversation.filter((message: Message) => 
-      message.sender.id === userId && !message.isRead && message.status !== 'read'
+    return conversation.filter(
+      (message: Message) =>
+        message.sender.id === userId &&
+        !message.isRead &&
+        message.status !== "read"
     ).length;
   };
 
@@ -65,10 +68,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
               </div>
               <div className="flex flex-col items-end">
                 <div className="text-xs text-gray-500">
-                  {connection.lastMessage && new Date(connection.lastMessage.createdAt).toLocaleTimeString(
-                    [],
-                    { hour: "2-digit", minute: "2-digit" }
-                  )}
+                  {connection.lastMessage &&
+                    new Date(
+                      connection.lastMessage.createdAt
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                 </div>
                 {unreadCount > 0 && (
                   <div className="mt-1 bg-purple-600 text-white text-xs font-bold rounded-full px-2 py-1">

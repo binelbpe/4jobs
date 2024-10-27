@@ -1,5 +1,7 @@
 module.exports = {
-  // ... other configurations
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}", 
+  ],
   theme: {
     extend: {
       animation: {
@@ -27,5 +29,5 @@ module.exports = {
       },
     },
   },
-  // ... other configurations
+  plugins: [],
 }

@@ -39,8 +39,15 @@ const MainFeed: React.FC = () => {
   if (status === "loading" && (!posts || posts.length === 0))
     return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!Array.isArray(posts) || posts.length === 0)
-    return <div>No posts available.</div>;
+  if (!Array.isArray(posts) || posts.length === 0) {
+    return (
+      <div>
+        <CreatePostButton />
+        <div>No posts available.</div>
+      </div>
+    );
+  }
+  
 
   return (
     <div className="w-full">

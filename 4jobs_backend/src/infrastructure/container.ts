@@ -103,6 +103,7 @@ import { MongoResumeRepository } from "./database/mongoose/repositories/MongoRes
 import { GenerateResumeUseCase } from "../application/usecases/user/GenerateResumeUseCase";
 import { ResumeController } from "../presentation/controllers/user/ResumeController";
 import { PDFExtractor } from "./services/PDFExtractor";
+import { AdvancedJobSearchUseCase } from "../application/usecases/user/AdvancedJobSearchUseCase";
 
 const container = new Container();
 
@@ -132,7 +133,7 @@ container
 container
   .bind(TYPES.OtpService)
   .toDynamicValue(
-    () => new OtpService(33 * 1000, container.get(TYPES.NodemailerEmailService))
+    () => new OtpService(31 * 1000, container.get(TYPES.NodemailerEmailService))
   );
 
 container.bind(TYPES.LoginAdminUseCase).to(LoginAdminUseCase);
@@ -308,6 +309,7 @@ container
   .bind<GenerateResumeUseCase>(TYPES.GenerateResumeUseCase)
   .to(GenerateResumeUseCase);
 container.bind<ResumeController>(TYPES.ResumeController).to(ResumeController);
+container.bind<AdvancedJobSearchUseCase>(TYPES.AdvancedJobSearchUseCase).to(AdvancedJobSearchUseCase);
 
 console.log(container);
 export { container };

@@ -38,7 +38,11 @@ let UserVideoCallUseCase = class UserVideoCallUseCase {
                 console.log(`[VIDEO CALL] User ${callerId} already has an active call. Ending previous call.`);
                 yield this.endCall(activeCall.id);
             }
-            return this.userVideoCallRepository.create(callerId, recipientId);
+            // Create a new video call
+            const newCall = yield this.userVideoCallRepository.create(callerId, recipientId);
+            // Emit event to notify the recipient about the incoming call
+            // This part can be handled in the socket server
+            return newCall;
         });
     }
     respondToCall(callId, status) {

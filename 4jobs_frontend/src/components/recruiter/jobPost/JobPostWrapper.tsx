@@ -11,7 +11,7 @@ import JobPost from "./JobPost";
 import { BasicJobPost } from "../../../types/jobPostTypes";
 import { Plus, Loader, AlertCircle } from "lucide-react";
 import RecruiterHeader from "../RecruiterHeader";
-import ConfirmationModal from "./ConfirmationModal"; // Import the new ConfirmationModal component
+import ConfirmationModal from "./ConfirmationModal";
 
 const JobPostWrapper: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,7 +19,7 @@ const JobPostWrapper: React.FC = () => {
   const { posts, loading, error } = useSelector((state: RootState) => state.jobPosts);
   const { recruiter } = useSelector((state: RootState) => state.recruiter);
 
-  // State for managing the confirmation modal
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
