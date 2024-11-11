@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { logoutAdmin } from '../../redux/slices/adminSlice';
-import { AppDispatch } from '../../redux/store';
+import React, { useState } from "react";
+import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutAdmin } from "../../redux/slices/adminSlice";
+import { AppDispatch } from "../../redux/store";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logoutAdmin());
-    navigate('/admin/login');
+    navigate("/admin/login");
   };
 
   const toggleDropdown = () => {
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
   };
 
   const goToProfile = () => {
-    navigate('/admin/profile'); 
+    navigate("/admin/profile");
   };
 
   const handleLogoutClick = () => {
@@ -47,7 +47,7 @@ const Header: React.FC = () => {
           <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-50">
             <ul className="py-1">
               <li
-                onClick={goToProfile} 
+                onClick={goToProfile}
                 className="px-3 sm:px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 cursor-pointer text-sm sm:text-base"
               >
                 <FaUserCircle />
@@ -65,7 +65,6 @@ const Header: React.FC = () => {
         )}
       </div>
 
-      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-purple-500 rounded-lg shadow-lg p-6">

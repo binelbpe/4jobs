@@ -30,7 +30,6 @@ const Dashboard: React.FC = () => {
             the dashboard once approved.
           </p>
 
-          {/* Logout Button */}
           <button
             onClick={handleLogout}
             className="mt-6 bg-purple-600 text-white py-2 px-4 rounded-lg shadow hover:bg-purple-700 transition duration-200 text-sm md:text-base"

@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserProjects } from '../../redux/slices/authSlice';
-import { RootState, AppDispatch } from '../../redux/store';
-import { Project } from '../../types/auth';
-import { toast } from 'react-toastify';
-import { Plus, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProjects } from "../../redux/slices/authSlice";
+import { RootState, AppDispatch } from "../../redux/store";
+import { Project } from "../../types/auth";
+import { toast } from "react-toastify";
+import { Plus, X } from "lucide-react";
 
 const Projects: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [projects, setProjects] = useState<Project[]>([]);
-  const [errors, setErrors] = useState<{ [key: number]: { name?: string; link?: string; description?: string; imageUrl?: string } }>({});
+  const [errors, setErrors] = useState<{
+    [key: number]: {
+      name?: string;
+      link?: string;
+      description?: string;
+      imageUrl?: string;
+    };
+  }>({});
 
   useEffect(() => {
     if (user && Array.isArray(user.projects)) {
@@ -27,7 +34,16 @@ const Projects: React.FC = () => {
   };
 
   const addProject = () => {
-    setProjects([...projects, { id: Date.now().toString(), name: '', description: '', link: '', imageUrl: '' }]);
+    setProjects([
+      ...projects,
+      {
+        id: Date.now().toString(),
+        name: "",
+        description: "",
+        link: "",
+        imageUrl: "",
+      },
+    ]);
   };
 
   const removeProject = (index: number) => {
@@ -41,25 +57,42 @@ const Projects: React.FC = () => {
   };
 
   const validateProjects = () => {
-    const newErrors: { [key: number]: { name?: string; link?: string; description?: string; imageUrl?: string } } = {};
+    const newErrors: {
+      [key: number]: {
+        name?: string;
+        link?: string;
+        description?: string;
+        imageUrl?: string;
+      };
+    } = {};
     let isValid = true;
 
     projects.forEach((project, index) => {
-      const projectErrors: { name?: string; link?: string; description?: string; imageUrl?: string } = {};
-      if (!project.name || project.name.length < 2 || project.name.length > 50) {
-        projectErrors.name = 'Name must be between 2 and 50 characters.';
+      const projectErrors: {
+        name?: string;
+        link?: string;
+        description?: string;
+        imageUrl?: string;
+      } = {};
+      if (
+        !project.name ||
+        project.name.length < 2 ||
+        project.name.length > 50
+      ) {
+        projectErrors.name = "Name must be between 2 and 50 characters.";
         isValid = false;
       }
       if (project.link && !/^https?:\/\/[^\s]+$/.test(project.link)) {
-        projectErrors.link = 'Invalid URL format.';
+        projectErrors.link = "Invalid URL format.";
         isValid = false;
       }
       if (project.description && project.description.length > 500) {
-        projectErrors.description = 'Description must not exceed 500 characters.';
+        projectErrors.description =
+          "Description must not exceed 500 characters.";
         isValid = false;
       }
       if (project.imageUrl && !/^https?:\/\/[^\s]+$/.test(project.imageUrl)) {
-        projectErrors.imageUrl = 'Invalid URL format.';
+        projectErrors.imageUrl = "Invalid URL format.";
         isValid = false;
       }
       if (Object.keys(projectErrors).length) {
@@ -76,12 +109,12 @@ const Projects: React.FC = () => {
     if (validateProjects() && user) {
       try {
         await dispatch(updateUserProjects({ userId: user.id, projects }));
-        toast.success('Projects updated successfully!');
+        toast.success("Projects updated successfully!");
       } catch (error) {
-        toast.error('Failed to update projects. Please try again later.');
+        toast.error("Failed to update projects. Please try again later.");
       }
     } else {
-      toast.error('Please fix the errors before submitting.');
+      toast.error("Please fix the errors before submitting.");
     }
   };
 
@@ -89,7 +122,10 @@ const Projects: React.FC = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <h2 className="text-2xl md:text-3xl font-bold mb-4">Projects</h2>
       {projects.map((project, index) => (
-        <div key={`${project.id}-${index}`} className="bg-white shadow rounded-lg p-6 relative">
+        <div
+          key={`${project.id}-${index}`}
+          className="bg-white shadow rounded-lg p-6 relative"
+        >
           <button
             type="button"
             onClick={() => removeProject(index)}
@@ -99,37 +135,68 @@ const Projects: React.FC = () => {
           </button>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor={`project-name-${index}`} className="block text-sm font-medium text-gray-700">Project Name</label>
+              <label
+                htmlFor={`project-name-${index}`}
+                className="block text-sm font-medium text-gray-700"
+              >
+                Project Name
+              </label>
               <input
                 type="text"
                 id={`project-name-${index}`}
                 value={project.name}
-                onChange={(e) => handleChange(index, 'name', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.name ? 'border-red-500' : ''}`}
+                onChange={(e) => handleChange(index, "name", e.target.value)}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  errors[index]?.name ? "border-red-500" : ""
+                }`}
               />
-              {errors[index]?.name && <p className="text-red-500 text-sm">{errors[index].name}</p>}
+              {errors[index]?.name && (
+                <p className="text-red-500 text-sm">{errors[index].name}</p>
+              )}
             </div>
             <div>
-              <label htmlFor={`project-link-${index}`} className="block text-sm font-medium text-gray-700">Project Link</label>
+              <label
+                htmlFor={`project-link-${index}`}
+                className="block text-sm font-medium text-gray-700"
+              >
+                Project Link
+              </label>
               <input
                 type="url"
                 id={`project-link-${index}`}
                 value={project.link}
-                onChange={(e) => handleChange(index, 'link', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.link ? 'border-red-500' : ''}`}
+                onChange={(e) => handleChange(index, "link", e.target.value)}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  errors[index]?.link ? "border-red-500" : ""
+                }`}
               />
-              {errors[index]?.link && <p className="text-red-500 text-sm">{errors[index].link}</p>}
+              {errors[index]?.link && (
+                <p className="text-red-500 text-sm">{errors[index].link}</p>
+              )}
             </div>
             <div className="md:col-span-2">
-              <label htmlFor={`project-description-${index}`} className="block text-sm font-medium text-gray-700">Description</label>
+              <label
+                htmlFor={`project-description-${index}`}
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
               <textarea
                 id={`project-description-${index}`}
                 value={project.description}
-                onChange={(e) => handleChange(index, 'description', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors[index]?.description ? 'border-red-500' : ''}`}
+                onChange={(e) =>
+                  handleChange(index, "description", e.target.value)
+                }
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  errors[index]?.description ? "border-red-500" : ""
+                }`}
                 rows={3}
               />
-              {errors[index]?.description && <p className="text-red-500 text-sm">{errors[index].description}</p>}
+              {errors[index]?.description && (
+                <p className="text-red-500 text-sm">
+                  {errors[index].description}
+                </p>
+              )}
             </div>
           </div>
         </div>

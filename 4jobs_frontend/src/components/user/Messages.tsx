@@ -17,14 +17,14 @@ const Messages: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
-  const [conversationKey, setConversationKey] = useState(0); // Key for re-render
+  const [conversationKey, setConversationKey] = useState(0);
   const recruiterUnreadCount = useSelector((state: RootState) => {
     const conversations = state.userRecruiterMessages.conversations;
     const messages = state.userRecruiterMessages.messages;
     return conversations.reduce((sum, conv) => {
       const conversationMessages = messages[conv.id] || [];
       const unreadCount = conversationMessages.filter(
-        msg => !msg.isRead && !msg.locallyRead && msg.senderId !== user?.id
+        (msg) => !msg.isRead && !msg.locallyRead && msg.senderId !== user?.id
       ).length;
       return sum + unreadCount;
     }, 0);
@@ -40,20 +40,24 @@ const Messages: React.FC = () => {
   const handleSelectUser = (userId: string) => {
     setSelectedUserId(userId);
     setShowSearch(false);
-    setConversationKey(prevKey => prevKey + 1); // Increment the key to force re-render
+    setConversationKey((prevKey) => prevKey + 1);
   };
 
   const handleBackToConversations = useCallback(() => {
     setSelectedUserId(null);
     setShowSearch(false);
-    setConversationKey(prev => prev + 1);
+    setConversationKey((prev) => prev + 1);
   }, []);
 
   return (
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-grow overflow-hidden">
-        <div className={`w-full ${selectedUserId ? 'hidden md:w-1/3' : 'md:w-1/3'} flex flex-col bg-white border-r border-gray-300`}>
+        <div
+          className={`w-full ${
+            selectedUserId ? "hidden md:w-1/3" : "md:w-1/3"
+          } flex flex-col bg-white border-r border-gray-300`}
+        >
           <div className="p-4 border-b border-gray-300">
             <h2 className="text-2xl font-semibold text-purple-700">Messages</h2>
             <div className="flex justify-between items-center mt-2">
@@ -63,7 +67,10 @@ const Messages: React.FC = () => {
               >
                 {showSearch ? "Back to Conversations" : "New Message"}
               </button>
-              <Link to="/user/messages" className="text-purple-600 hover:text-purple-800 relative">
+              <Link
+                to="/user/messages"
+                className="text-purple-600 hover:text-purple-800 relative"
+              >
                 <FaUserTie size={24} title="Recruiter Messages" />
                 {recruiterUnreadCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-purple-500 text-white rounded-full px-2 py-1 text-xs">
@@ -84,7 +91,11 @@ const Messages: React.FC = () => {
             )}
           </div>
         </div>
-        <div className={`w-full ${selectedUserId ? 'flex' : 'hidden md:flex'} flex-col`}>
+        <div
+          className={`w-full ${
+            selectedUserId ? "flex" : "hidden md:flex"
+          } flex-col`}
+        >
           {selectedUserId ? (
             <>
               <button
@@ -93,9 +104,9 @@ const Messages: React.FC = () => {
               >
                 Back to Conversations
               </button>
-              <Conversation 
-                key={conversationKey} 
-                userId={selectedUserId} 
+              <Conversation
+                key={conversationKey}
+                userId={selectedUserId}
                 onBack={handleBackToConversations}
               />
             </>

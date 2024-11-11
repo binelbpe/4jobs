@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "../../redux/store";
 import { register, clearError } from "../../redux/slices/recruiterSlice";
-import "../../styles/recruiter/register.css";
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -53,20 +52,17 @@ const Register: React.FC = () => {
       governmentId: "",
     };
 
-
     if (formData.name.trim().length < 3) {
       errors.name = "Full Name must be at least 3 characters long.";
     } else if (!formData.name.trim()) {
       errors.name = "Full Name is required.";
     }
 
-
     if (formData.companyName.trim().length < 3) {
       errors.companyName = "Company Name must be at least 3 characters long.";
     } else if (!formData.companyName.trim()) {
       errors.companyName = "Company Name is required.";
     }
-
 
     if (
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
@@ -78,7 +74,6 @@ const Register: React.FC = () => {
       errors.phone = "Please enter a valid phone number with 10 digits.";
     }
 
-   
     if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
         formData.password
@@ -87,7 +82,6 @@ const Register: React.FC = () => {
       errors.password =
         "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
     }
-
 
     if (!formData.governmentId) {
       errors.governmentId = "Please upload a government ID.";
@@ -98,7 +92,7 @@ const Register: React.FC = () => {
         "image/webp",
         "application/pdf",
       ];
-      const fileSizeLimit = 2 * 1024 * 1024; 
+      const fileSizeLimit = 2 * 1024 * 1024;
 
       if (!validFileTypes.includes(formData.governmentId.type)) {
         errors.governmentId =
@@ -141,7 +135,6 @@ const Register: React.FC = () => {
         await dispatch(register(formDataWithFile)).unwrap();
         navigate("/recruiter/verify-otp", { state: { email: formData.email } });
       } catch (err) {
-       
         console.error("Error registering:", err);
       }
     }

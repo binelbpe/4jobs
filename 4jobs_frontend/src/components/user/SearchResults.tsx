@@ -48,7 +48,6 @@ const SearchResults: React.FC = () => {
 
     if (currentUser) {
       try {
-        console.log("Applying for job with ID:", jobId);
         await dispatch(
           applyForJobAsync({ userId: currentUser.id, jobId })
         ).unwrap();
@@ -71,12 +70,13 @@ const SearchResults: React.FC = () => {
     }
 
     try {
-      console.log("Fetching job details for ID:", jobId);
       await dispatch(fetchJobPost(jobId)).unwrap();
       navigate(`/jobs/${jobId}`);
     } catch (error) {
       console.error("Error fetching job details:", error);
-      toast.error("Error occurred while fetching job details. Please try again.");
+      toast.error(
+        "Error occurred while fetching job details. Please try again."
+      );
     }
   };
 

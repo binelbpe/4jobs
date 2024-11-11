@@ -1,22 +1,22 @@
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import Header from '../admin/AdminHeader'; 
-import Sidebar from '../admin/AdminSidebar'; 
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import Header from "../admin/AdminHeader";
+import Sidebar from "../admin/AdminSidebar";
 
 const AdminProfile: React.FC = () => {
-  const { token, name,email,role } = useSelector((state: RootState) => state.admin);
+  const { token, name, email, role } = useSelector(
+    (state: RootState) => state.admin
+  );
 
-  useEffect(() => {
-  }, [token]);
+  useEffect(() => {}, [token]);
 
-
-  const adminDetails ={name,email,role}
+  const adminDetails = { name, email, role };
   return (
     <div className="flex">
-      <Sidebar /> 
+      <Sidebar />
       <div className="flex-1">
-        <Header /> 
+        <Header />
         <div className="container mx-auto p-4">
           <h1 className="text-2xl font-bold mb-6">Admin Profile</h1>
           <div className="bg-white shadow-md rounded-lg p-6">

@@ -10,9 +10,6 @@ import { Message } from "../../types/recruiterMessageType";
 import { userRecruiterSocketService } from "../../services/userRecruiterSocketService";
 import { format, isValid } from "date-fns";
 import ConversationHeader from "../shared/ConversationHeader";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faVideo } from "@fortawesome/free-solid-svg-icons";
-import VideoCall from "../shared/VideoCall";
 import { toast } from "react-toastify";
 
 interface ConversationProps {
@@ -46,9 +43,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
   const onlineStatus = useSelector(
     (state: RootState) => state.recruiterMessages.onlineStatus
   );
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
 
   const scrollToBottom = useCallback(() => {
     if (messageListRef.current) {
@@ -79,7 +74,6 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
- 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && currentRecruiter) {
@@ -99,7 +93,6 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
       }
     }
   };
-
 
   const handleTyping = () => {
     if (!isTyping) {
@@ -136,24 +129,7 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
     (status) => status
   );
 
-  // const handleStartVideoCall = () => {
-  //   setIsVideoCallActive(true);
-  // };
 
-  const handleEndVideoCall = () => {
-    setIsVideoCallActive(false);
-    userRecruiterSocketService.emitEndCall(conversation?.participant.id || "");
-  };
-
-  useEffect(() => {
-    userRecruiterSocketService.onCallEnded(() => {
-      setIsVideoCallActive(false);
-    });
-
-    return () => {
-      // Clean up any listeners if necessary
-    };
-  }, []);
 
   return (
     <div className="flex-1 flex flex-col h-full p-4">
@@ -248,13 +224,6 @@ const RecruiterConversation: React.FC<ConversationProps> = ({
           </button>
         </form>
       </div>
-      {isVideoCallActive && (
-        <VideoCall
-          isRecruiter={true}
-          recipientId={conversation?.participant.id || ""}
-          onEndCall={handleEndVideoCall}
-        />
-      )}
     </div>
   );
 };

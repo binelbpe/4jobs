@@ -8,7 +8,7 @@ import {
   clearContestants,
 } from "../../../redux/slices/contestantSlice";
 import { User, Mail, Eye, FileText, Filter } from "lucide-react";
-import Pagination from "../jobPost/common/agination";
+import Pagination from "./common/Pagination";
 import ErrorMessage from "../jobPost/common/ErrorMessage";
 import LoadingSpinner from "../jobPost/common/LoadingSpinner";
 import RecruiterHeader from "../RecruiterHeader";
@@ -29,7 +29,6 @@ const JobContestantsList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-  
 
   useEffect(() => {
     if (jobId) {
@@ -68,7 +67,9 @@ const JobContestantsList: React.FC = () => {
   if (error) return <ErrorMessage message={error} />;
 
   const displayedContestants = isFiltered ? filteredContestants : contestants;
-  const contestantsToRender = Array.isArray(displayedContestants) ? displayedContestants : [displayedContestants];
+  const contestantsToRender = Array.isArray(displayedContestants)
+    ? displayedContestants
+    : [displayedContestants];
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -128,7 +129,7 @@ const JobContestantsList: React.FC = () => {
                         <Mail size={14} className="mr-1" />
                         <span>{contestant.email}</span>
                       </div>
-                      {isFiltered && 'matchPercentage' in contestant && (
+                      {isFiltered && "matchPercentage" in contestant && (
                         <div className="text-green-600 font-semibold mt-1">
                           Match: {contestant.matchPercentage}%
                         </div>

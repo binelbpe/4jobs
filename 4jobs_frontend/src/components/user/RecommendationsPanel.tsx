@@ -63,10 +63,7 @@ const RecommendationsPanel: React.FC<RecommendationsPanelProps> = ({
       </h3>
       <div className="grid grid-row-1 sm:grid-row-2 lg:grid-row-3 xl:grid-row-4 gap-4">
         {recommendations.map((user: RecommendationUser) => (
-          <RecommendationCard
-            key={user.id}
-            user={user}
-          />
+          <RecommendationCard key={user.id} user={user} />
         ))}
       </div>
     </div>

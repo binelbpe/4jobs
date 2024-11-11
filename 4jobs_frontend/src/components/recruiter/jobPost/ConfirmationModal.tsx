@@ -1,5 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React from "react";
+import { X } from "lucide-react";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -8,7 +8,6 @@ interface ConfirmationModalProps {
   title: string;
   message: string;
 }
-
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
@@ -19,16 +18,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-
   const handleConfirm = () => {
     try {
       onConfirm();
       onClose();
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Error in confirmation action:', error.message);
+        console.error("Error in confirmation action:", error.message);
       } else {
-        console.error('An unknown error occurred during confirmation');
+        console.error("An unknown error occurred during confirmation");
       }
     }
   };
@@ -37,7 +35,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-auto">
         <div className="flex justify-between items-center border-b p-4">
-          <h3 className="text-xl font-semibold text-gray-900 break-words">{title}</h3>
+          <h3 className="text-xl font-semibold text-gray-900 break-words">
+            {title}
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 transition-colors duration-200"

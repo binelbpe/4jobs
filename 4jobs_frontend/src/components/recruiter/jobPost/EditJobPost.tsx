@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../redux/store';
-import { updateJobPost } from '../../../redux/slices/jobPostSlice';
-import JobPostForm from './JobPostForm';
-import { BasicJobPostFormData } from '../../../types/jobPostTypes';
-import RecruiterHeader from '../RecruiterHeader';
-import Toast from './Toast';
-import { Edit } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../redux/store";
+import { updateJobPost } from "../../../redux/slices/jobPostSlice";
+import JobPostForm from "./JobPostForm";
+import { BasicJobPostFormData } from "../../../types/jobPostTypes";
+import RecruiterHeader from "../RecruiterHeader";
+import Toast from "./Toast";
+import { Edit } from "lucide-react";
 
 const EditJobPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,12 +18,12 @@ const EditJobPost: React.FC = () => {
   const [jobPost, setJobPost] = useState<BasicJobPostFormData | null>(null);
 
   useEffect(() => {
-    const post = posts.find(p => p._id === id);
+    const post = posts.find((p) => p._id === id);
     if (post) {
       setJobPost(post);
     } else {
-      Toast({ message: 'Job post not found.', type: 'error' });
-      navigate('/recruiter/jobs');
+      Toast({ message: "Job post not found.", type: "error" });
+      navigate("/recruiter/jobs");
     }
   }, [id, posts, navigate]);
 
@@ -31,21 +31,26 @@ const EditJobPost: React.FC = () => {
     if (id && recruiter?.id) {
       try {
         await dispatch(updateJobPost({ id, postData: formData })).unwrap();
-        Toast({ message: 'Job post updated successfully', type: 'success' });
-        navigate('/recruiter/jobs');
+        Toast({ message: "Job post updated successfully", type: "success" });
+        navigate("/recruiter/jobs");
       } catch (error) {
-        console.error('Failed to update job post:', error);
-        Toast({ message: 'Failed to update job post. Please try again.', type: 'error' });
+        console.error("Failed to update job post:", error);
+        Toast({
+          message: "Failed to update job post. Please try again.",
+          type: "error",
+        });
       }
     } else {
-      Toast({ message: 'Recruiter ID is not available.', type: 'error' });
+      Toast({ message: "Recruiter ID is not available.", type: "error" });
     }
   };
 
   if (!jobPost) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-    </div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
   }
 
   return (
@@ -58,7 +63,7 @@ const EditJobPost: React.FC = () => {
           </h2>
           <JobPostForm
             initialData={jobPost}
-            recruiterId={recruiter?.id || ''}
+            recruiterId={recruiter?.id || ""}
             isEditing={true}
             onSubmit={handleSubmit}
           />

@@ -16,10 +16,10 @@ import {
 import { Message } from "../types/messageType";
 import { User, UserConnection } from "../types/auth";
 import { URMessage, URConversation } from "../types/userRecruiterMessage";
-import { ResumeData } from '../types/resumeTypes';
-import  store  from '../redux/store';
-import { logout } from '../redux/slices/authSlice';
-import { JobSearchFilters } from '../types/jobSearchTypes';
+import { ResumeData } from "../types/resumeTypes";
+import store from "../redux/store";
+import { logout } from "../redux/slices/authSlice";
+import { JobSearchFilters } from "../types/jobSearchTypes";
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -30,9 +30,6 @@ export interface FetchJobPostsParams {
 }
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-console.log("API_BASE_URL",API_BASE_URL,"  process.env.REACT_APP_API_BASE_URL ",process.env.REACT_APP_API_BASE_URL)
-
-
 
 const apiRequest = async (
   method: "POST" | "GET" | "PUT" | "DELETE",
@@ -62,9 +59,8 @@ const apiRequest = async (
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       if (error.response.status === 401) {
-        // Token is invalid or expired
         store.dispatch(logout());
-        throw new Error('Authentication failed. Please log in again.');
+        throw new Error("Authentication failed. Please log in again.");
       }
       console.error("API Error:", error.response.data);
       throw new Error(error.response.data.error || "Server Error");
@@ -274,7 +270,6 @@ export const createPostAPI = async (
   if (postData.video instanceof File) {
     formData.append("video", postData.video, postData.video.name);
   }
- 
 
   return apiUploadRequest("POST", `/posts/${userId}`, formData);
 };
@@ -461,64 +456,72 @@ export const deleteCommentAPI = async (
   return apiRequest("DELETE", `/posts/${postId}/comments/${commentId}`);
 };
 
-export const generateResumeApi = async (resumeData: ResumeData): Promise<string> => {
+export const generateResumeApi = async (
+  resumeData: ResumeData
+): Promise<string> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/generate-resume`, resumeData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/generate-resume`,
+      resumeData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
 
     if (response.data && response.data.pdfData) {
-      // Convert base64 to blob
       const byteCharacters = atob(response.data.pdfData);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      
-      // Create a URL for the blob
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+
       const fileURL = URL.createObjectURL(blob);
       return fileURL;
     } else {
-      throw new Error('Invalid response format from server');
+      throw new Error("Invalid response format from server");
     }
   } catch (error) {
     console.error("Error generating resume:", error);
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        console.error('Error response:', error.response.data);
+        console.error("Error response:", error.response.data);
         throw new Error(`Server error: ${JSON.stringify(error.response.data)}`);
       } else if (error.request) {
-        console.error('No response received:', error.request);
-        throw new Error('No response from the server');
+        console.error("No response received:", error.request);
+        throw new Error("No response from the server");
       } else {
-        console.error('Error setting up request:', error.message);
-        throw new Error('Error setting up request');
+        console.error("Error setting up request:", error.message);
+        throw new Error("Error setting up request");
       }
     } else if (error instanceof Error) {
       throw error;
     } else {
-      throw new Error('An unexpected error occurred');
+      throw new Error("An unexpected error occurred");
     }
   }
 };
-
-// Add these new functions to the existing file
 
 export const sendForgotPasswordOtpApi = async (email: string) => {
   return apiRequest("POST", "/forgot-password", { email });
 };
 
-export const verifyForgotPasswordOtpApi = async (email: string, otp: string) => {
+export const verifyForgotPasswordOtpApi = async (
+  email: string,
+  otp: string
+) => {
   return apiRequest("POST", "/verify-forgot-password-otp", { email, otp });
 };
 
-// Add this new function
-export const resetPasswordApi = async (email: string, newPassword: string, otp: string) => {
+export const resetPasswordApi = async (
+  email: string,
+  newPassword: string,
+  otp: string
+) => {
   return apiRequest("POST", "/reset-password", { email, newPassword, otp });
 };
 
@@ -527,15 +530,19 @@ export const refreshTokenApi = async () => {
   if (!refreshToken) {
     throw new Error("No refresh token available");
   }
-  const response = await axios.post(`${API_BASE_URL}/refresh-token`, { refreshToken });
+  const response = await axios.post(`${API_BASE_URL}/refresh-token`, {
+    refreshToken,
+  });
   return response.data.token;
 };
 
-export const removeConnectionApi = async (userId: string, connectionId: string) => {
+export const removeConnectionApi = async (
+  userId: string,
+  connectionId: string
+) => {
   return apiRequest("DELETE", `/connections/${userId}/remove/${connectionId}`);
 };
 
-// Add this function to the existing authapi.ts
 export const advancedJobSearchApi = async (
   filters: JobSearchFilters,
   page: number = 1,
@@ -551,7 +558,6 @@ export const advancedJobSearchApi = async (
   return apiRequest("POST", "/jobs/advanced-search", {
     filters,
     page,
-    limit
+    limit,
   });
 };
-

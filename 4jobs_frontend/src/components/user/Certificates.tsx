@@ -4,7 +4,7 @@ import { updateUserCertificates } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { Certificate } from "../../types/auth";
 import { toast } from "react-toastify";
-import { X, Edit2 } from 'lucide-react';
+import { X, Edit2 } from "lucide-react";
 
 interface CertificateWithFile extends Omit<Certificate, "file"> {
   file: File | null;
@@ -19,22 +19,27 @@ const Certificates: React.FC = () => {
       ? user.certificates.map((cert) => ({ ...cert, file: null }))
       : [];
 
-  const [certificates, setCertificates] = useState<CertificateWithFile[]>(initialCertificates);
-  const [currentCertificate, setCurrentCertificate] = useState<CertificateWithFile>({
-    id: '',
-    name: '',
-    issuingOrganization: '',
-    dateOfIssue: '',
-    imageUrl: '',
-    file: null,
-  });
+  const [certificates, setCertificates] =
+    useState<CertificateWithFile[]>(initialCertificates);
+  const [currentCertificate, setCurrentCertificate] =
+    useState<CertificateWithFile>({
+      id: "",
+      name: "",
+      issuingOrganization: "",
+      dateOfIssue: "",
+      imageUrl: "",
+      file: null,
+    });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     addNewCertificate();
   }, []);
 
-  const handleChange = (field: keyof Omit<Certificate, "id" | "file">, value: string) => {
+  const handleChange = (
+    field: keyof Omit<Certificate, "id" | "file">,
+    value: string
+  ) => {
     setCurrentCertificate((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -51,7 +56,9 @@ const Certificates: React.FC = () => {
     }
 
     if (name.length > 50 || issuingOrganization.length > 50) {
-      toast.error("Certificate name and issuing organization must be less than 50 characters.");
+      toast.error(
+        "Certificate name and issuing organization must be less than 50 characters."
+      );
       return false;
     }
 
@@ -86,7 +93,12 @@ const Certificates: React.FC = () => {
       }));
 
       try {
-        await dispatch(updateUserCertificates({ userId: user.id, certificates: certificatesWithFiles }));
+        await dispatch(
+          updateUserCertificates({
+            userId: user.id,
+            certificates: certificatesWithFiles,
+          })
+        );
         setCertificates(updatedCertificates);
         addNewCertificate();
         toast.success("Certificates updated successfully!");
@@ -118,26 +130,45 @@ const Certificates: React.FC = () => {
   };
 
   const renderCertificate = (certificate: CertificateWithFile) => {
-    const fileExtension = certificate.file?.name.split('.').pop()?.toLowerCase();
-    if (fileExtension === 'pdf') {
+    const fileExtension = certificate.file?.name
+      .split(".")
+      .pop()
+      ?.toLowerCase();
+    if (fileExtension === "pdf") {
       return (
-        <a href={certificate.imageUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800">
+        <a
+          href={certificate.imageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-purple-600 hover:text-purple-800"
+        >
           View Certificate (PDF)
         </a>
       );
-    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension || '')) {
-      return <img src={certificate.imageUrl} alt={certificate.name} className="w-full h-auto" />;
+    } else if (["jpg", "jpeg", "png", "gif"].includes(fileExtension || "")) {
+      return (
+        <img
+          src={certificate.imageUrl}
+          alt={certificate.name}
+          className="w-full h-auto"
+        />
+      );
     }
     return <p>Unsupported file type</p>;
   };
 
   return (
     <div>
-      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">Certificates</h2>
-      
+      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">
+        Certificates
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {certificates.map((certificate, index) => (
-          <div key={`${certificate.id}-${index}`} className="bg-white shadow-md rounded-lg p-6 relative">
+          <div
+            key={`${certificate.id}-${index}`}
+            className="bg-white shadow-md rounded-lg p-6 relative"
+          >
             <button
               type="button"
               onClick={() => removeCertificate(index)}
@@ -145,9 +176,15 @@ const Certificates: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800">{certificate.name}</h3>
-            <p className="text-gray-600 mb-1">{certificate.issuingOrganization}</p>
-            <p className="text-sm md:text-base text-gray-500 mb-4">{certificate.dateOfIssue}</p>
+            <h3 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800">
+              {certificate.name}
+            </h3>
+            <p className="text-gray-600 mb-1">
+              {certificate.issuingOrganization}
+            </p>
+            <p className="text-sm md:text-base text-gray-500 mb-4">
+              {certificate.dateOfIssue}
+            </p>
             <button
               type="button"
               onClick={() => editCertificate(index)}
@@ -161,13 +198,21 @@ const Certificates: React.FC = () => {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-lg p-6"
+      >
         <h3 className="text-2xl md:text-3xl font-semibold mb-6 text-gray-800">
           {editingIndex !== null ? "Edit Certificate" : "Add New Certificate"}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Certificate Name</label>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Certificate Name
+            </label>
             <input
               type="text"
               id="name"
@@ -178,18 +223,30 @@ const Certificates: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="issuingOrganization" className="block text-sm font-medium text-gray-700 mb-1">Issuing Organization</label>
+            <label
+              htmlFor="issuingOrganization"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Issuing Organization
+            </label>
             <input
               type="text"
               id="issuingOrganization"
               value={currentCertificate.issuingOrganization}
-              onChange={(e) => handleChange("issuingOrganization", e.target.value)}
+              onChange={(e) =>
+                handleChange("issuingOrganization", e.target.value)
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
             />
           </div>
           <div>
-            <label htmlFor="dateOfIssue" className="block text-sm font-medium text-gray-700 mb-1">Date of Issue</label>
+            <label
+              htmlFor="dateOfIssue"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Date of Issue
+            </label>
             <input
               type="date"
               id="dateOfIssue"
@@ -200,7 +257,12 @@ const Certificates: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="certificateFile" className="block text-sm font-medium text-gray-700 mb-1">Certificate File</label>
+            <label
+              htmlFor="certificateFile"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Certificate File
+            </label>
             <input
               type="file"
               id="certificateFile"

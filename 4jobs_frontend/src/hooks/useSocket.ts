@@ -80,18 +80,7 @@ export const useSocket = (recipientId: string) => {
     }
   }, [currentUser?.id, dispatch]);
 
-  useEffect(() => {
-    const handleIncomingCall = (data: { callerId: string; offer: string }) => {
-        console.log("Incoming call received:", data);
-        // Handle the incoming call (e.g., show a notification or modal)
-    };
 
-    const removeIncomingCallListener = socketService.onIncomingCall(handleIncomingCall);
-
-    return () => {
-        removeIncomingCallListener();
-    };
-  }, []);
 
   const sendMessage = useCallback(
     (message: { senderId: string; recipientId: string; content: string }) => {

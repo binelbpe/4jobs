@@ -17,6 +17,10 @@ import { setupSocketServer } from "./infrastructure/services/recruiterUserSocket
 import { authRouter } from "./presentation/routes/authRoutes";
 import { adminRouter } from "./presentation/routes/adminRoutes";
 import { recruiterRouter } from "./presentation/routes/RecruiterRoutes";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5646faeae94f569770d6f702b5e7cfc66980d7e7
 
 import { validateRequest } from "./presentation/middlewares/validateRequest";
 import { errorHandler } from "./presentation/middlewares/errorHandler";

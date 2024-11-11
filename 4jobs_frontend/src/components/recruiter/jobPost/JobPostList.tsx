@@ -46,9 +46,12 @@ const JobPostList: React.FC = () => {
     navigate("/recruiter/jobs/create");
   }, [navigate]);
 
-  const handleApplicants = useCallback((postId: string) => {
-    navigate(`/recruiter/jobsContestants/${postId}`);
-  }, [navigate]);
+  const handleApplicants = useCallback(
+    (postId: string) => {
+      navigate(`/recruiter/jobsContestants/${postId}`);
+    },
+    [navigate]
+  );
 
   const handleToggleStatus = useCallback(
     async (post: BasicJobPost) => {

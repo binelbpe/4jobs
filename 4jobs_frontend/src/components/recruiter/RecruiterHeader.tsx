@@ -178,7 +178,6 @@ const RecruiterHeader = () => {
           )}
       </div>
 
-      {/* Mobile Menu Button */}
       <button
         className="md:hidden text-gray-600 focus:outline-none"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -186,7 +185,6 @@ const RecruiterHeader = () => {
         <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
       </button>
 
-      {/* Navigation Items for larger screens */}
       <nav className="hidden md:flex space-x-6 items-center">
         <button
           onClick={handleAddJobs}
@@ -218,7 +216,6 @@ const RecruiterHeader = () => {
         </button>
       </nav>
 
-      {/* Dropdown Menu for Small Screens */}
       {menuOpen && (
         <div className="absolute top-16 right-0 w-48 bg-white shadow-lg rounded-md p-4 md:hidden">
           <button
@@ -252,7 +249,6 @@ const RecruiterHeader = () => {
         </div>
       )}
 
-      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-purple-500 rounded-lg shadow-lg p-6">

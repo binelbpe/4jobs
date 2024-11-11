@@ -8,7 +8,17 @@ import {
 import Sidebar from "./AdminSidebar";
 import Header from "./AdminHeader";
 import ConfirmationModal from "../common/ConfirmationModal";
-import { FaEye, FaBan, FaUnlock, FaImage, FaVideo, FaChevronLeft, FaChevronRight, FaSearch, FaTimes } from 'react-icons/fa';
+import {
+  FaEye,
+  FaBan,
+  FaUnlock,
+  FaImage,
+  FaVideo,
+  FaChevronLeft,
+  FaChevronRight,
+  FaSearch,
+  FaTimes,
+} from "react-icons/fa";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -30,7 +40,7 @@ const AdminUserPostManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<UserPost | null>(null);
   const [showContent, setShowContent] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchUserPosts({ page: currentPage, limit: ITEMS_PER_PAGE }));
@@ -63,19 +73,21 @@ const AdminUserPostManagement: React.FC = () => {
     }
   };
 
-  const filteredPosts = userPosts.filter((post: UserPost) =>
-    post.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPosts = userPosts.filter(
+    (post: UserPost) =>
+      post.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleClearSearch = () => {
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!userPosts || userPosts.length === 0) return <div>No user posts found.</div>;
+  if (!userPosts || userPosts.length === 0)
+    return <div>No user posts found.</div>;
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
@@ -147,10 +159,14 @@ const AdminUserPostManagement: React.FC = () => {
                         className="text-purple-600 hover:text-purple-900 text-xs sm:text-sm"
                       >
                         <FaEye className="inline mr-1 sm:mr-2" />
-                        {showContent === post.id ? "Hide Content" : "Show Content"}
+                        {showContent === post.id
+                          ? "Hide Content"
+                          : "Show Content"}
                       </button>
                       {showContent === post.id && (
-                        <div className="mt-2 text-purple-800 text-xs sm:text-sm">{post.content}</div>
+                        <div className="mt-2 text-purple-800 text-xs sm:text-sm">
+                          {post.content}
+                        </div>
                       )}
                     </td>
                     <td className="px-3 sm:px-5 py-3 sm:py-5 border-b border-purple-200">
@@ -180,7 +196,11 @@ const AdminUserPostManagement: React.FC = () => {
                             : "bg-red-500 hover:bg-red-600"
                         } text-white font-bold py-1 sm:py-2 px-2 sm:px-4 rounded focus:outline-none focus:shadow-outline text-xs sm:text-sm`}
                       >
-                        {post.isBlocked ? <FaUnlock className="inline mr-1 sm:mr-2" /> : <FaBan className="inline mr-1 sm:mr-2" />}
+                        {post.isBlocked ? (
+                          <FaUnlock className="inline mr-1 sm:mr-2" />
+                        ) : (
+                          <FaBan className="inline mr-1 sm:mr-2" />
+                        )}
                         {post.isBlocked ? "Unblock" : "Block"}
                       </button>
                     </td>
@@ -218,8 +238,12 @@ const AdminUserPostManagement: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={confirmBlockPost}
-        title={selectedPost?.isBlocked ? "Unblock User Post" : "Block User Post"}
-        message={`Are you sure you want to ${selectedPost?.isBlocked ? "unblock" : "block"} this post by ${selectedPost?.userName}?`}
+        title={
+          selectedPost?.isBlocked ? "Unblock User Post" : "Block User Post"
+        }
+        message={`Are you sure you want to ${
+          selectedPost?.isBlocked ? "unblock" : "block"
+        } this post by ${selectedPost?.userName}?`}
       />
     </div>
   );

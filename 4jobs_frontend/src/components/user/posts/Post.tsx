@@ -83,7 +83,6 @@ const Post: React.FC<PostType> = ({
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl mb-4 border border-purple-200 dark:border-purple-700">
-      {/* User Info Section */}
       <div className="p-4 border-b text-purple-600 border-purple-200 dark:border-purple-700">
         <div className="flex items-center space-x-3">
           <img
@@ -106,7 +105,6 @@ const Post: React.FC<PostType> = ({
         </div>
       </div>
 
-      {/* Post Content Section */}
       <div className="p-4">
         <p className="text-purple-800 dark:text-purple-500 mb-4">{content}</p>
         {imageUrl && (
@@ -123,8 +121,6 @@ const Post: React.FC<PostType> = ({
             className="w-full h-auto rounded-lg mb-4"
           />
         )}
-
-        {/* Like, Dislike, and Comment Buttons */}
         <div className="flex items-center justify-between mt-4">
           <div className="flex space-x-4">
             <button
@@ -154,7 +150,6 @@ const Post: React.FC<PostType> = ({
           </button>
         </div>
 
-        {/* Comments Section */}
         {showComments && (
           <div className="mt-4">
             <h4 className="font-medium text-purple-700 dark:text-purple-900 mb-2">

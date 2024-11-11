@@ -71,19 +71,19 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return; 
+    if (isSubmitting) return;
 
-    setIsSubmitting(true); 
+    setIsSubmitting(true);
 
     if (!validateContent(content)) {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
       return;
     }
     if (
       (image && !validateFile(image, true)) ||
       (video && !validateFile(video, false))
     ) {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
       return;
     }
 
@@ -93,7 +93,7 @@ const CreatePost: React.FC = () => {
       toast.error(
         "Please add some content, an image, or a video to your post."
       );
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   };
 
@@ -135,7 +135,7 @@ const CreatePost: React.FC = () => {
     setIsUploading(false);
     setIsProcessing(false);
     setIsConfirmed(false);
-    setIsSubmitting(false); 
+    setIsSubmitting(false);
   };
 
   const createPostInBackend = useCallback(
@@ -186,12 +186,8 @@ const CreatePost: React.FC = () => {
       const outputFileName = "output.mp4";
       await ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
 
-
       const duration = await getDuration(inputFile);
       const targetBitrate = Math.floor((TARGET_VIDEO_SIZE * 8) / duration);
-
-      console.log(`Input file size: ${formatFileSize(inputFile.size)}`);
-      console.log(`Target bitrate: ${targetBitrate} bps`);
 
       await ffmpeg.exec([
         "-i",
@@ -221,10 +217,6 @@ const CreatePost: React.FC = () => {
         {
           type: "video/mp4",
         }
-      );
-
-      console.log(
-        `Compressed file size: ${formatFileSize(compressedFile.size)}`
       );
 
       return compressedFile;

@@ -1,10 +1,10 @@
-import React from 'react';
-import Profile from './Profile';
-import Resume from './Resume';
-import Projects from './Project';
-import Certificates from './Certificates';
-import Experiences from './Experiences';
-import Header from './Header';
+import React from "react";
+import Profile from "./Profile";
+import Resume from "./Resume";
+import Projects from "./Project";
+import Certificates from "./Certificates";
+import Experiences from "./Experiences";
+import Header from "./Header";
 
 const UpdateProfile: React.FC = () => {
   return (
@@ -41,15 +41,16 @@ const UpdateProfile: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => {
   return (
     <section className="bg-white shadow-md rounded-lg overflow-hidden">
       <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-600 to-purple-300 text-white p-4">
         {title}
       </h2>
-      <div className="p-6">
-        {children}
-      </div>
+      <div className="p-6">{children}</div>
     </section>
   );
 };

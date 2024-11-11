@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { useNavigate } from 'react-router-dom';
-import SignupForm from './SignupForm';
-import OtpVerification from './OtpVerification';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { useNavigate } from "react-router-dom";
+import SignupForm from "./SignupForm";
+import OtpVerification from "./OtpVerification";
 
 const Signup: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isOtpStep, setIsOtpStep] = useState(false);
 
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -32,13 +34,17 @@ const Signup: React.FC = () => {
             <div className="mt-4 text-4xl font-semibold text-white">JOBS</div>
           </div>
           <div className="p-12 md:w-3/5">
-            <h2 className="mb-8 text-3xl font-semibold text-purple-600">Sign Up</h2>
+            <h2 className="mb-8 text-3xl font-semibold text-purple-600">
+              Sign Up
+            </h2>
             {isOtpStep ? (
               <OtpVerification email={email} />
             ) : (
               <SignupForm onSignupSuccess={handleSignupSuccess} />
             )}
-            {loading && <p className="mt-4 text-sm text-gray-600">Loading...</p>}
+            {loading && (
+              <p className="mt-4 text-sm text-gray-600">Loading...</p>
+            )}
             {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
           </div>
         </div>

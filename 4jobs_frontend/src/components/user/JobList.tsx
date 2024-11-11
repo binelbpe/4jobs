@@ -34,13 +34,20 @@ import {
   SelectChangeEvent,
   useMediaQuery,
 } from "@mui/material";
-import { Business, LocationOn, CalendarToday, Flag, Search as SearchIcon } from "@mui/icons-material";
+import {
+  Business,
+  LocationOn,
+  CalendarToday,
+  Flag,
+  Search as SearchIcon,
+} from "@mui/icons-material";
 
 const JobList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { jobPosts, user } = useSelector((state: RootState) => state.auth);
-  const { posts, loading, error, totalPages, totalCount, currentPage } = jobPosts;
+  const { posts, loading, error, totalPages, totalCount, currentPage } =
+    jobPosts;
   const appliedJobs = user?.appliedJobs || [];
 
   const [page, setPage] = useState(currentPage);
@@ -51,7 +58,7 @@ const JobList: React.FC = () => {
   const [reportDialog, setReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const isSmallScreen = useMediaQuery('(max-width:400px)'); // Check if screen is below 400px
+  const isSmallScreen = useMediaQuery("(max-width:400px)");
 
   useEffect(() => {
     dispatch(fetchJobPostsAsync({ page, limit, sortBy, sortOrder, filter }));
@@ -66,7 +73,9 @@ const JobList: React.FC = () => {
 
         if (applyForJobAsync.fulfilled.match(resultAction)) {
           toast.success("Successfully applied for the job!");
-          dispatch(fetchJobPostsAsync({ page, limit, sortBy, sortOrder, filter }));
+          dispatch(
+            fetchJobPostsAsync({ page, limit, sortBy, sortOrder, filter })
+          );
         } else if (applyForJobAsync.rejected.match(resultAction)) {
           toast.error(resultAction.payload as string);
         }
@@ -87,11 +96,15 @@ const JobList: React.FC = () => {
     if (user?.id && selectedJobId) {
       try {
         const resultAction = await dispatch(
-          reportJobAsync({ userId: user.id, jobId: selectedJobId, reason: reportReason })
+          reportJobAsync({
+            userId: user.id,
+            jobId: selectedJobId,
+            reason: reportReason,
+          })
         );
 
         if (reportJobAsync.fulfilled.match(resultAction)) {
-          toast.success('Job reported successfully');
+          toast.success("Job reported successfully");
           setReportDialog(false);
           setReportReason("");
           setSelectedJobId(null);
@@ -99,10 +112,10 @@ const JobList: React.FC = () => {
           toast.error(resultAction.payload as string);
         }
       } catch (err) {
-        toast.error('Error occurred while reporting the job.');
+        toast.error("Error occurred while reporting the job.");
       }
     } else {
-      toast.error('User ID not found. Please log in.');
+      toast.error("User ID not found. Please log in.");
     }
   };
 
@@ -115,7 +128,10 @@ const JobList: React.FC = () => {
     }
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
     setPage(newPage);
   };
 
@@ -154,10 +170,10 @@ const JobList: React.FC = () => {
           onClick={() => navigate(`/profile/${user.id}`)}
           className="text-sm"
           sx={{
-            bgcolor: '#EAB308', // yellow-500
-            '&:hover': {
-              bgcolor: '#CA8A04' // yellow-600
-            }
+            bgcolor: "#EAB308",
+            "&:hover": {
+              bgcolor: "#CA8A04",
+            },
           }}
         >
           Update Profile
@@ -172,14 +188,14 @@ const JobList: React.FC = () => {
         onClick={() => handleApply(jobId)}
         disabled={appliedJobs?.includes(jobId)}
         sx={{
-          bgcolor: '#9333EA', 
-          '&:hover': {
-            bgcolor: '#7E22CE' 
+          bgcolor: "#9333EA",
+          "&:hover": {
+            bgcolor: "#7E22CE",
           },
-          '&.Mui-disabled': {
-            bgcolor: '#E9D5FF', 
-            color: '#6B7280' 
-          }
+          "&.Mui-disabled": {
+            bgcolor: "#E9D5FF",
+            color: "#6B7280",
+          },
         }}
       >
         {appliedJobs?.includes(jobId) ? "Applied" : "Apply Now"}
@@ -189,26 +205,45 @@ const JobList: React.FC = () => {
 
   if (loading)
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
         <CircularProgress />
       </Box>
     );
-  if (error) return <Typography color="error" align="center" p={4}>{error}</Typography>;
+  if (error)
+    return (
+      <Typography color="error" align="center" p={4}>
+        {error}
+      </Typography>
+    );
 
   return (
-    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+    <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
       <Header />
       <ToastContainer />
 
       <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h4" component="h1" gutterBottom className={`text-purple-700 font-bold ${isSmallScreen ? 'text-xl' : 'text-2xl sm:text-3xl'}`}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          className={`text-purple-700 font-bold ${
+            isSmallScreen ? "text-xl" : "text-2xl sm:text-3xl"
+          }`}
+        >
           Job Listings
         </Typography>
 
         <Grid container spacing={2} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={4} md={3}>
             <FormControl fullWidth sx={{ minWidth: 120 }}>
-              <InputLabel id="sort-by-label" className="text-purple-700">Sort By</InputLabel>
+              <InputLabel id="sort-by-label" className="text-purple-700">
+                Sort By
+              </InputLabel>
               <Select
                 labelId="sort-by-label"
                 value={sortBy}
@@ -225,7 +260,9 @@ const JobList: React.FC = () => {
           </Grid>
           <Grid item xs={12} sm={4} md={3}>
             <FormControl fullWidth sx={{ minWidth: 120 }}>
-              <InputLabel id="limit-label" className="text-purple-700">Per Page</InputLabel>
+              <InputLabel id="limit-label" className="text-purple-700">
+                Per Page
+              </InputLabel>
               <Select
                 labelId="limit-label"
                 value={limit}
@@ -246,11 +283,11 @@ const JobList: React.FC = () => {
               variant="contained"
               onClick={handleFilterChange}
               sx={{
-                height: '100%',
-                bgcolor: '#9333EA', 
-                '&:hover': {
-                  bgcolor: '#7E22CE' 
-                }
+                height: "100%",
+                bgcolor: "#9333EA",
+                "&:hover": {
+                  bgcolor: "#7E22CE",
+                },
               }}
               size="small"
             >
@@ -261,14 +298,14 @@ const JobList: React.FC = () => {
             <Button
               fullWidth
               variant="contained"
-              onClick={() => navigate('/jobs/search')}
+              onClick={() => navigate("/jobs/search")}
               startIcon={<SearchIcon />}
               sx={{
-                height: '100%',
-                bgcolor: '#9333EA',
-                '&:hover': {
-                  bgcolor: '#7E22CE'
-                }
+                height: "100%",
+                bgcolor: "#9333EA",
+                "&:hover": {
+                  bgcolor: "#7E22CE",
+                },
               }}
               size="small"
             >
@@ -280,39 +317,69 @@ const JobList: React.FC = () => {
         <Grid container spacing={3}>
           {posts.map((job: BasicJobPost) => (
             <Grid item xs={12} key={job._id} md={12} lg={12}>
-              <Box sx={{
-                boxShadow: 2,
-                border: '1px solid',
-                borderColor: 'purple.300',
-                borderRadius: 2,
-                p: isSmallScreen ? 1 : 2,
-                mb: 2,
-                bgcolor: 'white'
-              }}>
-                <Typography variant="h6" component="h2" className={`text-purple-700 ${isSmallScreen ? 'text-lg' : 'text-lg sm:text-xl'}`}>
+              <Box
+                sx={{
+                  boxShadow: 2,
+                  border: "1px solid",
+                  borderColor: "purple.300",
+                  borderRadius: 2,
+                  p: isSmallScreen ? 1 : 2,
+                  mb: 2,
+                  bgcolor: "white",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  className={`text-purple-700 ${
+                    isSmallScreen ? "text-lg" : "text-lg sm:text-xl"
+                  }`}
+                >
                   {job.title}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
-                  <Business className="mr-1 text-purple-600" /> {job.company?.name}
+                <Typography
+                  color="text.secondary"
+                  gutterBottom
+                  className={`flex items-center text-sm ${
+                    isSmallScreen ? "text-xs" : "sm:text-base"
+                  }`}
+                >
+                  <Business className="mr-1 text-purple-600" />{" "}
+                  {job.company?.name}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
+                <Typography
+                  color="text.secondary"
+                  gutterBottom
+                  className={`flex items-center text-sm ${
+                    isSmallScreen ? "text-xs" : "sm:text-base"
+                  }`}
+                >
                   <LocationOn className="mr-1 text-purple-600" /> {job.location}
                 </Typography>
-                <Typography color="text.secondary" gutterBottom className={`flex items-center text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}>
-                  <CalendarToday className="mr-1 text-purple-600" /> Posted on {new Date(job.createdAt).toLocaleDateString()}
+                <Typography
+                  color="text.secondary"
+                  gutterBottom
+                  className={`flex items-center text-sm ${
+                    isSmallScreen ? "text-xs" : "sm:text-base"
+                  }`}
+                >
+                  <CalendarToday className="mr-1 text-purple-600" /> Posted on{" "}
+                  {new Date(job.createdAt).toLocaleDateString()}
                 </Typography>
-                <CardActions sx={{ justifyContent: 'flex-end' }}>
+                <CardActions sx={{ justifyContent: "flex-end" }}>
                   <Button
                     size="small"
                     variant="contained"
                     onClick={() => handleViewDetails(job._id)}
                     sx={{
-                      bgcolor: '#9333EA', 
-                      '&:hover': {
-                        bgcolor: '#7E22CE' 
-                      }
+                      bgcolor: "#9333EA",
+                      "&:hover": {
+                        bgcolor: "#7E22CE",
+                      },
                     }}
-                    className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}
+                    className={`text-sm ${
+                      isSmallScreen ? "text-xs" : "sm:text-base"
+                    }`}
                   >
                     View Details
                   </Button>
@@ -322,9 +389,15 @@ const JobList: React.FC = () => {
                     color="error"
                     onClick={() => handleReportClick(job._id)}
                     title="Report Job"
-                    className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`}
+                    className={`text-sm ${
+                      isSmallScreen ? "text-xs" : "sm:text-base"
+                    }`}
                   >
-                    <Flag className={`text-sm ${isSmallScreen ? 'text-xs' : 'sm:text-base'}`} />
+                    <Flag
+                      className={`text-sm ${
+                        isSmallScreen ? "text-xs" : "sm:text-base"
+                      }`}
+                    />
                   </IconButton>
                 </CardActions>
               </Box>
@@ -332,7 +405,7 @@ const JobList: React.FC = () => {
           ))}
         </Grid>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <Pagination
             count={totalPages}
             page={page}
@@ -365,11 +438,11 @@ const JobList: React.FC = () => {
           <Button
             onClick={() => setReportDialog(false)}
             sx={{
-              bgcolor: '#9333EA', 
-              color: 'white',
-              '&:hover': {
-                bgcolor: '#7E22CE' 
-              }
+              bgcolor: "#9333EA",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#7E22CE",
+              },
             }}
           >
             Cancel
@@ -377,11 +450,11 @@ const JobList: React.FC = () => {
           <Button
             onClick={handleReport}
             sx={{
-              bgcolor: '#9333EA', 
-              color: 'white',
-              '&:hover': {
-                bgcolor: '#7E22CE' 
-              }
+              bgcolor: "#9333EA",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#7E22CE",
+              },
             }}
           >
             Submit Report

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Plan {
   name: string;
@@ -8,19 +8,19 @@ interface Plan {
 
 const plans: Plan[] = [
   {
-    name: 'Monthly',
+    name: "Monthly",
     price: 200,
-    duration: '1 month',
+    duration: "1 month",
   },
   {
-    name: '3 Months',
+    name: "3 Months",
     price: 550,
-    duration: '3 months',
+    duration: "3 months",
   },
   {
-    name: 'Yearly',
+    name: "Yearly",
     price: 2000,
-    duration: '1 year',
+    duration: "1 year",
   },
 ];
 
@@ -28,11 +28,16 @@ interface SubscriptionPlansProps {
   onSelectPlan: (plan: Plan) => void;
 }
 
-const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSelectPlan }) => {
+const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
+  onSelectPlan,
+}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8">
       {plans.map((plan) => (
-        <div key={plan.name} className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div
+          key={plan.name}
+          className="bg-white rounded-lg shadow-lg overflow-hidden"
+        >
           <div className="px-6 py-8 bg-purple-600 text-white text-center">
             <h3 className="text-2xl font-bold">{plan.name}</h3>
             <div className="mt-4 flex items-center justify-center">

@@ -8,7 +8,7 @@ import { RecommendationUser } from "../../types/auth";
 
 const Recommendations: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
- 
+
   const { recommendations, loading, error } = useSelector(
     (state: RootState) => state.connections
   );
@@ -19,8 +19,6 @@ const Recommendations: React.FC = () => {
       dispatch(fetchRecommendations(currentUser.id));
     }
   }, [dispatch, currentUser]);
-
-  
 
   if (loading) {
     return (
@@ -47,7 +45,9 @@ const Recommendations: React.FC = () => {
     console.error("Recommendations is not an array:", recommendations);
     return (
       <div className="bg-white shadow-lg rounded-lg p-4">
-        <p className="text-red-500 text-center">An error occurred while loading recommendations.</p>
+        <p className="text-red-500 text-center">
+          An error occurred while loading recommendations.
+        </p>
       </div>
     );
   }
@@ -64,13 +64,12 @@ const Recommendations: React.FC = () => {
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-4">
-      <h3 className="font-semibold text-lg mb-4 text-gray-800">Recommendations</h3>
+      <h3 className="font-semibold text-lg mb-4 text-gray-800">
+        Recommendations
+      </h3>
       <div className="grid grid-row-1 sm:grid-row-2 lg:grid-row-3 xl:grid-row-4 gap-4">
         {recommendations.map((user: RecommendationUser) => (
-          <RecommendationCard
-            key={user.id}
-            user={user}
-          />
+          <RecommendationCard key={user.id} user={user} />
         ))}
       </div>
     </div>

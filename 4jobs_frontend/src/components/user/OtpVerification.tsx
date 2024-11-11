@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { verifyOtp } from '../../redux/slices/authSlice';
-import { AppDispatch } from '../../redux/store';
-import { sendOtpApi } from '../../api/authapi'; 
-import '../../styles/user/OtpVerification.css';
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { verifyOtp } from "../../redux/slices/authSlice";
+import { AppDispatch } from "../../redux/store";
+import { sendOtpApi } from "../../api/authapi";
+
 
 interface OtpVerificationProps {
   email: string;
 }
 
 const OtpVerification: React.FC<OtpVerificationProps> = ({ email }) => {
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(30);
   const [isTimerActive, setIsTimerActive] = useState(true);
 
@@ -32,7 +32,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ email }) => {
     try {
       await dispatch(verifyOtp({ email, otp })).unwrap();
     } catch (error) {
-      console.error('OTP verification failed:', error);
+      console.error("OTP verification failed:", error);
     }
   };
 
@@ -42,18 +42,27 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ email }) => {
       setIsTimerActive(true);
       setTimer(30);
     } catch (error) {
-      console.error('Failed to resend OTP:', error);
+      console.error("Failed to resend OTP:", error);
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8">
-        <h3 className="mb-4 text-2xl font-semibold text-purple-600 text-center">OTP Verification</h3>
-        <p className="mb-6 text-gray-700 text-center">An OTP has been sent to {email}</p>
-        
+        <h3 className="mb-4 text-2xl font-semibold text-purple-600 text-center">
+          OTP Verification
+        </h3>
+        <p className="mb-6 text-gray-700 text-center">
+          An OTP has been sent to {email}
+        </p>
+
         <div className="mb-4">
-          <label htmlFor="otp-input" className="block text-sm font-semibold text-gray-700">Enter OTP</label>
+          <label
+            htmlFor="otp-input"
+            className="block text-sm font-semibold text-gray-700"
+          >
+            Enter OTP
+          </label>
           <input
             id="otp-input"
             type="text"
@@ -63,17 +72,19 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ email }) => {
             className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-purple-500 focus:outline-none"
           />
         </div>
-        
-        <button 
+
+        <button
           onClick={handleOtpVerification}
           disabled={!isTimerActive}
           className={`w-full rounded-md py-2 text-sm font-semibold text-white transition duration-200 ${
-            isTimerActive ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300 cursor-not-allowed'
+            isTimerActive
+              ? "bg-purple-600 hover:bg-purple-700"
+              : "bg-gray-300 cursor-not-allowed"
           }`}
         >
           Verify OTP
         </button>
-        
+
         <div className="mt-4 text-center">
           {isTimerActive ? (
             <p className="text-gray-700">Resend OTP in {timer} seconds</p>

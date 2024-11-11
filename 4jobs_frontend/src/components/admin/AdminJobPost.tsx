@@ -22,7 +22,7 @@ import {
 } from "react-icons/fa";
 import Header from "../admin/AdminHeader";
 import Sidebar from "../admin/AdminSidebar";
-import ConfirmationModal from "../common/ConfirmationModal"; // Ensure this is imported
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -247,7 +247,6 @@ const AdminJobPost: React.FC = () => {
               </tbody>
             </table>
           </div>
-          {/* Pagination */}
           <div className="mt-4 flex justify-between items-center">
             <span className="text-purple-800">
               Page {currentPage} of {totalPages}
@@ -273,8 +272,16 @@ const AdminJobPost: React.FC = () => {
             isOpen={!!confirmAction}
             onClose={() => setConfirmAction(null)}
             onConfirm={confirmBlockUnblock}
-            title={confirmAction?.type === "block" ? "Confirm Block Job Post" : "Confirm Unblock Job Post"}
-            message={confirmAction?.type === "block" ? "Are you sure you want to block this job post?" : "Are you sure you want to unblock this job post?"}
+            title={
+              confirmAction?.type === "block"
+                ? "Confirm Block Job Post"
+                : "Confirm Unblock Job Post"
+            }
+            message={
+              confirmAction?.type === "block"
+                ? "Are you sure you want to block this job post?"
+                : "Are you sure you want to unblock this job post?"
+            }
           />
         </div>
       </div>

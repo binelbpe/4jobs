@@ -76,11 +76,6 @@ const MongoSearchRepository_1 = require("./database/mongoose/repositories/MongoS
 const SearchUsersAndJobsUseCase_1 = require("../application/usecases/user/SearchUsersAndJobsUseCase");
 const MongoRecruiterSearchRepository_1 = require("./database/mongoose/repositories/MongoRecruiterSearchRepository");
 const SearchUsersUseCase_1 = require("../application/usecases/recruiter/SearchUsersUseCase");
-const MongoVideoCallRepository_1 = require("./database/mongoose/repositories/MongoVideoCallRepository");
-const InitiateVideoCallUseCase_1 = require("../application/usecases/recruiter/InitiateVideoCallUseCase");
-const RespondToVideoCallUseCase_1 = require("../application/usecases/user/RespondToVideoCallUseCase");
-const MongoUserVideoCallRepository_1 = require("./database/mongoose/repositories/MongoUserVideoCallRepository");
-const UserVideoCallUseCase_1 = require("../application/usecases/user/UserVideoCallUseCase");
 const DislikePostUseCase_1 = require("../application/usecases/user/post/DislikePostUseCase");
 const LikePostUseCase_1 = require("../application/usecases/user/post/LikePostUseCase");
 const CommentOnPostUseCase_1 = require("../application/usecases/user/post/CommentOnPostUseCase");
@@ -246,21 +241,6 @@ container
 container
     .bind(types_1.default.SearchUsersUseCase)
     .to(SearchUsersUseCase_1.SearchUsersUseCase);
-container
-    .bind(types_1.default.IVideoCallRepository)
-    .to(MongoVideoCallRepository_1.MongoVideoCallRepository);
-container
-    .bind(types_1.default.InitiateVideoCallUseCase)
-    .to(InitiateVideoCallUseCase_1.InitiateVideoCallUseCase);
-container
-    .bind(types_1.default.RespondToVideoCallUseCase)
-    .to(RespondToVideoCallUseCase_1.RespondToVideoCallUseCase);
-container
-    .bind(types_1.default.IUserVideoCallRepository)
-    .to(MongoUserVideoCallRepository_1.MongoUserVideoCallRepository);
-container
-    .bind(types_1.default.UserVideoCallUseCase)
-    .to(UserVideoCallUseCase_1.UserVideoCallUseCase);
 container
     .bind(types_1.default.DislikePostUseCase)
     .to(DislikePostUseCase_1.DislikePostUseCase);

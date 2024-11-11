@@ -17,7 +17,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-import ConfirmationModal from "./ConfirmationModal"; 
+import ConfirmationModal from "./ConfirmationModal";
 
 const UserList: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -30,7 +30,9 @@ const UserList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToBlock, setUserToBlock] = useState<string | null>(null);
   const [userToUnblock, setUserToUnblock] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"block" | "unblock" | null>(null);
+  const [actionType, setActionType] = useState<"block" | "unblock" | null>(
+    null
+  );
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -187,7 +189,6 @@ const UserList: React.FC = () => {
                 </tbody>
               </table>
             </div>
-            {/* Pagination controls */}
             <div className="mt-4 flex justify-between items-center">
               <span className="text-purple-800">
                 Page {currentPage} of {totalPages}
@@ -210,12 +211,20 @@ const UserList: React.FC = () => {
               </div>
             </div>
           </div>
-          <ConfirmationModal 
-            isOpen={isModalOpen} 
-            onClose={() => setIsModalOpen(false)} 
-            onConfirm={confirmAction} 
-            title={actionType === "block" ? "Confirm Block User" : "Confirm Unblock User"}
-            message={actionType === "block" ? "Are you sure you want to block this user?" : "Are you sure you want to unblock this user?"}
+          <ConfirmationModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={confirmAction}
+            title={
+              actionType === "block"
+                ? "Confirm Block User"
+                : "Confirm Unblock User"
+            }
+            message={
+              actionType === "block"
+                ? "Are you sure you want to block this user?"
+                : "Are you sure you want to unblock this user?"
+            }
           />
         </main>
       </div>

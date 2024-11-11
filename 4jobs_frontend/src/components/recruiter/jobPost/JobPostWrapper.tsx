@@ -16,10 +16,11 @@ import ConfirmationModal from "./ConfirmationModal";
 const JobPostWrapper: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { posts, loading, error } = useSelector((state: RootState) => state.jobPosts);
+  const { posts, loading, error } = useSelector(
+    (state: RootState) => state.jobPosts
+  );
   const { recruiter } = useSelector((state: RootState) => state.recruiter);
 
- 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
@@ -33,7 +34,7 @@ const JobPostWrapper: React.FC = () => {
     setPostToDelete(id);
     setIsModalOpen(true);
   }, []);
-  
+
   const confirmDelete = useCallback(async (): Promise<void> => {
     if (postToDelete) {
       try {
@@ -46,28 +47,44 @@ const JobPostWrapper: React.FC = () => {
     setPostToDelete(null);
   }, [dispatch, postToDelete]);
 
-  const handleEdit = useCallback((post: { _id: string }) => {
-    navigate(`/recruiter/jobs/edit/${post._id}`);
-  }, [navigate]);
+  const handleEdit = useCallback(
+    (post: { _id: string }) => {
+      navigate(`/recruiter/jobs/edit/${post._id}`);
+    },
+    [navigate]
+  );
 
   const handleCreate = useCallback(() => {
     navigate("/recruiter/jobs/create");
   }, [navigate]);
 
-  const handleToggleStatus = useCallback((post: BasicJobPost): Promise<void> => {
-    const updatedPost = { ...post, status: post.status === "Open" ? "Closed" : "Open" };
-    return dispatch(updateJobPost({ id: post._id, postData: updatedPost })).unwrap();
-  }, [dispatch]);
+  const handleToggleStatus = useCallback(
+    (post: BasicJobPost): Promise<void> => {
+      const updatedPost = {
+        ...post,
+        status: post.status === "Open" ? "Closed" : "Open",
+      };
+      return dispatch(
+        updateJobPost({ id: post._id, postData: updatedPost })
+      ).unwrap();
+    },
+    [dispatch]
+  );
 
-  const handleViewContestants = useCallback((postId: string) => {
-    navigate(`/recruiter/job-applicants/${postId}`);
-  }, [navigate]);
+  const handleViewContestants = useCallback(
+    (postId: string) => {
+      navigate(`/recruiter/job-applicants/${postId}`);
+    },
+    [navigate]
+  );
 
   if (!recruiter) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
         <AlertCircle size={48} className="text-yellow-500 mb-4" />
-        <p className="text-xl text-gray-800 font-semibold mb-2">Access Restricted</p>
+        <p className="text-xl text-gray-800 font-semibold mb-2">
+          Access Restricted
+        </p>
         <p className="text-gray-600">Please log in to view job posts.</p>
       </div>
     );
@@ -79,9 +96,11 @@ const JobPostWrapper: React.FC = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-purple-900">Job Posts</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-purple-900">
+              Job Posts
+            </h2>
             <div className="flex space-x-4">
-              <button 
+              <button
                 onClick={handleCreate}
                 className="bg-purple-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center shadow-md text-sm sm:text-base"
               >
@@ -96,7 +115,10 @@ const JobPostWrapper: React.FC = () => {
               <Loader className="animate-spin h-12 w-12 text-purple-500" />
             </div>
           ) : error ? (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
+            <div
+              className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md"
+              role="alert"
+            >
               <div className="flex items-center">
                 <AlertCircle className="h-6 w-6 mr-2" />
                 <p className="font-bold">Error</p>
@@ -106,9 +128,13 @@ const JobPostWrapper: React.FC = () => {
           ) : posts.length === 0 ? (
             <div className="bg-white rounded-xl shadow-lg p-8 text-center">
               <AlertCircle size={48} className="text-yellow-500 mx-auto mb-4" />
-              <p className="text-xl text-gray-800 font-semibold mb-2">No Job Posts Available</p>
-              <p className="text-gray-600 mb-4">Click 'Create New Job Post' to add your first job listing.</p>
-              <button 
+              <p className="text-xl text-gray-800 font-semibold mb-2">
+                No Job Posts Available
+              </p>
+              <p className="text-gray-600 mb-4">
+                Click 'Create New Job Post' to add your first job listing.
+              </p>
+              <button
                 onClick={handleCreate}
                 className="bg-purple-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-purple-700 transition duration-300 inline-flex items-center text-sm sm:text-base"
               >
@@ -118,9 +144,9 @@ const JobPostWrapper: React.FC = () => {
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-lg p-8">
-              <JobPost 
-                jobPosts={posts} 
-                onDelete={handleDelete} 
+              <JobPost
+                jobPosts={posts}
+                onDelete={handleDelete}
                 onEdit={handleEdit}
                 onToggleStatus={handleToggleStatus}
                 onViewContestants={handleViewContestants}

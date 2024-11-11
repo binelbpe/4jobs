@@ -43,7 +43,8 @@ const UserConversationList: React.FC<ConversationListProps> = ({
   const getUnreadCount = (conversationId: string) => {
     const conversationMessages = messages[conversationId] || [];
     return conversationMessages.filter(
-      (msg) => !msg.isRead && !msg.locallyRead && msg.senderId !== currentUser?.id
+      (msg) =>
+        !msg.isRead && !msg.locallyRead && msg.senderId !== currentUser?.id
     ).length;
   };
 
@@ -89,7 +90,8 @@ const UserConversationList: React.FC<ConversationListProps> = ({
               </div>
               <div className="flex-grow min-w-0">
                 <h3 className="font-semibold truncate">
-                  {conversation.participant.name} - {conversation.participant.companyName}
+                  {conversation.participant.name} -{" "}
+                  {conversation.participant.companyName}
                 </h3>
                 <p className="text-sm text-gray-600 truncate">
                   {conversation.lastMessage}

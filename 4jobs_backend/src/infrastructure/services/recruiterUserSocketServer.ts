@@ -6,8 +6,6 @@ import { UserManager } from './UserManager';
 import { socketAuthMiddleware } from '../../presentation/middlewares/socketAuthMiddleware';
 import { UserRecruiterMessageUseCase } from '../../application/usecases/user/UserRecruiterMessageUseCase';
 import { RecruiterMessageUseCase } from '../../application/usecases/recruiter/RecruiterMessageUseCase';
-import { InitiateVideoCallUseCase } from '../../application/usecases/recruiter/InitiateVideoCallUseCase';
-import { RespondToVideoCallUseCase } from '../../application/usecases/user/RespondToVideoCallUseCase';
 import TYPES from "../../types";
 
 export function setupSocketServer(server: HTTPServer, container: Container) {
@@ -22,8 +20,6 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
   const eventEmitter = container.get<EventEmitter>(TYPES.NotificationEventEmitter);
   const userRecruiterMessageUseCase = container.get<UserRecruiterMessageUseCase>(TYPES.UserRecruiterMessageUseCase);
   const recruiterMessageUseCase = container.get<RecruiterMessageUseCase>(TYPES.RecruiterMessageUseCase);
-  const initiateVideoCallUseCase = container.get<InitiateVideoCallUseCase>(TYPES.InitiateVideoCallUseCase);
-  const respondToVideoCallUseCase = container.get<RespondToVideoCallUseCase>(TYPES.RespondToVideoCallUseCase);
 
   io.use(socketAuthMiddleware(userManager));
 
@@ -57,17 +53,14 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
           savedMessage = await recruiterMessageUseCase.sendMessage(conversationId, content, senderId);
         }
 console.log("conversation id:",conversationId)
-        // Emit the message to all clients in the conversation
         let newUserRecruiterMessage =io.emit('newUserRecruiterMessage', savedMessage);
         console.log("newUserRecruiterMessage",newUserRecruiterMessage)
-        // Update the conversation's last message
         const updatedConversation = await userRecruiterMessageUseCase.updateConversationLastMessage(
           conversationId,
           content,
           new Date()
         );
-
-        // Emit the updated conversation to all relevant clients
+   
         io.emit('conversationUpdated', updatedConversation);
       } catch (error) {
         console.error('Error sending message:', error);

@@ -1,12 +1,15 @@
-import React from 'react';
-import { User } from '../../types/auth';
+import React from "react";
+import { User } from "../../types/auth";
 
 interface SearchResultsProps {
   results: User[];
   onSelectUser: (userId: string) => void;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ results, onSelectUser }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({
+  results,
+  onSelectUser,
+}) => {
   return (
     <div className="bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto">
       {results.map((user) => (

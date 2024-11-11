@@ -50,7 +50,9 @@ const JobPost: React.FC<JobPostProps> = ({
           {post.isBlock && (
             <div className="flex items-center text-red-500 mb-2">
               <AlertTriangle size={18} className="mr-2" />
-              <span className="font-semibold text-sm md:text-base">Blocked by Admin</span>
+              <span className="font-semibold text-sm md:text-base">
+                Blocked by Admin
+              </span>
             </div>
           )}
           <p className="mb-2 text-gray-600 text-sm md:text-base">

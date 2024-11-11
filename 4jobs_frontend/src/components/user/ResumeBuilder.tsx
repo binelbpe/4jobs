@@ -45,7 +45,6 @@ const ResumeBuilder: React.FC = () => {
       case 'phone':
         if (!/^\+?[\d\s-]{10,14}$/.test(value)) error = 'Invalid phone number';
         break;
-      // Add more validations for other fields
     }
     setFormErrors(prev => ({ ...prev, [name]: error }));
   };

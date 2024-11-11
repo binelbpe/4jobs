@@ -81,17 +81,54 @@ const authPersistConfig = {
   transforms: [encryptTransform],
 };
 
+const recruiterPersistConfig = {
+  key: 'recruiter',
+  storage,
+  whitelist: ['isAuthenticatedRecruiter', 'recruiter', 'loading', 'isApproved'],
+  transforms: [encryptTransform],
+};
+
+const adminPersistConfig = {
+  key: 'admin',
+  storage,
+  whitelist: ['isAuthenticatedAdmin', 'token', 'email', 'name', 'role'],
+};
+
+const jobPostsPersistConfig = {
+  key: 'jobPosts',
+  storage,
+  whitelist: ['posts', 'totalPages', 'totalCount', 'currentPage'],
+};
+
+const connectionsPersistConfig = {
+  key: 'connections',
+  storage,
+  whitelist: ['connections', 'lastFetchedAt'],
+};
+
+const notificationsPersistConfig = {
+  key: 'notifications',
+  storage,
+  whitelist: ['items', 'unreadCount', 'seenNotifications'],
+};
+
+const userMessagesPersistConfig = {
+  key: 'messages',
+  storage,
+  whitelist: ['conversations', 'unreadCount'],
+};
+
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
-  admin: adminReducer,
-  recruiter: recruiterReducer,
-  jobPosts: jobPostReducer,
+  admin: persistReducer(adminPersistConfig, adminReducer),
+  recruiter: persistReducer(recruiterPersistConfig, recruiterReducer),
+  jobPosts: persistReducer(jobPostsPersistConfig, jobPostReducer),
   contestants: contestantReducer,
   posts: postReducer,
   adminJobPost: adminJobPostReducer,
-  connections: connectionReducer,
-  notifications: notificationReducer,
-  messages: userMessageReducer,
+  connections: persistReducer(connectionsPersistConfig, connectionReducer),
+  notifications: persistReducer(notificationsPersistConfig, notificationReducer),
+  messages: persistReducer(userMessagesPersistConfig, userMessageReducer),
   recruiterMessages: recruiterMessageReducer,
   userRecruiterMessages: userRecruiterMessageReducer,
   subscriptions: subscriptionReducer,

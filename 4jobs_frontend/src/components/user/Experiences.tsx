@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserExperiences } from "../../redux/slices/authSlice";
 import { RootState, AppDispatch } from "../../redux/store";
@@ -8,11 +8,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { X } from "lucide-react";
 
 const validateExperience = (experience: Experience): boolean => {
-  const { title, company, startDate, endDate, currentlyWorking, description } = experience;
+  const { title, company, startDate, endDate, currentlyWorking, description } =
+    experience;
 
   const titleRegex = /^[a-zA-Z0-9\s]{1,30}$/;
   const companyRegex = /^[a-zA-Z0-9\s]{1,20}$/;
-  const dateRegex = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$/i;
+  const dateRegex =
+    /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$/i;
 
   if (!title || !company || !startDate || !description) {
     toast.error("All fields except 'End Date' are required.");
@@ -30,7 +32,9 @@ const validateExperience = (experience: Experience): boolean => {
   }
 
   if (!dateRegex.test(startDate)) {
-    toast.error("Start date must be in the format 'MMM YYYY' (e.g., Jan 2020).");
+    toast.error(
+      "Start date must be in the format 'MMM YYYY' (e.g., Jan 2020)."
+    );
     return false;
   }
 
@@ -166,10 +170,11 @@ const Experiences: React.FC = () => {
     <div>
       <ToastContainer />
       <div className="space-y-8">
-        <h2 className="text-2xl font-bold mb-4 text-center">Your Experiences</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Your Experiences
+        </h2>
         {error && <p className="text-red-500">{error}</p>}
-        
- 
+
         <div className="space-y-4">
           {experiences.length > 0 ? (
             experiences.map((experience, index) => (
@@ -204,8 +209,11 @@ const Experiences: React.FC = () => {
             <p>No experiences added yet.</p>
           )}
         </div>
-   
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-4 sm:p-6">
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow rounded-lg p-4 sm:p-6"
+        >
           <h3 className="text-lg font-bold mb-4">
             {editingIndex !== null ? "Edit Experience" : "Add New Experience"}
           </h3>

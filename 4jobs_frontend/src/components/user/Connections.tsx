@@ -24,7 +24,7 @@ import { User } from "../../types/auth";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import { selectMemoizedConnections } from '../../redux/store';
+import { selectMemoizedConnections } from "../../redux/store";
 
 interface ConnectionRequest {
   _id: string;
@@ -47,7 +47,7 @@ const Connections: React.FC = () => {
       connections: selectMemoizedConnections(state),
       connectionRequests: state.connections.connectionRequests,
       loading: state.connections.loading,
-      error: state.connections.error, 
+      error: state.connections.error,
     })
   );
   const [searchQuery, setSearchQuery] = useState("");
@@ -140,7 +140,7 @@ const Connections: React.FC = () => {
     if (error) {
       toast.error(`An error occurred: ${error}`);
     }
-  }, [error]); 
+  }, [error]);
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -155,7 +155,6 @@ const Connections: React.FC = () => {
           My Network
         </h1>
 
-        {/* Search bar */}
         <div className="mb-4">
           <div className="flex items-center max-w-md mx-auto w-full">
             <input
@@ -181,7 +180,6 @@ const Connections: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Connection Requests Section */}
             <div className="bg-white mb-4">
               <h2 className="text-lg sm:text-xl font-semibold mb-2 text-purple-800">
                 Connection Requests
@@ -249,7 +247,6 @@ const Connections: React.FC = () => {
               )}
             </div>
 
-            {/* Connections List Section */}
             <div className="bg-white">
               <h2 className="text-lg sm:text-xl font-semibold mb-2 text-purple-800">
                 Your Connections
@@ -356,7 +353,7 @@ const Connections: React.FC = () => {
                       </button>
                       <button
                         className="ml-2 bg-red-600 text-white px-2 py-1 rounded-full hover:bg-red-700 transition duration-300 text-xs flex items-center"
-                        onClick={() => handleRemove(connection._id!)} // Ensure _id is not undefined
+                        onClick={() => handleRemove(connection._id!)}
                       >
                         <FontAwesomeIcon
                           icon={faUserTimes}

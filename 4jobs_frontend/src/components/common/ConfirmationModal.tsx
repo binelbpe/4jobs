@@ -1,5 +1,5 @@
-import React from 'react';
-import { XIcon } from 'lucide-react';
+import React from "react";
+import { XIcon } from "lucide-react";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -9,7 +9,13 @@ interface ConfirmationModalProps {
   message: string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -17,7 +23,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
             <XIcon size={24} />
           </button>
         </div>

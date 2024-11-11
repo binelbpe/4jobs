@@ -24,7 +24,9 @@ const MainContent: React.FC = () => {
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8 bg-purple-50">
-      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-purple-800">Job Listings</h2>
+      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-purple-800">
+        Job Listings
+      </h2>
       <div className="bg-white shadow-lg rounded-lg p-4 md:p-6">
         {posts.length > 0 ? (
           <JobList jobs={posts} />

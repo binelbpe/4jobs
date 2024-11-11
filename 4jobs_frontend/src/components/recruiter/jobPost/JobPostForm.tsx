@@ -13,8 +13,15 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { validateJobPostForm } from "./formValidation";
-import { WORK_TYPES, WorkType } from '../../../constants/jobConstants';
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectChangeEvent } from '@mui/material';
+import { WORK_TYPES, WorkType } from "../../../constants/jobConstants";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  SelectChangeEvent,
+} from "@mui/material";
 
 interface JobPostFormProps {
   initialData?: BasicJobPostFormData;
@@ -91,10 +98,12 @@ const JobPostForm: React.FC<JobPostFormProps> = ({
     }));
   };
 
-  const handleSelectChange = (e: SelectChangeEvent<typeof formData.wayOfWork>) => {
-    setFormData(prev => ({
+  const handleSelectChange = (
+    e: SelectChangeEvent<typeof formData.wayOfWork>
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      wayOfWork: e.target.value as WorkType
+      wayOfWork: e.target.value as WorkType,
     }));
   };
 

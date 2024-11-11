@@ -47,7 +47,6 @@ const MainFeed: React.FC = () => {
       </div>
     );
   }
-  
 
   return (
     <div className="w-full">

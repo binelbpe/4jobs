@@ -166,7 +166,6 @@ const UserPostsList: React.FC = () => {
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => {
-          console.log("Modal closed");
           setIsDeleteModalOpen(false);
           setPostToDelete(null);
         }}
@@ -195,9 +194,14 @@ const PostCard: React.FC<{
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="p-4">
         {post.status === "blocked" && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert"
+          >
             <strong className="font-bold">Notice: </strong>
-            <span className="block sm:inline">This post has been blocked by an admin.</span>
+            <span className="block sm:inline">
+              This post has been blocked by an admin.
+            </span>
           </div>
         )}
         <p className="text-gray-600 mb-4">{post.content}</p>

@@ -10,10 +10,8 @@ import { updateTotalUnreadCount } from "../../redux/slices/userRecruiterMessageS
 import { Message } from "../../types/messageType";
 import useSocket from "../../hooks/useSocket";
 import debounce from "lodash/debounce";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faVideo } from "@fortawesome/free-solid-svg-icons";
-import UserVideoCall from "./UserVideoCall";
-import { useCall } from "../../contexts/CallContext";
+
+
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -51,15 +49,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId, onBack }) => {
   } = useSocket(userId);
   const [hasFetchedConversation, setHasFetchedConversation] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const {
-    isIncomingCall,
-    incomingCallData,
-    isCallActive,
-    acceptCall,
-    rejectCall,
-    setupVideoCall,
-    endCall,
-  } = useCall();
+ 
   const debouncedEmitTypingRef = useRef<(isTyping: boolean) => void>();
 
   const fetchConversationData = useCallback(() => {
@@ -161,17 +151,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId, onBack }) => {
     };
   }, []);
 
-  const handleAcceptCall = useCallback(() => {
-    acceptCall();
-  }, [acceptCall]);
-
-  const handleStartVideoCall = useCallback(() => {
-    setupVideoCall(userId);
-  }, [userId, setupVideoCall]);
-
-  const handleEndVideoCall = useCallback(() => {
-    endCall();
-  }, [endCall]);
+ 
 
   if (!currentUser) {
     return <div>Loading...</div>;
@@ -194,12 +174,7 @@ const Conversation: React.FC<ConversationProps> = ({ userId, onBack }) => {
         <h2 className="text-xl font-semibold text-purple-700">
           {connection?.user.name || "Chat"}
         </h2>
-        <button
-          onClick={handleStartVideoCall}
-          className="bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition duration-300"
-        >
-          <FontAwesomeIcon icon={faVideo} />
-        </button>
+       
       </div>
       <div className="flex-grow overflow-y-auto p-4">
         {messages.map((message: Message, index: number) => (
@@ -258,38 +233,6 @@ const Conversation: React.FC<ConversationProps> = ({ userId, onBack }) => {
           </button>
         </div>
       </form>
-      {isIncomingCall && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Incoming Call</h2>
-            <p className="mb-6">
-              You have an incoming call from {incomingCallData?.callerId}
-            </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={handleAcceptCall}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg"
-              >
-                Accept
-              </button>
-              <button
-                onClick={rejectCall}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isCallActive && (
-        <UserVideoCall
-          recipientId={userId}
-          onEndCall={handleEndVideoCall}
-          incomingCallData={incomingCallData}
-        />
-      )}
     </div>
   );
 };

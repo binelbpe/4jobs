@@ -27,7 +27,6 @@ function setupUserSocketServer(server, container) {
     const userManager = container.get(types_1.default.UserManager);
     const eventEmitter = container.get(types_1.default.NotificationEventEmitter);
     const messageUseCase = container.get(types_1.default.MessageUseCase);
-    const userVideoCallUseCase = container.get(types_1.default.UserVideoCallUseCase);
     io.use((0, socketAuthMiddleware_1.socketAuthMiddleware)(userManager));
     io.on("connection", (socket) => {
         console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}`);
@@ -59,7 +58,6 @@ function setupUserSocketServer(server, container) {
                 else {
                     console.log("Recipient not online, message will be delivered later");
                 }
-                // Emit notification event
                 eventEmitter.emit("sendNotification", {
                     type: "NEW_MESSAGE",
                     recipient: data.recipientId,
@@ -88,135 +86,6 @@ function setupUserSocketServer(server, container) {
                 io.emit("userOnlineStatus", { userId: socket.userId, online: false });
             }
         });
-        socket.on("userCallOffer", (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(`[VIDEO CALL] User ${socket.userId} is initiating a call to ${data.recipientId}`);
-                if (!socket.userId) {
-                    throw new Error("User not authenticated");
-                }
-                const call = yield userVideoCallUseCase.initiateCall(socket.userId, data.recipientId);
-                const recipientSocket = userManager.getUserSocketId(data.recipientId);
-                if (recipientSocket) {
-                    console.log(`[VIDEO CALL] Sending incoming call to ${data.recipientId}`);
-                    io.to(recipientSocket).emit("incomingCall", {
-                        callId: call.id,
-                        callerId: socket.userId,
-                        offer: data.offer,
-                    });
-                    socket.emit("callRinging", {
-                        callId: call.id,
-                        recipientId: data.recipientId,
-                    });
-                }
-                else {
-                    socket.emit("callError", {
-                        message: "Recipient is not online",
-                        callId: call.id,
-                    });
-                    yield userVideoCallUseCase.endCall(call.id);
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error initiating call:", error);
-                socket.emit("callError", { message: "Failed to initiate call" });
-            }
-        }));
-        socket.on("callAccepted", (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(`[VIDEO CALL] Call accepted by ${socket.userId} for caller ${data.callerId}`);
-                const call = yield userVideoCallUseCase.getActiveCall(socket.userId);
-                if (call) {
-                    yield userVideoCallUseCase.respondToCall(call.id, "accepted");
-                    const callerSocket = userManager.getUserSocketId(data.callerId);
-                    if (callerSocket) {
-                        io.to(callerSocket).emit("callAccepted", {
-                            callId: call.id,
-                            recipientId: socket.userId,
-                        });
-                    }
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error accepting call:", error);
-            }
-        }));
-        socket.on("callAnswer", (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(`[VIDEO CALL] Received call answer from ${socket.userId}`);
-                const call = yield userVideoCallUseCase.getActiveCall(socket.userId);
-                if (call) {
-                    const callerSocket = userManager.getUserSocketId(data.callerId);
-                    if (callerSocket) {
-                        io.to(callerSocket).emit("userCallAnswer", {
-                            answerBase64: data.answer,
-                            callId: call.id,
-                        });
-                    }
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error handling call answer:", error);
-                socket.emit("callError", {
-                    message: "Failed to process call answer",
-                });
-            }
-        }));
-        socket.on("iceCandidate", (data) => {
-            try {
-                if (!data.candidate)
-                    return;
-                const recipientSocket = userManager.getUserSocketId(data.recipientId);
-                if (recipientSocket) {
-                    io.to(recipientSocket).emit("iceCandidate", {
-                        candidate: {
-                            candidate: data.candidate.candidate,
-                            sdpMid: data.candidate.sdpMid,
-                            sdpMLineIndex: data.candidate.sdpMLineIndex,
-                            usernameFragment: data.candidate.usernameFragment,
-                        },
-                        callerId: socket.userId,
-                    });
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error handling ICE candidate:", error);
-            }
-        });
-        socket.on("rejectCall", (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(`[VIDEO CALL] User ${socket.userId} is rejecting call from ${data.callerId}`);
-                const call = yield userVideoCallUseCase.getActiveCall(socket.userId);
-                if (call) {
-                    yield userVideoCallUseCase.respondToCall(call.id, "rejected");
-                    const callerSocket = userManager.getUserSocketId(data.callerId);
-                    if (callerSocket) {
-                        io.to(callerSocket).emit("callRejected", { callId: call.id });
-                    }
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error rejecting call:", error);
-            }
-        }));
-        socket.on("userEndCall", (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(`[VIDEO CALL] User ${socket.userId} is ending call with ${data.recipientId}`);
-                const call = yield userVideoCallUseCase.getActiveCall(socket.userId);
-                if (call) {
-                    yield userVideoCallUseCase.endCall(call.id);
-                    const recipientSocket = userManager.getUserSocketId(data.recipientId);
-                    if (recipientSocket) {
-                        io.to(recipientSocket).emit("userCallEnded", {
-                            callId: call.id,
-                            callerId: socket.userId,
-                        });
-                    }
-                }
-            }
-            catch (error) {
-                console.error("[VIDEO CALL] Error ending call:", error);
-            }
-        }));
     });
     return { io, userManager, eventEmitter };
 }

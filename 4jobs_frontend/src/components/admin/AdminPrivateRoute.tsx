@@ -23,7 +23,7 @@ const AdminPrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
           await dispatch(refreshAdminToken()).unwrap();
         } catch (error) {
           dispatch(logoutAdmin());
-          navigate('/admin/login');
+          navigate("/admin/login");
         }
       }
     };

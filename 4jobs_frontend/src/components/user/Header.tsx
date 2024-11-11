@@ -209,10 +209,8 @@ const UserHeader: React.FC = () => {
     },
   ];
 
-  
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
- 
   const toggleMobileMenu = useCallback(() => {
     setShowMobileMenu((prev) => !prev);
     setShowSearch(false);
@@ -233,7 +231,6 @@ const UserHeader: React.FC = () => {
     <header className="bg-white shadow-md p-2 sm:p-3 md:p-4">
       <div className="container mx-auto">
         <div className="flex flex-wrap justify-between items-center">
-          {/* Logo Section */}
           <div className="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
             <button
               onClick={() => navigateTo("/dashboard")}
@@ -271,7 +268,6 @@ const UserHeader: React.FC = () => {
             </div>
           </div>
 
-          {/* Search Bar Section */}
           <div
             className={`w-full md:w-auto md:flex-grow mx-0 sm:mx-2 md:mx-4 mb-2 md:mb-0 order-3 md:order-2 ${
               showSearch || !showMobileMenu ? "block" : "hidden"
@@ -309,7 +305,6 @@ const UserHeader: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Items */}
           <nav
             className={`${
               showMobileMenu ? "block" : "hidden"
@@ -328,7 +323,6 @@ const UserHeader: React.FC = () => {
           </nav>
         </div>
 
-        {/* Notifications Dropdown */}
         {showNotifications && (
           <div className="fixed inset-0 z-50 md:absolute md:inset-auto md:right-4 md:top-16 mt-2 w-full md:w-80 bg-white border border-gray-200 rounded-md shadow-lg">
             <div className="flex justify-between items-center p-2 sm:p-4 border-b border-gray-200">
@@ -380,7 +374,6 @@ const UserHeader: React.FC = () => {
           </div>
         )}
 
-        {/* Logout Confirmation Modal */}
         {showLogoutModal && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
             <div className="bg-purple-500 rounded-lg shadow-lg p-6">

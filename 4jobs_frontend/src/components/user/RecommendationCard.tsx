@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { sendConnectionRequest } from "../../redux/slices/connectionSlice";
 import { RecommendationUser } from "../../types/auth";
-import { UserCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { UserCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface RecommendationCardProps {
   user: RecommendationUser;
@@ -17,13 +17,18 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user }) => {
 
   const handleSendRequest = () => {
     if (currentUser) {
-      dispatch(sendConnectionRequest({ senderId: currentUser.id, recipientId: user.id }));
+      dispatch(
+        sendConnectionRequest({
+          senderId: currentUser.id,
+          recipientId: user.id,
+        })
+      );
     }
   };
 
   const getConnectionButton = () => {
     switch (user.connectionStatus) {
-      case 'pending':
+      case "pending":
         return (
           <button
             className="w-full text-sm bg-gray-400 text-white px-3 py-2 rounded cursor-not-allowed"
@@ -32,7 +37,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user }) => {
             Pending
           </button>
         );
-      case 'rejected':
+      case "rejected":
         return (
           <button
             onClick={handleSendRequest}
@@ -41,7 +46,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user }) => {
             Connect Again
           </button>
         );
-      case 'none':
+      case "none":
         return (
           <button
             onClick={handleSendRequest}
@@ -59,11 +64,17 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ user }) => {
     <div className="flex flex-col justify-between p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 ease-in-out h-full">
       <div className="flex flex-col items-center mb-3">
         {user?.profileImage ? (
-          <img src={`${user.profileImage}`} alt={user.name} className="rounded-full h-16 w-16 object-cover mb-2"/>
+          <img
+            src={`${user.profileImage}`}
+            alt={user.name}
+            className="rounded-full h-16 w-16 object-cover mb-2"
+          />
         ) : (
           <UserCircle className="w-20 h-20 text-gray-400" />
         )}
-        <h4 className="font-medium text-base text-gray-800 text-center">{user.name}</h4>
+        <h4 className="font-medium text-base text-gray-800 text-center">
+          {user.name}
+        </h4>
       </div>
       <div className="flex flex-col space-y-2 mt-auto">
         {getConnectionButton()}

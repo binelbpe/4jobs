@@ -1,23 +1,29 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { searchConnectionsMessage } from '../../redux/slices/connectionSlice';
-import { UserConnection } from '../../types/auth';
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../redux/store";
+import { searchConnectionsMessage } from "../../redux/slices/connectionSlice";
+import { UserConnection } from "../../types/auth";
 
 interface MessageConnectionSearchProps {
   onSelectUser: (userId: string) => void;
 }
 
-const MessageConnectionSearch: React.FC<MessageConnectionSearchProps> = ({ onSelectUser }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+const MessageConnectionSearch: React.FC<MessageConnectionSearchProps> = ({
+  onSelectUser,
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
-  const searchResults = useSelector((state: RootState) => state.connections.messageSearchResults);
+  const searchResults = useSelector(
+    (state: RootState) => state.connections.messageSearchResults
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (user && searchQuery.trim()) {
-      dispatch(searchConnectionsMessage({ userId: user.id, query: searchQuery.trim() }));
+      dispatch(
+        searchConnectionsMessage({ userId: user.id, query: searchQuery.trim() })
+      );
     }
   };
 
@@ -36,8 +42,19 @@ const MessageConnectionSearch: React.FC<MessageConnectionSearchProps> = ({ onSel
             type="submit"
             className="bg-purple-500 text-white p-2 rounded-r hover:bg-purple-600 transition duration-300"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </button>
         </div>
@@ -60,8 +77,12 @@ const MessageConnectionSearch: React.FC<MessageConnectionSearchProps> = ({ onSel
                 )}
               </div>
               <div>
-                <div className="font-semibold text-purple-800">{connection.name}</div>
-                <div className="text-sm text-purple-600">{connection.email}</div>
+                <div className="font-semibold text-purple-800">
+                  {connection.name}
+                </div>
+                <div className="text-sm text-purple-600">
+                  {connection.email}
+                </div>
               </div>
             </div>
           </div>

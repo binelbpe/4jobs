@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { AppDispatch, RootState } from '../../redux/store';
-import { sendForgotPasswordOtp, verifyForgotPasswordOtp, resetPassword } from '../../redux/slices/authSlice';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { AppDispatch, RootState } from "../../redux/store";
+import {
+  sendForgotPasswordOtp,
+  verifyForgotPasswordOtp,
+  resetPassword,
+} from "../../redux/slices/authSlice";
 
 const ForgotPassword: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState(1);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; newPassword?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{
+    email?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  }>({});
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -30,9 +38,8 @@ const ForgotPassword: React.FC = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-
   useEffect(() => {
-    dispatch({ type: 'auth/clearError' });
+    dispatch({ type: "auth/clearError" });
   }, [email, otp, newPassword, confirmPassword, dispatch]);
 
   const validateEmail = (email: string) => {
@@ -40,7 +47,9 @@ const ForgotPassword: React.FC = () => {
   };
 
   const validatePassword = (password: string) => {
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      password
+    );
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -48,7 +57,7 @@ const ForgotPassword: React.FC = () => {
     setErrors({});
 
     if (!validateEmail(email)) {
-      setErrors({ email: 'Please enter a valid email address.' });
+      setErrors({ email: "Please enter a valid email address." });
       return;
     }
 
@@ -73,18 +82,21 @@ const ForgotPassword: React.FC = () => {
     setErrors({});
 
     if (!validatePassword(newPassword)) {
-      setErrors({ newPassword: 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' });
+      setErrors({
+        newPassword:
+          "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setErrors({ confirmPassword: 'Passwords do not match.' });
+      setErrors({ confirmPassword: "Passwords do not match." });
       return;
     }
 
     const result = await dispatch(resetPassword({ email, newPassword, otp }));
     if (resetPassword.fulfilled.match(result)) {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
@@ -97,11 +109,16 @@ const ForgotPassword: React.FC = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h2 className="mb-6 text-2xl font-bold text-center text-purple-600">Forgot Password</h2>
+        <h2 className="mb-6 text-2xl font-bold text-center text-purple-600">
+          Forgot Password
+        </h2>
         {step === 1 && (
           <form onSubmit={handleSendOtp}>
             <div className="mb-4">
-              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
                 Email Address
               </label>
               <input
@@ -112,21 +129,26 @@ const ForgotPassword: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              {errors.email && <p className="mt-2 text-sm text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
             <button
               type="submit"
               className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               disabled={loading}
             >
-              {loading ? 'Sending...' : 'Send OTP'}
+              {loading ? "Sending..." : "Send OTP"}
             </button>
           </form>
         )}
         {step === 2 && (
           <form onSubmit={handleVerifyOtp}>
             <div className="mb-4">
-              <label htmlFor="otp" className="block mb-2 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="otp"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
                 Enter OTP
               </label>
               <input
@@ -143,7 +165,7 @@ const ForgotPassword: React.FC = () => {
               className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 mb-4"
               disabled={loading}
             >
-              {loading ? 'Verifying...' : 'Verify OTP'}
+              {loading ? "Verifying..." : "Verify OTP"}
             </button>
             {timer > 0 && (
               <p className="text-center text-sm text-gray-600">
@@ -164,7 +186,10 @@ const ForgotPassword: React.FC = () => {
         {step === 3 && (
           <form onSubmit={handleResetPassword}>
             <div className="mb-4">
-              <label htmlFor="newPassword" className="block mb-2 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="newPassword"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
                 New Password
               </label>
               <input
@@ -175,10 +200,17 @@ const ForgotPassword: React.FC = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
-              {errors.newPassword && <p className="mt-2 text-sm text-red-500">{errors.newPassword}</p>}
+              {errors.newPassword && (
+                <p className="mt-2 text-sm text-red-500">
+                  {errors.newPassword}
+                </p>
+              )}
             </div>
             <div className="mb-4">
-              <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="confirmPassword"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
                 Confirm New Password
               </label>
               <input
@@ -189,18 +221,24 @@ const ForgotPassword: React.FC = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
-              {errors.confirmPassword && <p className="mt-2 text-sm text-red-500">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && (
+                <p className="mt-2 text-sm text-red-500">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
             <button
               type="submit"
               className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               disabled={loading}
             >
-              {loading ? 'Resetting...' : 'Reset Password'}
+              {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
         )}
-        {error && <p className="mt-4 text-center text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="mt-4 text-center text-sm text-red-600">{error}</p>
+        )}
       </div>
     </div>
   );

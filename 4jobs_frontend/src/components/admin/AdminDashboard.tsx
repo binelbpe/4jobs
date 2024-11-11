@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import { fetchDashboardData } from "../../redux/slices/adminSlice";
 import Sidebar from "./AdminSidebar";
 import Header from "./AdminHeader";
-import { Line } from 'react-chartjs-2';
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +15,7 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
+} from "chart.js";
 
 ChartJS.register(
   CategoryScale,
@@ -55,24 +55,24 @@ const AdminDashboard: React.FC = () => {
       </div>
     );
 
-  const { 
-    userCount = 0, 
-    recruiterCount = 0, 
-    companyCount = 0, 
-    totalRevenue = 0, 
-    jobPostCount = 0, 
-    userPostCount = 0, 
-    revenueData = [] 
+  const {
+    userCount = 0,
+    recruiterCount = 0,
+    companyCount = 0,
+    totalRevenue = 0,
+    jobPostCount = 0,
+    userPostCount = 0,
+    revenueData = [],
   } = dashboardData || {};
 
   const chartData = {
     labels: revenueData.map((data: any) => data.month),
     datasets: [
       {
-        label: 'Revenue',
+        label: "Revenue",
         data: revenueData.map((data: any) => data.amount),
-        borderColor: 'rgb(147, 51, 234)',
-        backgroundColor: 'rgba(147, 51, 234, 0.5)',
+        borderColor: "rgb(147, 51, 234)",
+        backgroundColor: "rgba(147, 51, 234, 0.5)",
       },
     ],
   };
@@ -81,11 +81,11 @@ const AdminDashboard: React.FC = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: "top" as const,
       },
       title: {
         display: true,
-        text: 'Monthly Revenue',
+        text: "Monthly Revenue",
       },
     },
   };
@@ -96,12 +96,17 @@ const AdminDashboard: React.FC = () => {
       <div className="flex-1 flex flex-col bg-gray-100 md:ml-0">
         <Header />
         <div className="p-6 bg-white rounded-lg shadow-md m-4">
-          <h2 className="text-2xl font-bold text-purple-700 mb-6">Dashboard Overview</h2>
+          <h2 className="text-2xl font-bold text-purple-700 mb-6">
+            Dashboard Overview
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
             <DashboardCard title="Total Users" value={userCount} />
             <DashboardCard title="Total Recruiters" value={recruiterCount} />
             <DashboardCard title="Total Companies" value={companyCount} />
-            <DashboardCard title="Total Revenue" value={`₹${totalRevenue.toFixed(2)}`} />
+            <DashboardCard
+              title="Total Revenue"
+              value={`₹${totalRevenue.toFixed(2)}`}
+            />
             <DashboardCard title="Total Job Posts" value={jobPostCount} />
             <DashboardCard title="Total User Posts" value={userPostCount} />
           </div>
@@ -114,7 +119,10 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-const DashboardCard: React.FC<{ title: string; value: string | number }> = ({ title, value }) => (
+const DashboardCard: React.FC<{ title: string; value: string | number }> = ({
+  title,
+  value,
+}) => (
   <div className="bg-purple-100 p-4 rounded-lg">
     <h3 className="text-lg font-semibold text-purple-800">{title}</h3>
     <p className="text-3xl font-bold text-purple-600">{value}</p>

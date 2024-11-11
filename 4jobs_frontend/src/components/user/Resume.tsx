@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserResume } from '../../redux/slices/authSlice';
-import { RootState, AppDispatch } from '../../redux/store';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Upload } from 'lucide-react';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserResume } from "../../redux/slices/authSlice";
+import { RootState, AppDispatch } from "../../redux/store";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Upload } from "lucide-react";
 
 const Resume: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,12 +15,12 @@ const Resume: React.FC = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const selectedFile = files[0];
-      const allowedTypes = ['application/pdf'];
+      const allowedTypes = ["application/pdf"];
       if (!allowedTypes.includes(selectedFile.type)) {
         toast.error("Only PDF files are allowed.");
         return;
       }
-      if (selectedFile.size > 5 * 1024 * 1024) { // 5 MB
+      if (selectedFile.size > 5 * 1024 * 1024) {
         toast.error("File size must be less than 5 MB.");
         return;
       }
@@ -33,12 +33,12 @@ const Resume: React.FC = () => {
     if (user && resume) {
       try {
         await dispatch(updateUserResume({ userId: user.id, resume }));
-        toast.success('Resume updated successfully!');
+        toast.success("Resume updated successfully!");
       } catch (error) {
-        toast.error('Failed to update resume. Please try again later.');
+        toast.error("Failed to update resume. Please try again later.");
       }
     } else {
-      toast.error('Please select a resume file to upload.');
+      toast.error("Please select a resume file to upload.");
     }
   };
 
@@ -61,7 +61,9 @@ const Resume: React.FC = () => {
           Select File
         </label>
         {resume && (
-          <p className="mt-2 text-sm text-gray-600">Selected file: {resume.name}</p>
+          <p className="mt-2 text-sm text-gray-600">
+            Selected file: {resume.name}
+          </p>
         )}
       </div>
       <div className="flex justify-end">
