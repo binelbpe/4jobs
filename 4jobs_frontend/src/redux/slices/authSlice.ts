@@ -64,7 +64,6 @@ export const fetchUserProfile = createAsyncThunk(
 export const login = createAsyncThunk('auth/login', async (credentials: LoginCredentials, thunkAPI) => {
   try {
     const userData = await loginUserApi(credentials);
-    console.log("userdarta",userData)
     return userData;
   } catch (error) {
     return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -130,7 +129,7 @@ export const updateUserCertificates = createAsyncThunk(
   }, thunkAPI) => {
     try {
       const updatedCertificatesData = await updateUserCertificatesApi(userId, certificates);
-      console.log("updatedCertificatesData",updatedCertificatesData)
+
       return updatedCertificatesData;
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -143,7 +142,6 @@ export const updateUserExperiences = createAsyncThunk(
   async ({ userId, experiences }: { userId: string; experiences: any[] }, thunkAPI) => {
     try {
       const updatedExperiences = await updateUserExperiencesApi(userId, experiences);
-      console.log("exp",updatedExperiences)
       return updatedExperiences;
     } catch (error) {
       return thunkAPI.rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -167,9 +165,7 @@ export const fetchJobPostsAsync = createAsyncThunk(
   'auth/fetchJobPosts',
   async (params: FetchJobPostsParams = {}, { rejectWithValue }) => {
     try {
-      console.log("params",params)
       const response = await fetchJobPostsuser(params);
-      console.log("apply",response)
       return response;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job posts');
@@ -182,14 +178,12 @@ export const applyForJobAsync = createAsyncThunk(
   async ({ userId, jobId }: { userId: string; jobId: string }, { dispatch, rejectWithValue }) => {
     try {
      await applyForJob(userId, jobId);
-      
-      // Fetch updated job posts after applying
+
       await dispatch(fetchJobPostsAsync({}));
       
       return jobId;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
-        // Return the error message from the backend
         return rejectWithValue(error.response.data.error || 'Failed to apply for job');
       }
       return rejectWithValue('Failed to apply for job');
@@ -202,7 +196,6 @@ export const fetchJobPost = createAsyncThunk(
   async (jobId: string, { rejectWithValue }) => {
     try {
       const response = await fetchJobPostApi(jobId);
-      console.log(response)
       return response;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch job post');
@@ -317,7 +310,6 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        console.log(action.payload)
         state.error = action.payload as string;
       })
       .addCase(googleLogin.pending, (state) => {

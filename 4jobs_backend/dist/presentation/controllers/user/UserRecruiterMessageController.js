@@ -51,7 +51,6 @@ let UserRecruiterMessageController = class UserRecruiterMessageController {
                         lastMessageTimestamp: conv.lastMessageTimestamp.toISOString(),
                     };
                 })));
-                console.log("formattedConversations getUserConversations", formattedConversations);
                 res.status(200).json(formattedConversations);
             }
             catch (error) {
@@ -82,7 +81,6 @@ let UserRecruiterMessageController = class UserRecruiterMessageController {
                         isRead: msg.isRead,
                     };
                 })));
-                // Update the messages in the database
                 yield Promise.all(messages.map(msg => this.userRecruiterMessageUseCase.updateMessage(msg)));
                 res.status(200).json(formattedMessages);
             }

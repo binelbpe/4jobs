@@ -118,7 +118,6 @@ export class AuthController {
       }
 
       const result = await this.loginUseCase.execute(email, password);
-      console.log("result", result);
       res.status(200).json(result);
     } catch (error) {
       console.error("Error during login:", error);
@@ -149,7 +148,6 @@ export class AuthController {
       if (user) {
         const result = await this.loginUseCase.execute(email, "", true);
         const token = this.jwtAuthService.generateToken(user);
-        console.log("result", result);
         return res.status(200).json(result);
       } else {
         user = await this.userRepository.create({
@@ -166,7 +164,6 @@ export class AuthController {
         });
 
         const token = this.jwtAuthService.generateToken(user);
-        console.log("g user", user);
         return res.status(201).json({ user, token });
       }
     } catch (error) {
@@ -182,7 +179,6 @@ export class AuthController {
       const { query } = req.query;
       const { userId } = req.query;
 
-      console.log("query and userId", userId, query);
 
       if (typeof query !== "string" || query.length < 3 || !userId) {
         return res

@@ -7,7 +7,7 @@ export class UserRecruiterMessage {
     public senderType: 'user' | 'recruiter',
     public content: string,
     public timestamp: Date,
-    public isRead: boolean = false // Add this field
+    public isRead: boolean = false
   ) {}
 }
 

@@ -1,87 +1,95 @@
 // src/interface/middlewares/authMiddleware.ts
+import { inject, injectable } from 'inversify';
 import { Request, Response, NextFunction } from 'express';
-import { JwtAuthService } from '../../infrastructure/services/JwtAuthService';
-import {UserModel} from '../../infrastructure/database/mongoose/models/UserModel'; // Adjust the path to your user model
-import { User } from "../../domain/entities/User";
+import { IAuthMiddlewareService } from '../../domain/interfaces/services/IAuthMiddlewareService';
+import TYPES from '../../types';
+import { Container } from 'inversify';
 
-const authService = new JwtAuthService(process.env.JWT_SECRET !);
+@injectable()
+export class AuthMiddleware {
+  constructor(
+    @inject(TYPES.AuthMiddlewareService) 
+    private authService: IAuthMiddlewareService
+  ) {}
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  public authenticate = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
 
-  try {
-    const decoded = authService.verifyToken(token);
-    const user = await UserModel.findById(decoded.id).lean();
+    try {
+      const decoded = this.authService.verifyToken(token);
+      const user = await this.authService.findUserById(decoded.id);
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    } else if (user.isBlocked) {
-      throw new Error('User is blocked');
-    } else {
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      } else if (user.isBlocked) {
+        throw new Error('User is blocked');
+      }
+
       (req as any).user = user;
       next();
+    } catch (error) {
+      console.error('Error authenticating user:', error);
+      res.status(401).json({ error: 'Invalid token' });
     }
-  } catch (error) {
-    console.error('Error authenticating user:', error);
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
+  };
 
-// Add a new middleware for token refresh
-export const refreshTokenMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const refreshToken = req.body.refreshToken;
+  public authenticateadmin = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
-  if (!refreshToken) {
-    return res.status(400).json({ error: 'Refresh token is required' });
-  }
-
-  try {
-    const decoded = authService.verifyToken(refreshToken);
-    const user = await UserModel.findById(decoded.id).lean();
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const newToken = authService.generateToken({
-      id: user._id.toString(),
-      email: user.email,
-      password: user.password,
-      name: user.name,
-      role: user.role,
-    } as User);
-    res.json({ token: newToken, user });
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    res.status(401).json({ error: 'Invalid refresh token' });
-  }
-};
-
-
-export const authenticateadmin = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  try {
-    const decoded = authService.verifyToken(token);
-    const user = await UserModel.findById(decoded.id).lean();
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    } else if (!user.isAdmin || user.role !== "admin") {
-      return res.status(403).json({ error: 'User is not an admin' });
-    } else {
+    try {
+      const decoded = this.authService.verifyToken(token);
+      const user = await this.authService.findUserById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      } else if (!user.isAdmin || user.role !== "admin") {
+        return res.status(403).json({ error: 'User is not an admin' });
+      }
       (req as any).user = user;
       next();
+    } catch (error) {
+      res.status(401).json({ error: 'Invalid token' });
     }
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
+  };
+
+  public refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+    const refreshToken = req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    try {
+      const decoded = this.authService.verifyToken(refreshToken);
+      const user = await this.authService.findUserById(decoded.id);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const newToken = this.authService.generateToken(user);
+      res.json({ token: newToken, user });
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      res.status(401).json({ error: 'Invalid refresh token' });
+    }
+  };
+}
+
+// Create factory functions for middleware
+export const createAuthMiddleware = (container: Container) => {
+  const authMiddleware = container.get<AuthMiddleware>(AuthMiddleware);
+  return {
+    authenticate: authMiddleware.authenticate,
+    authenticateadmin: authMiddleware.authenticateadmin,
+    refreshTokenMiddleware: authMiddleware.refreshToken
+  };
 };
 

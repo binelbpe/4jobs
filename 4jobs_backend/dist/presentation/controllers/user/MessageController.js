@@ -42,7 +42,6 @@ let MessageController = class MessageController {
     sendMessage(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log("ivide vrunnund send message");
                 const { senderId, recipientId, content } = req.body;
                 if (!this.isValidObjectId(senderId) || !this.isValidObjectId(recipientId)) {
                     res.status(400).json({ error: "Invalid sender or recipient ID" });
@@ -51,7 +50,6 @@ let MessageController = class MessageController {
                 const message = yield this.messageUseCase.sendMessage(senderId, recipientId, content);
                 const senderNotified = this.emitSocketEvent(senderId, 'messageSent', message);
                 const recipientNotified = this.emitSocketEvent(recipientId, 'newMessage', message);
-                console.log(`Message sent. Sender notified: ${senderNotified}, Recipient notified: ${recipientNotified}`);
                 if (!senderNotified || !recipientNotified) {
                     console.warn(`Failed to notify ${!senderNotified ? 'sender' : 'recipient'} via socket for message ${message.id}`);
                 }
@@ -72,7 +70,6 @@ let MessageController = class MessageController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { userId1, userId2 } = req.params;
-                console.log(`Fetching conversation for users: ${userId1}, ${userId2}`);
                 if (userId1 === 'unread') {
                     const unreadCount = yield this.messageUseCase.getUnreadMessageCount(userId2);
                     res.status(200).json({ unreadCount });
@@ -83,7 +80,6 @@ let MessageController = class MessageController {
                     return;
                 }
                 const messages = yield this.messageUseCase.getConversation(userId1, userId2);
-                console.log("messages between two userssssssssss", messages);
                 res.status(200).json(messages);
             }
             catch (error) {
@@ -157,7 +153,6 @@ let MessageController = class MessageController {
                     res.status(400).json({ error: "Invalid user ID" });
                     return;
                 }
-                console.log("ivideeee kerunnnundddddddddddddddddddddddddddddddddddddd");
                 const connections = yield this.messageUseCase.getMessageConnections(userId);
                 res.status(200).json(connections);
             }
@@ -174,7 +169,6 @@ let MessageController = class MessageController {
         if (socketId) {
             try {
                 this.io.to(socketId).emit(event, data);
-                console.log(`${event} emitted to user ${userId}`);
                 return true;
             }
             catch (error) {
@@ -183,7 +177,7 @@ let MessageController = class MessageController {
             }
         }
         else {
-            console.log(`User ${userId} is not connected. Event ${event} not emitted.`);
+            console.error(`User ${userId} is not connected. Event ${event} not emitted.`);
             return false;
         }
     }

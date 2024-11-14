@@ -8,6 +8,7 @@ import { FetchUsersResponse, FetchUserDetailsResponse } from "../types/auth";
 import { Conversation, Message } from "../types/recruiterMessageType";
 import store from "../redux/store";
 import { logout } from "../redux/slices/recruiterSlice";
+import { getCsrfToken, setCsrfToken } from "../utils/csrf";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL_RECRUITER;
 
@@ -17,10 +18,18 @@ const apiRequest = async (
   data: any = {}
 ) => {
   const token = localStorage.getItem("token");
-  const headers: Record<string, string> = {};
+  const csrfToken = getCsrfToken();
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (csrfToken) {
+    headers['x-csrf-token'] = csrfToken;
   }
 
   try {
@@ -29,7 +38,15 @@ const apiRequest = async (
       url: `${API_BASE_URL}${endpoint}`,
       data,
       headers,
+      withCredentials: true,
     });
+
+    
+    const newCsrfToken = response.headers['x-csrf-token'];
+    if (newCsrfToken) {
+      setCsrfToken(newCsrfToken);
+    }
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

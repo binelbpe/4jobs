@@ -35,7 +35,6 @@ let GenerateResumeUseCase = class GenerateResumeUseCase {
     }
     execute(resumeData) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("resumeData", resumeData);
             const userId = resumeData.userId;
             if (!userId) {
                 throw new Error("User ID is required");
@@ -45,10 +44,6 @@ let GenerateResumeUseCase = class GenerateResumeUseCase {
                 throw new Error(`User not found with ID: ${userId}`);
             }
             const pdfBuffer = yield (0, PDFGeneratorService_1.generatePDF)(resumeData);
-            // Optionally, you can save the resume URL to the user's profile
-            // const resumeUrl = await this.resumeRepository.create(userId, "temp_url");
-            // user.resumeUrl = resumeUrl;
-            // await this.userRepository.update(user);
             return pdfBuffer;
         });
     }

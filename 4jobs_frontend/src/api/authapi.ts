@@ -20,6 +20,7 @@ import { ResumeData } from "../types/resumeTypes";
 import store from "../redux/store";
 import { logout } from "../redux/slices/authSlice";
 import { JobSearchFilters } from "../types/jobSearchTypes";
+import { getCsrfToken, setCsrfToken } from "../utils/csrf";
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -38,12 +39,18 @@ const apiRequest = async (
   headers: Record<string, string> = {}
 ) => {
   const token = localStorage.getItem("token");
+  const csrfToken = getCsrfToken();
+  
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
   if (token) {
     defaultHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  if (csrfToken) {
+    defaultHeaders['x-csrf-token'] = csrfToken;
   }
 
   const mergedHeaders = { ...defaultHeaders, ...headers };
@@ -54,7 +61,14 @@ const apiRequest = async (
       url: `${API_BASE_URL}${endpoint}`,
       data,
       headers: mergedHeaders,
+      withCredentials: true,
     });
+  
+    const newCsrfToken = response.headers['x-csrf-token'];
+    if (newCsrfToken) {
+      setCsrfToken(newCsrfToken);
+    }
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

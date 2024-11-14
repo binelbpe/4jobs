@@ -24,7 +24,6 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
   io.use(socketAuthMiddleware(userManager));
 
   io.on('connection', (socket: Socket & { userId?: string, userType?: 'user' | 'recruiter' }) => {
-    console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}, user type: ${socket.userType}`);
 
     if (!socket.userId || !socket.userType) {
       console.error('User not authenticated, closing connection');
@@ -42,19 +41,15 @@ export function setupSocketServer(server: HTTPServer, container: Container) {
       senderId: string;
       senderType: 'user' | 'recruiter';
     }) => {
-      console.log("rec user messaging")
       try {
         const { conversationId, content, senderId, senderType } = message;
-        console.log("senderId",senderId)
         let savedMessage;
         if (senderType === 'user') {
           savedMessage = await userRecruiterMessageUseCase.sendMessage(conversationId, content, senderId);
         } else {
           savedMessage = await recruiterMessageUseCase.sendMessage(conversationId, content, senderId);
         }
-console.log("conversation id:",conversationId)
         let newUserRecruiterMessage =io.emit('newUserRecruiterMessage', savedMessage);
-        console.log("newUserRecruiterMessage",newUserRecruiterMessage)
         const updatedConversation = await userRecruiterMessageUseCase.updateConversationLastMessage(
           conversationId,
           content,
@@ -70,24 +65,18 @@ console.log("conversation id:",conversationId)
 
     socket.on('joinConversation', (conversationId: string) => {
       socket.join(conversationId);
-      console.log(`User ${socket.userId} joined conversation ${conversationId}`);
     });
 
     socket.on('leaveConversation', (conversationId: string) => {
       socket.leave(conversationId);
-      console.log(`User ${socket.userId} left conversation ${conversationId}`);
     });
 
     socket.on('userRecruiterTyping', ({ conversationId, recipientId }: { conversationId: string, recipientId: string }) => {
-      // Emit typing status only to the intended recipient
       io.to(recipientId).emit('userRecruiterTyping', { senderId: socket.userId, conversationId });
-      console.log(`User ${socket.userId} is typing in conversation ${conversationId} for recipient ${recipientId}`);
     });
 
     socket.on('userRecruiterStoppedTyping', ({ conversationId, recipientId }: { conversationId: string, recipientId: string }) => {
-      // Emit stopped typing status only to the intended recipient
       io.to(recipientId).emit('userRecruiterStoppedTyping', { senderId: socket.userId, conversationId });
-      console.log(`User ${socket.userId} stopped typing in conversation ${conversationId} for recipient ${recipientId}`);
     });
 
     socket.on('markMessageAsRead', async ({ messageId, conversationId }: { messageId: string, conversationId: string }) => {
@@ -103,11 +92,10 @@ console.log("conversation id:",conversationId)
 
     socket.on('disconnect', () => {
       if (socket.userId) {
-        console.log(`User disconnected: ${socket.userId}`);
         userManager.removeUser(socket.userId);
         io.emit('userOnlineStatus', { userId: socket.userId, online: false });
       } else {
-        console.log('User disconnected without userId');
+        console.error('User disconnected without userId');
       }
     });
   });

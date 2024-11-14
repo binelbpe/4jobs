@@ -20,7 +20,6 @@ export class MessageController {
 
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
-      console.log("ivide vrunnund send message")
       const { senderId, recipientId, content } = req.body;
       
       if (!this.isValidObjectId(senderId) || !this.isValidObjectId(recipientId)) {
@@ -32,8 +31,7 @@ export class MessageController {
       
       const senderNotified = this.emitSocketEvent(senderId, 'messageSent', message);
       const recipientNotified = this.emitSocketEvent(recipientId, 'newMessage', message);
-      
-      console.log(`Message sent. Sender notified: ${senderNotified}, Recipient notified: ${recipientNotified}`);
+    
 
       if (!senderNotified || !recipientNotified) {
         console.warn(`Failed to notify ${!senderNotified ? 'sender' : 'recipient'} via socket for message ${message.id}`);
@@ -56,9 +54,6 @@ export class MessageController {
     try {
       const { userId1, userId2 } = req.params;
 
-     
-      console.log(`Fetching conversation for users: ${userId1}, ${userId2}`)
-
       if (userId1 === 'unread') {
         const unreadCount = await this.messageUseCase.getUnreadMessageCount(userId2);
         res.status(200).json({ unreadCount });
@@ -71,7 +66,6 @@ export class MessageController {
       }
 
       const messages = await this.messageUseCase.getConversation(userId1, userId2);
-      console.log("messages between two userssssssssss",messages)
       res.status(200).json(messages);
     } catch (error) {
       this.handleError(res, error, "Error fetching conversation");
@@ -147,7 +141,6 @@ export class MessageController {
         res.status(400).json({ error: "Invalid user ID" });
         return;
       }
-console.log("ivideeee kerunnnundddddddddddddddddddddddddddddddddddddd")
       const connections = await this.messageUseCase.getMessageConnections(userId);
       res.status(200).json(connections);
     } catch (error) {
@@ -164,14 +157,13 @@ console.log("ivideeee kerunnnundddddddddddddddddddddddddddddddddddddd")
     if (socketId) {
       try {
         this.io.to(socketId).emit(event, data);
-        console.log(`${event} emitted to user ${userId}`);
         return true;
       } catch (error) {
         console.error(`Failed to emit ${event} to user ${userId}:`, error);
         return false;
       }
     } else {
-      console.log(`User ${userId} is not connected. Event ${event} not emitted.`);
+      console.error(`User ${userId} is not connected. Event ${event} not emitted.`);
       return false;
     }
   }

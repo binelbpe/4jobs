@@ -59,7 +59,6 @@ let UserRecruiterMessageUseCase = class UserRecruiterMessageUseCase {
             const message = new UserRecruitermessage_1.UserRecruiterMessage('', conversationId, userId, conversation.recruiterId, 'user', content, new Date(), false);
             const savedMessage = yield this.userRecruiterMessageRepository.saveMessage(message);
             yield this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
-            // Emit an event for real-time updates
             this.eventEmitter.emit('newUserRecruiterMessage', savedMessage);
             return savedMessage;
         });

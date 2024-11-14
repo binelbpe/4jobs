@@ -24,8 +24,7 @@ export class MongoConnectionRepository implements IConnectionRepository {
     ]);
   
     const uniqueConnectedUserIds = [...new Set(connectedUserIds)].filter(id => id !== userId);
-  
-    // Split the skills string into an array and create case-insensitive regex patterns
+ 
     const userSkills = user.skills && user.skills[0] ? user.skills[0].split(',').map((skill: string) => skill.trim()) : [];
     const skillPatterns = userSkills.map((skill: string) => new RegExp(skill, 'i'));
 
@@ -65,7 +64,6 @@ export class MongoConnectionRepository implements IConnectionRepository {
   private getMatchingCriteria(currentUser: IUserDocument, recommendedUser: IUserDocument): string[] {
     const matchingCriteria: string[] = [];
 
-    // Split the skills strings into arrays
     const currentUserSkills = currentUser.skills && currentUser.skills[0] ? currentUser.skills[0].split(',').map((s: string) => s.trim().toLowerCase()) : [];
     const recommendedUserSkills = recommendedUser.skills && recommendedUser.skills[0] ? recommendedUser.skills[0].split(',').map((s: string) => s.trim().toLowerCase()) : [];
 
@@ -75,7 +73,6 @@ export class MongoConnectionRepository implements IConnectionRepository {
       matchingCriteria.push(`Matching skills: ${matchingSkills.join(', ')}`);
     }
 
-    // Check for matching experience titles or companies (case-insensitive)
     currentUser.experiences?.forEach((exp: { title: string; company: string }) => {
       const matchingExperience = recommendedUser.experiences?.find((recExp: { title: string; company: string }) =>
         recExp.title.toLowerCase().includes(exp.title.toLowerCase()) ||
@@ -144,7 +141,6 @@ export class MongoConnectionRepository implements IConnectionRepository {
 
 
 
-    console.log("updatedConnection",updatedConnection)
 
     return this.mapConnectionToEntity(updatedConnection);
   }

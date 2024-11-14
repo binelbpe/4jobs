@@ -47,7 +47,6 @@ export class JobPostController {
   async updateJobPost(req: Request, res: Response): Promise<void> {
     try {
       const updatedJobPost = await this.jobPostUseCase.updateJobPost(req.params.id, req.body);
-      console.log(req.body)
       if (updatedJobPost) {
         res.json(updatedJobPost);
       } else {
@@ -76,7 +75,6 @@ async getApplicantsByJobId(req: Request, res: Response): Promise<void> {
       const { jobId } = req.params;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-console.log("jobuid page limit",jobId,page,limit)
       const result = await this.jobPostUseCase.getApplicantsByJobId(jobId, page, limit);
       res.json(result);
     } catch (error) {
@@ -123,12 +121,9 @@ console.log("jobuid page limit",jobId,page,limit)
   }
 
   async getFilteredApplicants(req: Request, res: Response): Promise<void> {
-    console.log('getFilteredApplicants controller method called');
     try {
       const { jobId } = req.params;
-      console.log(`Fetching filtered applicants for jobId: ${jobId}`);
       const filteredApplicants = await this.jobPostUseCase.getFilteredApplicants(jobId);
-      console.log(`Filtered applicants returned: ${filteredApplicants.length}`);
       res.json(filteredApplicants);
     } catch (error) {
       console.error('Error in getFilteredApplicants:', error);

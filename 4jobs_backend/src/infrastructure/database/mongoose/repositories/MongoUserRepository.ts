@@ -83,7 +83,6 @@ export class MongoUserRepository implements IUserRepository {
     };
   }
 
-  // Add this new method to the MongoUserRepository class
 
   async updatePassword(id: string, newPassword: string): Promise<void> {
     await UserModel.findByIdAndUpdate(id, { password: newPassword });

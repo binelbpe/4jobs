@@ -7,12 +7,13 @@ import { ProfileController } from "../controllers/user/ProfileController";
 import { JobPostControllerUser } from "../controllers/user/JobPostControllerUser";
 import { PostController } from "../controllers/user/PostController";
 import { ConnectionController } from "../controllers/user/ConnectionController";
-import { authenticate } from "../middlewares/authMiddleware";
+import { createAuthMiddleware } from '../middlewares/authMiddleware';
 import { S3Service } from "../../infrastructure/services/S3Service";
 import { MessageController } from "../controllers/user/MessageController";
 import { UserRecruiterMessageController } from "../controllers/user/UserRecruiterMessageController";
 import { ResumeController } from "../controllers/user/ResumeController";
-import { refreshTokenMiddleware } from "../middlewares/authMiddleware";
+
+const { authenticate, refreshTokenMiddleware } = createAuthMiddleware(container);
 
 const profileController = container.get<ProfileController>(
   TYPES.ProfileController
@@ -42,7 +43,6 @@ const upload = multer({ storage });
 
 export const authRouter = Router();
 
-// Auth routes
 authRouter.post("/login", authController.login.bind(authController));
 authRouter.post("/signup", authController.signupUser.bind(authController));
 authRouter.post("/send-otp", authController.sendOtp.bind(authController));
@@ -52,14 +52,12 @@ authRouter.post(
   authController.googleAuth.bind(authController)
 );
 
-// Profile routes
 authRouter.get(
   "/profile/:userId",
   authenticate,
   profileController.getUserProfile.bind(profileController)
 );
 
-// Update profile route
 authRouter.put(
   "/edit-profile/:userId",
   authenticate,
@@ -88,18 +86,16 @@ authRouter.put(
   profileController.updateUserProfile.bind(profileController)
 );
 
-// Update projects route
 authRouter.put(
   "/edit-projects/:userId",
   authenticate,
   profileController.updateUserProjects.bind(profileController)
 );
 
-// Update certificates route
 authRouter.put(
   "/edit-certificates/:userId",
   authenticate,
-  upload.array("certificateImage"), // Allow multiple files
+  upload.array("certificateImage"),
   async (req, res, next) => {
     if (req.files && Array.isArray(req.files)) {
       const certificateImages = await Promise.all(
@@ -108,12 +104,10 @@ authRouter.put(
       req.body.certificateImages = certificateImages;
     }
 
-    // Parse the certificateDetails JSON string if it's a string
     if (typeof req.body.certificateDetails === "string") {
       req.body.certificateDetails = JSON.parse(req.body.certificateDetails);
     }
-
-    // Update imageUrl with S3 URL for new uploads
+   
     if (req.body.certificateDetails && req.body.certificateImages) {
       let s3UrlIndex = 0;
       req.body.certificateDetails = req.body.certificateDetails.map(
@@ -128,14 +122,13 @@ authRouter.put(
         }
       );
     }
-
-    console.log("req.body", req.body);
+ 
     next();
   },
   profileController.updateUserCertificates.bind(profileController)
 );
 
-// Update resume route
+
 authRouter.put(
   "/edit-resume/:userId",
   authenticate,
@@ -150,7 +143,6 @@ authRouter.put(
   profileController.updateUserResume.bind(profileController)
 );
 
-// Job routes
 authRouter.get(
   "/jobs",
   authenticate,
@@ -170,7 +162,6 @@ authRouter.post("/jobs/:jobId/report", authenticate, (req, res) =>
   jobPostControllerUser.reportJob(req, res)
 );
 
-// Post routes
 authRouter.post(
   "/posts/:userId",
   authenticate,
@@ -233,8 +224,6 @@ authRouter.put(
         req.body.videoUrl = videoUrl;
       }
     }
-    console.log("req,body", req.body);
-    console.log("idsss", req.params.userId);
     next();
   },
   postController.editPost.bind(postController)
@@ -293,7 +282,6 @@ authRouter.get(
   messageController.getConversation.bind(messageController)
 );
 
-// Connection routes for messaging
 authRouter.get(
   "/connections/message/:userId",
   authenticate,
@@ -305,7 +293,6 @@ authRouter.get(
   connectionController.searchMessageConnections.bind(connectionController)
 );
 
-// Message routes
 authRouter.post(
   "/messages",
   authenticate,
@@ -332,7 +319,6 @@ authRouter.get(
   messageController.searchMessages.bind(messageController)
 );
 
-// User-Recruiter Messaging routes
 authRouter.get(
   "/user-conversations/:userId",
   authenticate,
@@ -362,49 +348,44 @@ authRouter.post(
   )
 );
 
-// Update the resume generation route
 authRouter.post("/generate-resume", authenticate, (req, res) =>
   resumeController.generateResume(req, res)
 );
 
-// Add these new routes:
 
-// Search route (add this back)
+
 authRouter.get(
   "/search",
   authenticate,
   authController.searchUsersAndJobs.bind(authController)
 );
 
-// Like post route
 authRouter.post(
   "/posts/:postId/like",
   authenticate,
   postController.likePost.bind(postController)
 );
 
-// Dislike post route
+
 authRouter.post(
   "/posts/:postId/dislike",
   authenticate,
   postController.dislikePost.bind(postController)
 );
 
-// Comment on post route
+
 authRouter.post(
   "/posts/:postId/comment",
   authenticate,
   postController.commentOnPost.bind(postController)
 );
 
-// Delete comment route
 authRouter.delete(
   "/posts/:postId/comments/:commentId",
   authenticate,
   postController.deleteComment.bind(postController)
 );
 
-// Add these new routes
 
 authRouter.post(
   "/forgot-password",
@@ -416,24 +397,22 @@ authRouter.post(
   authController.verifyForgotPasswordOtp.bind(authController)
 );
 
-// Add this new route
+
 
 authRouter.post(
   "/reset-password",
   authController.resetPassword.bind(authController)
 );
 
-// Add a new route for token refresh
+
 authRouter.post("/refresh-token", refreshTokenMiddleware);
 
-// Update the delete connection route to use userId and connectionId
 authRouter.delete(
   "/connections/:userId/remove/:connectionId",
   authenticate,
   connectionController.deleteConnection.bind(connectionController)
 );
 
-// Add new advanced search route
 authRouter.post(
   "/jobs/advanced-search",
   authenticate,

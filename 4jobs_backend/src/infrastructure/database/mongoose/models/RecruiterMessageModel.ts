@@ -7,7 +7,7 @@ export interface IRecruiterMessageDocument extends Document {
   senderType: 'recruiter' | 'user';
   content: string;
   timestamp: Date;
-  isRead: boolean; // Add this field
+  isRead: boolean; 
 }
 
 const RecruiterMessageSchema: Schema = new Schema({
@@ -17,7 +17,7 @@ const RecruiterMessageSchema: Schema = new Schema({
   senderType: { type: String, enum: ['recruiter', 'user'], required: true },
   content: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
-  isRead: { type: Boolean, default: false }, // Add this field
+  isRead: { type: Boolean, default: false }, 
 });
 
 export const RecruiterMessageModel = mongoose.model<IRecruiterMessageDocument>('RecruiterMessage', RecruiterMessageSchema);

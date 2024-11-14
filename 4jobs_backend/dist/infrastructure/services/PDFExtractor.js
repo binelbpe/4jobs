@@ -32,8 +32,6 @@ let PDFExtractor = class PDFExtractor {
                 console.log("Starting PDF extraction");
                 const data = yield (0, pdf_parse_1.default)(buffer);
                 const text = data.text;
-                console.log(`PDF extraction completed. Text length: ${text.length}`);
-                console.log("First 200 characters of extracted text:", text.substring(0, 200));
                 return text;
             }
             catch (error) {

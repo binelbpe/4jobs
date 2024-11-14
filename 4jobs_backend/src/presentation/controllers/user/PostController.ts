@@ -32,9 +32,6 @@ export class PostController {
   ) {}
 
   async createPost(req: Request, res: Response): Promise<void> {
-    console.log("Request body:", req.body);
-    console.log("Request files:", req.files);
-    console.log("Request params:", req.params);
 
     try {
       const { userId } = req.params;
@@ -42,7 +39,6 @@ export class PostController {
       const image = req.files?.["image"]?.[0];
       const video = req.files?.["video"]?.[0];
 
-      console.log("Extracted data:", { userId, content, image, video });
 
       const post = await this.createPostUseCase.execute({
         userId,
@@ -63,7 +59,6 @@ export class PostController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      console.log("Fetching posts for page:", page);
 
       const posts = await this.getAllPostsUseCase.execute(page, limit);
       res.status(200).json(posts);
@@ -108,15 +103,11 @@ export class PostController {
       const postId = req.params.postId;
       const userId = req.params.userId;
       const updatedPostData = req.body;
-      console.log("updatedPostData", updatedPostData);
-      console.log("postIddd", postId);
-      console.log("userId", userId);
       const updatedPost = await this.EditPostUseCase.editPost(
         postId,
         userId,
         updatedPostData
       );
-      console.log("updatedPost", updatedPost);
       res.status(200).json(updatedPost);
     } catch (error) {
       console.error("Error editing post:", error);
@@ -130,7 +121,6 @@ export class PostController {
     try {
       const { postId } = req.params;
       const { userId } = req.body;
-      console.log("post like", postId, userId);
       const updatedPost = await this.likePostUseCase.execute(postId, userId);
       res.status(200).json(updatedPost);
     } catch (error) {
@@ -145,7 +135,6 @@ export class PostController {
     try {
       const { postId } = req.params;
       const { userId } = req.body;
-      console.log("post dislike", postId, userId);
       const updatedPost = await this.dislikePostUseCase.execute(postId, userId);
       res.status(200).json(updatedPost);
     } catch (error) {
@@ -160,7 +149,6 @@ export class PostController {
     try {
       const { postId } = req.params;
       const { userId, content } = req.body;
-      console.log("post comment", postId, userId);
       const updatedPost = await this.commentOnPostUseCase.execute(
         postId,
         userId,

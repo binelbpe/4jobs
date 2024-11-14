@@ -53,7 +53,6 @@ let RecruiterController = class RecruiterController {
             try {
                 const { email, password, companyName, phone, name } = req.body;
                 const governmentIdFile = req.file;
-                console.log("governmentId", req.file);
                 if (!email ||
                     !password ||
                     !companyName ||
@@ -156,7 +155,7 @@ let RecruiterController = class RecruiterController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                const recruiter = yield this.getRecruiterProfileUseCase.execute(id); // Updated
+                const recruiter = yield this.getRecruiterProfileUseCase.execute(id);
                 if (!recruiter) {
                     return res.status(404).json({ error: "Recruiter not found" });
                 }

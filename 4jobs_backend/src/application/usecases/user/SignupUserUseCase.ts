@@ -64,7 +64,6 @@ export class SignupUserUseCase {
       });
 
       const token = this.authService.generateToken(user);
-      console.log("g user", user);
       return { user, token };
     }
   }

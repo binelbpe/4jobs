@@ -1,6 +1,7 @@
 import axios from "axios";
 import store from "../redux/store";
 import { setLogoutAdmin } from "../redux/slices/adminSlice";
+import { getCsrfToken, setCsrfToken } from "../utils/csrf";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL_ADMIN;
 
@@ -10,12 +11,20 @@ const apiRequest = async (
   data: any = {}
 ) => {
   const token = localStorage.getItem("adminToken");
+  const csrfToken = getCsrfToken();
+  
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+
+  if (csrfToken) {
+    headers['x-csrf-token'] = csrfToken;
+  }
+
   if (!token) {
     console.error("no token");
   }
@@ -26,7 +35,15 @@ const apiRequest = async (
       url: `${API_BASE_URL}${endpoint}`,
       data,
       headers,
+      withCredentials: true, // Important for CSRF cookies
     });
+
+    // Store CSRF token from response header if present
+    const newCsrfToken = response.headers['x-csrf-token'];
+    if (newCsrfToken) {
+      setCsrfToken(newCsrfToken);
+    }
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

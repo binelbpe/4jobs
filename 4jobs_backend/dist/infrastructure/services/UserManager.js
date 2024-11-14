@@ -11,19 +11,13 @@ const inversify_1 = require("inversify");
 let UserManager = class UserManager {
     constructor() {
         this.userConnections = new Map();
-        this.typingUsers = new Map(); // conversationId -> Set of typing user IDs
+        this.typingUsers = new Map();
     }
     addUser(userId, socketId, userType) {
         this.userConnections.set(userId, { socketId, userType });
-        console.log(`${userType} ${userId} connected with socket ${socketId}`);
-        // Handle video call connections if necessary
-        // This can be expanded based on the requirements
-        console.log('Current userConnections:', Array.from(this.userConnections.entries()));
     }
     removeUser(userId) {
         this.userConnections.delete(userId);
-        console.log(`User ${userId} disconnected`);
-        console.log('Current userConnections after disconnect:', Array.from(this.userConnections.entries()));
     }
     getUserSocketId(userId) {
         var _a;

@@ -87,7 +87,6 @@ let MongoUserRecruiterMessageRepository = class MongoUserRecruiterMessageReposit
         return __awaiter(this, void 0, void 0, function* () {
             const updatedMessage = yield RecruiterMessageModel_1.RecruiterMessageModel.findByIdAndUpdate(message.id, {
                 isRead: message.isRead,
-                // Add other fields that might need updating
             }, { new: true });
             if (!updatedMessage) {
                 throw new Error('Message not found');

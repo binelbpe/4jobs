@@ -20,11 +20,7 @@ export class ResumeController {
       }
 
       const pdfBuffer = await this.generateResumeUseCase.execute(resumeData);
-      
-      // Convert the buffer to base64
       const base64Pdf = pdfBuffer.toString('base64');
-
-      // Send the base64 encoded PDF data
       res.json({ pdfData: base64Pdf });
     } catch (error) {
       console.error("Error generating resume:", error);

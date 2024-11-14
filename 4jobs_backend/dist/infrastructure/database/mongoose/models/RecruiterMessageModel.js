@@ -32,7 +32,7 @@ const RecruiterMessageSchema = new mongoose_1.Schema({
     senderType: { type: String, enum: ['recruiter', 'user'], required: true },
     content: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    isRead: { type: Boolean, default: false }, // Add this field
+    isRead: { type: Boolean, default: false },
 });
 exports.RecruiterMessageModel = mongoose_1.default.model('RecruiterMessage', RecruiterMessageSchema);
 const ConversationSchema = new mongoose_1.Schema({

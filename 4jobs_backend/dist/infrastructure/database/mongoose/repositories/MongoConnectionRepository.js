@@ -36,7 +36,6 @@ let MongoConnectionRepository = class MongoConnectionRepository {
                 conn.recipient.toString()
             ]);
             const uniqueConnectedUserIds = [...new Set(connectedUserIds)].filter(id => id !== userId);
-            // Split the skills string into an array and create case-insensitive regex patterns
             const userSkills = user.skills && user.skills[0] ? user.skills[0].split(',').map((skill) => skill.trim()) : [];
             const skillPatterns = userSkills.map((skill) => new RegExp(skill, 'i'));
             const recommendedUsers = yield UserModel_1.UserModel.find({
@@ -72,7 +71,6 @@ let MongoConnectionRepository = class MongoConnectionRepository {
     getMatchingCriteria(currentUser, recommendedUser) {
         var _a;
         const matchingCriteria = [];
-        // Split the skills strings into arrays
         const currentUserSkills = currentUser.skills && currentUser.skills[0] ? currentUser.skills[0].split(',').map((s) => s.trim().toLowerCase()) : [];
         const recommendedUserSkills = recommendedUser.skills && recommendedUser.skills[0] ? recommendedUser.skills[0].split(',').map((s) => s.trim().toLowerCase()) : [];
         // Check for matching skills (case-insensitive)
@@ -80,7 +78,6 @@ let MongoConnectionRepository = class MongoConnectionRepository {
         if (matchingSkills.length > 0) {
             matchingCriteria.push(`Matching skills: ${matchingSkills.join(', ')}`);
         }
-        // Check for matching experience titles or companies (case-insensitive)
         (_a = currentUser.experiences) === null || _a === void 0 ? void 0 : _a.forEach((exp) => {
             var _a;
             const matchingExperience = (_a = recommendedUser.experiences) === null || _a === void 0 ? void 0 : _a.find((recExp) => recExp.title.toLowerCase().includes(exp.title.toLowerCase()) ||
@@ -141,7 +138,6 @@ let MongoConnectionRepository = class MongoConnectionRepository {
             if (!updatedConnection) {
                 throw new Error('Connection not found');
             }
-            console.log("updatedConnection", updatedConnection);
             return this.mapConnectionToEntity(updatedConnection);
         });
     }

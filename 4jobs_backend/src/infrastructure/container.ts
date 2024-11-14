@@ -97,6 +97,12 @@ import { GenerateResumeUseCase } from "../application/usecases/user/GenerateResu
 import { ResumeController } from "../presentation/controllers/user/ResumeController";
 import { PDFExtractor } from "./services/PDFExtractor";
 import { AdvancedJobSearchUseCase } from "../application/usecases/user/AdvancedJobSearchUseCase";
+import { AuthMiddleware } from '../presentation/middlewares/authMiddleware';
+import { XssMiddleware } from '../presentation/middlewares/xssMiddleware';
+import { IAuthMiddlewareService } from '../domain/interfaces/services/IAuthMiddlewareService';
+import { IXssService } from '../domain/interfaces/services/IXssService';
+import { AuthMiddlewareService } from './services/AuthMiddlewareService';
+import { XssService } from './services/XssService';
 
 const container = new Container();
 
@@ -289,5 +295,15 @@ container
 container.bind<ResumeController>(TYPES.ResumeController).to(ResumeController);
 container.bind<AdvancedJobSearchUseCase>(TYPES.AdvancedJobSearchUseCase).to(AdvancedJobSearchUseCase);
 
-console.log(container);
+container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
+container.bind<XssMiddleware>(XssMiddleware).toSelf();
+
+container.bind<IAuthMiddlewareService>(TYPES.AuthMiddlewareService)
+  .to(AuthMiddlewareService)
+  .inSingletonScope();
+
+container.bind<IXssService>(TYPES.XssService)
+  .to(XssService)
+  .inSingletonScope();
+
 export { container };

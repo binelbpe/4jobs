@@ -27,7 +27,7 @@ export class SubscriptionController {
       const { amount, currency = "INR" } = req.body;
 
       const options = {
-        amount: amount * 100, // Razorpay expects amount in paise
+        amount: amount * 100, 
         currency,
         receipt: `order_${Date.now()}`,
       };
@@ -55,9 +55,8 @@ export class SubscriptionController {
       const isAuthentic = expectedSignature === razorpay_signature;
 
       if (isAuthentic) {
-        // Payment is successful, update the recruiter's subscription
         const { recruiterId, planDuration, amount } = req.body;
-        const subscriptionStartDate = new Date(); // Set the start date to now
+        const subscriptionStartDate = new Date();
         const expiryDate = this.calculateExpiryDate(planDuration, subscriptionStartDate);
 
         const updatedRecruiter = await this.recruiterRepository.updateSubscription(recruiterId, {
@@ -65,7 +64,7 @@ export class SubscriptionController {
           planDuration,
           expiryDate,
           subscriptionAmount: amount,
-          subscriptionStartDate, // Add this new field
+          subscriptionStartDate, 
         });
 
         if (updatedRecruiter) {

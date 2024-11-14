@@ -33,7 +33,7 @@ let MongoSearchRepository = class MongoSearchRepository {
                     { email: { $regex: query, $options: "i" } },
                 ],
                 _id: { $ne: new mongoose_1.default.Types.ObjectId(userId) },
-                isBlocked: { $ne: true }, // Exclude blocked users
+                isBlocked: { $ne: true },
             }).limit(10);
             const jobPostDocs = yield jobPostModel_1.default.find({
                 $or: [
@@ -72,7 +72,7 @@ let MongoSearchRepository = class MongoSearchRepository {
                     name: doc.name,
                     profileImage: doc.profileImage,
                     isConnected,
-                    isBlocked: doc.isBlocked, // Include isBlocked in the returned user object
+                    isBlocked: doc.isBlocked,
                 };
             })));
             const users = results.map((result) => result);

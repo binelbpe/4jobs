@@ -85,7 +85,7 @@ export class JobPostControllerUser {
       }
 
       const result = await this.applyForJobUseCase.execute(userId, jobId);
-      console.log("apply", result);
+  
 
       res.status(200).json(result);
     } catch (error: any) {
@@ -108,9 +108,6 @@ export class JobPostControllerUser {
     try {
       const { userId, reason } = req.body;
       const { jobId } = req.params;
-      console.log(userId)
-      console.log(jobId)
-      console.log(reason)
   
       await this.reportJobUseCase.execute(userId, jobId, reason);
   

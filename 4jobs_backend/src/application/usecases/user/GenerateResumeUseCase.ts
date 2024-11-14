@@ -13,7 +13,6 @@ export class GenerateResumeUseCase {
   ) {}
 
   async execute( resumeData: ResumeData): Promise<Buffer> {
-    console.log("resumeData",resumeData)
     const userId=resumeData.userId
     if (!userId) {
       throw new Error("User ID is required");
@@ -25,11 +24,7 @@ export class GenerateResumeUseCase {
     }
 
     const pdfBuffer = await generatePDF(resumeData);
-    
-    // Optionally, you can save the resume URL to the user's profile
-    // const resumeUrl = await this.resumeRepository.create(userId, "temp_url");
-    // user.resumeUrl = resumeUrl;
-    // await this.userRepository.update(user);
+
 
     return pdfBuffer;
   }

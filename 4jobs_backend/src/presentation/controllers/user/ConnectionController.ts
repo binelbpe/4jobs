@@ -66,7 +66,6 @@ export class ConnectionController {
   async getConnectionProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId;
-      console.log("object connectionId", userId);
       const profile = await this.connectionUseCase.getConnectionProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -115,7 +114,6 @@ export class ConnectionController {
       const connection = await this.connectionUseCase.rejectConnectionRequest(
         connectionId
       );
-      console.log("connection", connection);
       res.json({
         message: "Connection request rejected successfully",
         connection,
@@ -195,15 +193,15 @@ export class ConnectionController {
 
   async deleteConnection(req: Request, res: Response): Promise<void> {
     try {
-      const { userId, connectionId } = req.params; // Get userId and connectionId from request parameters
-      const deletedConnection = await this.connectionUseCase.deleteConnection(userId, connectionId); // Call use case to delete connection
+      const { userId, connectionId } = req.params; 
+      const deletedConnection = await this.connectionUseCase.deleteConnection(userId, connectionId); 
       if (!deletedConnection) {
-        res.status(404).json({ message: 'Connection not found' }); // Handle not found case
+        res.status(404).json({ message: 'Connection not found' });
         return; 
       }
-      res.json({ message: 'Connection removed successfully', deletedConnection }); // Return success message
+      res.json({ message: 'Connection removed successfully', deletedConnection }); 
     } catch (error) {
-      this.handleError(res, error, 'Failed to remove connection'); // Handle errors
+      this.handleError(res, error, 'Failed to remove connection'); 
     }
   }
 }

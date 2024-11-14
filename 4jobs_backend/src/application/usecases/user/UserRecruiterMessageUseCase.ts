@@ -45,7 +45,6 @@ export class UserRecruiterMessageUseCase {
     const savedMessage = await this.userRecruiterMessageRepository.saveMessage(message);
     await this.userRecruiterMessageRepository.updateConversation(conversationId, content, new Date());
 
-    // Emit an event for real-time updates
     this.eventEmitter.emit('newUserRecruiterMessage', savedMessage);
 
     return savedMessage;

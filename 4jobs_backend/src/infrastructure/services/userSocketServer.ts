@@ -28,9 +28,6 @@ export function setupUserSocketServer(
   io.use(socketAuthMiddleware(userManager));
 
   io.on("connection", (socket: Socket & { userId?: string }) => {
-    console.log(
-      `A user connected, socket id: ${socket.id}, user id: ${socket.userId}`
-    );
 
     if (!socket.userId) {
       console.error("User not authenticated, closing connection");
@@ -49,7 +46,6 @@ export function setupUserSocketServer(
         recipientId: string;
         content: string;
       }) => {
-        console.log("Received sendMessage event:", data);
         try {
           if (!socket.userId) {
             throw new Error("User not authenticated");
@@ -60,19 +56,16 @@ export function setupUserSocketServer(
             data.recipientId,
             data.content
           );
-          console.log("Message saved:", message);
 
-          // Emit to sender
+
           socket.emit("messageSent", message);
-          console.log("Emitted messageSent to sender");
 
-          // Emit to recipient
+
           const recipientSocket = userManager.getUserSocketId(data.recipientId);
           if (recipientSocket) {
             io.to(recipientSocket).emit("newMessage", message);
-            console.log("Emitted newMessage to recipient");
           } else {
-            console.log(
+            console.error(
               "Recipient not online, message will be delivered later"
             );
           }
@@ -83,7 +76,6 @@ export function setupUserSocketServer(
             sender: data.senderId,
             content: "You have a new message",
           });
-          console.log("Emitted sendNotification event");
         } catch (error) {
           console.error("Error sending message:", error);
           socket.emit("messageError", { error: "Failed to send message" });

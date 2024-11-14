@@ -29,7 +29,6 @@ function setupSocketServer(server, container) {
     const recruiterMessageUseCase = container.get(types_1.default.RecruiterMessageUseCase);
     io.use((0, socketAuthMiddleware_1.socketAuthMiddleware)(userManager));
     io.on('connection', (socket) => {
-        console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}, user type: ${socket.userType}`);
         if (!socket.userId || !socket.userType) {
             console.error('User not authenticated, closing connection');
             socket.disconnect(true);
@@ -39,10 +38,8 @@ function setupSocketServer(server, container) {
         socket.join(socket.userId);
         io.emit('userOnlineStatus', { userId: socket.userId, online: true });
         socket.on('sendUserRecruiterMessage', (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log("rec user messaging");
             try {
                 const { conversationId, content, senderId, senderType } = message;
-                console.log("senderId", senderId);
                 let savedMessage;
                 if (senderType === 'user') {
                     savedMessage = yield userRecruiterMessageUseCase.sendMessage(conversationId, content, senderId);
@@ -50,9 +47,7 @@ function setupSocketServer(server, container) {
                 else {
                     savedMessage = yield recruiterMessageUseCase.sendMessage(conversationId, content, senderId);
                 }
-                console.log("conversation id:", conversationId);
                 let newUserRecruiterMessage = io.emit('newUserRecruiterMessage', savedMessage);
-                console.log("newUserRecruiterMessage", newUserRecruiterMessage);
                 const updatedConversation = yield userRecruiterMessageUseCase.updateConversationLastMessage(conversationId, content, new Date());
                 io.emit('conversationUpdated', updatedConversation);
             }
@@ -63,21 +58,15 @@ function setupSocketServer(server, container) {
         }));
         socket.on('joinConversation', (conversationId) => {
             socket.join(conversationId);
-            console.log(`User ${socket.userId} joined conversation ${conversationId}`);
         });
         socket.on('leaveConversation', (conversationId) => {
             socket.leave(conversationId);
-            console.log(`User ${socket.userId} left conversation ${conversationId}`);
         });
         socket.on('userRecruiterTyping', ({ conversationId, recipientId }) => {
-            // Emit typing status only to the intended recipient
             io.to(recipientId).emit('userRecruiterTyping', { senderId: socket.userId, conversationId });
-            console.log(`User ${socket.userId} is typing in conversation ${conversationId} for recipient ${recipientId}`);
         });
         socket.on('userRecruiterStoppedTyping', ({ conversationId, recipientId }) => {
-            // Emit stopped typing status only to the intended recipient
             io.to(recipientId).emit('userRecruiterStoppedTyping', { senderId: socket.userId, conversationId });
-            console.log(`User ${socket.userId} stopped typing in conversation ${conversationId} for recipient ${recipientId}`);
         });
         socket.on('markMessageAsRead', (_a) => __awaiter(this, [_a], void 0, function* ({ messageId, conversationId }) {
             try {
@@ -90,12 +79,11 @@ function setupSocketServer(server, container) {
         }));
         socket.on('disconnect', () => {
             if (socket.userId) {
-                console.log(`User disconnected: ${socket.userId}`);
                 userManager.removeUser(socket.userId);
                 io.emit('userOnlineStatus', { userId: socket.userId, online: false });
             }
             else {
-                console.log('User disconnected without userId');
+                console.error('User disconnected without userId');
             }
         });
     });

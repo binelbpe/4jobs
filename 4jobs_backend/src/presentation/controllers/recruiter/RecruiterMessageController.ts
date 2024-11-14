@@ -62,10 +62,7 @@ export class RecruiterMessageController {
         };
       }));
 
-      // Update the messages in the database
       await Promise.all(messages.map(msg => this.recruiterMessageUseCase.updateMessage(msg)));
-
-      // Emit event for read messages
       const readMessages = formattedMessages.filter(msg => msg.isRead && msg.senderId === recruiterId);
       if (readMessages.length > 0) {
         this.eventEmitter.emit('recruiterMessagesRead', { messages: readMessages, conversationId });
@@ -100,8 +97,7 @@ export class RecruiterMessageController {
         timestamp: message.timestamp.toISOString(),
         isRead: message.isRead,
       };
-
-      // Emit real-time event
+     
       this.eventEmitter.emit('newRecruiterMessage', formattedMessage);
 
       res.status(201).json({ data: formattedMessage });
@@ -134,8 +130,7 @@ export class RecruiterMessageController {
         lastMessage: conversation.lastMessage,
         lastMessageTimestamp: conversation.lastMessageTimestamp.toISOString(),
       };
-
-      // Emit real-time event
+    
       this.eventEmitter.emit('newRecruiterConversation', formattedConversation);
 
       res.status(201).json({ data: formattedConversation });
@@ -149,8 +144,7 @@ export class RecruiterMessageController {
     try {
       const { messageId } = req.params;
       await this.recruiterMessageUseCase.markMessageAsRead(messageId);
-
-      // Emit real-time event
+  
       this.eventEmitter.emit('recruiterMessageRead', { messageId });
 
       res.status(200).json({ message: 'Message marked as read' });

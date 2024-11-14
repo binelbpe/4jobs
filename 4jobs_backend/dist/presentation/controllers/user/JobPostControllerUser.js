@@ -89,7 +89,6 @@ let JobPostControllerUser = class JobPostControllerUser {
                     return res.status(400).json({ error: "Job post not found or blocked" });
                 }
                 const result = yield this.applyForJobUseCase.execute(userId, jobId);
-                console.log("apply", result);
                 res.status(200).json(result);
             }
             catch (error) {
@@ -108,9 +107,6 @@ let JobPostControllerUser = class JobPostControllerUser {
             try {
                 const { userId, reason } = req.body;
                 const { jobId } = req.params;
-                console.log(userId);
-                console.log(jobId);
-                console.log(reason);
                 yield this.reportJobUseCase.execute(userId, jobId, reason);
                 res.status(200).json({ message: "Job reported successfully" });
             }

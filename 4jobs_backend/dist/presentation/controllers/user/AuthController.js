@@ -125,7 +125,6 @@ let AuthController = class AuthController {
                         .json({ error: "Email and password are required" });
                 }
                 const result = yield this.loginUseCase.execute(email, password);
-                console.log("result", result);
                 res.status(200).json(result);
             }
             catch (error) {
@@ -153,7 +152,6 @@ let AuthController = class AuthController {
                 if (user) {
                     const result = yield this.loginUseCase.execute(email, "", true);
                     const token = this.jwtAuthService.generateToken(user);
-                    console.log("result", result);
                     return res.status(200).json(result);
                 }
                 else {
@@ -170,7 +168,6 @@ let AuthController = class AuthController {
                         appliedJobs: [],
                     });
                     const token = this.jwtAuthService.generateToken(user);
-                    console.log("g user", user);
                     return res.status(201).json({ user, token });
                 }
             }
@@ -187,7 +184,6 @@ let AuthController = class AuthController {
             try {
                 const { query } = req.query;
                 const { userId } = req.query;
-                console.log("query and userId", userId, query);
                 if (typeof query !== "string" || query.length < 3 || !userId) {
                     return res
                         .status(400)

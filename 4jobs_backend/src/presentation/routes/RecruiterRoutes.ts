@@ -98,7 +98,7 @@ recruiterRouter.get(
   jobPostController.getApplicantsById.bind(jobPostController)
 );
 
-// Add new routes for messaging
+
 recruiterRouter.get("/conversations/:recruiterId", (req, res) =>
   recruiterMessageController.getConversations(req, res)
 );
@@ -112,7 +112,7 @@ recruiterRouter.post("/conversations", (req, res) =>
   recruiterMessageController.startConversation(req, res)
 );
 
-// Add new routes for subscription
+
 recruiterRouter.post(
   "/create-order",
   subscriptionController.createOrder.bind(subscriptionController)
@@ -122,13 +122,13 @@ recruiterRouter.post(
   subscriptionController.verifyPayment.bind(subscriptionController)
 );
 
-// Add this new route for updating subscription
+
 recruiterRouter.put('/update-subscription/:recruiterId', subscriptionController.updateSubscription.bind(subscriptionController));
 
-// Add this route
+
 recruiterRouter.get('/search-users', recruiterController.searchUsers.bind(recruiterController));
 
-// Add these new routes
+
 recruiterRouter.get(
   "/job-details/:id",
   jobPostController.getJobDetails.bind(jobPostController)
@@ -144,7 +144,7 @@ recruiterRouter.get(
   jobPostController.getFilteredApplicants.bind(jobPostController)
 );
 
-// Add a new route for refreshing recruiter token
+
 recruiterRouter.post('/refresh-token', recruiterController.refreshRecruiterToken.bind(recruiterController));
 
 export { recruiterRouter };

@@ -53,8 +53,7 @@ export class AdminController {
     @inject(TYPES.JwtAuthService)
     private jwtAuthService: JwtAuthService
   ) {}
-
-  // Admin login
+  
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
@@ -73,7 +72,6 @@ export class AdminController {
     }
   }
 
-  // Fetch all users
   async fetchUsers(req: Request, res: Response) {
     try {
       const users = await this.fetchAllUsersUseCase.execute();
@@ -84,7 +82,7 @@ export class AdminController {
     }
   }
 
-  // Block user
+
   async blockUser(req: Request, res: Response) {
     try {
       const { userId } = req.params;
@@ -99,7 +97,7 @@ export class AdminController {
     }
   }
 
-  // Unblock user
+
   async unblockUser(req: Request, res: Response) {
     try {
       const { userId } = req.params;
@@ -114,7 +112,7 @@ export class AdminController {
     }
   }
 
-  // Fetch all recruiters
+
   async fetchRecruiters(req: Request, res: Response) {
     try {
       const recruiters = await this.fetchRecruitersUseCase.execute();
@@ -125,11 +123,10 @@ export class AdminController {
     }
   }
 
-  // Approve recruiter
+
   async approveRecruiter(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      console.log("idd admin approve", id);
       const recruiter = await this.approveRecruiterUseCase.execute(id);
 
       if (!recruiter) {
@@ -142,7 +139,7 @@ export class AdminController {
     }
   }
 
-  // Admin dashboard
+
   async dashboard(req: Request, res: Response) {
     try {
       const data = await this.adminDashboardUseCase.execute();
@@ -153,11 +150,9 @@ export class AdminController {
     }
   }
 
-  // Fetch all job posts
   async fetchJobPosts(req: Request, res: Response) {
     try {
       const jobPosts = await this.fetchJobPostsUseCase.execute();
-      console.log("admin jobposts:", jobPosts);
       res.status(200).json(jobPosts);
     } catch (error) {
       console.error("Error fetching job posts:", error);
@@ -165,7 +160,6 @@ export class AdminController {
     }
   }
 
-  // Block job post
   async blockJobPost(req: Request, res: Response) {
     try {
       const { postId } = req.params;
@@ -180,7 +174,6 @@ export class AdminController {
     }
   }
 
-  // Unblock job post
   async unblockJobPost(req: Request, res: Response) {
     try {
       const { postId } = req.params;
@@ -270,7 +263,6 @@ export class AdminController {
     }
   }
 
-  // Add a new method for refreshing admin token
   async refreshAdminToken(req: Request, res: Response) {
     try {
       const { refreshToken } = req.body;

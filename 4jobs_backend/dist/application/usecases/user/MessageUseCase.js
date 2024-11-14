@@ -36,7 +36,6 @@ let MessageUseCase = class MessageUseCase {
     }
     sendMessage(senderId, recipientId, content) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('MessageUseCase: Sending message', { senderId, recipientId, content });
             const sender = yield this.userRepository.findById(senderId);
             const recipient = yield this.userRepository.findById(recipientId);
             if (!sender || !recipient) {
@@ -51,9 +50,7 @@ let MessageUseCase = class MessageUseCase {
                 isRead: false,
                 status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
             };
-            console.log('MessageUseCase: Creating new message', message);
             const savedMessage = yield this.messageRepository.create(message);
-            console.log('MessageUseCase: Message saved', savedMessage);
             return savedMessage;
         });
     }

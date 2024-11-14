@@ -100,7 +100,6 @@ let MongoUserRepository = class MongoUserRepository {
             isBlocked: doc.isBlocked,
         };
     }
-    // Add this new method to the MongoUserRepository class
     updatePassword(id, newPassword) {
         return __awaiter(this, void 0, void 0, function* () {
             yield UserModel_1.UserModel.findByIdAndUpdate(id, { password: newPassword });

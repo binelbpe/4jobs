@@ -30,9 +30,9 @@ let VerifyOtpUseCase = class VerifyOtpUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const verificationResult = yield this.otpService.verifyOtp(email, otp);
             if (typeof verificationResult === "string") {
-                throw new Error(verificationResult); // Handle error message from verifyOtp
+                throw new Error(verificationResult);
             }
-            const isValid = verificationResult; // This will be true or false
+            const isValid = verificationResult;
             if (isValid) {
                 const recruiter = yield this.recruiterRepository.findByEmail(email);
                 if (recruiter) {

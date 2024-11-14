@@ -57,7 +57,6 @@ let AdminController = class AdminController {
         this.postRepository = postRepository;
         this.jwtAuthService = jwtAuthService;
     }
-    // Admin login
     login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -76,7 +75,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Fetch all users
     fetchUsers(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -89,7 +87,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Block user
     blockUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,7 +103,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Unblock user
     unblockUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -123,7 +119,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Fetch all recruiters
     fetchRecruiters(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -136,12 +131,10 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Approve recruiter
     approveRecruiter(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                console.log("idd admin approve", id);
                 const recruiter = yield this.approveRecruiterUseCase.execute(id);
                 if (!recruiter) {
                     return res.status(404).json({ error: "Recruiter not found" });
@@ -154,7 +147,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Admin dashboard
     dashboard(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -167,12 +159,10 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Fetch all job posts
     fetchJobPosts(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const jobPosts = yield this.fetchJobPostsUseCase.execute();
-                console.log("admin jobposts:", jobPosts);
                 res.status(200).json(jobPosts);
             }
             catch (error) {
@@ -181,7 +171,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Block job post
     blockJobPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -198,7 +187,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Unblock job post
     unblockJobPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -298,7 +286,6 @@ let AdminController = class AdminController {
             }
         });
     }
-    // Add a new method for refreshing admin token
     refreshAdminToken(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

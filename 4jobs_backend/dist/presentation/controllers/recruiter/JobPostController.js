@@ -77,7 +77,6 @@ let JobPostController = class JobPostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const updatedJobPost = yield this.jobPostUseCase.updateJobPost(req.params.id, req.body);
-                console.log(req.body);
                 if (updatedJobPost) {
                     res.json(updatedJobPost);
                 }
@@ -113,7 +112,6 @@ let JobPostController = class JobPostController {
                 const { jobId } = req.params;
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 10;
-                console.log("jobuid page limit", jobId, page, limit);
                 const result = yield this.jobPostUseCase.getApplicantsByJobId(jobId, page, limit);
                 res.json(result);
             }
@@ -167,12 +165,9 @@ let JobPostController = class JobPostController {
     }
     getFilteredApplicants(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('getFilteredApplicants controller method called');
             try {
                 const { jobId } = req.params;
-                console.log(`Fetching filtered applicants for jobId: ${jobId}`);
                 const filteredApplicants = yield this.jobPostUseCase.getFilteredApplicants(jobId);
-                console.log(`Filtered applicants returned: ${filteredApplicants.length}`);
                 res.json(filteredApplicants);
             }
             catch (error) {

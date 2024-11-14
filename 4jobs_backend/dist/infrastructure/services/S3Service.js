@@ -31,7 +31,6 @@ let S3Service = class S3Service {
                 secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
             },
         });
-        console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID, "AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set');
         this.bucketName = process.env.S3_BUCKET_NAME;
         if (!this.bucketName) {
             console.warn("S3_BUCKET_NAME is not set in the process.envuration. Using default value '4jobs'.");
@@ -59,7 +58,6 @@ let S3Service = class S3Service {
     }
     getFile(key) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Extract the actual key if a full URL is provided
             const actualKey = key.includes('https://') ? key.split('/').slice(3).join('/') : key;
             const command = new client_s3_1.GetObjectCommand({
                 Bucket: this.bucketName,

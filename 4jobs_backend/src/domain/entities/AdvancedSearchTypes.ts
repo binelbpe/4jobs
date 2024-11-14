@@ -10,7 +10,6 @@ export interface AdvancedSearchFilters {
   wayOfWork?: string;
 }
 
-// Add JobPostWithMatch interface
 export interface JobPostWithMatch extends Omit<JobPost, '_id'> {
   _id?: string;
   matchPercentage: number;

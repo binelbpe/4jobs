@@ -84,7 +84,6 @@ let ConnectionController = class ConnectionController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const userId = req.params.userId;
-                console.log("object connectionId", userId);
                 const profile = yield this.connectionUseCase.getConnectionProfile(userId);
                 res.json(profile);
             }
@@ -128,7 +127,6 @@ let ConnectionController = class ConnectionController {
                 const { connectionId } = req.params;
                 const { userId } = req.body;
                 const connection = yield this.connectionUseCase.rejectConnectionRequest(connectionId);
-                console.log("connection", connection);
                 res.json({
                     message: "Connection request rejected successfully",
                     connection,
@@ -203,16 +201,16 @@ let ConnectionController = class ConnectionController {
     deleteConnection(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { userId, connectionId } = req.params; // Get userId and connectionId from request parameters
-                const deletedConnection = yield this.connectionUseCase.deleteConnection(userId, connectionId); // Call use case to delete connection
+                const { userId, connectionId } = req.params;
+                const deletedConnection = yield this.connectionUseCase.deleteConnection(userId, connectionId);
                 if (!deletedConnection) {
-                    res.status(404).json({ message: 'Connection not found' }); // Handle not found case
+                    res.status(404).json({ message: 'Connection not found' });
                     return;
                 }
-                res.json({ message: 'Connection removed successfully', deletedConnection }); // Return success message
+                res.json({ message: 'Connection removed successfully', deletedConnection });
             }
             catch (error) {
-                this.handleError(res, error, 'Failed to remove connection'); // Handle errors
+                this.handleError(res, error, 'Failed to remove connection');
             }
         });
     }

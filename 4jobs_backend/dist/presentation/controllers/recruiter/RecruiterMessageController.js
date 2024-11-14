@@ -83,9 +83,7 @@ let RecruiterMessageController = class RecruiterMessageController {
                         isRead: msg.isRead,
                     };
                 })));
-                // Update the messages in the database
                 yield Promise.all(messages.map(msg => this.recruiterMessageUseCase.updateMessage(msg)));
-                // Emit event for read messages
                 const readMessages = formattedMessages.filter(msg => msg.isRead && msg.senderId === recruiterId);
                 if (readMessages.length > 0) {
                     this.eventEmitter.emit('recruiterMessagesRead', { messages: readMessages, conversationId });
@@ -119,7 +117,6 @@ let RecruiterMessageController = class RecruiterMessageController {
                     timestamp: message.timestamp.toISOString(),
                     isRead: message.isRead,
                 };
-                // Emit real-time event
                 this.eventEmitter.emit('newRecruiterMessage', formattedMessage);
                 res.status(201).json({ data: formattedMessage });
             }
@@ -149,7 +146,6 @@ let RecruiterMessageController = class RecruiterMessageController {
                     lastMessage: conversation.lastMessage,
                     lastMessageTimestamp: conversation.lastMessageTimestamp.toISOString(),
                 };
-                // Emit real-time event
                 this.eventEmitter.emit('newRecruiterConversation', formattedConversation);
                 res.status(201).json({ data: formattedConversation });
             }
@@ -164,7 +160,6 @@ let RecruiterMessageController = class RecruiterMessageController {
             try {
                 const { messageId } = req.params;
                 yield this.recruiterMessageUseCase.markMessageAsRead(messageId);
-                // Emit real-time event
                 this.eventEmitter.emit('recruiterMessageRead', { messageId });
                 res.status(200).json({ message: 'Message marked as read' });
             }

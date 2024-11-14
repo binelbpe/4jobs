@@ -32,7 +32,6 @@ let MessageRepository = class MessageRepository {
     }
     create(message) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('MongoMessageRepository: Creating message', message);
             const newMessage = new MessageModel_1.MessageModel({
                 sender: message.sender ? this.toObjectId(message.sender) : undefined,
                 recipient: message.recipient ? this.toObjectId(message.recipient) : undefined,
@@ -41,10 +40,8 @@ let MessageRepository = class MessageRepository {
                 isRead: message.isRead,
                 status: message.status || 'sent',
             });
-            console.log('MongoMessageRepository: Saving message', newMessage);
             yield newMessage.save();
             const populatedMessage = yield newMessage.populate("sender recipient");
-            console.log('MongoMessageRepository: Message saved and populated', populatedMessage);
             return this.mapToEntity(populatedMessage);
         });
     }
@@ -150,7 +147,6 @@ let MessageRepository = class MessageRepository {
                     },
                 },
             ]);
-            console.log("ivide kweriii", connections);
             return connections.map((conn) => ({
                 user: conn.user._id.toString(),
                 lastMessage: this.mapToEntity(conn.lastMessage),

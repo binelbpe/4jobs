@@ -13,7 +13,6 @@ export class MessageRepository implements IMessageRepository {
   }
 
   async create(message: Partial<Message>): Promise<Message> {
-    console.log('MongoMessageRepository: Creating message', message);
     const newMessage = new MessageModel({
       sender: message.sender ? this.toObjectId(message.sender) : undefined,
       recipient: message.recipient ? this.toObjectId(message.recipient) : undefined,
@@ -22,10 +21,8 @@ export class MessageRepository implements IMessageRepository {
       isRead: message.isRead,
       status: message.status || 'sent',
     });
-    console.log('MongoMessageRepository: Saving message', newMessage);
     await newMessage.save();
     const populatedMessage = await newMessage.populate("sender recipient");
-    console.log('MongoMessageRepository: Message saved and populated', populatedMessage);
     return this.mapToEntity(populatedMessage);
   }
 
@@ -126,7 +123,6 @@ export class MessageRepository implements IMessageRepository {
       },
     ]);
 
-    console.log("ivide kweriii", connections);
 
     return connections.map((conn) => ({
       user: conn.user._id.toString(),

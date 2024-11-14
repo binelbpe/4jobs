@@ -15,7 +15,6 @@ export class MessageUseCase {
   ) {}
 
   async sendMessage(senderId: string, recipientId: string, content: string): Promise<Message> {
-    console.log('MessageUseCase: Sending message', { senderId, recipientId, content });
     const sender = await this.userRepository.findById(senderId);
     const recipient = await this.userRepository.findById(recipientId);
 
@@ -32,10 +31,8 @@ export class MessageUseCase {
       isRead: false,
       status: this.userManager.isUserOnline(recipientId) ? 'delivered' : 'sent'
     };
-
-    console.log('MessageUseCase: Creating new message', message);
+  
     const savedMessage = await this.messageRepository.create(message);
-    console.log('MessageUseCase: Message saved', savedMessage);
     return savedMessage;
   }
 

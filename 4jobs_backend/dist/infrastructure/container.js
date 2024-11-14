@@ -84,6 +84,10 @@ const GenerateResumeUseCase_1 = require("../application/usecases/user/GenerateRe
 const ResumeController_1 = require("../presentation/controllers/user/ResumeController");
 const PDFExtractor_1 = require("./services/PDFExtractor");
 const AdvancedJobSearchUseCase_1 = require("../application/usecases/user/AdvancedJobSearchUseCase");
+const authMiddleware_1 = require("../presentation/middlewares/authMiddleware");
+const xssMiddleware_1 = require("../presentation/middlewares/xssMiddleware");
+const AuthMiddlewareService_1 = require("./services/AuthMiddlewareService");
+const XssService_1 = require("./services/XssService");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.default.IUserRepository).to(MongoUserRepository_1.MongoUserRepository);
@@ -256,4 +260,11 @@ container
     .to(GenerateResumeUseCase_1.GenerateResumeUseCase);
 container.bind(types_1.default.ResumeController).to(ResumeController_1.ResumeController);
 container.bind(types_1.default.AdvancedJobSearchUseCase).to(AdvancedJobSearchUseCase_1.AdvancedJobSearchUseCase);
-console.log(container);
+container.bind(authMiddleware_1.AuthMiddleware).toSelf();
+container.bind(xssMiddleware_1.XssMiddleware).toSelf();
+container.bind(types_1.default.AuthMiddlewareService)
+    .to(AuthMiddlewareService_1.AuthMiddlewareService)
+    .inSingletonScope();
+container.bind(types_1.default.XssService)
+    .to(XssService_1.XssService)
+    .inSingletonScope();

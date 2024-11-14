@@ -29,7 +29,6 @@ function setupUserSocketServer(server, container) {
     const messageUseCase = container.get(types_1.default.MessageUseCase);
     io.use((0, socketAuthMiddleware_1.socketAuthMiddleware)(userManager));
     io.on("connection", (socket) => {
-        console.log(`A user connected, socket id: ${socket.id}, user id: ${socket.userId}`);
         if (!socket.userId) {
             console.error("User not authenticated, closing connection");
             socket.disconnect(true);
@@ -39,24 +38,18 @@ function setupUserSocketServer(server, container) {
         socket.join(socket.userId);
         io.emit("userOnlineStatus", { userId: socket.userId, online: true });
         socket.on("sendMessage", (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log("Received sendMessage event:", data);
             try {
                 if (!socket.userId) {
                     throw new Error("User not authenticated");
                 }
                 const message = yield messageUseCase.sendMessage(data.senderId, data.recipientId, data.content);
-                console.log("Message saved:", message);
-                // Emit to sender
                 socket.emit("messageSent", message);
-                console.log("Emitted messageSent to sender");
-                // Emit to recipient
                 const recipientSocket = userManager.getUserSocketId(data.recipientId);
                 if (recipientSocket) {
                     io.to(recipientSocket).emit("newMessage", message);
-                    console.log("Emitted newMessage to recipient");
                 }
                 else {
-                    console.log("Recipient not online, message will be delivered later");
+                    console.error("Recipient not online, message will be delivered later");
                 }
                 eventEmitter.emit("sendNotification", {
                     type: "NEW_MESSAGE",
@@ -64,7 +57,6 @@ function setupUserSocketServer(server, container) {
                     sender: data.senderId,
                     content: "You have a new message",
                 });
-                console.log("Emitted sendNotification event");
             }
             catch (error) {
                 console.error("Error sending message:", error);

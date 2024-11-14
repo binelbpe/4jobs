@@ -84,7 +84,7 @@ export class MongoAdminRepository implements IAdminRepository {
       planDuration: doc.planDuration,
       expiryDate: doc.expiryDate,
       subscriptionAmount: doc.subscriptionAmount,
-      subscriptionStartDate: doc.subscriptionStartDate, // Add this line
+      subscriptionStartDate: doc.subscriptionStartDate,
     };
   }
 

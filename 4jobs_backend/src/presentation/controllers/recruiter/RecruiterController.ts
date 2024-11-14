@@ -49,7 +49,6 @@ export class RecruiterController {
     try {
       const { email, password, companyName, phone, name } = req.body;
       const governmentIdFile = req.file;
-      console.log("governmentId", req.file);
       if (
         !email ||
         !password ||
@@ -168,7 +167,7 @@ export class RecruiterController {
   async getProfile(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const recruiter = await this.getRecruiterProfileUseCase.execute(id); // Updated
+      const recruiter = await this.getRecruiterProfileUseCase.execute(id); 
 
       if (!recruiter) {
         return res.status(404).json({ error: "Recruiter not found" });

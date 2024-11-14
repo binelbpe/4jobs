@@ -41,9 +41,7 @@ let ResumeController = class ResumeController {
                     return;
                 }
                 const pdfBuffer = yield this.generateResumeUseCase.execute(resumeData);
-                // Convert the buffer to base64
                 const base64Pdf = pdfBuffer.toString('base64');
-                // Send the base64 encoded PDF data
                 res.json({ pdfData: base64Pdf });
             }
             catch (error) {

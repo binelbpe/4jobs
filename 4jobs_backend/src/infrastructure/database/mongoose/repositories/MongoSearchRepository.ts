@@ -20,7 +20,7 @@ export class MongoSearchRepository implements ISearchRepository {
         { email: { $regex: query, $options: "i" } },
       ],
       _id: { $ne: new mongoose.Types.ObjectId(userId) },
-      isBlocked: { $ne: true }, // Exclude blocked users
+      isBlocked: { $ne: true }, 
     }).limit(10);
 
     const jobPostDocs = await JobPostModel.find({
@@ -67,7 +67,7 @@ export class MongoSearchRepository implements ISearchRepository {
           name: doc.name,
           profileImage: doc.profileImage,
           isConnected,
-          isBlocked: doc.isBlocked, // Include isBlocked in the returned user object
+          isBlocked: doc.isBlocked, 
         };
       })
     );

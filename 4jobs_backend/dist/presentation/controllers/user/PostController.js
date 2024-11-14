@@ -49,15 +49,11 @@ let PostController = class PostController {
     createPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
-            console.log("Request body:", req.body);
-            console.log("Request files:", req.files);
-            console.log("Request params:", req.params);
             try {
                 const { userId } = req.params;
                 const { content } = req.body;
                 const image = (_b = (_a = req.files) === null || _a === void 0 ? void 0 : _a["image"]) === null || _b === void 0 ? void 0 : _b[0];
                 const video = (_d = (_c = req.files) === null || _c === void 0 ? void 0 : _c["video"]) === null || _d === void 0 ? void 0 : _d[0];
-                console.log("Extracted data:", { userId, content, image, video });
                 const post = yield this.createPostUseCase.execute({
                     userId,
                     content,
@@ -79,7 +75,6 @@ let PostController = class PostController {
             try {
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 10;
-                console.log("Fetching posts for page:", page);
                 const posts = yield this.getAllPostsUseCase.execute(page, limit);
                 res.status(200).json(posts);
             }
@@ -123,11 +118,7 @@ let PostController = class PostController {
                 const postId = req.params.postId;
                 const userId = req.params.userId;
                 const updatedPostData = req.body;
-                console.log("updatedPostData", updatedPostData);
-                console.log("postIddd", postId);
-                console.log("userId", userId);
                 const updatedPost = yield this.EditPostUseCase.editPost(postId, userId, updatedPostData);
-                console.log("updatedPost", updatedPost);
                 res.status(200).json(updatedPost);
             }
             catch (error) {
@@ -143,7 +134,6 @@ let PostController = class PostController {
             try {
                 const { postId } = req.params;
                 const { userId } = req.body;
-                console.log("post like", postId, userId);
                 const updatedPost = yield this.likePostUseCase.execute(postId, userId);
                 res.status(200).json(updatedPost);
             }
@@ -160,7 +150,6 @@ let PostController = class PostController {
             try {
                 const { postId } = req.params;
                 const { userId } = req.body;
-                console.log("post dislike", postId, userId);
                 const updatedPost = yield this.dislikePostUseCase.execute(postId, userId);
                 res.status(200).json(updatedPost);
             }
@@ -177,7 +166,6 @@ let PostController = class PostController {
             try {
                 const { postId } = req.params;
                 const { userId, content } = req.body;
-                console.log("post comment", postId, userId);
                 const updatedPost = yield this.commentOnPostUseCase.execute(postId, userId, content);
                 res.status(200).json(updatedPost);
             }

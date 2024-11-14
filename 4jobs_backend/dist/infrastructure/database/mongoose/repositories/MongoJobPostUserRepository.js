@@ -40,7 +40,6 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
             const sort = {
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
             };
-            // Add isBlock: false to the filter
             const blockFilter = Object.assign(Object.assign({}, filter), { isBlock: false });
             const totalCount = yield jobPostModel_1.default.countDocuments(blockFilter);
             const totalPages = Math.ceil(totalCount / limit);
@@ -74,15 +73,12 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;
             const baseQuery = { isBlock: false, status: "Open" };
-            // Function to check if a search term matches a target string
             const isMatch = (searchTerm, target) => {
                 return target.toLowerCase().includes(searchTerm.toLowerCase());
             };
-            // Function to calculate match percentage for all criteria
             const calculateMatchPercentage = (job) => {
                 let matchedCriteria = 0;
                 let totalCriteria = 0;
-                // Check each filter criteria
                 if (filters.title) {
                     totalCriteria++;
                     if (isMatch(filters.title, job.title)) {
@@ -107,7 +103,6 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
                         matchedCriteria++;
                     }
                 }
-                // Check salary range
                 if (filters.salaryMin || filters.salaryMax) {
                     totalCriteria++;
                     if ((!filters.salaryMin || job.salaryRange.max >= filters.salaryMin) &&
@@ -115,7 +110,6 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
                         matchedCriteria++;
                     }
                 }
-                // Check skills - now with proper typing
                 if (filters.skills && filters.skills.length > 0) {
                     totalCriteria++;
                     const matchedSkills = filters.skills.filter(searchSkill => job.skillsRequired.some((jobSkill) => isMatch(searchSkill, jobSkill)));
@@ -123,7 +117,6 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
                         matchedCriteria++;
                     }
                 }
-                // Calculate percentage only if there are criteria to match
                 const percentage = totalCriteria > 0
                     ? (matchedCriteria / totalCriteria) * 100
                     : 0;
@@ -133,27 +126,21 @@ let MongoJobPostUserRepository = class MongoJobPostUserRepository {
                     totalCriteria
                 };
             };
-            // Get all jobs
             const allJobs = yield jobPostModel_1.default.find(baseQuery).lean();
-            // Process and categorize jobs
             let exactMatches = [];
             let similarMatches = [];
             allJobs.forEach(job => {
                 const result = calculateMatchPercentage(job);
                 const jobWithMatch = Object.assign(Object.assign({}, job), { matchPercentage: result.percentage });
                 if (result.matchedCriteria === result.totalCriteria && result.totalCriteria > 0) {
-                    // All specified criteria match - Exact match
                     exactMatches.push(jobWithMatch);
                 }
                 else if (result.percentage >= 50) {
-                    // 50% or more criteria match - Similar match
                     similarMatches.push(jobWithMatch);
                 }
             });
-            // Sort by match percentage
             exactMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
             similarMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
-            // Apply pagination
             const paginatedExactMatches = exactMatches.slice(skip, skip + limit);
             const paginatedSimilarMatches = similarMatches.slice(skip, skip + limit);
             return {

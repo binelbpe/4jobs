@@ -141,7 +141,7 @@ export class UserMessageRepository implements IMessageRepository {
       email: user.email,
       name: user.name,
       profileImage: user.profileImage,
-      password: '', // Add an empty string for password
+      password: '',
     } as MUser;
   }
 }

@@ -92,7 +92,7 @@ let MongoAdminRepository = class MongoAdminRepository {
             planDuration: doc.planDuration,
             expiryDate: doc.expiryDate,
             subscriptionAmount: doc.subscriptionAmount,
-            subscriptionStartDate: doc.subscriptionStartDate, // Add this line
+            subscriptionStartDate: doc.subscriptionStartDate,
         };
     }
     save(recruiter) {

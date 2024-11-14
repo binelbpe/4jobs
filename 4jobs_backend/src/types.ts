@@ -84,6 +84,10 @@ const TYPES = {
   GenerateResumeUseCase: Symbol.for("GenerateResumeUseCase"),
   ResumeController: Symbol.for("ResumeController"),
   AdvancedJobSearchUseCase: Symbol.for("AdvancedJobSearchUseCase"),
+  AuthMiddlewareService: Symbol.for("AuthMiddlewareService"),
+  XssService: Symbol.for("XssService"),
+  RateLimiterService: Symbol.for("RateLimiterService"),
+  CsrfService: Symbol.for("CsrfService"),
 };
 
 export default TYPES;

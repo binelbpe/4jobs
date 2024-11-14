@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { Document } from 'mongoose';
 
 export interface User {
-  id: string; // Change this to non-optional
+  id: string; 
   email: string;
   password: string;
   phone?:number;
@@ -11,7 +11,6 @@ export interface User {
   role?: 'user' | 'recruiter' | 'admin';  
   isAdmin?: boolean;
   appliedJobs?: string[];
-  // Profile-related fields
   bio?: string;
   about?: string;
   experiences?: Experience[];
@@ -34,7 +33,6 @@ export interface MUser {
   role?: 'user' | 'recruiter' | 'admin';  
   isAdmin?: boolean;
   appliedJobs?: string[];
-  // Profile-related fields
   bio?: string;
   about?: string;
   experiences?: Experience[];
@@ -49,7 +47,7 @@ export interface MUser {
 }
 
 export interface IUserDocument extends Omit<User, 'id'>, Document {
-  _id: string; // Add this line
+  _id: string; 
 }
 
 export interface Experience {

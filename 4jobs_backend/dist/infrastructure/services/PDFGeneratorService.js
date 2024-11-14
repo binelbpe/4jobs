@@ -21,19 +21,16 @@ const generatePDF = (resumeData) => {
         doc.on("end", () => resolve(Buffer.concat(chunks)));
         doc.on("error", reject);
         const pageWidth = doc.page.width;
-        const contentWidth = pageWidth - 100; // Accounting for left and right margins
-        // Center-aligned header with white background
+        const contentWidth = pageWidth - 100;
         doc
             .font("Helvetica-Bold")
             .fontSize(24)
             .text(resumeData.fullName.toUpperCase(), { align: "center" });
         doc.moveDown(0.5);
-        // Contact info in smaller text, center-aligned
         doc
             .fontSize(10)
             .font("Helvetica")
             .text(`${resumeData.phone} — ${resumeData.email}`, { align: "center" });
-        // Helper function for consistent section headers
         const addSectionHeader = (text) => {
             doc.moveDown(1);
             doc.fontSize(14).font("Helvetica-Bold").text(text.toUpperCase());
@@ -45,7 +42,6 @@ const generatePDF = (resumeData) => {
                 .stroke();
             doc.moveDown(0.5);
         };
-        // Helper function to add a section if content exists
         const addSectionIfContent = (title, content, renderContent) => {
             if (content &&
                 (Array.isArray(content)
@@ -55,14 +51,11 @@ const generatePDF = (resumeData) => {
                 renderContent();
             }
         };
-        // Helper function for bullet points
         const addBulletPoint = (text) => {
             doc.fontSize(10).font("Helvetica");
             doc.list([text], { bulletRadius: 1.5, textIndent: 10 });
         };
-        // Move to the main content area
         doc.moveDown(2);
-        // Profile Summary
         if (resumeData.profileSummary) {
             addSectionHeader("Professional Summary");
             doc
@@ -70,7 +63,6 @@ const generatePDF = (resumeData) => {
                 .font("Helvetica")
                 .text(resumeData.profileSummary, { align: "justify" });
         }
-        // Redesigned Skills Section
         addSectionIfContent("Skills", resumeData.skills, () => {
             const skillsText = resumeData.skills.join(" • ");
             doc.fontSize(10).font("Helvetica").text(skillsText, {
@@ -79,7 +71,6 @@ const generatePDF = (resumeData) => {
             });
             doc.moveDown(0.5);
         });
-        // Experience
         addSectionIfContent("Professional Experience", resumeData.experience, () => {
             resumeData.experience.forEach((exp) => {
                 doc.fontSize(12).font("Helvetica-Bold").text(exp.position);
@@ -94,7 +85,6 @@ const generatePDF = (resumeData) => {
                 doc.moveDown(0.5);
             });
         });
-        // Projects
         addSectionIfContent("Key Projects", resumeData.projects, () => {
             resumeData.projects.forEach((project) => {
                 doc.fontSize(12).font("Helvetica-Bold").text(project.name);
@@ -106,7 +96,6 @@ const generatePDF = (resumeData) => {
                 doc.moveDown(0.5);
             });
         });
-        // Education
         addSectionIfContent("Education", resumeData.education, () => {
             resumeData.education.forEach((edu) => {
                 doc.fontSize(12).font("Helvetica-Bold").text(edu.degree);
@@ -118,7 +107,6 @@ const generatePDF = (resumeData) => {
                 doc.moveDown(0.5);
             });
         });
-        // Declaration
         addSectionHeader("Declaration");
         doc
             .fontSize(10)

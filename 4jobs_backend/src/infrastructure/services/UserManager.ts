@@ -8,21 +8,13 @@ export class UserManager {
 
   private userConnections: Map<string, { socketId: string, userType: 'user' | 'recruiter' }> = new Map();
 
-  private typingUsers: Map<string, Set<string>> = new Map(); // conversationId -> Set of typing user IDs
+  private typingUsers: Map<string, Set<string>> = new Map();
 
 
 
   addUser(userId: string, socketId: string, userType: 'user' | 'recruiter') {
 
     this.userConnections.set(userId, { socketId, userType });
-
-    console.log(`${userType} ${userId} connected with socket ${socketId}`);
-
-    // Handle video call connections if necessary
-
-    // This can be expanded based on the requirements
-
-    console.log('Current userConnections:', Array.from(this.userConnections.entries()));
 
   }
 
@@ -31,10 +23,6 @@ export class UserManager {
   removeUser(userId: string) {
 
     this.userConnections.delete(userId);
-
-    console.log(`User ${userId} disconnected`);
-
-    console.log('Current userConnections after disconnect:', Array.from(this.userConnections.entries()));
 
   }
 

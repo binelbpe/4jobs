@@ -15,8 +15,7 @@ export interface IJobPostUserRepository {
   update(id: string, userId: string): Promise<JobPost | null>;
   
   reportJob(userId: string, jobId: string, reason: string): Promise<JobPost | null>;
-
-  // Add new method for advanced search
+ 
   advancedSearch(
     filters: AdvancedSearchFilters,
     page: number,

@@ -78,7 +78,6 @@ export class MongoRecruiterMessage implements IRecruiterMessageRepository {
       message.id,
       {
         isRead: message.isRead,
-        // Add other fields that might need updating
       },
       { new: true }
     );
