@@ -8,7 +8,7 @@ import { FetchUsersResponse, FetchUserDetailsResponse } from "../types/auth";
 import { Conversation, Message } from "../types/recruiterMessageType";
 import store from "../redux/store";
 import { logout } from "../redux/slices/recruiterSlice";
-import { getCsrfToken, setCsrfToken } from "../utils/csrf";
+import { getCsrfToken, setCsrfToken, clearCsrfToken } from "../utils/csrf";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL_RECRUITER;
 
@@ -50,20 +50,34 @@ const apiRequest = async (
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          store.dispatch(logout());
-          throw new Error("Authentication failed. Please log in again.");
+      if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+        clearCsrfToken();
+        const retryResponse = await axios({
+          method,
+          url: `${API_BASE_URL}${endpoint}`,
+          data,
+          headers: {
+            ...headers,
+            'x-csrf-token': getCsrfToken() || ''
+          },
+          withCredentials: true,
+        });
+        
+        const newToken = retryResponse.headers['x-csrf-token'];
+        if (newToken) {
+          setCsrfToken(newToken);
         }
-        console.error("API Error:", error.response.data);
-        throw new Error(error.response.data.error || "Server Error");
-      } else if (error.request) {
-        console.error("No response received:", error.request);
-        throw new Error("No response from the server");
+        
+        return retryResponse.data;
       }
+      
+      if (error.response?.status === 401) {
+        store.dispatch(logout());
+        throw new Error("Authentication failed. Please log in again.");
+      }
+      throw new Error(error.response?.data?.error || "Server Error");
     }
-    console.error("Unexpected error:", error);
-    throw new Error("An unknown error occurred");
+    throw error;
   }
 };
 
@@ -72,7 +86,12 @@ export const registerRecruiterApi = async (recruiterData: FormData) => {
 };
 
 export const loginRecruiterApi = async (loginData: any) => {
-  return apiRequest("POST", "/login", loginData);
+  const response = await apiRequest("POST", "/login", loginData);
+  const token = response.headers?.['x-csrf-token'];
+  if (token) {
+    setCsrfToken(token);
+  }
+  return response;
 };
 
 export const verifyOtpApi = async (otpData: any) => {
@@ -247,4 +266,9 @@ export const fetchFilteredApplicants = async (
 
 export const refreshRecruiterTokenApi = async () => {
   return apiRequest("POST", "/refresh-token");
+};
+
+export const logoutRecruiter = () => {
+  localStorage.removeItem("token");
+  clearCsrfToken();
 };

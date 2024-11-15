@@ -20,7 +20,7 @@ import { ResumeData } from "../types/resumeTypes";
 import store from "../redux/store";
 import { logout } from "../redux/slices/authSlice";
 import { JobSearchFilters } from "../types/jobSearchTypes";
-import { getCsrfToken, setCsrfToken } from "../utils/csrf";
+import { getCsrfToken, setCsrfToken, clearCsrfToken } from "../utils/csrf";
 
 export interface FetchJobPostsParams {
   page?: number;
@@ -71,19 +71,10 @@ const apiRequest = async (
 
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      if (error.response.status === 401) {
-        store.dispatch(logout());
-        throw new Error("Authentication failed. Please log in again.");
-      }
-      console.error("API Error:", error.response.data);
-      throw new Error(error.response.data.error || "Server Error");
-    } else if (axios.isAxiosError(error) && error.request) {
-      console.error("No response received:", error.request);
-      throw new Error("No response from the server");
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      clearCsrfToken();
     }
-    console.error("Unexpected error:", error);
-    throw new Error("An unknown error occurred");
+    throw error;
   }
 };
 
@@ -131,7 +122,14 @@ export const verifyOtpApi = async (credentials: OtpVerificationCredentials) => {
 };
 
 export const loginUserApi = async (credentials: LoginCredentials) => {
-  return apiRequest("POST", "/login", credentials);
+  const response = await apiRequest("POST", "/login", credentials);
+  if (response.token) {
+    localStorage.setItem('token', response.token);
+  }
+  if (response.refreshToken) {
+    localStorage.setItem('refreshToken', response.refreshToken);
+  }
+  return response;
 };
 
 export const signupUserApi = async (credentials: SignupCredentials) => {
@@ -540,14 +538,29 @@ export const resetPasswordApi = async (
 };
 
 export const refreshTokenApi = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
+  const refreshToken = localStorage.getItem('refreshToken');
   if (!refreshToken) {
-    throw new Error("No refresh token available");
+    throw new Error('No refresh token available');
   }
-  const response = await axios.post(`${API_BASE_URL}/refresh-token`, {
-    refreshToken,
-  });
-  return response.data.token;
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/refresh-token`,
+      { refreshToken },
+      { withCredentials: true }
+    );
+
+    const { token, csrfToken } = response.data;
+    if (csrfToken) {
+      setCsrfToken(csrfToken);
+    }
+    return token;
+  } catch (error) {
+    clearCsrfToken();
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    throw error;
+  }
 };
 
 export const removeConnectionApi = async (
@@ -574,4 +587,9 @@ export const advancedJobSearchApi = async (
     page,
     limit,
   });
+};
+
+export const logoutUser = () => {
+  localStorage.removeItem("token");
+  clearCsrfToken();
 };

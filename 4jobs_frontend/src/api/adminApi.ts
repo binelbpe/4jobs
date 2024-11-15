@@ -1,7 +1,7 @@
 import axios from "axios";
 import store from "../redux/store";
 import { setLogoutAdmin } from "../redux/slices/adminSlice";
-import { getCsrfToken, setCsrfToken } from "../utils/csrf";
+import { getCsrfToken, setCsrfToken, clearCsrfToken } from "../utils/csrf";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL_ADMIN;
 
@@ -25,20 +25,15 @@ const apiRequest = async (
     headers['x-csrf-token'] = csrfToken;
   }
 
-  if (!token) {
-    console.error("no token");
-  }
-
   try {
     const response = await axios({
       method,
       url: `${API_BASE_URL}${endpoint}`,
       data,
       headers,
-      withCredentials: true, // Important for CSRF cookies
+      withCredentials: true,
     });
 
-    // Store CSRF token from response header if present
     const newCsrfToken = response.headers['x-csrf-token'];
     if (newCsrfToken) {
       setCsrfToken(newCsrfToken);
@@ -46,25 +41,10 @@ const apiRequest = async (
 
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          store.dispatch(setLogoutAdmin());
-          throw new Error("Authentication failed. Please log in again.");
-        }
-        console.error(
-          "API Error:",
-          error.response.data.error || "Unknown error from API"
-        );
-        throw new Error(error.response.data.error || "Server Error");
-      } else if (error.request) {
-        console.error("No response received from API:", error.request);
-        throw new Error("No response from the server");
-      }
-    } else {
-      console.error("Unknown error:", error);
-      throw new Error("An unknown error occurred");
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      clearCsrfToken();
     }
+    throw error;
   }
 };
 

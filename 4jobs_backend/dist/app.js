@@ -18,7 +18,6 @@ const rateLimiter_1 = __importDefault(require("./presentation/middlewares/rateLi
 const corsMiddleware_1 = __importDefault(require("./presentation/middlewares/corsMiddleware"));
 const securityHeaders_1 = __importDefault(require("./presentation/middlewares/securityHeaders"));
 const xssMiddleware_1 = require("./presentation/middlewares/xssMiddleware");
-const csrfMiddleware_1 = require("./presentation/middlewares/csrfMiddleware");
 const containerMiddleware_1 = __importDefault(require("./presentation/middlewares/containerMiddleware"));
 const validateRequest_1 = require("./presentation/middlewares/validateRequest");
 const errorHandler_1 = require("./presentation/middlewares/errorHandler");
@@ -53,15 +52,11 @@ app.use((0, hpp_1.default)());
 app.use((0, xssMiddleware_1.createXssMiddleware)(container_1.container));
 // Static Files
 app.use("/uploads", express_1.default.static(path_1.default.join(__dirname, "../uploads")));
-// CSRF Protection
-app.use(csrfMiddleware_1.attachCsrfToken);
-app.use(csrfMiddleware_1.doubleCsrfProtection);
 // Routes
 app.use("/", authRoutes_1.authRouter);
 app.use("/admin", adminRoutes_1.adminRouter);
 app.use("/recruiter", RecruiterRoutes_1.recruiterRouter);
 // Error Handling
-app.use(csrfMiddleware_1.handleCsrfError);
 app.use(validateRequest_1.validateRequest);
 app.use(errorHandler_1.errorHandler);
 // Container Injection

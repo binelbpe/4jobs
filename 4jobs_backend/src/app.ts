@@ -14,7 +14,6 @@ import rateLimiter from "./presentation/middlewares/rateLimiter";
 import corsMiddleware from "./presentation/middlewares/corsMiddleware";
 import securityHeaders from "./presentation/middlewares/securityHeaders";
 import { createXssMiddleware } from "./presentation/middlewares/xssMiddleware";
-import { attachCsrfToken, doubleCsrfProtection, handleCsrfError } from './presentation/middlewares/csrfMiddleware';
 import containerMiddleware from "./presentation/middlewares/containerMiddleware";
 import { validateRequest } from "./presentation/middlewares/validateRequest";
 import { errorHandler } from "./presentation/middlewares/errorHandler";
@@ -61,17 +60,12 @@ app.use(createXssMiddleware(container));
 // Static Files
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// CSRF Protection
-app.use(attachCsrfToken);
-app.use(doubleCsrfProtection);
-
 // Routes
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/recruiter", recruiterRouter);
 
 // Error Handling
-app.use(handleCsrfError);
 app.use(validateRequest);
 app.use(errorHandler);
 
