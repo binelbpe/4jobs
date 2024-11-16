@@ -7,8 +7,8 @@
 [![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-
-
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=flat&logo=express&logoColor=white)](https://expressjs.com/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=flat&logo=socket.io&logoColor=white)](https://socket.io/)
 
 ### 🌟 Connecting Talent with Opportunity
 
@@ -25,28 +25,36 @@ A cutting-edge professional networking platform that revolutionizes the job sear
   - Create ATS-optimized resumes with advanced formatting
   - Store multiple versions in your profile
   - One-click sharing with employers
+  - PDF parsing and generation using pdf-parse and PDFKit
   
 - 🎯 **Intelligent Job Matching**
   - Automated matching based on skills and experience
   - Resume parsing for better job recommendations
   - Real-time job alerts
+  - Advanced filtering using MongoDB aggregation
 
 ### For Recruiters 👥
 - 💼 **Advanced Recruiter Dashboard**
   - Comprehensive candidate search and filtering
   - Skills-based matching algorithm
   - Detailed analytics and reporting
+  - Real-time notifications via Socket.io
 
 ### Platform Features 🛠️
 - 💬 **Real-time Communication**
-  - Video conferencing integration
-  - Live chat functionality
+  - Video conferencing using PeerJS
+  - Live chat functionality via Socket.io
   - Instant notifications
+  - WebRTC integration
 
 - 🔒 **Security & Authentication**
   - Google OAuth integration
+  - JWT-based authentication
   - Secure payment processing via Razorpay
   - End-to-end data encryption
+  - XSS protection
+  - Rate limiting
+  - MongoDB sanitization
 
 ## 🚀 Technology Stack
 
@@ -67,11 +75,51 @@ const frontend = {
 const backend = {
   runtime: 'Node.js',
   framework: 'Express.js',
-  database: 'MongoDB',
-  authentication: ['JWT', 'Google Auth'],
+  database: {
+    primary: 'MongoDB',
+    odm: 'Mongoose'
+  },
+  authentication: [
+    'JWT',
+    'Google Auth Library',
+    'Bcrypt'
+  ],
+  security: [
+    'Helmet',
+    'Express Rate Limit',
+    'HPP',
+    'XSS',
+    'Express Mongo Sanitize'
+  ],
+  fileProcessing: [
+    'Multer',
+    'PDF Parse',
+    'PDFKit',
+    'Node Poppler'
+  ],
   email: 'Nodemailer',
+  realtime: [
+    'Socket.io',
+    'PeerJS'
+  ],
+  payment: 'Razorpay',
   documentation: 'Swagger',
+  dependencyInjection: [
+    'Inversify',
+    'Reflect Metadata'
+  ],
   architecture: ['Clean Architecture', 'SOLID Principles']
+}
+```
+
+### Cloud & Storage
+```javascript
+const cloud = {
+  storage: 'AWS S3',
+  sdks: [
+    '@aws-sdk/client-s3',
+    'aws-sdk'
+  ]
 }
 ```
 
@@ -82,7 +130,20 @@ const infrastructure = {
   webServer: ['Nginx', 'Apache'],
   processManager: 'PM2',
   monitoring: ['New Relic', 'Morgan'],
-  cicd: 'GitHub Actions'
+  cicd: 'GitHub Actions',
+  containerization: 'Docker'
+}
+```
+
+### Development Tools
+```javascript
+const devTools = {
+  language: 'TypeScript',
+  runtime: 'ts-node-dev',
+  testing: ['Jest', 'Supertest'],
+  linting: ['ESLint', 'Prettier'],
+  validation: ['Express Validator'],
+  versionControl: 'Git'
 }
 ```
 
@@ -116,6 +177,9 @@ S3_BUCKET_NAME=             # S3 bucket name
 # Payment Gateway
 RAZORPAY_KEY_ID=            # Razorpay key ID
 RAZORPAY_SECRET=            # Razorpay secret
+
+# WebRTC Configuration
+PEER_PORT=                  # PeerJS server port
 ```
 
 ## 🚀 Getting Started
@@ -127,8 +191,10 @@ RAZORPAY_SECRET=            # Razorpay secret
 - AWS Account with S3 access
 - Razorpay Account
 - SMTP Server access
+- Docker (optional)
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/4jobs.git
@@ -143,6 +209,20 @@ cp .env.example .env
 
 # Start development server
 npm run dev
+
+# Build for production
+npm run build
+npm start
+```
+
+### Docker Setup
+
+```bash
+# Build Docker image
+docker build -t 4jobs .
+
+# Run container
+docker run -p 3000:3000 4jobs
 ```
 
 ## 📱 Screenshots
@@ -154,6 +234,22 @@ npm run dev
   <img src="/api/placeholder/400/300" alt="Video Call" width="400"/>
 </div>
 
+## 🔧 API Documentation
+
+API documentation is available at `/api-docs` endpoint using Swagger UI.
+
+## 🛡️ Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- XSS protection
+- Rate limiting
+- MongoDB query sanitization
+- Helmet security headers
+- CORS configuration
+- Input validation
+- HTTP Parameter Pollution protection
+
 ## 🤝 Contributing
 
 1. Fork the Project
@@ -161,6 +257,10 @@ npm run dev
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## 🐛 Bug Reporting
+
+Issues can be reported via the GitHub issues page.
 
 ## 📄 License
 
